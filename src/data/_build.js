@@ -407,7 +407,7 @@ function generateLanguage(lang) {
 		},
 		
 		
-		// ADVERBS : _irregulars
+		// ADVERB : _irregulars
 		{ // 8
 			id: 'adverbs_irregular',
 			description: '',
@@ -426,7 +426,7 @@ function generateLanguage(lang) {
 				/* TODO flags for all conjugated :  'I'.concat(flag(o.meta))) */
 				return irregulars;
 			},
-			
+			// expand
 			unzip: function(a) {
 				var res = {};
 				zip.forEach(function(a) {
@@ -437,6 +437,7 @@ function generateLanguage(lang) {
 		},
 		
 		
+		// OTHER : numbers, dates, honorifics, abbreviations, normalizations, multiples, unambigousSuffixes
 		{ // 9
 			id: 'numbers',
 			description: '',
@@ -477,7 +478,7 @@ function generateLanguage(lang) {
 				
 				return {months: dates.month, days: dates.day};
 			},
-			
+			// expand
 			unzip: function() {
 				var res = zip;
 				res.rDaySearch = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
@@ -517,7 +518,6 @@ function generateLanguage(lang) {
 				});
 				return did(res);
 			},
-			
 			// expand
 			unzip: function(a) {
 				var res = { normaler: {}, greek: {}	};
@@ -530,6 +530,7 @@ function generateLanguage(lang) {
 				return res;
 			}
 		},
+		
 		{ // 14
 			id: 'multiples',
 			description: '',
@@ -543,6 +544,7 @@ function generateLanguage(lang) {
 				return res;
 			}
 		},
+		
 		{ // 15
 			id: 'unambigousSuffixes',
 			description: '',

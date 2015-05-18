@@ -1,6 +1,5 @@
 // nlp_comprimise by @spencermountain  in 2014
 
-var main = { 
 /* *********************************************************************************************************
 //	The main dictionary to build various language (or context) specific lexica -
 //  This list is the seed, from which various forms are conjugated and flags are determined in the lexicon
@@ -127,6 +126,7 @@ A lot of/lots of: A lot of/lots of are informal substitutes for much and many. T
 A little bit of is informal and always precedes an uncountable noun.
 */
 
+var main = { 
 	// multiple words are handled seperately for now
 	multiples: {
 		NN: [{ en: 'ad hominem' }],
