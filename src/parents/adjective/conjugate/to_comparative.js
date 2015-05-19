@@ -1,32 +1,12 @@
 //turn 'quick' into 'quickly'
 var to_comparative = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    convertables = require("./convertables")
-  }
-  var main = function(str) {
-    var irregulars = {
-      "grey": "greyer",
-      "gray": "grayer",
-      "green": "greener",
-      "yellow": "yellower",
-      "red": "redder",
-      "good": "better",
-      "well": "better",
-      "bad": "worse",
-      "sad": "sadder"
-    }
-
-    var dont = {
-      "overweight": 1,
-      "main": 1,
-      "nearby": 1,
-      "asleep": 1,
-      "weekly": 1,
-      "secret": 1,
-      "certain": 1
-    }
-
+  var main = function(str, lang) {
+		if (typeof lang != 'string') lang = 'en';
+		if (typeof module !== 'undefined' && module.exports) {
+			decline = require('../../../data/'+lang+'/adjectives_decline');
+		}
+		
     var transforms = [{
       reg: /y$/i,
       repl: 'ier'
@@ -39,7 +19,7 @@ var to_comparative = (function() {
     }, {
       reg: /nge$/i,
       repl: 'nger'
-    }]
+    }];
 
     var matches = [
       /ght$/,
@@ -52,55 +32,46 @@ var to_comparative = (function() {
       /old$/,
       /oud$/,
       /e[ae]p$/
-    ]
+    ];
 
     var not_matches = [
       /ary$/,
       /ous$/
-    ]
-
-    if (dont.hasOwnProperty(str)) {
-      return null
-    }
+    ];
+		
+    if (!(decline.to_comparative[str])) return null;
 
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
 
-    if (convertables.hasOwnProperty(str)) {
-      if (str.match(/e$/)) {
-        return str + "r"
-      } else {
-        return str + "er"
-      }
+    if (decline.convertables.hasOwnProperty(str)) {
+      return (str.match(/e$/)) ? str + 'r' : str + 'er';
     }
 
-
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
+    if (decline.to_comparative.hasOwnProperty(str)) {
+      return decline.to_comparative[str];
     }
 
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return "more " + str
+        return 'more ' + str;
       }
     }
 
 
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
-        return str + "er"
+        return str + 'er';
       }
     }
-    return "more " + str
+    return 'more ' + str;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
   return main;
 })();
 

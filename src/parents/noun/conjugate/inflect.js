@@ -3,98 +3,13 @@
 //https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
 
 var inflect = (function() {
-
-  if (typeof module !== "undefined" && module.exports) {
-    uncountables = require("../../../data/lexicon/uncountables")
-  }
-  //words that shouldn't ever inflect, for metaphysical reasons
-  uncountable_nouns = uncountables.reduce(function(h, a) {
-    h[a] = true
-    return h
-  }, {})
-
+	// TODO lang
   var titlecase = function(str) {
     if (!str) {
       return ''
     }
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
-  var irregulars = [
-    ['child', 'children'],
-    ['person', 'people'],
-    ['leaf', 'leaves'],
-    ['database', 'databases'],
-    ['quiz', 'quizzes'],
-    ['child', 'children'],
-    ['stomach', 'stomachs'],
-    ['sex', 'sexes'],
-    ['move', 'moves'],
-    ['shoe', 'shoes'],
-    ["goose", "geese"],
-    ["phenomenon", "phenomena"],
-    ['barracks', 'barracks'],
-    ['deer', 'deer'],
-    ['syllabus', 'syllabi'],
-    ['index', 'indices'],
-    ['appendix', 'appendices'],
-    ['criterion', 'criteria'],
-    ['i', 'we'],
-    ['man', 'men'],
-    ['move', 'moves'],
-    ['she', 'they'],
-    ['he', 'they'],
-    ['myself', 'ourselves'],
-    ['yourself', 'yourselves'],
-    ['himself', 'themselves'],
-    ['herself', 'themselves'],
-    ['themself', 'themselves'],
-    ['mine', 'ours'],
-    ['hers', 'theirs'],
-    ['his', 'theirs'],
-    ['its', 'theirs'],
-    ['theirs', 'theirs'],
-    ['sex', 'sexes'],
-    ['rodeo', 'rodeos'],
-    ['epoch', 'epochs'],
-    ['zero', 'zeros'],
-    ['avocado', 'avocados'],
-    ['halo', 'halos'],
-    ['tornado', 'tornados'],
-    ['tuxedo', 'tuxedos'],
-    ['sombrero', 'sombreros'],
-    ['addendum', 'addenda'],
-    ['alga', 'algae'],
-    ['alumna', 'alumnae'],
-    ['alumnus', 'alumni'],
-    ['bacillus', 'bacilli'],
-    ['cactus', 'cacti'],
-    ['beau', 'beaux'],
-    ['château', 'châteaux'],
-    ['chateau', 'chateaux'],
-    ['tableau', 'tableaux'],
-    ['corpus', 'corpora'],
-    ['curriculum', 'curricula'],
-    ['echo', 'echoes'],
-    ['embargo', 'embargoes'],
-    ['foot', 'feet'],
-    ['genus', 'genera'],
-    ['hippopotamus', 'hippopotami'],
-    ['larva', 'larvae'],
-    ['libretto', 'libretti'],
-    ['loaf', 'loaves'],
-    ['matrix', 'matrices'],
-    ['memorandum', 'memoranda'],
-    ['mosquito', 'mosquitoes'],
-    ['opus', 'opera'],
-    ['ovum', 'ova'],
-    ['ox', 'oxen'],
-    ['radius', 'radii'],
-    ['referendum', 'referenda'],
-    ['thief', 'thieves'],
-    ['that', 'those'],
-    ['this', 'these'],
-    ['tooth', 'teeth'],
-  ]
 
   var pluralize_rules = [
     [/(ax|test)is$/i, '$1es'],
@@ -126,44 +41,30 @@ var inflect = (function() {
       reg: a[0],
       repl: a[1]
     }
-  })
-
-  var pluralize = function(str) {
-    var low = str.toLowerCase()
-      //uncountable
-    if (uncountable_nouns[low]) {
-      return str
-    }
-    //is it already plural?
-    if(is_plural(low)===true){
-      return str
-    }
-    //irregular
-    var found = irregulars.filter(function(r) {
-      return r[0] === low
-    })
-    if (found[0]) {
-      if (titlecase(low) === str) { //handle capitalisation properly
-        return titlecase(found[0][1])
-      } else {
-        return found[0][1]
-      }
-    }
-    //inflect first word of preposition-phrase
-    if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-      var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1]
-      if (first) {
-        var better_first = pluralize(first)
-        return better_first + str.replace(first, '')
-      }
-    }
-    //regular
-    for (var i = 0; i < pluralize_rules.length; i++) {
-      if (str.match(pluralize_rules[i].reg)) {
-        return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl)
-      }
-    }
-  }
+  });
+	//similar to plural/singularize rules, but not the same
+	var plural_indicators=[
+		/(^v)ies$/i,
+		/ises$/i,
+		/ives$/i,
+		/(antenn|formul|nebul|vertebr|vit)ae$/i,
+		/(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
+		/(buffal|tomat|tornad)oes$/i,
+		/(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
+		/(vert|ind|cort)ices$/i,
+		/(matr|append)ices$/i,
+		/(x|ch|ss|sh|s|z|o)es$/i,
+		/men$/i,
+		/news$/i,
+		/.tia$/i,
+		/(^f)ves$/i,
+		/(lr)ves$/i,
+		/(^aeiouy|qu)ies$/i,
+		/(m|l)ice$/i,
+		/(cris|ax|test)es$/i,
+		/(alias|status)es$/i,
+		/ics$/i
+	];
 
   var singularize_rules = [
     [/([^v])ies$/i, '$1y'],
@@ -195,151 +96,166 @@ var inflect = (function() {
       reg: a[0],
       repl: a[1]
     }
-  })
+  });
+	//similar to plural/singularize rules, but not the same
+	var singular_indicators=[
+		/(ax|test)is$/i,
+		/(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
+		/(octop|vir)i$/i,
+		/(rl)f$/i,
+		/(alias|status)$/i,
+		/(bu)s$/i,
+		/(al|ad|at|er|et|ed|ad)o$/i,
+		/(ti)um$/i,
+		/(ti)a$/i,
+		/sis$/i,
+		/(?:(^f)fe|(lr)f)$/i,
+		/hive$/i,
+		/(^aeiouy|qu)y$/i,
+		/(x|ch|ss|sh|z)$/i,
+		/(matr|vert|ind|cort)(ix|ex)$/i,
+		/(m|l)ouse$/i,
+		/(m|l)ice$/i,
+		/(antenn|formul|nebul|vertebr|vit)a$/i,
+		/.sis$/i,
+		/^(?!talis|.*hu)(.*)man$/i
+	];
 
-  var singularize = function(str) {
-    var low = str.toLowerCase()
-      //uncountable
-    if (uncountable_nouns[low]) {
-      return str
-    }
-    //is it already singular?
-    if(is_plural(low) === false){
-      return str
-    }
-    //irregular
-    var found = irregulars.filter(function(r) {
-      return r[1] === low
-    })
-    if (found[0]) {
-      if (titlecase(low) === str) { //handle capitalisation properly
-        return titlecase(found[0][0])
-      } else {
-        return found[0][0]
-      }
-    }
-    //inflect first word of preposition-phrase
-    if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-      var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/)
-      if (first && first[1]) {
-        var better_first = singularize(first[1])
-        return better_first + str.replace(first[1], '')
-      }
-    }
-    //regular
-    for (var i = 0; i < singularize_rules.length; i++) {
-      if (str.match(singularize_rules[i].reg)) {
-        return str.replace(singularize_rules[i].reg, singularize_rules[i].repl)
-      }
-    }
-    return str
-  }
+	var lang = 0;
+	var nouns_inflect = {};
+	var methods = {
+		setLang: function(lang) {
+			if (typeof module !== 'undefined' && module.exports) {
+				nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
+			}
+		},
+		pluralize: function(str, l) {
+			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
+			var low = str.toLowerCase()
+				//uncountable
+			if (uncountable_nouns[low]) return str;
+			
+			//is it already plural?
+			if(is_plural(low)===true) return str;
+			
+			//irregular
+			var found = irregulars.filter(function(r) {
+				return r[0] === low;
+			})
+			if (found[0]) {
+				if (titlecase(low) === str) { //handle capitalisation properly
+					return titlecase(found[0][1]);
+				} else {
+					return found[0][1];
+				}
+			}
+			//inflect first word of preposition-phrase
+			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+				var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
+				if (first) {
+					var better_first = pluralize(first);
+					return better_first + str.replace(first, '');
+				}
+			}
+			//regular
+			for (var i = 0; i < pluralize_rules.length; i++) {
+				if (str.match(pluralize_rules[i].reg)) {
+					return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
+				}
+			}
+		},
+		
+		singularize: function(str, l) {
+			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
+			var low = str.toLowerCase();
+				//uncountable
+			if (uncountable_nouns[low]) return str;
+			//is it already singular?
+			if(is_plural(low) === false) return str;
+			//irregular
+			var found = irregulars.filter(function(r) {
+				return r[1] === low;
+			})
+			if (found[0]) {
+				if (titlecase(low) === str) { //handle capitalisation properly
+					return titlecase(found[0][0]);
+				} else {
+					return found[0][0];
+				}
+			}
+			//inflect first word of preposition-phrase
+			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+				var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
+				if (first && first[1]) {
+					var better_first = singularize(first[1]);
+					return better_first + str.replace(first[1], '');
+				}
+			}
+			//regular
+			for (var i = 0; i < singularize_rules.length; i++) {
+				if (str.match(singularize_rules[i].reg)) {
+					return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
+				}
+			}
+			return str;
+		},
+		
+		is_plural: function(str, l) {
+			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
+			str=(str||'').toLowerCase()
+			//handle 'mayors of chicago'
+			var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
+			if (preposition && preposition[1]) {
+				str = preposition[1];
+			}
+			// if it's a known irregular case
+			for (var i = 0; i < irregulars.length; i++) {
+				if (irregulars[i][1] === str) {
+					return true;
+				}
+				if (irregulars[i][0] === str) {
+					return false;
+				}
+			}
+			for (var i = 0; i < plural_indicators.length; i++) {
+				if (str.match(plural_indicators[i])) {
+					return true;
+				}
+			}
+			for (var i = 0; i < singular_indicators.length; i++) {
+				if (str.match(singular_indicators[i])) {
+					return false;
+				}
+			}
+			// 'looks pretty plural' rules
+			if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+				return true;
+			}
+			return false;
+		},
+		
+		inflect: function(str, l) {
+			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
+			if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
+				return {
+					plural: str,
+					singular: str
+				};
+			}
+			if (is_plural(str)) {
+				return {
+					plural: str,
+					singular: singularize(str)
+				};
+			} else {
+				return {
+					singular: str,
+					plural: pluralize(str)
+				};
+			}
+		}
+	}
 
-  var is_plural = function(str) {
-    str=(str||'').toLowerCase()
-    //handle 'mayors of chicago'
-    var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
-    if (preposition && preposition[1]) {
-      str = preposition[1]
-    }
-    // if it's a known irregular case
-    for (var i = 0; i < irregulars.length; i++) {
-      if (irregulars[i][1] === str) {
-        return true
-      }
-      if (irregulars[i][0] === str) {
-        return false
-      }
-    }
-    //similar to plural/singularize rules, but not the same
-    var plural_indicators=[
-      /(^v)ies$/i,
-      /ises$/i,
-      /ives$/i,
-      /(antenn|formul|nebul|vertebr|vit)ae$/i,
-      /(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
-      /(buffal|tomat|tornad)oes$/i,
-      /(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
-      /(vert|ind|cort)ices$/i,
-      /(matr|append)ices$/i,
-      /(x|ch|ss|sh|s|z|o)es$/i,
-      /men$/i,
-      /news$/i,
-      /.tia$/i,
-      /(^f)ves$/i,
-      /(lr)ves$/i,
-      /(^aeiouy|qu)ies$/i,
-      /(m|l)ice$/i,
-      /(cris|ax|test)es$/i,
-      /(alias|status)es$/i,
-      /ics$/i
-    ]
-    for (var i = 0; i < plural_indicators.length; i++) {
-      if (str.match(plural_indicators[i])) {
-        return true
-      }
-    }
-    //similar to plural/singularize rules, but not the same
-    var singular_indicators=[
-      /(ax|test)is$/i,
-      /(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
-      /(octop|vir)i$/i,
-      /(rl)f$/i,
-      /(alias|status)$/i,
-      /(bu)s$/i,
-      /(al|ad|at|er|et|ed|ad)o$/i,
-      /(ti)um$/i,
-      /(ti)a$/i,
-      /sis$/i,
-      /(?:(^f)fe|(lr)f)$/i,
-      /hive$/i,
-      /(^aeiouy|qu)y$/i,
-      /(x|ch|ss|sh|z)$/i,
-      /(matr|vert|ind|cort)(ix|ex)$/i,
-      /(m|l)ouse$/i,
-      /(m|l)ice$/i,
-      /(antenn|formul|nebul|vertebr|vit)a$/i,
-      /.sis$/i,
-      /^(?!talis|.*hu)(.*)man$/i
-    ]
-    for (var i = 0; i < singular_indicators.length; i++) {
-      if (str.match(singular_indicators[i])) {
-        return false
-      }
-    }
-    // 'looks pretty plural' rules
-    if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
-      return true
-    }
-    return false
-  }
-
-  var inflect = function(str) {
-    if (uncountable_nouns[str]) { //uncountables shouldn't ever inflect
-      return {
-        plural: str,
-        singular: str
-      }
-    }
-    if (is_plural(str)) {
-      return {
-        plural: str,
-        singular: singularize(str)
-      }
-    } else {
-      return {
-        singular: str,
-        plural: pluralize(str)
-      }
-    }
-  }
-
-  var methods = {
-    inflect: inflect,
-    is_plural: is_plural,
-    singularize: singularize,
-    pluralize: pluralize
-  }
   if (typeof module !== "undefined" && module.exports) {
     module.exports = methods;
   }

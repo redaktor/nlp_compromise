@@ -1,7 +1,8 @@
 
 var lang = 'en';
 var abbreviations = (function() {
-  var zip = [ 'arc',
+  var zip = [ 'ss',
+  'arc',
   'al',
   'ave',
   'blvd',
@@ -94,6 +95,7 @@ var abbreviations = (function() {
   'jeopardy' ]; 
 
   var main = zip;
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

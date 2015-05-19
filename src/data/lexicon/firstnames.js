@@ -317,7 +317,14 @@ var firstnames = (function () {
     if (typeof module !== "undefined" && module.exports) {
       module.exports = main;
     }
-    return main
+		/*
+		{
+			xavier: 'm', // male
+  		maria: 'f', // female
+			devan: 'a' // ambigous
+		}
+		*/
+    return main;
   })()
   // console.log(firstnames['spencer'])
   // console.log(firstnames['jill'])

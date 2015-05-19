@@ -1,75 +1,11 @@
 //turn 'quick' into 'quickly'
 var adj_to_adv = (function() {
-
-  var main = function(str) {
-    var irregulars = {
-      "idle": "idly",
-      "public": "publicly",
-      "vague": "vaguely",
-      "day": "daily",
-      "icy": "icily",
-      "single": "singly",
-      "female": "womanly",
-      "male": "manly",
-      "simple": "simply",
-      "whole": "wholly",
-      "special": "especially",
-      "straight": "straight",
-      "wrong": "wrong",
-      "fast": "fast",
-      "hard": "hard",
-      "late": "late",
-      "early": "early",
-      "well": "well",
-      "best": "best",
-      "latter": "latter",
-      "bad": "badly"
-    }
-
-    var dont = {
-      "foreign": 1,
-      "black": 1,
-      "modern": 1,
-      "next": 1,
-      "difficult": 1,
-      "degenerate": 1,
-      "young": 1,
-      "awake": 1,
-      "back": 1,
-      "blue": 1,
-      "brown": 1,
-      "orange": 1,
-      "complex": 1,
-      "cool": 1,
-      "dirty": 1,
-      "done": 1,
-      "empty": 1,
-      "fat": 1,
-      "fertile": 1,
-      "frozen": 1,
-      "gold": 1,
-      "grey": 1,
-      "gray": 1,
-      "green": 1,
-      "medium": 1,
-      "parallel": 1,
-      "outdoor": 1,
-      "unknown": 1,
-      "undersized": 1,
-      "used": 1,
-      "welcome": 1,
-      "yellow": 1,
-      "white": 1,
-      "fixed": 1,
-      "mixed": 1,
-      "super": 1,
-      "guilty": 1,
-      "tiny": 1,
-      "able": 1,
-      "unable": 1,
-      "same": 1,
-      "adult": 1
-    }
+	
+  var main = function(str, lang) {
+		if (typeof lang != 'string') lang = 'en';
+		if (typeof module !== 'undefined' && module.exports) {
+			var decline = require('../../../data/'+lang+'/adjectives_decline');
+		}
 
     var transforms = [{
       reg: /al$/i,
@@ -95,39 +31,34 @@ var adj_to_adv = (function() {
     }, {
       reg: /l$/i,
       repl: 'ly'
-    }]
+    }];
 
     var not_matches = [
       /airs$/,
       /ll$/,
       /ee.$/,
       /ile$/
-    ]
+    ];
 
-    if (dont[str]) {
-      return null
-    }
-    if (irregulars[str]) {
-      return irregulars[str]
-    }
-    if (str.length <= 3) {
-      return null
-    }
+    if (decline.adv_donts[str]) return null;
+    if (decline.adj_to_advs[str]) return decline.adj_to_advs[str];
+    if (str.length <= 3) return null;
+		
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return null
+        return null;
       }
     }
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str + 'ly'
+    return str + 'ly';
   }
 
-  if (typeof module !== "undefined" && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = main;
   }
   return main;

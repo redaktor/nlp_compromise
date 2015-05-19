@@ -121,6 +121,7 @@ function generateLanguage(lang) {
 		{ // 0
 			id: 'nouns_inflect',
 			description: 'singular nouns having irregular plurals',
+			suffix: '  main.uncountables = zip.uncountables.reduce(function(h,s){\n    h[s]=true;\n    return h;\n  },{});',
 			// zip
 			zip: function(lang) { 
 				var _irregulars = newRes();
@@ -153,12 +154,21 @@ function generateLanguage(lang) {
 			// build
 			zip: function(lang) { 
 				// TODO: 'it', 'one'
+				var _all = dict.NN.words.concat(dict.PP.words, dict.DT.words, dict.NNAB.words, dict.CC.words).filter(possible);
 				return {
-					entityBlacklist: dict.NN.words.concat(dict.PP.words, dict.DT.words).filter(function(o) { 
-						return meta(o, 'entityBlacklist');
-					}).map(val),
+					entityBlacklist: _all.filter(function(o) { return meta(o, 'entityBlacklist'); }).map(val),
+					personBlacklist: _all.filter(function(o) { return meta(o, 'personBlacklist'); }).map(val),
 					prps: dict.PRP.words.map(val)
 				};
+			},
+			// expand
+			unzip: function () {
+				var toO = function(h,s){ h[s]=true; return h; };
+				return { 
+					prps: zip.prps.reduce(toO, {}), 
+					entityBlacklist: zip.entityBlacklist.reduce(toO, {}), 
+					personBlacklist: zip.personBlacklist
+				}
 			}
 		},
 	
@@ -275,7 +285,7 @@ function generateLanguage(lang) {
 		},
 		
 		
-		// ADJECTIVE : _irregulars, _demonyms, _regulars
+		// ADJECTIVE
 		{ // 5
 			id: 'adjectives_decline',
 			description: '',
@@ -364,6 +374,9 @@ function generateLanguage(lang) {
 						if (a.length>4 && a[4]!=1) res.to_noun[a[0]] = expand(a[4], a[0]);
 					}
 				});
+				var toO = function(h,s){ h[s]=true; return h; };
+				res.convertables = res.convertables.reduce(toO, {});
+				res.adv_donts = res.adv_donts.reduce(toO, {});
 				return res;
 			}
 			
@@ -407,9 +420,9 @@ function generateLanguage(lang) {
 		},
 		
 		
-		// ADVERB : _irregulars
+		// ADVERB
 		{ // 8
-			id: 'adverbs_irregular',
+			id: 'adverbs_decline',
 			description: '',
 			
 			// build
@@ -602,18 +615,18 @@ function generateLanguage(lang) {
 		// the same function (without arguments) is used in the lexicon to add words which ARE in other modules ...
 		var gen = function (cat){
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(m.nouns_inflect.uncountables), 
+				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)), 
 				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }), 
 				VBN: __VBN, 
 				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }), 
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }), 
-				RB: Object.keys(m.adverbs_irregular).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
+				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
 			}
 			if (!cat) {
 				var lexiZip = {
 					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }), 
 					NNAB: m.honorifics.concat(m.abbreviations), 
-					PRP: m.nouns.prps, 
+					PRP: Object.keys(m.nouns.prps), 
 					CP: m.verbs_special.cps, 
 					MD: m.verbs_special.mds, 
 					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }), 
@@ -621,9 +634,9 @@ function generateLanguage(lang) {
 					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }), 
 					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }), 
 					JJ: m.adjectives_demonym.concat(
-							m.adjectives_decline.adv_donts, Object.keys(m.adjectives_decline.adj_to_advs), 
+							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs), 
 							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative), 
-							Object.keys(m.adverbs_irregular).map(function(s) { return m.adverbs_irregular[s]; })
+							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 					), 
 					//CD
 					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
@@ -651,7 +664,7 @@ function generateLanguage(lang) {
 				});
 				// decline all adjectives to their adverbs. (13ms)
 				// 'to_adverb','to_superlative','to_comparative' 
-				m.adjectives.concat(m.adjectives_decline.convertables).forEach(function(j) {
+				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
 					main[j] = 'JJ';
 					var adv = pm.to_adverb(j);
 					if (adv && adv !== j && !main[adv]) main[adv] = main[adv] || 'RB';
@@ -695,6 +708,7 @@ function generateLanguage(lang) {
 	var _generate = function(g, i) { 
 		/*TODO lang.mixin*/
 		if (!(g.prefix)) g.prefix = '';
+		if (!(g.suffix)) g.suffix = '';
 		
 		var id = g.id;
 		var generated = g.zip(lang);
@@ -706,17 +720,18 @@ function generateLanguage(lang) {
 		if (g.hasOwnProperty('prefix')) {
 			prefix = g.prefix.concat('\n', prefix);
 		}
-		var suffix = '\n  if (typeof module !== "undefined" && module.exports) module.exports = main;\n\n'+
-		'  return main;\n'+
-		'})();';
+		var suffix = g.suffix.concat('\n  if (typeof module !== "undefined" && module.exports) module.exports = main;'+
+			'\n\n  return main;\n'+
+			'})();'
+		);
 		var _main = '; \n\n  var main = ';
-		var unzip = 'zip;';
+		var unzip = 'zip;\n';
 		if (g.hasOwnProperty('unzip') && g.unzip.hasOwnProperty('array')) {
 			var arr = (g.unzip.array === 'zip' || g.unzip.array === '') ? 'zip' : 'zip.'.concat(g.unzip.array); 
 			if (g.unzip.array != 'zip' && g.unzip.array != '') _main = _main.concat('zip;\n  main.', g.unzip.array, ' = ');
-			unzip = arr.concat('.map(', g.unzip.fn.toString(-1), ');');
+			unzip = arr.concat('.map(', g.unzip.fn.toString(-1), ');\n');
 		} else if (g.hasOwnProperty('unzip')) {
-			unzip = '('.concat(g.unzip.toString(-1), ')();');
+			unzip = '('.concat(g.unzip.toString(-1), ')();\n');
 		}
 		
 		var result = prefix.concat('var zip = ', zip, _main, unzip, suffix);

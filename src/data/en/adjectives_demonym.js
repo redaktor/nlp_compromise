@@ -108,6 +108,7 @@ var adjectives_demonym = (function() {
 						break;
 					}
 				});
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

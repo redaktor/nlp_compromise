@@ -1,6 +1,6 @@
 
 var lang = 'en';
-var adverbs_irregular = (function() {
+var adverbs_decline = (function() {
   var zip = [ [ 'wholly', 'whole' ],
   [ 'idly', 'idle' ],
   [ '=y', 'full' ],
@@ -27,6 +27,7 @@ var adverbs_irregular = (function() {
 				});
 				return res;
 			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

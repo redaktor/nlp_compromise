@@ -66,6 +66,7 @@ var multiples = (function() {
   'a posteriori': 'RB' }; 
 
   var main = zip;
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

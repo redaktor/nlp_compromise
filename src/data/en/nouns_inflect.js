@@ -223,6 +223,10 @@ var nouns_inflect = (function() {
 
   var main = zip;
   main.irregulars = zip.irregulars.map(function (a) { a[1] = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2)).replace(/\$/g,'es'); return a; });
+  main.uncountables = zip.uncountables.reduce(function(h,s){
+    h[s]=true;
+    return h;
+  },{});
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

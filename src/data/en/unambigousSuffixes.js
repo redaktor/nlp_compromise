@@ -588,6 +588,7 @@ var unambigousSuffixes = (function() {
 					return h;
 				}, {});
 			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

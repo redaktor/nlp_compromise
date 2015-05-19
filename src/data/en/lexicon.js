@@ -12,7 +12,7 @@ var lexicon = (function() {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
-  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_irregular','numbers','dates','honorifics','abbreviations','normalizations','multiples','unambigousSuffixes'].forEach(reqDmodule);
+  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','normalizations','multiples','unambigousSuffixes'].forEach(reqDmodule);
   reqPmodules();
   
   var main = {};
@@ -36,6 +36,23 @@ var lexicon = (function() {
      'tomorrow',
      'era',
      'century',
+     'center',
+     'house',
+     'park',
+     'square',
+     'centre',
+     'memorial',
+     'school',
+     'bridge',
+     'university',
+     'college',
+     'foundation',
+     'institute',
+     'club',
+     'museum',
+     'hall',
+     'arena',
+     'stadium',
      'president',
      'dollar',
      'student',
@@ -340,17 +357,17 @@ var lexicon = (function() {
   RBS: [ 'most' ] }
   var unzip = function (cat){
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(m.nouns_inflect.uncountables), 
+				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)), 
 				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }), 
 				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }), 
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }), 
-				RB: Object.keys(m.adverbs_irregular).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
+				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
 			}
 			if (!cat) {
 				var lexiZip = {
 					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }), 
 					NNAB: m.honorifics.concat(m.abbreviations), 
-					PRP: m.nouns.prps, 
+					PRP: Object.keys(m.nouns.prps), 
 					CP: m.verbs_special.cps, 
 					MD: m.verbs_special.mds, 
 					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }), 
@@ -358,9 +375,9 @@ var lexicon = (function() {
 					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }), 
 					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }), 
 					JJ: m.adjectives_demonym.concat(
-							m.adjectives_decline.adv_donts, Object.keys(m.adjectives_decline.adj_to_advs), 
+							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs), 
 							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative), 
-							Object.keys(m.adverbs_irregular).map(function(s) { return m.adverbs_irregular[s]; })
+							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 					), 
 					//CD
 					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
@@ -388,7 +405,7 @@ var lexicon = (function() {
 				});
 				// decline all adjectives to their adverbs. (13ms)
 				// 'to_adverb','to_superlative','to_comparative' 
-				m.adjectives.concat(m.adjectives_decline.convertables).forEach(function(j) {
+				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
 					main[j] = 'JJ';
 					var adv = pm.to_adverb(j);
 					if (adv && adv !== j && !main[adv]) main[adv] = main[adv] || 'RB';

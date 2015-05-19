@@ -5,12 +5,12 @@ var Adjective = function(str, next, last, token) {
   the.next = next
   the.last = last
 
-  if (typeof module !== "undefined" && module.exports) {
-    to_comparative = require("./conjugate/to_comparative")
-    to_superlative = require("./conjugate/to_superlative")
-    adj_to_adv = require("./conjugate/to_adverb")
-    adj_to_noun = require("./conjugate/to_noun")
-    parts_of_speech = require("../../data/parts_of_speech")
+  if (typeof module !== 'undefined' && module.exports) {
+    to_comparative = require('./conjugate/to_comparative')
+    to_superlative = require('./conjugate/to_superlative')
+    adj_to_adv = require('./conjugate/to_adverb')
+    adj_to_noun = require('./conjugate/to_noun')
+    parts_of_speech = require('../../data/parts_of_speech')
   }
 
   the.conjugate = function() {
@@ -34,7 +34,7 @@ var Adjective = function(str, next, last, token) {
 
   return the;
 };
-if (typeof module !== "undefined" && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = Adjective;
 }
-// console.log(new Adjective("crazy"))
+// console.log(new Adjective('crazy'))

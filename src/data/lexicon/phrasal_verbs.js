@@ -1,7 +1,7 @@
-//phrasal verbs are two words that really mean one verb.
-//'beef up' is one verb, and not some direction of beefing.
-//by @spencermountain, 2015 mit
-//many credits to http://www.allmyphrasalverbs.com/
+// phrasal verbs are two words that really mean one verb.
+// 'beef up' is one verb, and not some direction of beefing.
+// by @spencermountain, 2015 mit
+// many credits to http://www.allmyphrasalverbs.com/
 var phrasal_verbs = (function () {
 
   if (typeof module !== "undefined" && module.exports) {

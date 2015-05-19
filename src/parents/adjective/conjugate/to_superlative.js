@@ -1,41 +1,25 @@
 //turn 'quick' into 'quickest'
 var to_superlative = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    convertables = require("./convertables")
-  }
-
-  var main = function(str) {
-    var irregulars = {
-      "nice": "nicest",
-      "late": "latest",
-      "hard": "hardest",
-      "inner": "innermost",
-      "outer": "outermost",
-      "far": "furthest",
-      "worse": "worst",
-      "bad": "worst",
-      "good": "best"
-    }
-
-    var dont = {
-      "overweight": 1,
-      "ready": 1
-    }
-
+  var main = function(str, lang) {
+		if (typeof lang != 'string') lang = 'en';
+		if (typeof module !== 'undefined' && module.exports) {
+			decline = require('../../../data/'+lang+'/adjectives_decline');
+		}
+		
     var transforms = [{
-      "reg": /y$/i,
-      "repl": 'iest'
+      reg: /y$/i,
+      repl: 'iest'
     }, {
-      "reg": /([aeiou])t$/i,
-      "repl": '$1ttest'
+      reg: /([aeiou])t$/i,
+      repl: '$1ttest'
     }, {
-      "reg": /([aeou])de$/i,
-      "repl": '$1dest'
+      reg: /([aeou])de$/i,
+      repl: '$1dest'
     }, {
-      "reg": /nge$/i,
-      "repl": 'ngest'
-    }]
+      reg: /nge$/i,
+      repl: 'ngest'
+    }];
 
     var matches = [
       /ght$/,
@@ -47,17 +31,17 @@ var to_superlative = (function() {
       /ow$/,
       /oud$/,
       /...p$/
-    ]
+    ];
 
     var not_matches = [
       /ary$/
-    ]
+    ];
 
     var generic_transformation = function(str) {
       if (str.match(/e$/)) {
-        return str + "st"
+        return str + 'st'
       } else {
-        return str + "est"
+        return str + 'est'
       }
     }
 
@@ -67,35 +51,26 @@ var to_superlative = (function() {
       }
     }
 
-    if (convertables.hasOwnProperty(str)) {
-      return generic_transformation(str)
-    }
-
-    if (dont.hasOwnProperty(str)) {
-      return "most " + str
-    }
-
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
-    }
+    if (decline.convertables.hasOwnProperty(str)) return generic_transformation(str);
+		if (!(decline.to_superlative[str])) return 'most '.concat(str);
+    if (decline.to_superlative.hasOwnProperty(str)) return decline.to_superlative[str];
+		
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return "most " + str
+        return 'most ' + str;
       }
     }
 
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
-        return generic_transformation(str)
+        return generic_transformation(str);
       }
     }
-    return "most " + str
+    return 'most ' + str;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
   return main;
 })();
 

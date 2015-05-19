@@ -42,6 +42,7 @@ var dates = (function() {
 				res.rMonths = res.monthSearch + ',?'; // TODO - this isn't really cross language
 				return res;
 			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

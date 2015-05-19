@@ -185,6 +185,7 @@ var verbs_conjugate = (function() {
 					}
 					return obj;
 				});
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

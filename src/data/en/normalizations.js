@@ -46,6 +46,7 @@ var normalizations = (function() {
 				}
 				return res;
 			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

@@ -19,6 +19,27 @@ var nouns = (function() {
      'your',
      'itself',
      'the' ],
+  personBlacklist: 
+   [ 'center',
+     'house',
+     'park',
+     'square',
+     'centre',
+     'memorial',
+     'school',
+     'bridge',
+     'university',
+     'college',
+     'foundation',
+     'institute',
+     'club',
+     'museum',
+     'hall',
+     'arena',
+     'stadium',
+     'the',
+     'ss',
+     'for' ],
   prps: 
    [ 'it',
      'they',
@@ -38,7 +59,15 @@ var nouns = (function() {
      '\'em',
      'yourself' ] }; 
 
-  var main = zip;
+  var main = (function () {
+				var toO = function(h,s){ h[s]=true; return h; };
+				return { 
+					prps: zip.prps.reduce(toO, {}), 
+					entityBlacklist: zip.entityBlacklist.reduce(toO, {}), 
+					personBlacklist: zip.personBlacklist
+				}
+			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;
