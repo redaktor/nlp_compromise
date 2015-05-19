@@ -1,4 +1,4 @@
-//convert cute to cuteness
+// convert cute to cuteness
 var adj_to_noun = (function() {
 	
   var main = function(w, lang) {

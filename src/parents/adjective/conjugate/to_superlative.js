@@ -1,4 +1,4 @@
-//turn 'quick' into 'quickest'
+// turn 'quick' into 'quickest'
 var to_superlative = (function() {
 
   var main = function(str, lang) {

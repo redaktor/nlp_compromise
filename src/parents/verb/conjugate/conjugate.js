@@ -1,11 +1,11 @@
 //turn a verb into its other grammatical forms.
 var verb_conjugate = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    verb_to_doer = require("./to_doer")
-    verb_irregulars = require("./verb_irregulars")
-    verb_rules = require("./verb_rules")
-    suffix_rules = require("./suffix_rules")
+  if (typeof module !== 'undefined' && module.exports) {
+    verb_to_doer = require('./to_doer')
+    verb_irregulars = require('./verb_irregulars')
+    verb_rules = require('./verb_rules')
+    suffix_rules = require('./suffix_rules')
   }
 
   //this method is the slowest in the whole library, basically TODO:whaaa
@@ -19,7 +19,7 @@ var verb_conjugate = (function() {
         return suffix_rules[arr[i]]
       }
     }
-    return "infinitive"
+    return 'infinitive'
   }
 
   //fallback to this transformation if it has an unknown prefix
@@ -32,12 +32,12 @@ var verb_conjugate = (function() {
     }
     var present, past, gerund, doer;
     if (w.match(/[^aeiou]$/)) {
-      gerund = w + "ing"
-      past = w + "ed"
+      gerund = w + 'ing'
+      past = w + 'ed'
       if (w.match(/ss$/)) {
-        present = w + "es" //'passes'
+        present = w + 'es' //'passes'
       } else {
-        present = w + "s"
+        present = w + 's'
       }
       doer = verb_to_doer(infinitive)
     } else {
@@ -52,7 +52,7 @@ var verb_conjugate = (function() {
       past: past,
       gerund: gerund,
       doer: doer,
-      future: "will " + infinitive
+      future: 'will ' + infinitive
     }
   }
 
@@ -81,19 +81,19 @@ var verb_conjugate = (function() {
     }
     //future is 'will'+infinitive
     if (!obj.future) {
-      obj.future = "will " + obj.infinitive
+      obj.future = 'will ' + obj.infinitive
     }
     //perfect is 'have'+past-tense
     if (!obj.perfect) {
-      obj.perfect = "have " + obj.past
+      obj.perfect = 'have ' + obj.past
     }
     //pluperfect is 'had'+past-tense
     if (!obj.pluperfect) {
-      obj.pluperfect = "had " + obj.past
+      obj.pluperfect = 'had ' + obj.past
     }
     //future perfect is 'will have'+past-tense
     if (!obj.future_perfect) {
-      obj.future_perfect = "will have " + obj.past
+      obj.future_perfect = 'will have ' + obj.past
     }
     return obj
   }
@@ -104,16 +104,16 @@ var verb_conjugate = (function() {
     }
 
     //for phrasal verbs ('look out'), conjugate look, then append 'out'
-    var phrasal_reg=new RegExp("^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$",'i')
+    var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
     if(w.match(' ') && w.match(phrasal_reg)){
       var split=w.match(phrasal_reg,'')
       var phrasal_verb=split[1]
       var particle=split[2]
       var result=main(phrasal_verb)//recursive
-      delete result["doer"]
+      delete result['doer']
       Object.keys(result).forEach(function(k){
         if(result[k]){
-          result[k]+=" "+particle
+          result[k]+=' '+particle
         }
       })
       return result
@@ -174,25 +174,25 @@ var verb_conjugate = (function() {
     return fallback(w)
   };
 
-  if (typeof module !== "undefined" && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = main;
   }
   return main
 })()
 
-// console.log(verb_conjugate("walking"))
-// console.log(verb_conjugate("overtook"))
-// console.log(verb_conjugate("watch out"))
-// console.log(verb_conjugate("watch"))
-// console.log(verb_conjugate("smash"))
-// console.log(verb_conjugate("word"))
+// console.log(verb_conjugate('walking'))
+// console.log(verb_conjugate('overtook'))
+// console.log(verb_conjugate('watch out'))
+// console.log(verb_conjugate('watch'))
+// console.log(verb_conjugate('smash'))
+// console.log(verb_conjugate('word'))
 //broken
-// console.log(verb_conjugate("read"))
-// console.log(verb_conjugate("free"))
-// console.log(verb_conjugate("flesh"))
-// console.log(verb_conjugate("branch"))
-// console.log(verb_conjugate("spred"))
-// console.log(verb_conjugate("bog"))
-// console.log(verb_conjugate("nod"))
-// console.log(verb_conjugate("had tried"))
-// console.log(verb_conjugate("have tried"))
+// console.log(verb_conjugate('read'))
+// console.log(verb_conjugate('free'))
+// console.log(verb_conjugate('flesh'))
+// console.log(verb_conjugate('branch'))
+// console.log(verb_conjugate('spred'))
+// console.log(verb_conjugate('bog'))
+// console.log(verb_conjugate('nod'))
+// console.log(verb_conjugate('had tried'))
+// console.log(verb_conjugate('have tried'))

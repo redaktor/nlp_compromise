@@ -1,4 +1,4 @@
-//turn 'quick' into 'quickly'
+// turn 'quick' into 'quicker'
 var to_comparative = (function() {
 
   var main = function(str, lang) {

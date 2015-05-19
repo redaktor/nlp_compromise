@@ -63,7 +63,7 @@ var Noun = function(str, next, last, token) {
   }
 
   the.article = function() {
-    return indefinite_article(the.word);
+    return (the.is_plural()) ? "the" : indefinite_article(the.word);
   }
 
   the.pluralize = function() {
@@ -99,16 +99,116 @@ var Noun = function(str, next, last, token) {
     return false;
   }
 
-  //specifically which pos it is
+  //decides if it deserves a he, she, they, or it
+  the.pronoun = function(){
+    //if it's a person try to classify male/female
+    if(the.is_person()){
+      var names=the.word.split(' ').map(function(a){
+        return a.toLowerCase()
+      })
+      if(firstnames[names[0]]==='m' || firstnames[names[1]]=='m'){
+        return 'he'
+      }
+      if(firstnames[names[0]]==='f' || firstnames[names[1]]=='f' ){
+        return 'she'
+      }
+      //test some honourifics
+      if(the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')){
+        return 'she'
+      }
+      if(the.word.match(/\b(mr|mister|sr|jr)\b/,'i')){
+        return 'he'
+      }
+      //if it's a known unisex name, don't try guess it. be safe.
+      if(firstnames[names[0]]==='a' || firstnames[names[1]]=='a' ){
+        return 'they'
+      }
+      //if we think it's a person, but still don't know the gender, do a little guessing
+      if(names[0].match(/[aeiy]$/)){//if it ends in a 'ee or ah', female
+        return 'she'
+      }
+      if(names[0].match(/[ou]$/)){//if it ends in a 'oh or uh', male
+        return 'he'
+      }
+      if(names[0].match(/(nn|ll|tt)/)){//if it has double-consonants, female
+        return 'she'
+      }
+      //fallback to 'singular-they'
+      return 'they'
+    }
+
+    //not a person
+    if(the.is_plural()){
+      return 'they'
+    }
+
+    return 'it'
+  }
+
+  //list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
+  the.referenced_by = function() {
+    //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
+    if(token && token.pos.tag!=="PRP" && token.pos.tag!=="PP"){
+      var prp=the.pronoun()
+      //look at rest of sentence
+      var interested=sentence.tokens.slice(word_i+1, sentence.tokens.length)
+      //add next sentence too, could go further..
+      if(sentence.next){
+        interested=interested.concat(sentence.next.tokens)
+      }
+      //find the matching pronouns, and break if another noun overwrites it
+      var matches=[]
+      for(var i=0; i<interested.length; i++){
+        if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || posessives[interested[i].normalised]===prp)){
+          //this pronoun points at our noun
+          matches.push(interested[i])
+        }else if(interested[i].pos.tag==="PP" && posessives[interested[i].normalised]===prp){
+          //this posessive pronoun ('his/her') points at our noun
+          matches.push(interested[i])
+        }else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp){
+          //this noun stops our further pursuit
+          break
+        }
+      }
+      return matches
+    }
+    return []
+  }
+
+  // a pronoun that points at a noun mentioned previously '[he] is nice'
+  the.reference_to = function() {
+    //if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
+    if(token && token.pos.tag==="PRP"){
+      var prp=token.normalised
+      //look at starting of this sentence
+      var interested=sentence.tokens.slice(0, word_i)
+      //add previous sentence, if applicable
+      if(sentence.last){
+        interested=sentence.last.tokens.concat(interested)
+      }
+      //reverse the terms to loop through backward..
+      interested=interested.reverse()
+      for(var i=0; i<interested.length; i++){
+        //it's a match
+        if(interested[i].pos.parent==="noun" && interested[i].pos.tag!=="PRP" && interested[i].analysis.pronoun()===prp){
+          return interested[i]
+        }
+      }
+    }
+  }
+
+  // specifically which pos it is
   the.which = (function() {
-    //posessive
-    if (the.word.match(/'s$/)) return parts_of_speech['NNO'];
-    //plural
+    // posessive
+    if (the.word.match(/'s$/)) {
+      return parts_of_speech['NNO']
+    }
+    // plural
     // if (the.is_plural) {
     //   return parts_of_speech['NNS']
     // }
-    //generic
-    return parts_of_speech['NN'];
+    // generic
+    return parts_of_speech['NN']
   })()
 
   return the;

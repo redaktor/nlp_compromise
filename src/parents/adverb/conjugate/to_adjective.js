@@ -1,4 +1,4 @@
-//turns 'quickly' into 'quick'
+// turns 'quickly' into 'quick'
 var to_adjective = (function() {	
 
   var main = function(str, lang) {

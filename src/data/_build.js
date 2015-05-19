@@ -101,6 +101,9 @@ function generateLanguage(lang) {
 	var possibleRef = function(o) { 
 		return ( o.hasOwnProperty(lang) && o.hasOwnProperty('ref') ); 
 	};
+	var isRef = function(oa, o) {
+		return ((oa.ref instanceof Array && oa.ref.indexOf(o.uid) > -1) || oa.ref === o.uid);	
+	}
 	var possibleIrreg = function(o) { 
 		return ( (o.hasOwnProperty(lang)) && (o.hasOwnProperty('uid')) ); 
 	};
@@ -130,7 +133,7 @@ function generateLanguage(lang) {
 				}).map(val);
 				dict.NN.words.filter(possibleIrreg).forEach(function(o) { 
 					dict.NNS.words.filter(possibleRef).forEach(function(op) {
-						if (op.ref === o.uid) {
+						if (isRef(op, o)) {
 							_irregulars.push([o[lang], op[lang].replace(o[lang], '=').replace(o[lang].slice(0,-2), '_').replace(/es/g, '$')]);
 						}
 					});
@@ -209,7 +212,7 @@ function generateLanguage(lang) {
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
-							if (oc.ref === o.uid) {
+							if (isRef(oc, o)) {
 								switch (lang) {
 									default:
 										conjugated = oc[lang].replace(iStr, '=').replace('ing', '$').replace('er', '_');
@@ -318,7 +321,7 @@ function generateLanguage(lang) {
 						}
 						if (declined > 0 || !o.hasOwnProperty('meta') || !o.meta.convertable) {
 							dict[type].words.filter(possibleRef).forEach(function(oa) {
-								if (oa.ref === o.uid) {
+								if (isRef(oa, o)) {
 									switch (lang) {
 										default:
 											declined = (typeof oa[lang] === 'number') ? oa[lang] : oa[lang].replace(jjStr, '=').replace('ly', '$');
@@ -432,7 +435,7 @@ function generateLanguage(lang) {
 					var iStr = o[lang];
 					var adj = '';
 					dict.JJ.words.filter(possibleRef).forEach(function(oj) {
-						if (oj.ref === o.uid) adj = did(oj[lang]);
+						if (isRef(oj, o)) adj = did(oj[lang]);
 					});
 					irregulars.push([iStr.replace(adj, '='), adj]);
 				});

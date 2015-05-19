@@ -5,6 +5,8 @@
 //  This list is the seed, from which various forms are conjugated and flags are determined in the lexicon
 ********************************************************************************************************* */
 
+// see ./build.js for generating the lexica
+
 // note: the orig. lexicon was compared to redaktor translation databases
 // we found a few questionable categorized like e.g. over, against (can be prepositions) etc.
 // we corrected that but the original comments are intact and we added a reasonable rest
@@ -26,6 +28,9 @@
 // please see the following capitalized "note tags": TODO, DOC, FIXME
 
 /* TODO - general
+- phrasal_verbs
+- firstnames
+
 Useful would be an option to either disable 'last' and 'next' in the tokens -
 OR a customized toJSON method :
 'last' and 'next' create a Circular and thus the object can't become a JSON ...
@@ -127,7 +132,7 @@ A little bit of is informal and always precedes an uncountable noun.
 */
 
 var main = { 
-	// multiple words are handled seperately for now
+	// multiple words (except phrasal verbs) are handled seperately for now
 	multiples: {
 		NN: [{ en: 'ad hominem' }],
 		CP: [{ en: 'will be', meta: {stopword: ['en']} }],
@@ -1687,57 +1692,44 @@ var main = {
 			{ uid: 10, en: 'index' },
 			{ uid: 11, en: 'appendix' },
 			{ uid: 12, en: 'criterion' },
-			{ uid: 13, en: 'i' },
-			{ uid: 14, en: 'man' },
-			{ uid: 15, en: 'she' },
-			{ uid: 16, en: 'he' },
-			{ uid: 17, en: 'myself' },
-			{ uid: 18, en: 'yourself' },
-			{ uid: 19, en: 'himself' },
-			{ uid: 20, en: 'herself' },
-			{ uid: 21, en: 'themself' },
-			{ uid: 22, en: 'mine' },
-			{ uid: 23, en: 'hers' },
-			{ uid: 24, en: 'his' },
-			{ uid: 25, en: 'its' },
-			{ uid: 26, en: 'theirs' },
-			{ uid: 27, en: 'sex' },
-			{ uid: 28, en: 'narrative' },
-			{ uid: 29, en: 'addendum' },
-			{ uid: 30, en: 'alga' },
-			{ uid: 31, en: 'alumna' },
-			{ uid: 32, en: 'alumnus' },
-			{ uid: 33, en: 'bacillus' },
-			{ uid: 34, en: 'beau' },
-			{ uid: 35, en: 'cactus' },
-			{ uid: 36, en: 'château' },
-			{ uid: 37, en: 'corpus' },
-			{ uid: 38, en: 'curriculum' },
-			{ uid: 39, en: 'die' },
-			{ uid: 40, en: 'echo' },
-			{ uid: 41, en: 'embargo' },
-			{ uid: 42, en: 'foot' },
-			{ uid: 43, en: 'formula' },
-			{ uid: 44, en: 'genus' },
-			{ uid: 45, en: 'graffito' },
-			{ uid: 46, en: 'hippopotamus' },
-			{ uid: 47, en: 'larva' },
-			{ uid: 48, en: 'libretto' },
-			{ uid: 49, en: 'loaf' },
-			{ uid: 50, en: 'matrix' },
-			{ uid: 51, en: 'memorandum' },
-			{ uid: 52, en: 'mosquito' },
-			{ uid: 53, en: 'opus' },
-			{ uid: 54, en: 'ovum' },
-			{ uid: 55, en: 'ox' },
-			{ uid: 56, en: 'radius' },
-			{ uid: 57, en: 'referendum' },
-			{ uid: 58, en: 'tableau' },
-			{ uid: 59, en: 'that' },
-			{ uid: 60, en: 'thief' },
-			{ uid: 61, en: 'this' },
-			{ uid: 62, en: 'tooth' },
-			{ uid: 63, en: 'vita' },
+			{ uid: 13, en: 'man' },
+			{ uid: 14, en: 'sex' },
+			{ uid: 15, en: 'narrative' },
+			{ uid: 16, en: 'addendum' },
+			{ uid: 17, en: 'alga' },
+			{ uid: 18, en: 'alumna' },
+			{ uid: 19, en: 'alumnus' },
+			{ uid: 20, en: 'bacillus' },
+			{ uid: 21, en: 'beau' },
+			{ uid: 22, en: 'cactus' },
+			{ uid: 23, en: 'château' },
+			{ uid: 24, en: 'corpus' },
+			{ uid: 25, en: 'curriculum' },
+			{ uid: 26, en: 'die' },
+			{ uid: 27, en: 'echo' },
+			{ uid: 28, en: 'embargo' },
+			{ uid: 29, en: 'foot' },
+			{ uid: 30, en: 'formula' },
+			{ uid: 31, en: 'genus' },
+			{ uid: 32, en: 'graffito' },
+			{ uid: 33, en: 'hippopotamus' },
+			{ uid: 34, en: 'larva' },
+			{ uid: 35, en: 'libretto' },
+			{ uid: 36, en: 'loaf' },
+			{ uid: 37, en: 'matrix' },
+			{ uid: 38, en: 'memorandum' },
+			{ uid: 39, en: 'mosquito' },
+			{ uid: 40, en: 'opus' },
+			{ uid: 41, en: 'ovum' },
+			{ uid: 42, en: 'ox' },
+			{ uid: 43, en: 'radius' },
+			{ uid: 44, en: 'referendum' },
+			{ uid: 45, en: 'tableau' },
+			{ uid: 46, en: 'that' },
+			{ uid: 47, en: 'thief' },
+			{ uid: 48, en: 'this' },
+			{ uid: 49, en: 'tooth' },
+			{ uid: 50, en: 'vita' },
 			{ ref: 80, en: 'cleanliness' },
 			{ ref: 81, en: 'naivety' },
 			// no plural
@@ -1968,58 +1960,45 @@ var main = {
 			{ ref: 10, en: 'indices' },
 			{ ref: 11, en: 'appendices' },
 			{ ref: 12, en: 'criteria' },
-			{ ref: 13, en: 'we' },
-			{ ref: 14, en: 'men' },
-			{ ref: 15, en: 'they' },
-			{ ref: 16, en: 'they' },
-			{ ref: 17, en: 'ourselves' },
-			{ ref: 18, en: 'yourselves' },
-			{ ref: 19, en: 'themselves' },
-			{ ref: 20, en: 'themselves' },
-			{ ref: 21, en: 'themselves' },
-			{ ref: 22, en: 'ours' },
-			{ ref: 23, en: 'theirs' },
-			{ ref: 24, en: 'theirs' },
-			{ ref: 25, en: 'theirs' },
-			{ ref: 26, en: 'theirs' },
-			{ ref: 27, en: 'sexes' },
-			{ ref: 28, en: 'narratives' },
-			{ ref: 29, en: 'addenda' },
-			{ ref: 30, en: 'algae' },
-			{ ref: 31, en: 'alumnae' },
-			{ ref: 32, en: 'alumni' },
-			{ ref: 33, en: 'bacilli' },
-			{ ref: 34, en: 'beaux' },
-			{ ref: 35, en: 'cactuses' },
-			{ ref: 36, en: 'châteaux' },
-			{ ref: 37, en: 'corpora' },
-			{ ref: 38, en: 'curricula' },
-			{ ref: 39, en: 'dice' },
-			{ ref: 40, en: 'echoes' },
-			{ ref: 41, en: 'embargoes' },
-			{ ref: 42, en: 'feet' },
-			{ ref: 43, en: 'formulas' },
-			{ ref: 44, en: 'genera' },
-			{ ref: 45, en: 'graffiti' },
-			{ ref: 46, en: 'hippopotami' },
-			{ ref: 47, en: 'larvae' },
-			{ ref: 48, en: 'libretti' },
-			{ ref: 49, en: 'loaves' },
-			{ ref: 50, en: 'matrices' },
-			{ ref: 51, en: 'memoranda' },
-			{ ref: 52, en: 'mosquitoes' },
-			{ ref: 53, en: 'opera' },
-			{ ref: 54, en: 'ova' },
-			{ ref: 55, en: 'oxen' },
-			{ ref: 56, en: 'radiuses' },
-			{ ref: 57, en: 'referenda' },
-			{ ref: 58, en: 'tableaux' },
-			{ ref: 59, en: 'those' },
-			{ ref: 59, en: 'theses' },
-			{ ref: 60, en: 'thieves' },
-			{ ref: 61, en: 'these' },
-			{ ref: 62, en: 'teeth' },
-			{ ref: 63, en: 'vitae' },
+			{ ref: 13, en: 'men' },
+			{ ref: 14, en: 'sexes' },
+			{ ref: 15, en: 'narratives' },
+			{ ref: 16, en: 'addenda' },
+			{ ref: 17, en: 'algae' },
+			{ ref: 18, en: 'alumnae' },
+			{ ref: 19, en: 'alumni' },
+			{ ref: 20, en: 'bacilli' },
+			{ ref: 21, en: 'beaux' },
+			{ ref: 22, en: 'cactuses' },
+			{ ref: 23, en: 'châteaux' },
+			{ ref: 24, en: 'corpora' },
+			{ ref: 25, en: 'curricula' },
+			{ ref: 26, en: 'dice' },
+			{ ref: 27, en: 'echoes' },
+			{ ref: 28, en: 'embargoes' },
+			{ ref: 29, en: 'feet' },
+			{ ref: 30, en: 'formulas' },
+			{ ref: 31, en: 'genera' },
+			{ ref: 32, en: 'graffiti' },
+			{ ref: 33, en: 'hippopotami' },
+			{ ref: 34, en: 'larvae' },
+			{ ref: 35, en: 'libretti' },
+			{ ref: 36, en: 'loaves' },
+			{ ref: 37, en: 'matrices' },
+			{ ref: 38, en: 'memoranda' },
+			{ ref: 39, en: 'mosquitoes' },
+			{ ref: 40, en: 'opera' },
+			{ ref: 41, en: 'ova' },
+			{ ref: 42, en: 'oxen' },
+			{ ref: 43, en: 'radiuses' },
+			{ ref: 44, en: 'referenda' },
+			{ ref: 45, en: 'tableaux' },
+			{ ref: 46, en: 'those' },
+			{ ref: 46, en: 'theses' },
+			{ ref: 47, en: 'thieves' },
+			{ ref: 48, en: 'these' },
+			{ ref: 49, en: 'teeth' },
+			{ ref: 50, en: 'vitae' },
 			{ en: 'friends' }
 		]
 	},
@@ -2207,30 +2186,97 @@ var main = {
 		]
 	},
 	
+			
 	//: PRP personal-pronouns
+	// uid/ref for singular/plural
   PRP: { 
 		title: 'personal pronoun',
 		example: 'I, you, she',
 		parent: 'noun',
 		tag: 'PRP',
 		words: [
-			{ en: 'it', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'they', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'i', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'them', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'she', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 0, en: 'i', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 1, en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 2, en: 'he', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 3, en: 'she', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 4, en: 'it', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 5, ref: 0, en: 'we', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			// you ;) a space for other languages
+			{ en: 'they', ref: [2,3], meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'me', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'he', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			// you ;) a space for other languages
 			{ en: 'him', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'ourselves', meta: {stopword: ['en']} },
+			{ en: 'her', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			// it ;) a space for other languages
 			{ en: 'us', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'we', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			// you ;) a space for other languages
+			{ en: 'them', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'thou', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'il', meta: {stopword: ['en']} },
 			{ en: 'elle', meta: {stopword: ['en']} },
-			{ en: '\'em', meta: {stopword: ['en']} },
-			{ en: 'yourself' }
+			{ en: '\'em', meta: {stopword: ['en']} }
+		]
+	},
+	/*
+			'i': 'we'
+			'she': 'they'
+			'he': 'they'
+			'myself': 'ourselves'
+			'yourself': 'yourselves'
+			'himself': 'themselves'
+			'herself': 'themselves'
+			'themself': 'themselves' 
+			'mine': 'ours'
+			'hers': 'theirs'
+			'his': 'theirs'
+			'its': 'theirs'
+			'theirs': 'theirs'
+			
+			var posessives= {
+				"his":"he",
+				"her":"she",
+				"hers":"she",
+				"their":"they",
+				"them":"they",
+				"its":"it"
+			}
+			*/
+	//: PP posessive-pronouns
+  PP: { 
+		title: 'possessive pronoun',
+		example: 'my, one\'s',
+		parent: 'glue',
+		tag: 'PP',
+		words: [
+			{ en: 'mine' },
+			{ en: 'my', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ en: 'myself', meta: {stopword: ['en']} },
+			{ en: 'yours', meta: {stopword: ['en']} },
+			{ en: 'your', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ en: 'yourselves', meta: {stopword: ['en']} },
+			{ en: 'his', meta: {stopword: ['en']} },
+			{ en: 'himself', meta: {stopword: ['en']} },
+			{ en: 'hers', meta: {stopword: ['en']} },
+			{ en: 'her', meta: {stopword: ['en']}, description:'this one is pretty ambiguous...' },
+			{ en: 'herself', meta: {stopword: ['en']} },
+			{ en: 'its', meta: {stopword: ['en']} },
+			{ en: 'itself', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ en: 'ours', meta: {stopword: ['en']} },
+			{ en: 'our', meta: {stopword: ['en']} },
+			{ en: 'theirs', meta: {stopword: ['en']} },
+			{ en: 'their', meta: {stopword: ['en']} },
+			{ en: 'themselves', meta: {stopword: ['en']} },
+			
+			{ en: 'none', meta: {demonstrative: ['en']} },
+			{ en: 'whose', meta: {wh: ['en']} },
+			{ en: 'something' },
+			{ en: 'anything' },
+			{ en: 'anyone' },
+			{ en: 'lot' },
+			{ en: 'nothing' },
+			{ en: 'everything' },
+			{ en: 'who', meta: {stopword: ['en']} },
+			{ en: 'whom', meta: {stopword: ['en']} }
 		]
 	},
 		
@@ -3646,44 +3692,6 @@ var main = {
 			{ en: 'unlike' },
 			{ en: 'towards' },
 			{ en: 'besides' }
-		]
-	},
-	
-	//: PP posessive-pronouns
-  PP: { 
-		title: 'possessive pronoun',
-		example: 'my, one\'s',
-		parent: 'glue',
-		tag: 'PP',
-		words: [
-			{ en: 'none', meta: {demonstrative: ['en']} },
-			{ en: 'whose', meta: {wh: ['en']} },
-			{ en: 'mine' },
-			{ en: 'something' },
-			{ en: 'anything' },
-			{ en: 'anyone' },
-			{ en: 'lot' },
-			{ en: 'nothing' },
-			{ en: 'everything' },
-			{ en: 'theirs', meta: {stopword: ['en']} },
-			{ en: 'himself', meta: {stopword: ['en']} },
-			{ en: 'ours', meta: {stopword: ['en']} },
-			{ en: 'his', meta: {stopword: ['en']} },
-			{ en: 'my', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'their', meta: {stopword: ['en']} },
-			{ en: 'yours', meta: {stopword: ['en']} },
-			{ en: 'your', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'yourselves', meta: {stopword: ['en']} },
-			{ en: 'our', meta: {stopword: ['en']} },
-			{ en: 'its', meta: {stopword: ['en']} },
-			{ en: 'herself', meta: {stopword: ['en']} },
-			{ en: 'hers', meta: {stopword: ['en']} },
-			{ en: 'themselves', meta: {stopword: ['en']} },
-			{ en: 'myself', meta: {stopword: ['en']} },
-			{ en: 'itself', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'who', meta: {stopword: ['en']} },
-			{ en: 'her', meta: {stopword: ['en']}, description:'this one is pretty ambiguous...' },
-			{ en: 'whom', meta: {stopword: ['en']} }
 		]
 	},
 	
