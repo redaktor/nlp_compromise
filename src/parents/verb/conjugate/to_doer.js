@@ -2,33 +2,11 @@
 //turn 'walk' into 'walker'
 var verb_to_doer = (function() {
   var main = function(str) {
-    str = str || ''
-    var irregulars = {
-      'tie': 'tier',
-      'dream': 'dreamer',
-      'sail': 'sailer',
-      'run': 'runner',
-      'rub': 'rubber',
-      'begin': 'beginner',
-      'win': 'winner',
-      'claim': 'claimant',
-      'deal': 'dealer',
-      'spin': 'spinner'
-    }
-    var dont = {
-      'aid': 1,
-      'fail': 1,
-      'appear': 1,
-      'happen': 1,
-      'seem': 1,
-      'try': 1,
-      'say': 1,
-      'marry': 1,
-      'be': 1,
-      'forbid': 1,
-      'understand': 1,
-      'bet': 1
-    }
+		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
+			var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
+		}
+    str = str || '';
     var transforms = [{
       'reg': /e$/i,
       'repl': 'er'
@@ -43,11 +21,11 @@ var verb_to_doer = (function() {
       'repl': '$1tter'
     }]
 
-    if (dont.hasOwnProperty(str)) {
+    if (verbs_conjugate.noDoers.hasOwnProperty(str)) {
       return null
     }
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
+    if (verbs_conjugate.irregularDoers.hasOwnProperty(str)) {
+      return verbs_conjugate.irregularDoers[str]
     }
     for (var i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {

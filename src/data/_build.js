@@ -57,6 +57,7 @@ var flag = function(meta, lang) {
 };
 
 var possibleLanguage = {};
+// TODO - could become vice-versa: a whitelist of ISO-languages ...
 var ignores = ['uid', 'ref', 'title', 'description', 'meta'];
 for (var cat in dict) {
 	if (dict[cat].hasOwnProperty('words')) {
@@ -120,7 +121,7 @@ function generateLanguage(lang) {
 	// generate the DATA
 	var generators = [
 	
-		// NOUN : _irregulars, _uncountables, _entityBlacklist
+		// NOUN : irregulars (plural), uncountables
 		{ // 0
 			id: 'nouns_inflect',
 			description: 'singular nouns having irregular plurals',
@@ -131,11 +132,13 @@ function generateLanguage(lang) {
 				var _uncountables = dict.NN.words.filter(function(o) { 
 					return meta(o, 'uncountable');
 				}).map(val);
-				dict.NN.words.filter(possibleIrreg).forEach(function(o) { 
-					dict.NNS.words.filter(possibleRef).forEach(function(op) {
-						if (isRef(op, o)) {
-							_irregulars.push([o[lang], op[lang].replace(o[lang], '=').replace(o[lang].slice(0,-2), '_').replace(/es/g, '$')]);
-						}
+				[[dict.NN.words, dict.NNS.words], [dict.PRP.words], [dict.PP.words]].forEach(function(a) {
+					a[0].filter(possibleIrreg).forEach(function(o) { 
+						a[((a[1]) ? 1 : 0)].filter(possibleRef).forEach(function(op) {
+							if (isRef(op, o)) {
+								_irregulars.push([o[lang], op[lang].replace(o[lang], '=').replace(o[lang].slice(0,-2), '_').replace(/es/g, '$')]);
+							}
+						});
 					});
 				});
 				return {
@@ -151,26 +154,38 @@ function generateLanguage(lang) {
 		},
 		
 		
-		{ // 1
+		/*
+		PP: { 
+			// meta.parent MUST reference according personal pronoun PRP
+		*/
+		{ // 1 entityBlacklist, personBlacklist, prps
 			id: 'nouns',
 			description: '',
 			// build
 			zip: function(lang) { 
 				// TODO: 'it', 'one'
 				var _all = dict.NN.words.concat(dict.PP.words, dict.DT.words, dict.NNAB.words, dict.CC.words).filter(possible);
+				var _prps = dict.PRP.words.map(val);
+				var _pps = dict.PP.words.filter(function(o) { return o.hasOwnProperty('meta') && o.meta.hasOwnProperty('parent') }).map(function(o) {
+					return [o[lang], o.meta.parent];
+				});
 				return {
 					entityBlacklist: _all.filter(function(o) { return meta(o, 'entityBlacklist'); }).map(val),
 					personBlacklist: _all.filter(function(o) { return meta(o, 'personBlacklist'); }).map(val),
-					prps: dict.PRP.words.map(val)
+					prps: _prps,
+					pps: _pps
 				};
 			},
 			// expand
 			unzip: function () {
 				var toO = function(h,s){ h[s]=true; return h; };
+				var _pps = {}; 
+				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return { 
+					pps: _pps,
 					prps: zip.prps.reduce(toO, {}), 
 					entityBlacklist: zip.entityBlacklist.reduce(toO, {}), 
-					personBlacklist: zip.personBlacklist
+					personBlacklist: zip.personBlacklist,
 				}
 			}
 		},

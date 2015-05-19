@@ -2202,7 +2202,7 @@ var main = {
 			{ uid: 4, en: 'it', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 5, ref: 0, en: 'we', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ en: 'they', ref: [2,3], meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 6, ref: [2,3], en: 'they', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'me', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
 			{ en: 'him', meta: {stopword: ['en'], entitySubstitution: ['en']} },
@@ -2217,55 +2217,39 @@ var main = {
 			{ en: '\'em', meta: {stopword: ['en']} }
 		]
 	},
-	/*
-			'i': 'we'
-			'she': 'they'
-			'he': 'they'
-			'myself': 'ourselves'
-			'yourself': 'yourselves'
-			'himself': 'themselves'
-			'herself': 'themselves'
-			'themself': 'themselves' 
-			'mine': 'ours'
-			'hers': 'theirs'
-			'his': 'theirs'
-			'its': 'theirs'
-			'theirs': 'theirs'
-			
-			var posessives= {
-				"his":"he",
-				"her":"she",
-				"hers":"she",
-				"their":"they",
-				"them":"they",
-				"its":"it"
-			}
-			*/
 	//: PP posessive-pronouns
   PP: { 
+		// note :
+		// uid/ref for singular/plural
+		// !
+		// meta.parent MUST reference according personal pronoun PRP
 		title: 'possessive pronoun',
 		example: 'my, one\'s',
 		parent: 'glue',
 		tag: 'PP',
 		words: [
-			{ en: 'mine' },
-			{ en: 'my', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'myself', meta: {stopword: ['en']} },
-			{ en: 'yours', meta: {stopword: ['en']} },
-			{ en: 'your', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'yourselves', meta: {stopword: ['en']} },
-			{ en: 'his', meta: {stopword: ['en']} },
-			{ en: 'himself', meta: {stopword: ['en']} },
-			{ en: 'hers', meta: {stopword: ['en']} },
-			{ en: 'her', meta: {stopword: ['en']}, description:'this one is pretty ambiguous...' },
-			{ en: 'herself', meta: {stopword: ['en']} },
-			{ en: 'its', meta: {stopword: ['en']} },
-			{ en: 'itself', meta: {stopword: ['en'], entityBlacklist: ['en']} },
-			{ en: 'ours', meta: {stopword: ['en']} },
-			{ en: 'our', meta: {stopword: ['en']} },
-			{ en: 'theirs', meta: {stopword: ['en']} },
-			{ en: 'their', meta: {stopword: ['en']} },
-			{ en: 'themselves', meta: {stopword: ['en']} },
+			{ uid: 0, en: 'mine', meta: {parent: 0} },
+			{ uid: 1, en: 'my', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ uid: 2, en: 'myself', meta: {stopword: ['en']} },
+			{ uid: 3, en: 'yours', meta: {parent: 1, stopword: ['en']} },
+			{ uid: 4, en: 'your', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ uid: 5, en: 'yourself', meta: {stopword: ['en']} },
+			{ uid: 6, ref: 2, en: 'yourselves', meta: {stopword: ['en']} },
+			{ uid: 7, en: 'his', meta: {parent: 2, stopword: ['en']} },
+			{ uid: 8, en: 'himself', meta: {stopword: ['en']} },
+			{ uid: 9, en: 'her', meta: {parent: 3, stopword: ['en']}, description:'this one is pretty ambiguous...' },
+			{ uid: 10, en: 'hers', meta: {stopword: ['en']} },
+			{ uid: 11, en: 'herself', meta: {stopword: ['en']} },
+			{ uid: 12, en: 'its', meta: {parent: 4, stopword: ['en']} },
+			{ uid: 13, en: 'itself', meta: {stopword: ['en'], entityBlacklist: ['en']} },
+			{ uid: 14, en: 'our', meta: {parent: 5, stopword: ['en']} },
+			{ uid: 15, ref: 0, en: 'ours', meta: {stopword: ['en']} },
+			{ uid: 16, ref: 2, en: 'ourselves', meta: {stopword: ['en']} },
+			{ uid: 17, ref: [7, 9, 10, 12, 17], en: 'theirs', meta: {stopword: ['en']} },
+			{ uid: 18, en: 'their', meta: {parent: 6, stopword: ['en']} },
+			{ uid: 19, en: 'them', meta: {parent: 6, stopword: ['en']} },
+			{ uid: 20, en: 'themself', meta: {stopword: ['en']} },
+			{ uid: 21, ref: [5, 8, 11, 20], en: 'themselves', meta: {stopword: ['en']} },
 			
 			{ en: 'none', meta: {demonstrative: ['en']} },
 			{ en: 'whose', meta: {wh: ['en']} },

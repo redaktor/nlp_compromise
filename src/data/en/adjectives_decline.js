@@ -273,14 +273,9 @@ var adjectives_decline = (function() {
 						if (a.length>4 && a[4]!=1) res.to_noun[a[0]] = expand(a[4], a[0]);
 					}
 				});
-				res.convertables = res.convertables.reduce(function(h,s){
-					h[s]=true;
-					return h;
-				},{});
-				res.adv_donts = res.adv_donts.reduce(function(h,s){
-					h[s]=true;
-					return h;
-				},{});
+				var toO = function(h,s){ h[s]=true; return h; };
+				res.convertables = res.convertables.reduce(toO, {});
+				res.adv_donts = res.adv_donts.reduce(toO, {});
 				return res;
 			})();
 

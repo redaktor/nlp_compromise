@@ -3,7 +3,10 @@ var verb_conjugate = (function() {
 
   if (typeof module !== 'undefined' && module.exports) {
     verb_to_doer = require('./to_doer')
-    verb_irregulars = require('./verb_irregulars')
+    //verb_irregulars = require('./verb_irregulars')
+		if (typeof lang != 'string') lang = 'en';
+		var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
+		
     verb_rules = require('./verb_rules')
     suffix_rules = require('./suffix_rules')
   }
@@ -140,12 +143,12 @@ var verb_conjugate = (function() {
     var verb = w.replace(/^(over|under|re|anti|full)\-?/i, '')
     //check irregulars
     var obj = {};
-    var l = verb_irregulars.length
+    var l = verbs_conjugate.irregulars.length
     var x, i;
     for (i = 0; i < l; i++) {
-      x = verb_irregulars[i]
+      x = verbs_conjugate.irregulars[i]
       if (verb === x.present || verb === x.gerund || verb === x.past || verb === x.infinitive) {
-        obj = JSON.parse(JSON.stringify(verb_irregulars[i])); // object 'clone' hack, to avoid mem leak
+        obj = JSON.parse(JSON.stringify(verbs_conjugate.irregulars[i])); // object 'clone' hack, to avoid mem leak
         return fufill(obj, prefix)
       }
     }

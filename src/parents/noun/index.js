@@ -1,9 +1,12 @@
 // wrapper for noun's methods
-var Noun = function(str, next, last, token) {
-  var the = this;
+var Noun = function(str, sentence, word_i) {
+  var the = this
+  var token, next;
+  if(sentence!==undefined && word_i!==undefined){
+    token=sentence.tokens[word_i]
+    next=sentence.tokens[word_i+i]
+  }
   the.word = str || '';
-  the.next = next;
-  the.last = last;
 
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
@@ -159,10 +162,10 @@ var Noun = function(str, next, last, token) {
       //find the matching pronouns, and break if another noun overwrites it
       var matches=[]
       for(var i=0; i<interested.length; i++){
-        if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || posessives[interested[i].normalised]===prp)){
+        if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)){
           //this pronoun points at our noun
           matches.push(interested[i])
-        }else if(interested[i].pos.tag==="PP" && posessives[interested[i].normalised]===prp){
+        }else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp){
           //this posessive pronoun ('his/her') points at our noun
           matches.push(interested[i])
         }else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp){
