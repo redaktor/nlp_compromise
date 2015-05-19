@@ -458,7 +458,7 @@ function generateLanguage(lang) {
 				return irregulars;
 			},
 			// expand
-			unzip: function(a) {
+			unzip: function() {
 				var res = {};
 				zip.forEach(function(a) {
 					res[a[0].replace('=', a[1])] = a[1];

@@ -8,8 +8,8 @@ var Adjective = function(str, next, last, token) {
   if (typeof module !== 'undefined' && module.exports) {
     to_comparative = require('./conjugate/to_comparative')
     to_superlative = require('./conjugate/to_superlative')
-    adj_to_adv = require('./conjugate/to_adverb')
-    adj_to_noun = require('./conjugate/to_noun')
+    to_adverb = require('./conjugate/to_adverb')
+    to_noun = require('./conjugate/to_noun')
     parts_of_speech = require('../../data/parts_of_speech')
   }
 
@@ -17,8 +17,8 @@ var Adjective = function(str, next, last, token) {
     return {
       comparative: to_comparative(the.word),
       superlative: to_superlative(the.word),
-      adverb: adj_to_adv(the.word),
-      noun: adj_to_noun(the.word)
+      adverb: to_adverb(the.word),
+      noun: to_noun(the.word)
     }
   }
 

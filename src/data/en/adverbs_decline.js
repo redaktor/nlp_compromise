@@ -20,7 +20,7 @@ var adverbs_decline = (function() {
   [ '=ally', 'pornographic' ],
   [ '=', 'jolly' ] ]; 
 
-  var main = (function (a) {
+  var main = (function () {
 				var res = {};
 				zip.forEach(function(a) {
 					res[a[0].replace('=', a[1])] = a[1];

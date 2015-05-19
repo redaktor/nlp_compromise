@@ -12,8 +12,8 @@ var Noun = function(str, sentence, word_i) {
 		if (typeof lang != 'string') lang = 'en';
     var parts_of_speech = require('../../data/parts_of_speech');
 		
-    var firstnames = require('../../data/lexicon/firstnames'); // TODO
 		var indefinite_article = require('./indefinite_article'); // TODO
+    var firstnames = require('../../data/lexicon/firstnames'); // TODO
 		
 		var honourifics= require('../../../data/'+lang+'/honorifics');
 		var inflect = require('../../../data/'+lang+'/nouns_inflect');
