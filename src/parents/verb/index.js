@@ -9,8 +9,8 @@ var Verb = function(str, next, last, token) {
 		if (typeof lang != 'string') lang = 'en';
     var parts_of_speech = require('../../data/parts_of_speech');
 		
-		var verbs = require('../../../data/'+lang+'/verbs_special');
-    var verb_conjugate = require('../../../data/'+lang+'/verbs_conjugate').irregulars;
+		var verbs_special = require('../../../data/'+lang+'/verbs_special');
+    var verb_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
   }
 	
   var tenses = {
@@ -22,22 +22,22 @@ var Verb = function(str, next, last, token) {
   }
 
   the.conjugate = function() {
-    return verb_conjugate(the.word);
+    return verb_conjugate.irregulars(the.word);
   }
 
   the.to_past = function() {
     if (the.form === 'gerund') {
       return the.word;
     }
-    return verb_conjugate(the.word).past;
+    return verb_conjugate.irregulars(the.word).past;
   }
 
   the.to_present = function() {
-    return verb_conjugate(the.word).present;
+    return verb_conjugate.irregulars(the.word).present;
   }
 
   the.to_future = function() {
-    return 'will ' + verb_conjugate(the.word).infinitive;
+    return 'will ' + verb_conjugate.irregulars(the.word).infinitive;
   }
 
   //which conjugation
@@ -49,7 +49,7 @@ var Verb = function(str, next, last, token) {
       'gerund',
       'infinitive'
     ];
-    var forms = verb_conjugate(the.word);
+    var forms = verb_conjugate.irregulars(the.word);
     for (var i = 0; i < order.length; i++) {
       if (forms[order[i]] === the.word) return order[i];
     }
@@ -65,7 +65,7 @@ var Verb = function(str, next, last, token) {
 
   //the most accurate part_of_speech
   the.which = (function() {
-    if (verbs.cps[the.word]) return parts_of_speech['CP'];
+    if (verbs_special.cps[the.word]) return parts_of_speech['CP'];
     if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) return parts_of_speech['VBG'];
     var form = the.form;
     return parts_of_speech[tenses[form]];
@@ -74,7 +74,7 @@ var Verb = function(str, next, last, token) {
   //is this verb negative already?
   the.negative = function() {
     if (the.word.match(/n't$/)) return true;
-    if ((verbs.mds[the.word] || verbs.cps[the.word]) && the.next && the.next.normalised === 'not') {
+    if ((verbs_special.mds[the.word] || verbs_special.cps[the.word]) && the.next && the.next.normalised === 'not') {
       return true;
     }
     return false;

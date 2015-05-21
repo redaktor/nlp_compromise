@@ -4,7 +4,7 @@ var to_comparative = (function() {
   var main = function(str, lang) {
 		if (typeof lang != 'string') lang = 'en';
 		if (typeof module !== 'undefined' && module.exports) {
-			decline = require('../../../data/'+lang+'/adjectives_decline');
+			adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
 		
     var transforms = [{
@@ -39,7 +39,7 @@ var to_comparative = (function() {
       /ous$/
     ];
 		
-    if (!(decline.to_comparative[str])) return null;
+    if (!(adjectives_decline.to_comparative[str])) return null;
 
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
@@ -47,12 +47,12 @@ var to_comparative = (function() {
       }
     }
 
-    if (decline.convertables.hasOwnProperty(str)) {
+    if (adjectives_decline.convertables.hasOwnProperty(str)) {
       return (str.match(/e$/)) ? str + 'r' : str + 'er';
     }
 
-    if (decline.to_comparative.hasOwnProperty(str)) {
-      return decline.to_comparative[str];
+    if (adjectives_decline.to_comparative.hasOwnProperty(str)) {
+      return adjectives_decline.to_comparative[str];
     }
 
     var i;

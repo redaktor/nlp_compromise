@@ -16,7 +16,7 @@ var Noun = function(str, sentence, word_i) {
     var firstnames = require('../../data/lexicon/firstnames'); // TODO
 		
 		var honourifics= require('../../../data/'+lang+'/honorifics');
-		var inflect = require('../../../data/'+lang+'/nouns_inflect');
+		var nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
 		var nouns = require('../../../data/'+lang+'/nouns');
   }
 	
@@ -58,11 +58,11 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.conjugate = function() {
-    return inflect.inflect(the.word);
+    return nouns_inflect.inflect(the.word);
   },
 
   the.is_plural = function() {
-    return inflect.is_plural(the.word);
+    return nouns_inflect.is_plural(the.word);
   }
 
   the.article = function() {
@@ -70,11 +70,11 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.pluralize = function() {
-    return inflect.pluralize(the.word);
+    return nouns_inflect.pluralize(the.word);
   }
 
   the.singularize = function() {
-    return inflect.singularize(the.word);
+    return nouns_inflect.singularize(the.word);
   }
 
   //uses common first-name list + honourifics to guess if this noun is the name of a person

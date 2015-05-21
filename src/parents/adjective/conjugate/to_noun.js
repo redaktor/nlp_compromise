@@ -4,10 +4,10 @@ var adj_to_noun = (function() {
   var main = function(w, lang) {
 		if (typeof lang != 'string') lang = 'en';
 		if (typeof module !== 'undefined' && module.exports) {
-			decline = require('../../../data/'+lang+'/adjectives_decline');
+			adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
     if (!w) return '';
-    if (decline.to_noun.hasOwnProperty(w)) return decline.to_noun[w];
+    if (adjectives_decline.to_noun.hasOwnProperty(w)) return adjectives_decline.to_noun[w];
     if (w.match(' ')) return w;
     if (w.match(/w$/))return w;
 		

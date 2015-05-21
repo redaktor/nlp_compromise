@@ -23,13 +23,9 @@ var Adjective = function(str, next, last, token) {
   }
 
   the.which = (function() {
-    if (the.word.match(/..est$/)) {
-      return parts_of_speech['JJS']
-    }
-    if (the.word.match(/..er$/)) {
-      return parts_of_speech['JJR']
-    }
-    return parts_of_speech['JJ']
+    if (the.word.match(/..est$/)) return parts_of_speech['JJS'];
+    if (the.word.match(/..er$/))  return parts_of_speech['JJR'];
+    return parts_of_speech['JJ'];
   })()
 
   return the;

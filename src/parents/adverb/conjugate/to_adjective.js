@@ -4,7 +4,7 @@ var to_adjective = (function() {
   var main = function(str, lang) {
 		if (typeof lang != 'string') lang = 'en';
 		if (typeof module !== 'undefined' && module.exports) {
-			var irregulars = require('../../../data/'+lang+'/adverbs_decline');
+			var adverbs_decline = require('../../../data/'+lang+'/adverbs_decline');
 		}
     var transforms = [{
       'reg': /bly$/i,
@@ -28,8 +28,8 @@ var to_adjective = (function() {
       'reg': /(.{3})ly$/i,
       'repl': '$1'
     }];
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str];
+    if (adverbs_decline.hasOwnProperty(str)) {
+      return adverbs_decline[str];
     }
     for (var i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {

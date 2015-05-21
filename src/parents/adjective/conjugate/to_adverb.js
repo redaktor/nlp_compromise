@@ -4,7 +4,7 @@ var adj_to_adv = (function() {
   var main = function(str, lang) {
 		if (typeof lang != 'string') lang = 'en';
 		if (typeof module !== 'undefined' && module.exports) {
-			var decline = require('../../../data/'+lang+'/adjectives_decline');
+			var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
 
     var transforms = [{
@@ -40,8 +40,8 @@ var adj_to_adv = (function() {
       /ile$/
     ];
 
-    if (decline.adv_donts[str]) return null;
-    if (decline.adj_to_advs[str]) return decline.adj_to_advs[str];
+    if (adjectives_decline.adv_donts[str]) return null;
+    if (adjectives_decline.adj_to_advs[str]) return adjectives_decline.adj_to_advs[str];
     if (str.length <= 3) return null;
 		
     var i;
