@@ -1,7 +1,9 @@
 
 var lang = 'en';
 var adverbs_decline = (function() {
-  var zip = [ [ 'wholly', 'whole' ],
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = [ [ 'wholly', 'whole' ],
   [ 'idly', 'idle' ],
   [ '=y', 'full' ],
   [ '=ly', 'practical' ],

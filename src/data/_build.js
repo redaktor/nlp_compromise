@@ -23,38 +23,19 @@
 // ./en/...
 */
 
+/* TODO 
+- phrasal_verbs
+- firstnames
+*/	
+
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
 
 var dict = require('./_dictionary');
-
-var flag = function(meta, lang) {
-	// return flags compressed, like 'IAW'
-	var flagStr = '';
-	var flags = {
-		stopword: 'S',
-		filler: 'F',
-		entitySubstitution: 'E',
-		aux: 'A',
-		weak: 'W',
-		irregular: 'I',
-		passive: 'P',
-		demonstrative: 'D',
-		wh: 'w',
-		unconfirmed: 'u',
-		vulgar: 'v',
-		entitySubstitutionCheck: 'x'
-	};
-	for (var key in meta) {
-		if (flags.hasOwnProperty(key) && flags[key]) {
-			if (typeof meta[key] === 'boolean' || meta[key].indexOf(lang)) {
-				flagStr = flagStr.concat(flags[key]);
-			}
-		}
-	}
-	return flagStr;
-};
+var nodeExportStr = '\n  if (typeof module !== "undefined" && module.exports) module.exports = main;';
+var prefixFn = function(id) { return '\nvar '.concat(id,' = (function() {\n  '); }
+var endFnStr = '\n\n  return main;\n})();';
 
 var possibleLanguage = {};
 // TODO - could become vice-versa: a whitelist of ISO-languages ...
@@ -78,6 +59,63 @@ function generateLanguage(lang) {
 		console.log( 'Language not found:', '"'+lang+'"' );
 		return false;
 	}
+	
+	
+	// for metrics module TODO
+	var flag = function(meta) {
+		// return flags compressed, like 'IAW'
+		var flagStr = '';
+		var flags = {
+			stopword: 'S',
+			filler: 'F',
+			entitySubstitution: 'E',
+			aux: 'A',
+			weak: 'W',
+			irregular: 'I',
+			passive: 'P',
+			demonstrative: 'D',
+			wh: 'w',
+			unconfirmed: 'u',
+			vulgar: 'v',
+			entitySubstitutionCheck: 'x'
+		};
+		for (var key in meta) {
+			if (flags.hasOwnProperty(key) && flags[key]) {
+				if (typeof meta[key] === 'boolean' || meta[key].indexOf(lang)) {
+					flagStr = flagStr.concat(flags[key]);
+				}
+			}
+		}
+		return flagStr;
+	};
+	
+	// for helpers module
+	var _fns = function() {
+		return {
+			toObj: function(h,s){ h[s]=true; return h; },
+			repl: function(a,s,r){
+				if (typeof a === 'undefined') return null;
+				var _r = function(w){
+					s.forEach(function(rS, i) { w = w.replace(new RegExp(rS, 'g'), r[i]) });
+					return w;
+				}
+				return (a instanceof Array) ? a.map(_r) : _r(a);
+			},
+			replBase: function(a,s,r){
+				if (typeof a === 'undefined') return null;
+				var _s = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2));
+				return [a[0], ((s instanceof Array) ? helpFns.repl(_s, s, r) : _s) ];
+			}
+		};
+	}
+	var id = 'helpFns';
+	var helpFns = _fns(); 
+	var helpersStr = prefixFn(id).concat('var main = (', _fns.toString(), ')();', nodeExportStr, endFnStr);
+	
+	try { fs.mkdirSync(path.join('./', lang)); } catch (e) {};
+	fs.writeFileSync(	path.join('./', lang, '/', id+'.js'), helpersStr	);
+	var helpersImportStr = 'if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");\n';
+	
 	var results = [[]]; //TODO minor - has first el. only for DEBUG - SHOULD be empty
 	// some helpers for the generators
 	var newRes = function() {
@@ -99,33 +137,49 @@ function generateLanguage(lang) {
 	var possible = function(o) { 
 		return ( o.hasOwnProperty(lang) ); 
 	};
+	var possibleOrig = function(o) { 
+		return ( (o.hasOwnProperty(lang)) && (o.hasOwnProperty('uid')) ); 
+	};
 	var possibleRef = function(o) { 
 		return ( o.hasOwnProperty(lang) && o.hasOwnProperty('ref') ); 
 	};
 	var isRef = function(oa, o) {
 		return ((oa.ref instanceof Array && oa.ref.indexOf(o.uid) > -1) || oa.ref === o.uid);	
 	}
-	var possibleIrreg = function(o) { 
-		return ( (o.hasOwnProperty(lang)) && (o.hasOwnProperty('uid')) ); 
-	};
 	var possibleRest = function(o) { 
 		return ( (o.hasOwnProperty(lang)) && !handled(o[lang]) ); 
 	};
 	var meta = function(o, key) {
-		return (!handled(o[lang]) && possible(o) && o.hasOwnProperty('meta') && o.meta[key] && o.meta[key].indexOf(lang) > -1);
+		if (o.hasOwnProperty('meta') && o.meta[key]) {
+			var checkLang = (o.meta[key] instanceof Array) ? o.meta[key] : Object.keys(o.meta[key]);
+			return (!handled(o[lang]) && possible(o) && checkLang.indexOf(lang) > -1);
+		}
+		return false;
 	};
 	var val = function(o) { return o[lang]; }
-	//
+	var baseRepl = function(w, iStr) { 
+		var w = w.replace(iStr, '=');
+		var iSl = iStr.slice(0,-2);
+		return (iSl === '') ? w : w.replace(iSl, '_'); 
+	}
+	
+	var allPossible = function() { 
+		var _all = [];
+		for (var key in dict) {
+			if (dict[key].hasOwnProperty('words')) _all = _all.concat(dict[key].words.filter(possible));
+		}
+		return _all;
+	};
+	var allPossibles = allPossible();
 	
 	var langStr = "var lang = '".concat(lang, "';");
 	// generate the DATA
 	var generators = [
 	
-		// NOUN : irregulars (plural), uncountables
-		{ // 0
+		// NOUN 
+		{ // 0 irregulars (plural), uncountables
 			id: 'nouns_inflect',
 			description: 'singular nouns having irregular plurals',
-			suffix: '  main.uncountables = zip.uncountables.reduce(function(h,s){\n    h[s]=true;\n    return h;\n  },{});',
 			// zip
 			zip: function(lang) { 
 				var _irregulars = newRes();
@@ -133,31 +187,28 @@ function generateLanguage(lang) {
 					return meta(o, 'uncountable');
 				}).map(val);
 				[[dict.NN.words, dict.NNS.words], [dict.PRP.words], [dict.PP.words]].forEach(function(a) {
-					a[0].filter(possibleIrreg).forEach(function(o) { 
+					a[0].filter(possibleOrig).forEach(function(o) { 
 						a[((a[1]) ? 1 : 0)].filter(possibleRef).forEach(function(op) {
 							if (isRef(op, o)) {
-								_irregulars.push([o[lang], op[lang].replace(o[lang], '=').replace(o[lang].slice(0,-2), '_').replace(/es/g, '$')]);
+								_irregulars.push([o[lang], baseRepl(op[lang], o[lang]).replace(/es/g, '_')]);
 							}
 						});
 					});
 				});
 				return {
 					irregulars: _irregulars,
-					uncountables: _uncountables
+					uc: _uncountables
 				};
 			},
 			// expand
-			unzip: {
-				array: 'irregulars',
-				fn: function(a) { a[1] = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2)).replace(/\$/g,'es'); return a; }
+			unzip: function() {
+				return {
+					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,['_'],['es']); }),
+					uncountables: zip.uc.reduce(helpFns.toObj,{})
+				};
 			}
 		},
-		
-		
-		/*
-		PP: { 
-			// meta.parent MUST reference according personal pronoun PRP
-		*/
+			
 		{ // 1 entityBlacklist, personBlacklist, prps
 			id: 'nouns',
 			description: '',
@@ -178,34 +229,55 @@ function generateLanguage(lang) {
 			},
 			// expand
 			unzip: function () {
-				var toO = function(h,s){ h[s]=true; return h; };
 				var _pps = {}; 
 				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return { 
 					pps: _pps,
-					prps: zip.prps.reduce(toO, {}), 
-					entityBlacklist: zip.entityBlacklist.reduce(toO, {}), 
+					prps: zip.prps.reduce(helpFns.toObj, {}), 
+					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}), 
 					personBlacklist: zip.personBlacklist,
 				}
 			}
 		},
 	
 		
-		// VERB : _irregulars, _noDoers, _comparatives, _superlatives, _regulars
-		{ // 2
+		// VERB : 
+		{ // 2 cps, mds, negate
 			id: 'verbs_special',
 			description: '',
-			// build
+			// compress
 			zip: function(lang) { 
 				// TODO: 'it', 'one'
-				return {
-					cps: dict.CP.words.map(val),
-					mds: dict.MD.words.map(val)
-				};
+				var res = {cps:[], mds:[]};
+				['CP', 'MD'].forEach(function(type) {
+					dict[type].words.filter(possibleOrig).forEach(function(o) {
+						dict[type].words.filter(possibleRef).forEach(function(ov) {
+							if (isRef(ov, o)) {
+								res[type.toLowerCase()+'s'].push([o[lang], baseRepl(ov[lang], o[lang]).replace('\'t','_') ]);
+							}
+						});
+					});
+				});
+				return res;
+			},
+			// expand
+			unzip: function () {
+				var res = {};
+				var negate = {};
+				['cps', 'mds'].forEach(function(type) {
+					res[type] = [];
+					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) { 
+						var arr = helpFns.replBase(a,['_'],['\'t']);
+						negate[arr[0]] = arr[1];
+						return arr; 
+					}));
+				});
+				res.negate = negate;
+				return res;
 			}
 		},
 		
-		{ // 3
+		{ // 3 irregulars, noDoers, irregularDoers
 			id: 'verbs_conjugate',
 			description: '',
 			prefix: '// types: infinitive, gerund, past, present, doer, future \n',
@@ -221,20 +293,13 @@ function generateLanguage(lang) {
 				var _irregulars = newRes();
 				var _noDoers = {};
 				//var irregularFlags = [];
-				dict.VBP.words.filter(possibleIrreg).forEach(function(o) {
-					var iStr = o[lang];
-					var conjugateds = [iStr.replace('ing', '$').replace('er', '_')];
+				dict.VBP.words.filter(possibleOrig).forEach(function(o) {
+					var conjugateds = [helpFns.repl(o[lang], ['ing', 'er', 've'], ['&', '_', '#'])];
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
-							if (isRef(oc, o)) {
-								switch (lang) {
-									default:
-										conjugated = oc[lang].replace(iStr, '=').replace('ing', '$').replace('er', '_');
-									break;
-								}
-								did(o[lang]);
-							}
+							if (isRef(oc, o)) conjugated = helpFns.repl(baseRepl(oc[lang], o[lang]), ['ing', 'er', 've'], ['&', '_', '#']);
+							did(o[lang]);
 						});
 						conjugateds.push( (conjugated) ? conjugated : 0 );
 						/*
@@ -270,22 +335,18 @@ function generateLanguage(lang) {
 				fn: function(a) {
 					var types = ['infinitive','gerund','past','present','doer','future'];
 					var obj = {};
-					switch (lang) {
-						default:
-							var r = function(s) {return s;}
-							a.forEach(function(s, i) {
-								if (s && i>0) s = s.replace('=', a[0]);
-								if (s) s = s.replace(/\$/g, 'ing').replace(/_/g, 'er');
-								if (i > 3 && !s) {
-									main.noDoers[r(a[0])] = 1;
-								} else if (i > 3) {
-									main.irregularDoers[r(a[0])] = s;
-								} else {
-									obj[types[i]] = s;
-								}
-							});
-						break;
-					}
+					var r = function(s) {return s;}
+					a.forEach(function(s, i) {
+						if (s && i > 0) s = s.replace('=',a[0]).replace('_', a[0].slice(0,-2));
+						if (s) s = helpFns.repl(s, ['&', '_', '#'], ['ing', 'er', 've']);
+						if (i > 3 && !s) {
+							main.noDoers[r(a[0])] = 1;
+						} else if (i > 3) {
+							main.irregularDoers[r(a[0])] = s;
+						} else {
+							obj[types[i]] = s;
+						}
+					});
 					return obj;
 				}
 			}
@@ -304,6 +365,7 @@ function generateLanguage(lang) {
 		
 		
 		// ADJECTIVE
+		// 
 		{ // 5
 			id: 'adjectives_decline',
 			description: '',
@@ -312,6 +374,7 @@ function generateLanguage(lang) {
 			"// 1 means 'default behavior'\n",
 			// compress
 			zip: function(lang) {
+				var repJJ = function(s) { return ((typeof s === 'string') ? helpFns.repl(s, ['ight', 'ing', 'ent', 'er', 'al', 'ed'], [':', '&', '_', '#', '§', '!']) : s); }
 				var types = {
 					/*JJ: 'adjective',*/ 
 					RB: 'adverb', 
@@ -321,9 +384,9 @@ function generateLanguage(lang) {
 				};
 				var irregulars = newRes();
 				//var irregularFlags = [];
-				dict.JJ.words.filter(possibleIrreg).forEach(function(o) {
+				dict.JJ.words.filter(possibleOrig).forEach(function(o) {
 					var jjStr = o[lang];
-					var declineds = [jjStr];
+					var declineds = [repJJ(jjStr)];
 					for (var type in types) {
 						var declined = 1;
 						if (type === 'RB' && meta(o, 'noAdverb')) declined = 0;
@@ -339,14 +402,14 @@ function generateLanguage(lang) {
 								if (isRef(oa, o)) {
 									switch (lang) {
 										default:
-											declined = (typeof oa[lang] === 'number') ? oa[lang] : oa[lang].replace(jjStr, '=').replace('ly', '$');
+											declined = (typeof oa[lang] === 'number') ? oa[lang] : oa[lang].replace(jjStr, '=');
 										break;
 									}
 								} 
 							});
 						}
 						if (declined === -1) declined = 0;
-						declineds.push( (declined) ? declined : 0 );
+						declineds.push( (declined) ? repJJ(declined) : 0 );
 					}
 					
 					if (declineds.length > 4 && declineds[4] === 1) declineds.pop();
@@ -363,7 +426,7 @@ function generateLanguage(lang) {
 				var possibleConvertable = function(o) { return meta(o, 'convertable'); };
 				dict.JJ.words.filter(possibleConvertable).forEach(function(o) {
 					if (!handled(o[lang])) {
-						irregulars.push(o[lang]);
+						irregulars.push(repJJ(o[lang]));
 						did(o[lang]);
 					}
 				});
@@ -373,12 +436,14 @@ function generateLanguage(lang) {
 			
 			// expand
 			unzip: function () {
+				var repJJ = function(s) { return (typeof s !== 'string') ? s : helpFns.repl(s, [':', '&', '_', '#', '§', '!'], ['ight', 'ing', 'ent', 'er', 'al', 'ed']); }
 				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
-				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b).replace('$', 'ly'); }
-				zip.forEach(function(a) {
-					if (typeof a === 'string') {
-						res.convertables.push(a); 
+				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
+				zip.forEach(function(_a) {
+					if (typeof _a === 'string') {
+						res.convertables.push(repJJ(_a)); 
 					} else {
+						var a = _a.map(function(w){ return repJJ(w); });
 						if (a.length > 1) {
 							if (a[1] === 0) res.adv_donts.push(a[0]);
 							if (typeof a[1] === 'string') res.adj_to_advs[a[0]] = expand(a[1], a[0]);
@@ -392,9 +457,8 @@ function generateLanguage(lang) {
 						if (a.length>4 && a[4]!=1) res.to_noun[a[0]] = expand(a[4], a[0]);
 					}
 				});
-				var toO = function(h,s){ h[s]=true; return h; };
-				res.convertables = res.convertables.reduce(toO, {});
-				res.adv_donts = res.adv_donts.reduce(toO, {});
+				res.convertables = res.convertables.reduce(helpFns.toObj, {});
+				res.adv_donts = res.adv_donts.reduce(helpFns.toObj, {});
 				return res;
 			}
 			
@@ -409,7 +473,7 @@ function generateLanguage(lang) {
 				var demonyms = [];
 				var possibleDemo = function(o) { return meta(o, 'demonym'); };
 				dict.JJ.words.filter(possibleDemo).forEach(function(o) {
-					demonyms.push( o[lang].replace('ian', '$').replace('ese', '=') );
+					demonyms.push( helpFns.repl(o[lang], ['can', 'dan', 'ean', 'ian', 'ese', 'an'], [':', '&', '_', '#', '§', '!']) );
 					did(o[lang]);
 				});
 				return demonyms;
@@ -418,12 +482,8 @@ function generateLanguage(lang) {
 			// expand
 			unzip: {
 				array: 'zip',
-				fn: function(s) {
-					switch (lang) {
-						default:
-							return s.replace('$', 'ian').replace('=', 'ese');
-						break;
-					}
+				fn: function(w) {
+					return helpFns.repl(w, [':', '&', '_', '#', '§', '!'], ['can', 'dan', 'ean', 'ian', 'ese', 'an'])
 				}
 			}
 		},
@@ -433,7 +493,12 @@ function generateLanguage(lang) {
 			description: '',
 			// build
 			zip: function(lang) { 
-				return did(dict.JJ.words.filter(possibleRest).map(val));
+				return did(dict.JJ.words.filter(possibleRest).map(val).map(function(w) {
+					return helpFns.repl(w, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly'], [':', '&', '_', '#', '§', '!', '%', '>'/*, '<', '-'*/]);
+				}));
+			},
+			unzip: function() {
+				return zip.map(function(w) { return helpFns.repl(w, [':', '&', '_', '#', '§', '!', '%', '>'], ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly']); });
 			}
 		},
 		
@@ -446,13 +511,12 @@ function generateLanguage(lang) {
 			// build
 			zip: function(lang) { 
 				var irregulars = newRes();
-				dict.RB.words.filter(possibleIrreg).forEach(function(o) {
-					var iStr = o[lang];
+				dict.RB.words.filter(possibleOrig).forEach(function(o) {
 					var adj = '';
 					dict.JJ.words.filter(possibleRef).forEach(function(oj) {
 						if (isRef(oj, o)) adj = did(oj[lang]);
 					});
-					irregulars.push([iStr.replace(adj, '='), adj]);
+					irregulars.push([o[lang].replace(adj, '='), adj]);
 				});
 				/* TODO flags for all conjugated :  'I'.concat(flag(o.meta))) */
 				return irregulars;
@@ -577,6 +641,64 @@ function generateLanguage(lang) {
 		},
 		
 		{ // 15
+			id: 'posData',
+			description: '',
+			// build
+			zip: function(lang) { 
+				var res = { particles: [], cs: [], contractions: {} };
+				var possibleParticle = function(o) { return meta(o, 'particle'); }
+				res.particles = allPossibles.filter(possibleParticle).map(val);
+				var possibleContraction = function(o) { return meta(o, 'contractions'); }
+				if (dict.contractions.hasOwnProperty(lang)) {
+					res.cs = dict.contractions[lang];
+					var cs = res.cs.map(function(w){ return w.replace('|', ''); });
+					allPossibles.filter(possibleContraction).forEach(function(o){ 
+						o.meta.contractions[lang].forEach(function(cw) {
+							var pos = cs.indexOf(cw);
+							if (pos > -1) {
+								if (!(res.contractions.hasOwnProperty(o[lang]))) res.contractions[o[lang]] = [];
+								res.contractions[o[lang]].push(pos);
+							}
+						});
+					});
+				}
+				return res;
+			},
+			//convert it to an easier format
+			unzip: function() {
+				zip.particles = zip.particles.reduce(helpFns.toObj, {});
+				var c = zip.contractions;
+				var _cs = [];
+				for (var k in c) { c[k].forEach(function(i){ var a = zip.cs[i].split('|'); _cs[k+((a[1]) ? "'"+a[1] : a[0])] = [k,a.join('')]; }) }
+				zip.contractions = _cs;
+				return zip;
+			}
+		},
+		
+		{ // 16
+		// 
+		/* TODO : verbs_special.negate +
+		// + some logical ones work
+        "everyone": "no one",
+        "everybody": "nobody",
+        "someone": "no one",
+        "somebody": "nobody",
+        // everything:"nothing",
+        "always": "never",
+		*/
+			id: 'negateData',
+			description: '',
+			// build
+			zip: function(lang) { 
+				return 1;
+			},
+			//convert it to an easier format
+			unzip: function() {
+				return 1;
+			}
+		},
+		
+		{ // 17
 			id: 'unambigousSuffixes',
 			description: '',
 			// build
@@ -615,7 +737,7 @@ function generateLanguage(lang) {
 		_names.forEach(reqModule);
 		
 		// require the modules in the lexicon.js
-		var nStr = util.inspect(_names).replace(/ |\n/g,'');
+		var nStr = util.inspect(_names, {depth: null}).replace(/ |\n/g,'');
 		/*
 		verb_conjugate = require("../parents/verb/conjugate/conjugate")
 		verb_to_doer = require("../parents/verb/conjugate/to_doer")
@@ -721,8 +843,9 @@ function generateLanguage(lang) {
 		return lStr;
 	}
 	
+	
+	
 	var i = 0;
-	var _prefix = function(id) { return '\nvar '.concat(id,' = (function() {\n  '); }
 	var _generate = function(g, i) { 
 		/*TODO lang.mixin*/
 		if (!(g.prefix)) g.prefix = '';
@@ -731,25 +854,26 @@ function generateLanguage(lang) {
 		var id = g.id;
 		var generated = g.zip(lang);
 		var zip = util.inspect(generated, { depth: null });
-		var prefix = langStr.concat(_prefix(id));
+		var prefix = langStr.concat(prefixFn(id));
 		if (g.hasOwnProperty('description') && g.description != '') {
 			g.prefix = '/* '.concat(g.description, ' */\n', g.prefix);
 		}
 		if (g.hasOwnProperty('prefix')) {
 			prefix = g.prefix.concat('\n', prefix);
 		}
-		var suffix = g.suffix.concat('\n  if (typeof module !== "undefined" && module.exports) module.exports = main;'+
-			'\n\n  return main;\n'+
-			'})();'
-		);
+		var suffix = g.suffix.concat(nodeExportStr, endFnStr);
 		var _main = '; \n\n  var main = ';
 		var unzip = 'zip;\n';
 		if (g.hasOwnProperty('unzip') && g.unzip.hasOwnProperty('array')) {
+			var str = g.unzip.fn.toString(-1);
+			if (str.indexOf('helpFns.' > -1)) prefix = prefix.concat('\n', helpersImportStr); 
 			var arr = (g.unzip.array === 'zip' || g.unzip.array === '') ? 'zip' : 'zip.'.concat(g.unzip.array); 
 			if (g.unzip.array != 'zip' && g.unzip.array != '') _main = _main.concat('zip;\n  main.', g.unzip.array, ' = ');
 			unzip = arr.concat('.map(', g.unzip.fn.toString(-1), ');\n');
 		} else if (g.hasOwnProperty('unzip')) {
-			unzip = '('.concat(g.unzip.toString(-1), ')();\n');
+			var str = g.unzip.toString(-1);
+			if (str.indexOf('helpFns' > -1)) prefix = prefix.concat('\n', helpersImportStr);
+			unzip = '('.concat(str, ')();\n');
 		}
 		
 		var result = prefix.concat('var zip = ', zip, _main, unzip, suffix);
@@ -761,7 +885,7 @@ function generateLanguage(lang) {
 			if (i === generators.length) {
 				colors = ['\u001b[32m', '\u001b[39m'];
 				
-				var rStr = _prefix('lexicon').concat(_generateLexi(), suffix);
+				var rStr = prefixFn('lexicon').concat(_generateLexi(), suffix);
 				fs.writeFileSync(	path.join('./', lang, '/', 'lexicon.js'), rStr);
 				
 				// Generate rules ... TODO				
@@ -773,7 +897,6 @@ function generateLanguage(lang) {
 	
 	
 	// Generate data part (lexica)
-	try { fs.mkdirSync(path.join('./', lang)); } catch (e) {};
 	generators.forEach(_generate);
 	
 }

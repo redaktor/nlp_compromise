@@ -2,19 +2,21 @@
 
 var lang = 'en';
 var nouns_inflect = (function() {
-  var zip = { irregulars: 
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { irregulars: 
    [ [ 'child', '=ren' ],
      [ 'person', 'people' ],
-     [ 'leaf', '_av$' ],
+     [ 'leaf', '_av_' ],
      [ 'database', '=s' ],
-     [ 'quiz', '=z$' ],
-     [ 'goose', 'ge$e' ],
+     [ 'quiz', '=z_' ],
+     [ 'goose', 'ge_e' ],
      [ 'phenomenon', '_a' ],
      [ 'barracks', '=' ],
      [ 'deer', '=' ],
      [ 'syllabus', '_i' ],
-     [ 'index', '_ic$' ],
-     [ 'appendix', '_ic$' ],
+     [ 'index', '_ic_' ],
+     [ 'appendix', '_ic_' ],
      [ 'criterion', '_a' ],
      [ 'man', '_en' ],
      [ 'sex', '=e_' ],
@@ -25,13 +27,13 @@ var nouns_inflect = (function() {
      [ 'alumnus', '_i' ],
      [ 'bacillus', '_i' ],
      [ 'beau', '=x' ],
-     [ 'cactus', '=$' ],
+     [ 'cactus', '=_' ],
      [ 'château', '=x' ],
      [ 'corpus', '_ora' ],
      [ 'curriculum', '_a' ],
      [ 'die', '_ice' ],
-     [ 'echo', '=$' ],
-     [ 'embargo', '=$' ],
+     [ 'echo', '=_' ],
+     [ 'embargo', '=_' ],
      [ 'foot', 'feet' ],
      [ 'formula', '=s' ],
      [ 'genus', '_era' ],
@@ -39,38 +41,38 @@ var nouns_inflect = (function() {
      [ 'hippopotamus', '_i' ],
      [ 'larva', '=e' ],
      [ 'libretto', '_ti' ],
-     [ 'loaf', '_av$' ],
-     [ 'matrix', '_ic$' ],
+     [ 'loaf', '_av_' ],
+     [ 'matrix', '_ic_' ],
      [ 'memorandum', '_a' ],
-     [ 'mosquito', '=$' ],
+     [ 'mosquito', '=_' ],
      [ 'opus', '_era' ],
      [ 'ovum', '_a' ],
-     [ 'ox', '_=en' ],
-     [ 'radius', '=$' ],
+     [ 'ox', '=en' ],
+     [ 'radius', '=_' ],
      [ 'referendum', '_a' ],
      [ 'tableau', '=x' ],
      [ 'that', '_ose' ],
-     [ 'that', '_$$' ],
-     [ 'thief', '_ev$' ],
-     [ 'this', '_$e' ],
+     [ 'that', '___' ],
+     [ 'thief', '_ev_' ],
+     [ 'this', '__e' ],
      [ 'tooth', 'teeth' ],
      [ 'vita', '=e' ],
-     [ 'i', '_we' ],
-     [ 'he', '_t=y' ],
+     [ 'i', 'we' ],
+     [ 'he', 't=y' ],
      [ 'she', 'they' ],
      [ 'mine', 'ours' ],
-     [ 'myself', 'yourselv$' ],
-     [ 'myself', 'ourselv$' ],
-     [ 'yourself', 'themselv$' ],
+     [ 'myself', 'yourselv_' ],
+     [ 'myself', 'ourselv_' ],
+     [ 'yourself', 'themselv_' ],
      [ 'his', 't_eirs' ],
-     [ 'himself', 'themselv$' ],
+     [ 'himself', 'themselv_' ],
      [ 'her', 't_eirs' ],
      [ 'hers', 't_irs' ],
-     [ 'herself', 'themselv$' ],
+     [ 'herself', 'themselv_' ],
      [ 'its', 'the_rs' ],
      [ 'theirs', '=' ],
-     [ 'themself', '_lv$' ] ],
-  uncountables: 
+     [ 'themself', '_lv_' ] ],
+  uc: 
    [ 'oxen',
      'grammar',
      'series',
@@ -223,12 +225,13 @@ var nouns_inflect = (function() {
      'kelvin',
      'hertz' ] }; 
 
-  var main = zip;
-  main.irregulars = zip.irregulars.map(function (a) { a[1] = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2)).replace(/\$/g,'es'); return a; });
-  main.uncountables = zip.uncountables.reduce(function(h,s){
-    h[s]=true;
-    return h;
-  },{});
+  var main = (function () {
+				return {
+					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,['_'],['es']); }),
+					uncountables: zip.uc.reduce(helpFns.toObj,{})
+				};
+			})();
+
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 
   return main;

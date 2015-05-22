@@ -1,29 +1,40 @@
 
 var lang = 'en';
 var verbs_special = (function() {
-  var zip = { cps: [ 'is', 'am', 'are', 'was', 'were', 'isn\'t', 'ain\'t', 'aren\'t' ],
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { cps: 
+   [ [ 'is', '=n_' ],
+     [ 'am', 'ain_' ],
+     [ 'are', '=n_' ],
+     [ 'was', '=n_' ],
+     [ 'were', '=n_' ],
+     [ 'will be', 'won_ be' ] ],
   mds: 
-   [ 'can',
-     'could',
-     'couldn\'t',
-     'might',
-     'may',
-     'must',
-     'mustn\'t',
-     'will',
-     'would',
-     'wouldn\'t',
-     'shall',
-     'should',
-     'shouldn\'t',
-     'shan\'t',
-     'shant',
-     'lets',
-     'let\'s',
-     'who\'d',
-     'ought' ] }; 
+   [ [ 'did', '=n_' ],
+     [ 'would', '=n_' ],
+     [ 'could', '=n_' ],
+     [ 'should', '=n_' ],
+     [ 'can', '=_' ],
+     [ 'will', 'won_' ],
+     [ 'must', '=n_' ],
+     [ 'shall', '_nt' ],
+     [ 'shall', '_n_' ] ] }; 
 
-  var main = zip;
+  var main = (function () {
+				var res = {};
+				var negate = {};
+				['cps', 'mds'].forEach(function(type) {
+					res[type] = [];
+					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) { 
+						var arr = helpFns.replBase(a,['_'],['\'t']);
+						negate[arr[0]] = arr[1];
+						return arr; 
+					}));
+				});
+				res.negate = negate;
+				return res;
+			})();
 
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 

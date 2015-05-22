@@ -1,7 +1,9 @@
 
 var lang = 'en';
 var unambigousSuffixes = (function() {
-  var zip = { NN: 
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { NN: 
    [ 'ceae',
      'inae',
      'idae',

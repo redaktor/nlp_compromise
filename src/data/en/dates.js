@@ -1,7 +1,9 @@
 
 var lang = 'en';
 var dates = (function() {
-  var zip = { months: 
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { months: 
    { january: 0,
      jan: 0,
      february: 1,

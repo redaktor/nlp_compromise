@@ -1,7 +1,9 @@
 
 var lang = 'en';
 var nouns = (function() {
-  var zip = { entityBlacklist: 
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { entityBlacklist: 
    [ 'west',
      'western',
      'east',
@@ -38,6 +40,9 @@ var nouns = (function() {
      'arena',
      'stadium',
      'the',
+     'ave',
+     'blvd',
+     'uss',
      'ss',
      'for' ],
   prps: 
@@ -68,13 +73,12 @@ var nouns = (function() {
      [ 'them', 6 ] ] }; 
 
   var main = (function () {
-				var toO = function(h,s){ h[s]=true; return h; };
 				var _pps = {}; 
 				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return { 
 					pps: _pps,
-					prps: zip.prps.reduce(toO, {}), 
-					entityBlacklist: zip.entityBlacklist.reduce(toO, {}), 
+					prps: zip.prps.reduce(helpFns.toObj, {}), 
+					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}), 
 					personBlacklist: zip.personBlacklist,
 				}
 			})();

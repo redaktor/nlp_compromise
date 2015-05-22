@@ -26,47 +26,10 @@
 // And we have references to the flags (below), like "IASWx" (not too much more bytes than bitmasks)
 
 // please see the following capitalized "note tags": TODO, DOC, FIXME
-
-/* TODO - general
-- phrasal_verbs
-- firstnames
-- generator + logic_negate AND particles,
-- particles + "do", "together"
-+
-var contractions = {
-	"i'd": ["i", "would"],
-	"she'd": ["she", "would"],
-	"he'd": ["he", "would"],
-	"they'd": ["they", "would"],
-	"we'd": ["we", "would"],
-	"i'll": ["i", "will"],
-	"she'll": ["she", "will"],
-	"he'll": ["he", "will"],
-	"they'll": ["they", "will"],
-	"we'll": ["we", "will"],
-	"i've": ["i", "have"],
-	"they've": ["they", "have"],
-	"we've": ["we", "have"],
-	"should've": ["should", "have"],
-	"would've": ["would", "have"],
-	"could've": ["could", "have"],
-	"must've": ["must", "have"],
-	"i'm": ["i", "am"],
-	"he's": ["he", "is"],
-	"she's": ["she", "is"],
-	"we're": ["we", "are"],
-	"they're": ["they", "are"],
-	"cannot": ["can", "not"]
-}
-	
-
-
+/* TODO
 Useful would be an option to either disable 'last' and 'next' in the tokens -
-OR a customized toJSON method :
+OR a customized toJSON method (used automatically by JSON.parse ...) :
 'last' and 'next' create a Circular and thus the object can't become a JSON ...
-
-/* TODO - check
-'be' and some others :: were listed twice in original irregular verbs 
 */
 
 
@@ -162,6 +125,12 @@ A little bit of is informal and always precedes an uncountable noun.
 */
 
 var main = { 
+	// contractions are handled seperately for now
+	// if it is a ' contraction, seperate the word by |
+	// reference contractions later by meta.contractions (e.g. for 'he': {en: ['would', 'will', 'is']} )
+	contractions: {
+		en: ['woul|d','wi|ll','ha|ve','a|m','i|s','a|re','not']
+	},
 	// multiple words (except phrasal verbs) are handled seperately for now
 	multiples: {
 		NN: [{ en: 'ad hominem' }],
@@ -268,10 +237,10 @@ var main = {
 		tag: 'MD',
 		words: [
 			{ uid: 0, en: 'did', meta: {aux: ['en']} },
-			{ uid: 1, en: 'would', meta: {aux: ['en']} },
-			{ uid: 2, en: 'could', meta: {aux: ['en']} },
-			{ uid: 3, en: 'should', meta: {aux: ['en'], stopword: ['en']} },
-			{ uid: 4, en: 'can', meta: {aux: ['en'], stopword: ['en']} },
+			{ uid: 1, en: 'would', meta: {contractions: {en: ['have']}, aux: ['en']} },
+			{ uid: 2, en: 'could', meta: {contractions: {en: ['have']}, aux: ['en']} },
+			{ uid: 3, en: 'should', meta: {contractions: {en: ['have']}, aux: ['en'], stopword: ['en']} },
+			{ uid: 4, en: 'can', meta: {contractions: {en: ['not']}, aux: ['en'], stopword: ['en']} },
 			{ uid: 5, en: 'will', meta: {aux: ['en'], stopword: ['en']} },
 			{ uid: 6, en: 'must', meta: {aux: ['en']} },
 			{ uid: 7, en: 'shall', meta: {aux: ['en']} },
@@ -282,8 +251,8 @@ var main = {
 			{ ref: 4, en: 'can\'t', meta: {aux: ['en']} },
 			{ ref: 5, en: 'won\'t', meta: {stopword: ['en']} },
 			{ ref: 6, en: 'mustn\'t', meta: {aux: ['en']} },
-			{ ref: 7, en: 'shan\'t' },
 			{ ref: 7, en: 'shant' },
+			{ ref: 7, en: 'shan\'t' },
 			{ en: 'might', meta: {aux: ['en'], filler: ['en']} },
 			{ en: 'may', meta: {aux: ['en']} },
 			{ en: 'lets', description: 'arguable' },
@@ -1008,7 +977,7 @@ var main = {
 			// irregular verbs
 			{ uid: 0, en: 'be', meta: {noDoer: ['en'], aux: ['en'], passive: ['en'], stopword: ['en'], weak: ['en']} },
 			{ uid: 1, en: 'have', meta: {noDoer: ['en'], aux: ['en'], stopword: ['en'], weak: ['en']} },
-			{ uid: 2, en: 'do', meta: {aux: ['en'], stopword: ['en'], weak: ['en']} },
+			{ uid: 2, en: 'do', meta: {particle: ['en'], aux: ['en'], stopword: ['en'], weak: ['en']} },
 			{ uid: 3, en: 'begin', meta: {filler: ['en'], weak: ['en']} },
 			{ uid: 4, en: 'go', meta: {weak: ['en']} },
 			{ uid: 5, en: 'say', meta: {noDoer: ['en'], weak: ['en']} },
@@ -2126,11 +2095,12 @@ var main = {
 			{ en: 'sfc', meta: {honour: ['en']} },
 			{ en: 'surg', meta: {honour: ['en']} },
 			// common abbreviations
-      { en: 'ss', meta: {personBlacklist: ['en']} }, // US Ship
+			{ en: 'ave', meta: {personBlacklist: ['en']}  },
+			{ en: 'blvd', meta: {personBlacklist: ['en']}  },
+      { en: 'uss', meta: {personBlacklist: ['en']} }, // US States Ship
+      { en: 'ss', meta: {personBlacklist: ['en']} }, // Naval States Ship
 			{ en: 'arc' },
 			{ en: 'al' },
-			{ en: 'ave' },
-			{ en: 'blvd' },
 			{ en: 'cl' },
 			{ en: 'ct' },
 			{ en: 'cres' },
@@ -2235,14 +2205,14 @@ var main = {
 		parent: 'noun',
 		tag: 'PRP',
 		words: [
-			{ uid: 0, en: 'i', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 0, en: 'i', meta: {contractions: {en: ['would', 'will', 'have', 'am']}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 1, en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 2, en: 'he', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 3, en: 'she', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 4, en: 'it', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 5, ref: 0, en: 'we', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 5, ref: 0, en: 'we', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ uid: 6, ref: [2,3], en: 'they', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 6, ref: [2,3], en: 'they', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'me', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
 			{ en: 'him', meta: {stopword: ['en'], entitySubstitution: ['en']} },
@@ -3128,6 +3098,7 @@ var main = {
 			{ en: 'interesting', meta: {convertable: ['en']} },
 			{ en: 'attractive', meta: {convertable: ['en']} },
 			{ en: 'dangerous', meta: {convertable: ['en']} },
+			{ en: 'intelligent', meta: {convertable: ['en']} },
 			{ en: 'intellegent', meta: {convertable: ['en']} },
 			{ en: 'formal', meta: {convertable: ['en']} },
 			{ en: 'tired', meta: {convertable: ['en']} },
@@ -3361,7 +3332,7 @@ var main = {
 			{ en: 'less' },
 			{ en: 'divine' },
 			{ en: 'all', meta: {stopword: ['en']} },
-			{ en: 'together' },
+			{ en: 'together', meta: {particle: ['en']} },
 			{ en: 'only', meta: {stopword: ['en']} },
 			{ en: 'outside' },
 			{ en: 'multiple' },

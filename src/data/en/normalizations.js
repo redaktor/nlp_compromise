@@ -2,7 +2,9 @@
 
 var lang = 'en';
 var normalizations = (function() {
-  var zip = { '2': '²ƻ',
+  
+if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+var zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
   '5': 'Ƽƽ',
   '8': 'Ȣȣ',

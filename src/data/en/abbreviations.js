@@ -1,11 +1,12 @@
 
 var lang = 'en';
 var abbreviations = (function() {
-  var zip = [ 'ss',
+  var zip = [ 'ave',
+  'blvd',
+  'uss',
+  'ss',
   'arc',
   'al',
-  'ave',
-  'blvd',
   'cl',
   'ct',
   'cres',
