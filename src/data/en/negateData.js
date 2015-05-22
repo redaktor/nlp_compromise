@@ -3,10 +3,17 @@ var lang = 'en';
 var negateData = (function() {
   
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-var zip = 1; 
+var zip = { everyone: 'no one',
+  everybody: 'nobody',
+  someone: 'no one',
+  somebody: 'nobody',
+  always: 'never' }; 
 
   var main = (function () {
-				return 1;
+				if (typeof module !== "undefined" && module.exports) var verbs_special = require('./verbs_special');
+				var negate = verbs_special.negate || {};
+				for (var k in zip) { negate[k] = zip[k]; }
+				return negate;
 			})();
 
   if (typeof module !== "undefined" && module.exports) module.exports = main;

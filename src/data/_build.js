@@ -103,7 +103,7 @@ function generateLanguage(lang) {
 			},
 			replBase: function(a,s,r){
 				if (typeof a === 'undefined') return null;
-				var _s = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2));
+				var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));
 				return [a[0], ((s instanceof Array) ? helpFns.repl(_s, s, r) : _s) ];
 			}
 		};
@@ -160,7 +160,7 @@ function generateLanguage(lang) {
 	var baseRepl = function(w, iStr) { 
 		var w = w.replace(iStr, '=');
 		var iSl = iStr.slice(0,-2);
-		return (iSl === '') ? w : w.replace(iSl, '_'); 
+		return (iSl === '') ? w : w.replace(iSl, '<'); 
 	}
 	
 	var allPossible = function() { 
@@ -337,7 +337,7 @@ function generateLanguage(lang) {
 					var obj = {};
 					var r = function(s) {return s;}
 					a.forEach(function(s, i) {
-						if (s && i > 0) s = s.replace('=',a[0]).replace('_', a[0].slice(0,-2));
+						if (s && i > 0) s = s.replace('=',a[0]).replace('<', a[0].slice(0,-2));
 						if (s) s = helpFns.repl(s, ['&', '_', '#'], ['ing', 'er', 've']);
 						if (i > 3 && !s) {
 							main.noDoers[r(a[0])] = 1;
@@ -494,7 +494,7 @@ function generateLanguage(lang) {
 			// build
 			zip: function(lang) { 
 				return did(dict.JJ.words.filter(possibleRest).map(val).map(function(w) {
-					return helpFns.repl(w, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly'], [':', '&', '_', '#', '§', '!', '%', '>'/*, '<', '-'*/]);
+					return helpFns.repl(w, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly'], [':', '&', '_', '#', '§', '!', '%', '>']);
 				}));
 			},
 			unzip: function() {
@@ -664,7 +664,7 @@ function generateLanguage(lang) {
 				}
 				return res;
 			},
-			//convert it to an easier format
+			// convert it to an easier format
 			unzip: function() {
 				zip.particles = zip.particles.reduce(helpFns.toObj, {});
 				var c = zip.contractions;
@@ -676,25 +676,18 @@ function generateLanguage(lang) {
 		},
 		
 		{ // 16
-		// 
-		/* TODO : verbs_special.negate +
-		// + some logical ones work
-        "everyone": "no one",
-        "everybody": "nobody",
-        "someone": "no one",
-        "somebody": "nobody",
-        // everything:"nothing",
-        "always": "never",
-		*/
 			id: 'negateData',
 			description: '',
 			// build
 			zip: function(lang) { 
-				return 1;
+				return dict.negate.hasOwnProperty(lang) ? dict.negate[lang] : {};
 			},
 			//convert it to an easier format
 			unzip: function() {
-				return 1;
+				if (typeof module !== "undefined" && module.exports) var verbs_special = require('./verbs_special');
+				var negate = verbs_special.negate || {};
+				for (var k in zip) { negate[k] = zip[k]; }
+				return negate;
 			}
 		},
 		

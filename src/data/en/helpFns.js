@@ -13,7 +13,7 @@ var helpFns = (function() {
 			},
 			replBase: function(a,s,r){
 				if (typeof a === 'undefined') return null;
-				var _s = a[1].replace('=',a[0]).replace('_', a[0].slice(0,-2));
+				var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));
 				return [a[0], ((s instanceof Array) ? helpFns.repl(_s, s, r) : _s) ];
 			}
 		};

@@ -18,8 +18,8 @@ var zip = { cps:
      [ 'can', '=_' ],
      [ 'will', 'won_' ],
      [ 'must', '=n_' ],
-     [ 'shall', '_nt' ],
-     [ 'shall', '_n_' ] ] }; 
+     [ 'shall', '<nt' ],
+     [ 'shall', '<n_' ] ] }; 
 
   var main = (function () {
 				var res = {};
