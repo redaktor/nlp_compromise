@@ -795,7 +795,7 @@ function generateLanguage(lang) {
 			['conjugate','to_doer'].forEach(function(n) {
 				pm[n] = require('../../parents/verb/conjugate/' + n);
 			});
-			['to_adverb','to_superlative','to_comparative', 'convertables'].forEach(function(n) {
+			['to_adverb','to_superlative','to_comparative'].forEach(function(n) {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
