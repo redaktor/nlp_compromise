@@ -583,7 +583,7 @@ function generateLanguage(lang) {
 				var res = zip;
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthSearch + ',?'; 
+				res.monthsS = res.monthSearch + ',?';
 				return res;
 			}
 		},
