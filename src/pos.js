@@ -2,8 +2,6 @@ var pos = (function() {
   // 'use strict';
 
   if (typeof module !== 'undefined' && module.exports) {
-		//lexicon = require('./data/lexicon')
-    //values = require('./data/lexicon/values')
 		lexicon = require('../../../data/'+lang+'/lexicon');
     dates = require('../../../data/'+lang+'/dates');
     numbers = require('../../../data/'+lang+'/numbers');

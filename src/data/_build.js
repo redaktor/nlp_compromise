@@ -720,12 +720,14 @@ function generateLanguage(lang) {
 						['=', ':', '&', '_', '#', '~', '!', '%', '>', '<', ';', '@']
 					); 
 				}
-				var names = {};			
+				var names = {male: {}, female: {}, ambiguous: []};			
 				['male', 'female'].forEach(function(type) {
-					names[type] = {};
-					for (var k in name[type]) names[type][k] = replN(name[type][k]);
+					if (name[type].hasOwnProperty(lang)) {
+						names[type] = {};
+						for (var k in name[type][lang]) names[type][k] = replN(name[type][lang][k]);
+					}
 				});
-				names.ambiguous = name.ambiguous.map(replN);
+				if (name[type].hasOwnProperty(lang)) names.ambiguous = name.ambiguous[lang].map(replN);
 				return names;
 			},
 			//convert it to an easier format
