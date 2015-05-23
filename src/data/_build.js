@@ -727,7 +727,7 @@ function generateLanguage(lang) {
 						for (var k in name[type][lang]) names[type][k] = replN(name[type][lang][k]);
 					}
 				});
-				if (name[type].hasOwnProperty(lang)) names.ambiguous = name.ambiguous[lang].map(replN);
+				if (name.ambiguous.hasOwnProperty(lang)) names.ambiguous = name.ambiguous[lang].map(replN);
 				return names;
 			},
 			//convert it to an easier format

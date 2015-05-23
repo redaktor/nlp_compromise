@@ -280,17 +280,17 @@ var zip = { male:
 
   var main = (function () {
 				var replN = function(w) { return helpFns.repl(w, ['=', ':', '&', '_', '#', '~', '!', '%', '>', '<', ';', '@'], ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) }
-				var main = {};
+				var o = {};
 				['male', 'female'].forEach(function(type) {
 					for (var k in zip[type]) {
-						var arr = replN(zip[type][k]).split(',')
+						var arr = replN(zip[type][k]).split(',');
 						arr.forEach(function(w, i) {
-							main[k + w] = type.charAt(0);
+							o[k + w] = type.charAt(0);
 						})
 					}
 				});
-				zip.ambiguous.map(replN).reduce(function(h,s){ h[s]='a'; return h; }, main);
-				return main;
+				zip.ambiguous.map(replN).reduce(function(h,s){ h[s]='a'; return h; }, o);
+				return o;
 			})();
 
   if (typeof module !== "undefined" && module.exports) module.exports = main;
