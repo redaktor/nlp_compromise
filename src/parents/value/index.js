@@ -3,10 +3,10 @@ var Value = function(str, next, last, token) {
   var the = this
   the.word = str || '';
 
-  if (typeof module !== "undefined" && module.exports) {
-    to_number = require("./to_number")
-    date_extractor = require("./date_extractor")
-    parts_of_speech = require("../../data/parts_of_speech")
+  if (typeof module !== 'undefined' && module.exports) {
+		schema = require('../../data/'+lang+'/schema');
+    to_number = require('./to_number');
+    date_extractor = require('./date_extractor');
   }
 
   the.date = function(options) {
@@ -33,12 +33,12 @@ var Value = function(str, next, last, token) {
 
   the.which = (function() {
     if (the.date()) {
-      return parts_of_speech['DA']
+      return schema['DA']
     }
     if (the.number()) {
-      return parts_of_speech['NU']
+      return schema['NU']
     }
-    return parts_of_speech['CD']
+    return schema['CD']
   })()
 
   return the;

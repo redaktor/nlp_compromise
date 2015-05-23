@@ -7,10 +7,9 @@ var Verb = function(str, next, last, token) {
 
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
-    var parts_of_speech = require('../../data/parts_of_speech');
-		
-		var verbs_special = require('../../../data/'+lang+'/verbs_special');
-    var verb_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
+		schema = require('../../data/'+lang+'/schema');
+		verbs_special = require('../../data/'+lang+'/verbs_special');
+    verb_conjugate = require('../../data/'+lang+'/verbs_conjugate');
   }
 	
   var tenses = {
@@ -65,10 +64,10 @@ var Verb = function(str, next, last, token) {
 
   //the most accurate part_of_speech
   the.which = (function() {
-    if (verbs_special.cps[the.word]) return parts_of_speech['CP'];
-    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) return parts_of_speech['VBG'];
+    if (verbs_special.cps[the.word]) return schema['CP'];
+    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) return schema['VBG'];
     var form = the.form;
-    return parts_of_speech[tenses[form]];
+    return schema[tenses[form]];
   })()
 
   //is this verb negative already?

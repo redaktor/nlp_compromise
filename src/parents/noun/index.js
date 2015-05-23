@@ -10,14 +10,14 @@ var Noun = function(str, sentence, word_i) {
 
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
-    var parts_of_speech = require('../../data/parts_of_speech');
 		
-		var indefinite_article = require('./indefinite_article'); // TODO
-    var firstnames = require('../../data/lexicon/firstnames'); // TODO
+		schema = require('../../data/'+lang+'/schema');
+		indefinite_article = require('./indefinite_article'); // TODO
 		
-		var honourifics= require('../../../data/'+lang+'/honorifics');
-		var nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
-		var nouns = require('../../../data/'+lang+'/nouns');
+    firstnames = require('../../data/'+lang+'/firstnames');
+		honourifics = require('../../data/'+lang+'/honorifics');
+		nouns_inflect = require('../../data/'+lang+'/nouns_inflect');
+		nouns = require('../../data/'+lang+'/nouns');
   }
 	
   the.is_acronym = function() {
@@ -204,14 +204,14 @@ var Noun = function(str, sentence, word_i) {
   the.which = (function() {
     // posessive
     if (the.word.match(/'s$/)) {
-      return parts_of_speech['NNO']
+      return schema['NNO']
     }
     // plural
     // if (the.is_plural) {
-    //   return parts_of_speech['NNS']
+    //   return schema['NNS']
     // }
     // generic
-    return parts_of_speech['NN']
+    return schema['NN']
   })()
 
   return the;

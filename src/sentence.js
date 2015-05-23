@@ -62,7 +62,7 @@ var Sentence = function(tokens) {
     // ('none' is ambiguous because it could mean (all or some) )
     //loop through each term..
     for (var i = 0; i < the.tokens.length; i++) {
-			if (typeof module !== 'undefined' && module.exports) negate_data = require('../../../data/'+lang+'/negate_data');
+			if (typeof module !== 'undefined' && module.exports) negate_data = require('./data/'+lang+'/negate_data');
       var tok = the.tokens[i];
       //turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
       if (negate_data[tok.normalised] && (!the.tokens[i + 1] || the.tokens[i + 1].normalised != "not")) {

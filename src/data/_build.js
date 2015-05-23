@@ -34,6 +34,7 @@ var fs = require('fs');
 var path = require('path');
 var util = require('util');
 
+var schema = require('./_dictionarySchema');
 var dict = require('./_dictionary');
 var name = require('./_dictionaryNamed');
 var nodeExportStr = '\n  if (typeof module !== "undefined" && module.exports) module.exports = main;';
@@ -685,7 +686,7 @@ function generateLanguage(lang) {
 			zip: function(lang) { 
 				return dict.negate.hasOwnProperty(lang) ? dict.negate[lang] : {};
 			},
-			//convert it to an easier format
+			// convert it to an easier format
 			unzip: function() {
 				if (typeof module !== "undefined" && module.exports) var verbs_special = require('./verbs_special');
 				var negate = verbs_special.negate || {};
@@ -701,7 +702,7 @@ function generateLanguage(lang) {
 			zip: function(lang) { 
 				return dict.unambiguousSuffixes[lang];
 			},
-			//convert it to an easier format
+			// convert it to an easier format
 			unzip: function() {
 				return Object.keys(zip).reduce(function(h, k) {
 					zip[k].forEach(function(w) { h[w] = k; });
@@ -730,7 +731,7 @@ function generateLanguage(lang) {
 				if (name.ambiguous.hasOwnProperty(lang)) names.ambiguous = name.ambiguous[lang].map(replN);
 				return names;
 			},
-			//convert it to an easier format
+			// convert it to an easier format
 			unzip: function() {
 				var replN = function(w) { return helpFns.repl(w, ['=', ':', '&', '_', '#', '~', '!', '%', '>', '<', ';', '@'], ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) }
 				var o = {};
@@ -745,7 +746,38 @@ function generateLanguage(lang) {
 				zip.ambiguous.map(replN).reduce(function(h,s){ h[s]='a'; return h; }, o);
 				return o;
 			}
+		},
+		
+		{ // 19
+			id: 'schema',
+			description: '',
+			// compress
+			zip: function(lang) {
+				var o = {parents: [], tags: []};
+				for (var tag in schema) {
+					var name = schema[tag].hasOwnProperty(lang) ? schema[tag][lang] : schema[tag].en;
+					var pPos = o.parents.indexOf(schema[tag].parent);
+					if (pPos < 0) {
+						o.parents.push(schema[tag].parent);
+						pPos = o.parents.length-1;
+					}
+					var a = [tag, name, pPos];
+					if (schema[tag].hasOwnProperty('tense')) a.push(schema[tag].tense);
+					o.tags.push(a);
+				}
+				return o;
+			},
+			// expand
+			unzip: function() {
+				var res = {};
+				zip.tags.forEach(function(a) {
+					res[a[0]] = { name:a[1], parent:zip.parents[a[2]], tag:a[0] };
+					if (a.length > 3) res[a[0]].tense = a[3];
+				});
+				return res;
+			}
 		}
+		
 	];
 	
 	var _generateLexi = function() {

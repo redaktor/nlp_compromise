@@ -6,8 +6,8 @@ var Adverb = function(str, next, last, token) {
   the.last = last
 
   if (typeof module !== "undefined" && module.exports) {
-    to_adjective = require("./conjugate/to_adjective")
-    parts_of_speech = require("../../data/parts_of_speech")
+    to_adjective = require("./conjugate/to_adjective");
+		schema = require('../../data/'+lang+'/schema');
   }
 
   the.conjugate = function() {
@@ -18,12 +18,12 @@ var Adverb = function(str, next, last, token) {
 
   the.which = (function() {
     if (the.word.match(/..est$/)) {
-      return parts_of_speech['RBS']
+      return schema['RBS']
     }
     if (the.word.match(/..er$/)) {
-      return parts_of_speech['RBR']
+      return schema['RBR']
     }
-    return parts_of_speech['RB']
+    return schema['RB']
   })()
 
   return the;

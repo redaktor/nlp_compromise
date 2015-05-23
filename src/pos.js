@@ -2,20 +2,20 @@ var pos = (function() {
   // 'use strict';
 
   if (typeof module !== 'undefined' && module.exports) {
-		lexicon = require('../../../data/'+lang+'/lexicon');
-    dates = require('../../../data/'+lang+'/dates');
-    numbers = require('../../../data/'+lang+'/numbers');
-    firstnames = require('../../../data/'+lang+'/firstnames');
+		lexicon = require('./data/'+lang+'/lexicon');
+    dates = require('./data/'+lang+'/dates');
+    numbers = require('./data/'+lang+'/numbers');
+    firstnames = require('./data/'+lang+'/firstnames');
 		// .particles (possible 2nd part in a phrasal verb) and .contractions:
-		pos_data = require('../../../data/'+lang+'/pos_data');
+		pos_data = require('./data/'+lang+'/pos_data');
 				
-    wordnet_suffixes = require('../../../data/'+lang+'/unambiguousSuffixes');
-    parts_of_speech = require('./data/parts_of_speech')
-    word_rules = require('./data/word_rules')
+    wordnet_suffixes = require('./data/'+lang+'/unambiguousSuffixes');
+		schema = require('./data/'+lang+'/schema');
+    word_rules = require('./data/word_rules'); // TODO
     tokenize = require('./methods/tokenization/tokenize').tokenize;
-    Sentence = require('./sentence')
-    Section = require('./section')
-    parents = require('./parents/parents')
+    Sentence = require('./sentence');
+    Section = require('./section');
+    parents = require('./parents/parents');
   }
 	
 	var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
@@ -50,7 +50,7 @@ var pos = (function() {
         else if ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')) {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
-          arr[i + 1].pos= parts_of_speech['NNP']
+          arr[i + 1].pos= schema['NNP']
         }
         //merge dates manually, which often have punctuation
         else if (tag === 'CD' && next.pos.tag ==='CD') {
@@ -121,19 +121,19 @@ var pos = (function() {
 
   var lexicon_pass = function(w) {
     if (lexicon.hasOwnProperty(w)) {
-      return parts_of_speech[lexicon[w]]
+      return schema[lexicon[w]]
     }
     //try to match it without a prefix - eg. outworked -> worked
     if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
       var attempt = w.replace(/^(over|under|out|.*?-|un|re|en)/, '')
-      return parts_of_speech[lexicon[attempt]]
+      return schema[lexicon[attempt]]
     }
   }
 
   var rules_pass = function(w) {
     for (var i = 0; i < word_rules.length; i++) {
       if (w.length> 4 && w.match(word_rules[i].reg)) {
-        return parts_of_speech[word_rules[i].pos]
+        return schema[word_rules[i].pos]
       }
     }
   }
@@ -148,58 +148,58 @@ var pos = (function() {
       }
     //resolve ambiguous 'march','april','may' with dates
     if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
-      token.pos = parts_of_speech['CD']
+      token.pos = schema['CD']
       token.pos_reason = 'may_is_date'
     }
       //if it's before a modal verb, it's a noun -> lkjsdf would
     if (next && token.pos.parent !== 'noun' && token.pos.parent !== 'glue' && next.pos.tag === 'MD') {
-      token.pos = parts_of_speech['NN']
+      token.pos = schema['NN']
       token.pos_reason = 'before_modal'
     }
     //if it's after the word 'will' its probably a verb/adverb
     if (last && last.normalised == 'will' && !last.punctuated && token.pos.parent == 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP') {
-      token.pos = parts_of_speech['VB']
+      token.pos = schema['VB']
       token.pos_reason = 'after_will'
     }
     //if it's after the word 'i' its probably a verb/adverb
     if (last && last.normalised == 'i' && !last.punctuated && token.pos.parent == 'noun') {
-      token.pos = parts_of_speech['VB']
+      token.pos = schema['VB']
       token.pos_reason = 'after_i'
     }
     //if it's after an adverb, it's not a noun -> quickly acked
     //support form 'atleast he is..'
     if (last && token.pos.parent === 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP' && last.pos.tag === 'RB' && !last.start) {
-      token.pos = parts_of_speech['VB']
+      token.pos = schema['VB']
       token.pos_reason = 'after_adverb'
     }
     //no consecutive, unpunctuated adjectives -> real good
     if (next && token.pos.parent === 'adjective' && next.pos.parent === 'adjective' && !token.punctuated) {
-      token.pos = parts_of_speech['RB']
+      token.pos = schema['RB']
       token.pos_reason = 'consecutive_adjectives'
     }
     //if it's after a determiner, it's not a verb -> the walk
     if (last && token.pos.parent === 'verb' && strong_determiners[last.pos.normalised] && token.pos.tag != 'CP') {
-      token.pos = parts_of_speech['NN']
+      token.pos = schema['NN']
       token.pos_reason = 'determiner-verb'
     }
     //copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
     if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
-      token.pos = parts_of_speech['JJ']
+      token.pos = schema['JJ']
       token.pos_reason = 'copula-adjective'
     }
     //copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
     if (last && next && last.pos.tag === 'CP' && token.pos.tag === 'RB' && next.pos.parent === 'verb') {
-      sentence.tokens[i + 1].pos = parts_of_speech['JJ']
+      sentence.tokens[i + 1].pos = schema['JJ']
       sentence.tokens[i + 1].pos_reason = 'copula-adverb-adjective'
     }
     // the city [verb] him.
     if (next && next.pos.tag == 'PRP' && token.pos.tag !== 'PP' && token.pos.parent == 'noun' && !token.punctuated) {
-      token.pos = parts_of_speech['VB']
+      token.pos = schema['VB']
       token.pos_reason = 'before_[him|her|it]'
     }
     //the misled worker -> misled is an adjective, not vb
     if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
-      token.pos = parts_of_speech['JJ']
+      token.pos = schema['JJ']
       token.pos_reason = 'determiner-adjective-noun'
     }
 
@@ -256,7 +256,7 @@ var pos = (function() {
       sentence.tokens = sentence.tokens.map(function(token) {
         //it has a capital and isn't a month, etc.
         if (token.noun_capital && !values[token.normalised]) {
-          token.pos = parts_of_speech['NN']
+          token.pos = schema['NN']
           token.pos_reason = 'noun_capitalised'
           return token
         }
@@ -274,7 +274,7 @@ var pos = (function() {
 
         //handle punctuation like ' -- '
         if (!token.normalised) {
-          token.pos = parts_of_speech['UH']
+          token.pos = schema['UH']
           token.pos_reason = 'wordless_string'
           return token
         }
@@ -284,7 +284,7 @@ var pos = (function() {
         if (len > 4) {
           var suffix = token.normalised.substr(len - 4, len - 1)
           if (wordnet_suffixes.hasOwnProperty(suffix)) {
-            token.pos = parts_of_speech[wordnet_suffixes[suffix]]
+            token.pos = schema[wordnet_suffixes[suffix]]
             token.pos_reason = 'wordnet suffix'
             return token
           }
@@ -300,7 +300,7 @@ var pos = (function() {
 
         //see if it's a number
         if (parseFloat(token.normalised)) {
-          token.pos = parts_of_speech['CD']
+          token.pos = schema['CD']
           token.pos_reason = 'parsefloat'
           return token
         }
@@ -312,7 +312,7 @@ var pos = (function() {
       sentence.tokens = sentence.tokens.map(function(token, i) {
         //set ambiguous 'ed' endings as either verb/adjective
         if ( token.pos_reason!=='lexicon' && token.normalised.match(/.ed$/)) {
-          token.pos = parts_of_speech['VB']
+          token.pos = schema['VB']
           token.pos_reason = 'ed'
         }
         return token
@@ -342,14 +342,14 @@ var pos = (function() {
         if (token.pos) {
           if (need == 'verb' && token.pos.parent == 'noun' && (!next || (next.pos && next.pos.parent != 'noun'))) {
             if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-              token.pos = parts_of_speech['VB']
+              token.pos = schema['VB']
               token.pos_reason = 'signal from ' + reason
               need = null
             }
           }
           if (need == 'noun' && token.pos.parent == 'verb' && (!next || (next.pos && next.pos.parent != 'verb'))) {
             if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-              token.pos = parts_of_speech['NN']
+              token.pos = schema['NN']
               token.pos_reason = 'signal from ' + reason
               need = null
             }
@@ -358,7 +358,7 @@ var pos = (function() {
         //satisfy need with an unknown pos
         if (need && !token.pos) {
           if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-            token.pos = parts_of_speech[need]
+            token.pos = schema[need]
             token.pos_reason = 'signal from ' + reason
             need = null
           }
@@ -384,14 +384,14 @@ var pos = (function() {
         if (!token.pos) {
           //if there is no verb in the sentence, and there needs to be.
           if (has['adjective'] && has['noun'] && !has['verb']) {
-            token.pos = parts_of_speech['VB']
+            token.pos = schema['VB']
             token.pos_reason = 'need one verb'
             has['verb'] = true
             return token
           }
 
           //fallback to a noun
-          token.pos = parts_of_speech['NN']
+          token.pos = schema['NN']
           token.pos_reason = 'noun fallback'
         }
         return token

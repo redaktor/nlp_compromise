@@ -3,197 +3,197 @@ var parts_of_speech = (function() {
 
   var main = {
     //verbs
-    "VB": {
-      "name": "verb, generic",
-      "parent": "verb",
-      "tag": "VB"
+    VB: {
+      'name': 'verb, generic',
+      'parent': 'verb',
+      'tag': 'VB'
     },
-    "VBD": {
-      "name": "past-tense verb",
-      "parent": "verb",
-      "tense": "past",
-      "tag": "VBD"
+    VBD: {
+      'name': 'past-tense verb',
+      'parent': 'verb',
+      'tense': 'past',
+      'tag': 'VBD'
     },
-    "VBN": {
-      "name": "past-participle verb",
-      "parent": "verb",
-      "tense": "past",
-      "tag": "VBN"
+    VBN: {
+      'name': 'past-participle verb',
+      'parent': 'verb',
+      'tense': 'past',
+      'tag': 'VBN'
     },
-    "VBP": {
-      "name": "infinitive verb",
-      "parent": "verb",
-      "tense": "present",
-      "tag": "VBP"
+    VBP: {
+      'name': 'infinitive verb',
+      'parent': 'verb',
+      'tense': 'present',
+      'tag': 'VBP'
     },
-    "VBF": {
-      "name": "future-tense verb",
-      "parent": "verb",
-      "tense": "future",
-      "tag": "VBF"
+    VBF: {
+      'name': 'future-tense verb',
+      'parent': 'verb',
+      'tense': 'future',
+      'tag': 'VBF'
     },
-    "VBZ": {
-      "name": "present-tense verb",
-      "tense": "present",
-      "parent": "verb",
-      "tag": "VBZ"
+    VBZ: {
+      'name': 'present-tense verb',
+      'tense': 'present',
+      'parent': 'verb',
+      'tag': 'VBZ'
     },
-    "CP": {
-      "name": "copula",
-      "parent": "verb",
-      "tag": "CP"
+    CP: {
+      'name': 'copula',
+      'parent': 'verb',
+      'tag': 'CP'
     },
-    "VBG": {
-      "name": "gerund verb",
-      "parent": "verb",
-      "tag": "VBG"
+    VBG: {
+      'name': 'gerund verb',
+      'parent': 'verb',
+      'tag': 'VBG'
     },
 
     //adjectives
-    "JJ": {
-      "name": "adjective, generic",
-      "parent": "adjective",
-      "tag": "JJ"
+    JJ: {
+      'name': 'adjective, generic',
+      'parent': 'adjective',
+      'tag': 'JJ'
     },
-    "JJR": {
-      "name": "comparative adjective",
-      "parent": "adjective",
-      "tag": "JJR"
+    JJR: {
+      'name': 'comparative adjective',
+      'parent': 'adjective',
+      'tag': 'JJR'
     },
-    "JJS": {
-      "name": "superlative adjective",
-      "parent": "adjective",
-      "tag": "JJS"
+    JJS: {
+      'name': 'superlative adjective',
+      'parent': 'adjective',
+      'tag': 'JJS'
     },
 
     //adverbs
-    "RB": {
-      "name": "adverb",
-      "parent": "adverb",
-      "tag": "RB"
+    RB: {
+      'name': 'adverb',
+      'parent': 'adverb',
+      'tag': 'RB'
     },
-    "RBR": {
-      "name": "comparative adverb",
-      "parent": "adverb",
-      "tag": "RBR"
+    RBR: {
+      'name': 'comparative adverb',
+      'parent': 'adverb',
+      'tag': 'RBR'
     },
-    "RBS": {
-      "name": "superlative adverb",
-      "parent": "adverb",
-      "tag": "RBS"
+    RBS: {
+      'name': 'superlative adverb',
+      'parent': 'adverb',
+      'tag': 'RBS'
     },
 
     //nouns
-    "NN": {
-      "name": "noun, generic",
-      "parent": "noun",
-      "tag": "NN"
+    NN: {
+      'name': 'noun, generic',
+      'parent': 'noun',
+      'tag': 'NN'
     },
-    "NNP": {
-      "name": "singular proper noun",
-      "parent": "noun",
-      "tag": "NNP"
+    NNP: {
+      'name': 'singular proper noun',
+      'parent': 'noun',
+      'tag': 'NNP'
     },
-    "NNA": {
-      "name": "noun, active",
-      "parent": "noun",
-      "tag": "NNA"
+    NNA: {
+      'name': 'noun, active',
+      'parent': 'noun',
+      'tag': 'NNA'
     },
-    "NNPA": {
-      "name": "noun, acronym",
-      "parent": "noun",
-      "tag": "NNPA"
+    NNPA: {
+      'name': 'noun, acronym',
+      'parent': 'noun',
+      'tag': 'NNPA'
     },
-    "NNPS": {
-      "name": "plural proper noun",
-      "parent": "noun",
-      "tag": "NNPS"
+    NNPS: {
+      'name': 'plural proper noun',
+      'parent': 'noun',
+      'tag': 'NNPS'
     },
-    "NNAB": {
-      "name": "noun, abbreviation",
-      "parent": "noun",
-      "tag": "NNAB"
+    NNAB: {
+      'name': 'noun, abbreviation',
+      'parent': 'noun',
+      'tag': 'NNAB'
     },
-    "NNS": {
-      "name": "plural noun",
-      "parent": "noun",
-      "tag": "NNS"
+    NNS: {
+      'name': 'plural noun',
+      'parent': 'noun',
+      'tag': 'NNS'
     },
-    "NNO": {
-      "name": "possessive noun",
-      "parent": "noun",
-      "tag": "NNO"
+    NNO: {
+      'name': 'possessive noun',
+      'parent': 'noun',
+      'tag': 'NNO'
     },
-    "NNG": {
-      "name": "gerund noun",
-      "parent": "noun",
-      "tag": "VBG"
+    NNG: {
+      'name': 'gerund noun',
+      'parent': 'noun',
+      'tag': 'VBG'
     },
 
     //glue
-    "PP": {
-      "name": "possessive pronoun",
-      "parent": "glue",
-      "tag": "PP"
+    PP: {
+      'name': 'possessive pronoun',
+      'parent': 'glue',
+      'tag': 'PP'
     },
-    "FW": {
-      "name": "foreign word",
-      "parent": "glue",
-      "tag": "FW"
+    FW: {
+      'name': 'foreign word',
+      'parent': 'glue',
+      'tag': 'FW'
     },
-    "CD": {
-      "name": "cardinal value, generic",
-      "parent": "value",
-      "tag": "CD"
+    CD: {
+      'name': 'cardinal value, generic',
+      'parent': 'value',
+      'tag': 'CD'
     },
-    "DA": {
-      "name": "date",
-      "parent": "value",
-      "tag": "DA"
+    DA: {
+      'name': 'date',
+      'parent': 'value',
+      'tag': 'DA'
     },
-    "NU": {
-      "name": "number",
-      "parent": "value",
-      "tag": "NU"
+    NU: {
+      'name': 'number',
+      'parent': 'value',
+      'tag': 'NU'
     },
-    "IN": {
-      "name": "preposition",
-      "parent": "glue",
-      "tag": "IN"
+    IN: {
+      'name': 'preposition',
+      'parent': 'glue',
+      'tag': 'IN'
     },
-    "MD": {
-      "name": "modal verb",
-      "parent": "verb", //dunno
-      "tag": "MD"
+    MD: {
+      'name': 'modal verb',
+      'parent': 'verb', //dunno
+      'tag': 'MD'
     },
-    "CC": {
-      "name": "co-ordating conjunction",
-      "parent": "glue",
-      "tag": "CC"
+    CC: {
+      'name': 'co-ordating conjunction',
+      'parent': 'glue',
+      'tag': 'CC'
     },
-    "PRP": {
-      "name": "personal pronoun",
-      "parent": "noun",
-      "tag": "PRP"
+    PRP: {
+      'name': 'personal pronoun',
+      'parent': 'noun',
+      'tag': 'PRP'
     },
-    "DT": {
-      "name": "determiner",
-      "parent": "glue",
-      "tag": "DT"
+    DT: {
+      'name': 'determiner',
+      'parent': 'glue',
+      'tag': 'DT'
     },
-    "UH": {
-      "name": "interjection",
-      "parent": "glue",
-      "tag": "UH"
+    UH: {
+      'name': 'interjection',
+      'parent': 'glue',
+      'tag': 'UH'
     },
-    "EX": {
-      "name": "existential there",
-      "parent": "glue",
-      "tag": "EX"
+    EX: {
+      'name': 'existential there',
+      'parent': 'glue',
+      'tag': 'EX'
     }
   }
 
-  if (typeof module !== "undefined" && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = main;
   }
 
