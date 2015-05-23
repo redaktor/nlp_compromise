@@ -39,9 +39,9 @@ var zip = { months:
 
   var main = (function () {
 				var res = zip;
-				res.rDaySearch = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
-				res.rMonthSearch = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.rMonths = res.monthSearch + ',?'; // TODO - this isn't really cross language
+				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
+				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
+				res.monthsS = res.monthSearch + ',?';
 				return res;
 			})();
 

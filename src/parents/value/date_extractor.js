@@ -1,10 +1,10 @@
-// #generates properly-formatted dates from free-text date forms
-// #by spencer kelly 2014
+// generates properly-formatted dates from free-text date forms
+// by spencer kelly 2014
 
 var date_extractor = (function() {
-  var months = "(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|aug|sept|oct|nov|dec),?";
-  var days = "([0-9]{1,2}),?";
-  var years = "([12][0-9]{3})";
+	if (typeof module !== 'undefined' && module.exports) dates = require('../../data/'+lang+'/dates');
+  var days = '([0-9]{1,2}),?';
+  var years = '([12][0-9]{3})';
 
   var to_obj = function(arr, places) {
     return Object.keys(places).reduce(function(h, k) {
@@ -14,8 +14,8 @@ var date_extractor = (function() {
   }
 
   var regexes = [{
-    reg: String(months) + " " + String(days) + "-" + String(days) + " " + String(years),
-    example: "March 7th-11th 1987",
+    reg: dates.monthsS + ' ' + days + '-' + days + ' ' + years,
+    //example: 'March 7th-11th 1987',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -29,8 +29,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + String(months) + " to " + String(days) + " of " + String(months) + " " + String(years),
-    example: "28th of September to 5th of October 2008",
+    reg: days + ' of ' + dates.monthsS + ' to ' + days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '28th of September to 5th of October 2008',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -45,8 +45,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(days) + " to " + String(months) + " " + String(days) + " " + String(years),
-    example: "March 7th to june 11th 1987",
+    reg: dates.monthsS + ' ' + days + ' to ' + dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'March 7th to june 11th 1987',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -62,8 +62,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: "between " + String(days) + " " + String(months) + " and " + String(days) + " " + String(months) + " " + String(years),
-    example: "between 13 February and 15 February 1945",
+    reg: 'between ' + days + ' ' + dates.monthsS + ' and ' + days + ' ' + dates.monthsS + ' ' + years,
+    //example: 'between 13 February and 15 February 1945',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -79,8 +79,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: "between " + String(months) + " " + String(days) + " and " + String(months) + " " + String(days) + " " + String(years),
-    example: "between March 7th and june 11th 1987",
+    reg: 'between ' + dates.monthsS + ' ' + days + ' and ' + dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'between March 7th and june 11th 1987',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -96,8 +96,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(days) + " " + String(years),
-    example: "March 1st 1987",
+    reg: dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'March 1st 1987',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -110,8 +110,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " - " + String(days) + " of " + String(months) + " " + String(years),
-    example: "3rd - 5th of March 1969",
+    reg: days + ' - ' + days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '3rd - 5th of March 1969',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -125,8 +125,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + String(months) + " " + String(years),
-    example: "3rd of March 1969",
+    reg: days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '3rd of March 1969',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -139,8 +139,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + years + ",? to " + String(months) + " " + String(years),
-    example: "September 1939 to April 1945",
+    reg: dates.monthsS + ' ' + years + ',? to ' + dates.monthsS + ' ' + years,
+    //example: 'September 1939 to April 1945',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -154,8 +154,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(years),
-    example: "March 1969",
+    reg: dates.monthsS + ' ' + years,
+    //example: 'March 1969',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -167,8 +167,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + days,
-    example: "March 18th",
+    reg: dates.monthsS + ' ' + days,
+    //example: 'March 18th',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -180,8 +180,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + months,
-    example: "18th of March",
+    reg: days + ' of ' + dates.monthsS,
+    //example: '18th of March',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -193,8 +193,8 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: years + " ?- ?" + String(years),
-    example: "1997-1998",
+    reg: years + ' ?- ?' + years,
+    //example: '1997-1998',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -207,7 +207,7 @@ var date_extractor = (function() {
     }
   }, {
     reg: years,
-    example: "1998",
+    //example: '1998',
     process: function(arr) {
       if (!arr) {
         arr = [];
@@ -218,35 +218,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }].map(function(o) {
-    o.reg = new RegExp(o.reg, "g");
+    o.reg = new RegExp(o.reg, 'g');
     return o;
   });
 
   //0 based months, 1 based days...
-  var months_obj = {
-    january: 0,
-    february: 1,
-    march: 2,
-    april: 3,
-    may: 4,
-    june: 5,
-    july: 6,
-    august: 7,
-    september: 8,
-    october: 9,
-    november: 10,
-    december: 11,
-    jan: 0,
-    feb: 1,
-    mar: 2,
-    apr: 3,
-    aug: 7,
-    sept: 8,
-    oct: 9,
-    nov: 10,
-    dec: 11
-  };
-
   //thirty days hath september...
   var last_dates = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -264,8 +240,8 @@ var date_extractor = (function() {
     obj.day = parseInt(obj.day, 10) || undefined;
     obj.to_day = parseInt(obj.to_day, 10) || undefined;
     obj.to_year = parseInt(obj.to_year, 10) || undefined;
-    obj.month = months_obj[obj.month];
-    obj.to_month = months_obj[obj.to_month];
+    obj.month = dates.months[obj.month];
+    obj.to_month = dates.months[obj.to_month];
     //swap to_month and month
     if (obj.to_month !== undefined && obj.month === undefined) {
       obj.month = obj.to_month;
@@ -333,7 +309,7 @@ var date_extractor = (function() {
     return {};
   };
 
-  //pass through sequence of regexes until tempate is matched..
+  //pass through sequence of regexes until template is matched..
   var main = function(str, options) {
     options = options || {};
     str = preprocess(str)
@@ -342,7 +318,7 @@ var date_extractor = (function() {
     for(var i=0; i<l; i+=1){
       obj=regexes[i]
       if (str.match(obj.reg)) {
-        clone_reg=new RegExp(obj.reg.source,"i");//this avoids a memory-leak
+        clone_reg=new RegExp(obj.reg.source,'i');//this avoids a memory-leak
         arr = clone_reg.exec(str);
         good = obj.process(arr);
         return postprocess(good, options);
@@ -351,12 +327,12 @@ var date_extractor = (function() {
   };
 
   //export modules
-  if (typeof module !== "undefined" && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = main;
   }
   return main;
 
 })();
 
-// console.log(date_extractor("1998"))
-// console.log(date_extractor("1999"))
+// console.log(date_extractor('1998'))
+// console.log(date_extractor('1999'))
