@@ -27,6 +27,9 @@
 
 // please see the following capitalized "note tags": TODO, DOC, FIXME
 /* TODO
+
+We MUST know the gender of each noun for several other languages !
+
 Useful would be an option to either disable 'last' and 'next' in the tokens -
 OR a customized toJSON method (used automatically by JSON.parse ...) :
 'last' and 'next' create a Circular and thus the object can't become a JSON ...

@@ -1,10 +1,10 @@
 // wrapper for noun's methods
 var Noun = function(str, sentence, word_i) {
-  var the = this
+  var the = this;
   var token, next;
   if(sentence!==undefined && word_i!==undefined){
-    token=sentence.tokens[word_i]
-    next=sentence.tokens[word_i+i]
+    token=sentence.tokens[word_i];
+    next=sentence.tokens[word_i+i];
   }
   the.word = str || '';
 
@@ -77,7 +77,7 @@ var Noun = function(str, sentence, word_i) {
     return nouns_inflect.singularize(the.word);
   }
 
-  //uses common first-name list + honourifics to guess if this noun is the name of a person
+  // uses common first-name list + honourifics to guess if this noun is the name of a person
   the.is_person = function() {
     var i;
     //remove things that are often named after people
@@ -102,80 +102,70 @@ var Noun = function(str, sentence, word_i) {
     return false;
   }
 
-  //decides if it deserves a he, she, they, or it
+  // decides if it deserves a he, she, they, or it
   the.pronoun = function(){
     //if it's a person try to classify male/female
     if(the.is_person()){
+			var nameType = function(t) { return (firstnames[names[0]]===t || firstnames[names[1]]==t); }
       var names=the.word.split(' ').map(function(a){
-        return a.toLowerCase()
+        return a.toLowerCase();
       })
-      if(firstnames[names[0]]==='m' || firstnames[names[1]]=='m'){
-        return 'he'
-      }
-      if(firstnames[names[0]]==='f' || firstnames[names[1]]=='f' ){
-        return 'she'
-      }
+      if( nameType('m')) return 'he';
+      if (nameType('f')) return 'she';
       //test some honourifics
-      if(the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')){
-        return 'she'
-      }
-      if(the.word.match(/\b(mr|mister|sr|jr)\b/,'i')){
-        return 'he'
-      }
+      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) return 'she';
+      if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) return 'he';
       //if it's a known unisex name, don't try guess it. be safe.
-      if(firstnames[names[0]]==='a' || firstnames[names[1]]=='a' ){
-        return 'they'
-      }
+      if(nameType('a')) return 'they';
       //if we think it's a person, but still don't know the gender, do a little guessing
-      if(names[0].match(/[aeiy]$/)){//if it ends in a 'ee or ah', female
-        return 'she'
-      }
-      if(names[0].match(/[ou]$/)){//if it ends in a 'oh or uh', male
-        return 'he'
-      }
-      if(names[0].match(/(nn|ll|tt)/)){//if it has double-consonants, female
-        return 'she'
+			//if it ends in a 'ee or ah', female
+      if (names[0].match(/[aeiy]$/)) return 'she';
+			//if it ends in a 'oh or uh', male
+      if (names[0].match(/[ou]$/)) return 'he';
+      //if it has double-consonants, female
+      if(names[0].match(/(nn|ll|tt)/)){
+        return 'she';
       }
       //fallback to 'singular-they'
-      return 'they'
+      return 'they';
     }
 
     //not a person
     if(the.is_plural()){
-      return 'they'
+      return 'they';
     }
 
-    return 'it'
+    return 'it';
   }
 
   //list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
   the.referenced_by = function() {
     //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
     if(token && token.pos.tag!=="PRP" && token.pos.tag!=="PP"){
-      var prp=the.pronoun()
+      var prp=the.pronoun();
       //look at rest of sentence
-      var interested=sentence.tokens.slice(word_i+1, sentence.tokens.length)
+      var interested=sentence.tokens.slice(word_i+1, sentence.tokens.length);
       //add next sentence too, could go further..
       if(sentence.next){
-        interested=interested.concat(sentence.next.tokens)
+        interested=interested.concat(sentence.next.tokens);
       }
       //find the matching pronouns, and break if another noun overwrites it
-      var matches=[]
+      var matches=[];
       for(var i=0; i<interested.length; i++){
         if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)){
           //this pronoun points at our noun
-          matches.push(interested[i])
+          matches.push(interested[i]);
         }else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp){
           //this posessive pronoun ('his/her') points at our noun
-          matches.push(interested[i])
+          matches.push(interested[i]);
         }else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp){
           //this noun stops our further pursuit
-          break
+          break;
         }
       }
-      return matches
+      return matches;
     }
-    return []
+    return [];
   }
 
   // a pronoun that points at a noun mentioned previously '[he] is nice'
@@ -203,22 +193,18 @@ var Noun = function(str, sentence, word_i) {
   // specifically which pos it is
   the.which = (function() {
     // posessive
-    if (the.word.match(/'s$/)) {
-      return schema['NNO']
-    }
+    if (the.word.match(/'s$/)) return schema['NNO'];
     // plural
     // if (the.is_plural) {
     //   return schema['NNS']
     // }
     // generic
-    return schema['NN']
+    return schema['NN'];
   })()
 
   return the;
 }
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Noun;
-}
+if (typeof module !== 'undefined' && module.exports) module.exports = Noun;
 
 // console.log(new Noun('farmhouse').is_entity())
 // console.log(new Noun('FBI').is_acronym())

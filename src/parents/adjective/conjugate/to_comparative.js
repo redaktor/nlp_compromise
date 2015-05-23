@@ -62,7 +62,6 @@ var to_comparative = (function() {
       }
     }
 
-
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
         return str + 'er';

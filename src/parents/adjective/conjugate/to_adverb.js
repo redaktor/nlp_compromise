@@ -46,9 +46,7 @@ var adj_to_adv = (function() {
 		
     var i;
     for (i = 0; i < not_matches.length; i++) {
-      if (str.match(not_matches[i])) {
-        return null;
-      }
+      if (str.match(not_matches[i])) return null;
     }
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
@@ -58,9 +56,7 @@ var adj_to_adv = (function() {
     return str + 'ly';
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = main;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
   return main;
 })();
 

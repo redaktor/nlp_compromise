@@ -1,7 +1,7 @@
 //a section is a block of text, with an arbitrary number of sentences
 //these methods are just wrappers around the ones in sentence.js
 var Section = function(sentences) {
-  var the = this
+  var the = this;
   the.sentences = sentences || [];
 
   the.text = function() {
@@ -106,6 +106,4 @@ var Section = function(sentences) {
   }
 
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Section;
-}
+if (typeof module !== 'undefined' && module.exports) module.exports = Section;

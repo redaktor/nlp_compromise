@@ -21,23 +21,19 @@ var verb_to_doer = (function() {
       'repl': '$1tter'
     }]
 
-    if (verbs_conjugate.noDoers.hasOwnProperty(str)) {
-      return null
-    }
+    if (verbs_conjugate.noDoers.hasOwnProperty(str)) return null;
     if (verbs_conjugate.irregularDoers.hasOwnProperty(str)) {
-      return verbs_conjugate.irregularDoers[str]
+      return verbs_conjugate.irregularDoers[str];
     }
     for (var i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str + 'er'
+    return str + 'er';
   }
 
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = main;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
   return main;
 })();
 

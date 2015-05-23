@@ -2,13 +2,13 @@
 var verb_conjugate = (function() {
 
   if (typeof module !== 'undefined' && module.exports) {
-    verb_to_doer = require('./to_doer')
+    verb_to_doer = require('./to_doer');
     //verb_irregulars = require('./verb_irregulars')
 		if (typeof lang != 'string') lang = 'en';
 		var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
 		
-    verb_rules = require('./verb_rules')
-    suffix_rules = require('./suffix_rules')
+    verb_rules = require('./verb_rules');
+    suffix_rules = require('./suffix_rules');
   }
 
   //this method is the slowest in the whole library, basically TODO:whaaa
@@ -18,11 +18,9 @@ var verb_conjugate = (function() {
     }
     var arr = Object.keys(suffix_rules);
     for (i = 0; i < arr.length; i++) {
-      if (endsWith(w, arr[i])) {
-        return suffix_rules[arr[i]]
-      }
+      if (endsWith(w, arr[i])) return suffix_rules[arr[i]];
     }
-    return 'infinitive'
+    return 'infinitive';
   }
 
   //fallback to this transformation if it has an unknown prefix

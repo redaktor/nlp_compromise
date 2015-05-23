@@ -36,11 +36,9 @@ var to_adjective = (function() {
         return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str
+    return str;
   }
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = main;
-  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
   return main;
 })();
 

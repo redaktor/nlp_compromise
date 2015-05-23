@@ -1,16 +1,14 @@
-//converts nouns from plural and singular, and viceversases
-//some regex borrowed from pksunkara/inflect
-//https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
+// TODO - localize 'of|in|by|for' use
+// converts nouns from plural and singular, and viceversases
+// some regex borrowed from pksunkara/inflect
+// https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
 
 var inflect = (function() {
 	// TODO lang
   var titlecase = function(str) {
-    if (!str) {
-      return ''
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1)
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
-
   var pluralize_rules = [
     [/(ax|test)is$/i, '$1es'],
     [/(octop|vir|radi|nucle|fung|cact|stimul)us$/i, '$1i'],
@@ -65,7 +63,6 @@ var inflect = (function() {
 		/(alias|status)es$/i,
 		/ics$/i
 	];
-
   var singularize_rules = [
     [/([^v])ies$/i, '$1y'],
     [/ises$/i, 'isis'],
@@ -256,9 +253,7 @@ var inflect = (function() {
 		}
 	}
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = methods;
-  }
+  if (typeof module !== "undefined" && module.exports) module.exports = methods;
   return methods;
 })();
 

@@ -1,16 +1,15 @@
 //wrapper for verb's methods
 var Verb = function(str, next, last, token) {
-  var the = this;
-  the.word = str || '';
-  the.next = next;
-  the.last = last;
-
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		schema = require('../../data/'+lang+'/schema');
 		verbs_special = require('../../data/'+lang+'/verbs_special');
     verb_conjugate = require('../../data/'+lang+'/verbs_conjugate');
   }
+  var the = this;
+  the.word = str || '';
+  the.next = next;
+  the.last = last;
 	
   var tenses = {
     past: 'VBD',
@@ -81,9 +80,7 @@ var Verb = function(str, next, last, token) {
 
   return the;
 }
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Verb;
-}
+if (typeof module !== 'undefined' && module.exports) module.exports = Verb;
 
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)

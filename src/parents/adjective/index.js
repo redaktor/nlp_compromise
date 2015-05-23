@@ -30,7 +30,5 @@ var Adjective = function(str, next, last, token) {
 
   return the;
 };
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = Adjective;
-}
+if (typeof module !== 'undefined' && module.exports) module.exports = Adjective;
 // console.log(new Adjective('crazy'))

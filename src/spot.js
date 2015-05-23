@@ -2,39 +2,35 @@
 //most of this logic is in ./parents/noun
 var spot = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    pos = require("./pos");
-  }
+  if (typeof module !== "undefined" && module.exports) pos = require("./pos");
 
   var main = function(text, options) {
-    options = options || {}
+    options = options || {};
     //collect 'entities' from all nouns
-    var sentences = pos(text, options).sentences
-    var arr=sentences.reduce(function(arr, s) {
-      return arr.concat(s.entities(options))
-    }, [])
+    var sentences = pos(text, options).sentences;
+    var arr = sentences.reduce(function(arr, s) {
+      return arr.concat(s.entities(options));
+    }, []);
     //for people, remove instances of 'george', and 'bush' after 'george bush'.
-    var ignore={}
-    arr=arr.filter(function(o){
+    var ignore = {};
+    arr = arr.filter(function(o){
       //add tokens to blacklist
       if(o.analysis.is_person()){
         o.normalised.split(' ').forEach(function(s){
-          ignore[s]=true
+          ignore[s]=true;
         })
       }
       if(ignore[o.normalised]){
-        return false
+        return false;
       }
-      return true
+      return true;
     })
 
-    return arr
+    return arr;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
+  if (typeof module !== "undefined" && module.exports) module.exports = main;
+  return main;
 })()
 
 // console.log(spot("Tony Hawk is cool. Tony eats all day.").map(function(s){return s}))
