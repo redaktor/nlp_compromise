@@ -3975,7 +3975,7 @@ var main = {
 	
 	
 	//: unambigous suffixes
-	unambigousSuffixes: {
+	unambiguousSuffixes: {
 		en: {
 			NN: [
 				'ceae', 'inae', 'idae', 'leaf', 'rgan', 'eman', 'sman', 'star', 'boat', 'tube', 'rica', 'tica', 'nica', 'auce', 'tics', 'ency', 'ancy', 'poda', 'tude', 'xide', 'body', 'weed', 'tree', 'rrel', 'stem', 'cher', 'icer', 'erer', 'ader', 'ncer', 'izer', 'ayer', 'nner', 'ates', 'ales', 'ides', 'rmes', 'etes', 'llet', 'uage', 'ings', 'aphy', 'chid', 'tein', 'vein', 'hair', 'tris', 'unit', 'cake', 'nake', 'illa', 'ella', 'icle', 'ille', 'etle', 'scle', 'cell', 'bell', 'bill', 'palm', 'toma', 'game', 'lamp', 'bone', 'mann', 'ment', 'wood', 'book', 'nson', 'agon', 'odon', 'dron', 'iron', 'tion', 'itor', 'ator', 'root', 'cope', 'tera', 'hora', 'lora', 'bird', 'worm', 'fern', 'horn', 'wort', 'ourt', 'stry', 'etry', 'bush', 'ness', 'gist', 'rata', 'lata', 'tata', 'moth', 'lity', 'nity', 'sity', 'rity', 'city', 'dity', 'vity', 'drug', 'dium', 'llum', 'trum', 'inum', 'lium', 'tium', 'atum', 'rium', 'icum', 'anum', 'nium', 'orum', 'icus', 'opus', 'chus', 'ngus', 'thus', 'rius', 'rpus'
@@ -3990,7 +3990,7 @@ var main = {
 				'that', 'oubt', 'much', 'diem', 'high', 'atim', 'sely', 'nely', 'ibly', 'lely', 'dely', 'ally', 'gely', 'imly', 'tely', 'ully', 'ably', 'owly', 'vely', 'cely', 'mely', 'mply', 'ngly', 'exly', 'ffly', 'rmly', 'rely', 'uely', 'time', 'iori', 'oors', 'wise', 'orst', 'east', 'ways'
 			]
 		}
-		// end unambigousSuffixes.en
+		// end unambiguousSuffixes.en
   },
 	
 	//: normalization and denormalization

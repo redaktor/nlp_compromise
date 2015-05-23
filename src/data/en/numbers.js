@@ -1,11 +1,7 @@
 
 var lang = 'en';
 var numbers = (function() {
-  var zip = { title: {},
-  example: {},
-  parent: {},
-  tag: {},
-  ones: 
+  var zip = { ones: 
    { zero: 0,
      null: 0,
      nil: 0,

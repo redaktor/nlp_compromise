@@ -1,6 +1,6 @@
 
 var lang = 'en';
-var posData = (function() {
+var pos_data = (function() {
   
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 var zip = { particles: 

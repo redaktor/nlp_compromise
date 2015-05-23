@@ -1,3 +1,3 @@
 var util = require('util'); 
-var names = ["nouns_inflect.js","nouns.js","verbs_special.js","verbs_conjugate.js","verbs.js","adjectives_decline.js","adjectives_demonym.js","adjectives.js","adverbs_decline.js","numbers.js","dates.js","honorifics.js","abbreviations.js","normalizations.js","multiples.js","posData.js","negateData.js","unambigousSuffixes.js","lexicon.js"];
+var names = ["nouns_inflect.js","nouns.js","verbs_special.js","verbs_conjugate.js","verbs.js","adjectives_decline.js","adjectives_demonym.js","adjectives.js","adverbs_decline.js","numbers.js","dates.js","honorifics.js","abbreviations.js","normalizations.js","multiples.js","pos_data.js","negate_data.js","unambiguousSuffixes.js","firstnames.js","lexicon.js"];
 names.forEach(function(n, i) { console.log( n ); console.log( require('./'+n) ); });

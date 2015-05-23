@@ -1,6 +1,6 @@
 
 var lang = 'en';
-var unambigousSuffixes = (function() {
+var unambiguousSuffixes = (function() {
   
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 var zip = { NN: 

@@ -1,7 +1,7 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
 var Sentence = function(tokens) {
-  var the = this
+  var the = this;
   the.tokens = tokens || [];
 
   var capitalise = function(s) {
@@ -60,45 +60,14 @@ var Sentence = function(tokens) {
   the.negate = function() {
     //these are cheap ways to negate the meaning
     // ('none' is ambiguous because it could mean (all or some) )
-    var logic_negate = {
-        //some logical ones work
-        "everyone": "no one",
-        "everybody": "nobody",
-        "someone": "no one",
-        "somebody": "nobody",
-        // everything:"nothing",
-        "always": "never",
-        //copulas
-        "is": "isn't",
-        "are": "aren't",
-        "was": "wasn't",
-        "will": "won't",
-        //modals
-        "didn't": "did",
-        "wouldn't": "would",
-        "couldn't": "could",
-        "shouldn't": "should",
-        "can't": "can",
-        "won't": "will",
-        "mustn't": "must",
-        "shan't": "shall",
-        "shant": "shall",
-
-        "did": "didn't",
-        "would": "wouldn't",
-        "could": "couldn't",
-        "should": "shouldn't",
-        "can": "can't",
-        "must": "mustn't"
-      }
-      //loop through each term..
+    //loop through each term..
     for (var i = 0; i < the.tokens.length; i++) {
-      var tok = the.tokens[i]
-
+			if (typeof module !== 'undefined' && module.exports) negate_data = require('../../../data/'+lang+'/negate_data');
+      var tok = the.tokens[i];
       //turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
-      if (logic_negate[tok.normalised] && (!the.tokens[i + 1] || the.tokens[i + 1].normalised != "not")) {
-        tok.text = logic_negate[tok.normalised]
-        tok.normalised = logic_negate[tok.normalised]
+      if (negate_data[tok.normalised] && (!the.tokens[i + 1] || the.tokens[i + 1].normalised != "not")) {
+        tok.text = negate_data[tok.normalised]
+        tok.normalised = negate_data[tok.normalised]
         if (tok.capitalised) {
           tok.text = capitalise(tok.text)
         }

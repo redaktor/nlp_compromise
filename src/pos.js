@@ -1,31 +1,33 @@
 var pos = (function() {
-  // "use strict";
+  // 'use strict';
 
-  if (typeof module !== "undefined" && module.exports) {
-    lexicon = require("./data/lexicon")
-    values = require("./data/lexicon/values")
-    firstnames = require("./data/lexicon/firstnames")
-
-    tokenize = require("./methods/tokenization/tokenize").tokenize;
-    parts_of_speech = require("./data/parts_of_speech")
-    word_rules = require("./data/word_rules")
-    wordnet_suffixes = require("./data/unambiguous_suffixes")
-    Sentence = require("./sentence")
-    Section = require("./section")
-    parents = require("./parents/parents")
+  if (typeof module !== 'undefined' && module.exports) {
+		//lexicon = require('./data/lexicon')
+    //values = require('./data/lexicon/values')
+		lexicon = require('../../../data/'+lang+'/lexicon');
+    dates = require('../../../data/'+lang+'/dates');
+    numbers = require('../../../data/'+lang+'/numbers');
+    firstnames = require('../../../data/'+lang+'/firstnames');
+		// .particles (possible 2nd part in a phrasal verb) and .contractions:
+		pos_data = require('../../../data/'+lang+'/pos_data');
+				
+    wordnet_suffixes = require('../../../data/'+lang+'/unambiguousSuffixes');
+    parts_of_speech = require('./data/parts_of_speech')
+    word_rules = require('./data/word_rules')
+    tokenize = require('./methods/tokenization/tokenize').tokenize;
+    Sentence = require('./sentence')
+    Section = require('./section')
+    parents = require('./parents/parents')
   }
-
-  //possible 2nd part in a phrasal verb
-  var particles=["in", "out", "on", "off", "behind", "way", "with", "of", "do", "away", "across", "ahead", "back", "over", "under", "together", "apart", "up", "upon", "aback", "down", "about", "before", "after", "around", "to", "forth", "round", "through", "along", "onto"]
-  particles=particles.reduce(function(h,s){
-    h[s]=true
-    return h
-  }, {})
+	
+	var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
+	for (var k in numbers) vs = vs.concat(Object.keys(numbers[k]));
+	var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
   var merge_tokens = function(a, b) {
-    a.text += " " + b.text
-    a.normalised += " " + b.normalised
-    a.pos_reason += "|" + b.pos_reason
+    a.text += ' ' + b.text
+    a.normalised += ' ' + b.normalised
+    a.pos_reason += '|' + b.pos_reason
     a.start = a.start || b.start
     a.noun_capital = (a.noun_capital && b.noun_capital)
     a.punctuated = a.punctuated || b.punctuated
@@ -47,40 +49,40 @@ var pos = (function() {
           arr[i] = null
         }
         //merge NNP and NN, like firstname, lastname
-        else if ((tag === "NNP" && next.pos.tag ==="NN") || (tag==="NN" && next.pos.tag==="NNP")) {
+        else if ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')) {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
           arr[i + 1].pos= parts_of_speech['NNP']
         }
         //merge dates manually, which often have punctuation
-        else if (tag === "CD" && next.pos.tag ==="CD") {
+        else if (tag === 'CD' && next.pos.tag ==='CD') {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
         }
-        //merge abbreviations with nouns manually, eg. "Joe jr."
-        else if ( (tag === "NNAB" && next.pos.parent ==="noun") || (arr[i].pos.parent==="noun" && next.pos.tag==="NNAB")) {
+        //merge abbreviations with nouns manually, eg. 'Joe jr.'
+        else if ( (tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')) {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
         }
         //'will walk' -> future-tense verb
-        else if (arr[i].normalised === "will" && next.pos.parent === "verb") {
+        else if (arr[i].normalised === 'will' && next.pos.parent === 'verb') {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
         }
         //'hundred and fifty', 'march the 5th'
-        else if (tag === "CD" && (next.normalised === "and" || next.normalised === "the") && arr[i + 2] && arr[i + 2].pos.tag === "CD") {
+        else if (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD') {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
         }
         //capitals surrounding a preposition  'United States of America'
-        else if (tag=="NN" && arr[i].noun_capital && (next.normalised == "of" || next.normalised == "and") && arr[i + 2] && arr[i + 2].noun_capital) {
+        else if (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital) {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
           arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2])
           arr[i + 1] = null
         }
         //capitals surrounding two prepositions  'Phantom of the Opera'
-        else if (arr[i].noun_capital && next.normalised == "of" && arr[i + 2] && arr[i + 2].pos.tag == "DT" && arr[i + 3] && arr[i + 3].noun_capital) {
+        else if (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital) {
           arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
           arr[i] = null
           arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2])
@@ -97,16 +99,16 @@ var pos = (function() {
   }
 
 
-  //some prepositions are clumped onto the back of a verb "looked for", "looks at"
+  //some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
   //they should be combined with the verb, sometimes.
   //does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
   var combine_phrasal_verbs = function(sentence) {
     var arr = sentence.tokens || []
     for (var i = 1; i < arr.length; i++) {
-      if(particles[arr[i].normalised]){
+      if(pos_data.particles[arr[i].normalised]){
         //it matches a known phrasal-verb
-        if(lexicon[arr[i-1].normalised + " " + arr[i].normalised]){
-          // console.log(arr[i-1].normalised + " " + arr[i].normalised)
+        if(lexicon[arr[i-1].normalised + ' ' + arr[i].normalised]){
+          // console.log(arr[i-1].normalised + ' ' + arr[i].normalised)
           arr[i] = merge_tokens(arr[i-1], arr[i])
           arr[i-1] = null
         }
@@ -142,65 +144,65 @@ var pos = (function() {
     var last = sentence.tokens[i - 1]
     var next = sentence.tokens[i + 1]
     var strong_determiners = {
-        "the": 1,
-        "a": 1,
-        "an": 1
+        'the': 1,
+        'a': 1,
+        'an': 1
       }
     //resolve ambiguous 'march','april','may' with dates
-    if((token.normalised=="march"||token.normalised=="april"||token.normalised=="may") && ( (next && next.pos.tag=="CD") || (last && last.pos.tag=="CD") ) ){
+    if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
       token.pos = parts_of_speech['CD']
-      token.pos_reason = "may_is_date"
+      token.pos_reason = 'may_is_date'
     }
       //if it's before a modal verb, it's a noun -> lkjsdf would
-    if (next && token.pos.parent !== "noun" && token.pos.parent !== "glue" && next.pos.tag === "MD") {
+    if (next && token.pos.parent !== 'noun' && token.pos.parent !== 'glue' && next.pos.tag === 'MD') {
       token.pos = parts_of_speech['NN']
-      token.pos_reason = "before_modal"
+      token.pos_reason = 'before_modal'
     }
     //if it's after the word 'will' its probably a verb/adverb
-    if (last && last.normalised == "will" && !last.punctuated && token.pos.parent == "noun" && token.pos.tag !== "PRP") {
+    if (last && last.normalised == 'will' && !last.punctuated && token.pos.parent == 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP') {
       token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_will"
+      token.pos_reason = 'after_will'
     }
     //if it's after the word 'i' its probably a verb/adverb
-    if (last && last.normalised == "i" && !last.punctuated && token.pos.parent == "noun") {
+    if (last && last.normalised == 'i' && !last.punctuated && token.pos.parent == 'noun') {
       token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_i"
+      token.pos_reason = 'after_i'
     }
     //if it's after an adverb, it's not a noun -> quickly acked
     //support form 'atleast he is..'
-    if (last && token.pos.parent === "noun" && token.pos.tag !== "PRP" && last.pos.tag === "RB" && !last.start) {
+    if (last && token.pos.parent === 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP' && last.pos.tag === 'RB' && !last.start) {
       token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_adverb"
+      token.pos_reason = 'after_adverb'
     }
     //no consecutive, unpunctuated adjectives -> real good
-    if (next && token.pos.parent === "adjective" && next.pos.parent === "adjective" && !token.punctuated) {
+    if (next && token.pos.parent === 'adjective' && next.pos.parent === 'adjective' && !token.punctuated) {
       token.pos = parts_of_speech['RB']
-      token.pos_reason = "consecutive_adjectives"
+      token.pos_reason = 'consecutive_adjectives'
     }
     //if it's after a determiner, it's not a verb -> the walk
-    if (last && token.pos.parent === "verb" && strong_determiners[last.pos.normalised] && token.pos.tag != "CP") {
+    if (last && token.pos.parent === 'verb' && strong_determiners[last.pos.normalised] && token.pos.tag != 'CP') {
       token.pos = parts_of_speech['NN']
-      token.pos_reason = "determiner-verb"
+      token.pos_reason = 'determiner-verb'
     }
-    //copulas are followed by a determiner ("are a .."), or an adjective ("are good")
-    if (last && last.pos.tag === "CP" && token.pos.tag !== "DT" && token.pos.tag !== "RB" && token.pos.parent !== "adjective" && token.pos.parent !== "value") {
+    //copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
+    if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
       token.pos = parts_of_speech['JJ']
-      token.pos_reason = "copula-adjective"
+      token.pos_reason = 'copula-adjective'
     }
     //copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
-    if (last && next && last.pos.tag === "CP" && token.pos.tag === "RB" && next.pos.parent === "verb") {
+    if (last && next && last.pos.tag === 'CP' && token.pos.tag === 'RB' && next.pos.parent === 'verb') {
       sentence.tokens[i + 1].pos = parts_of_speech['JJ']
-      sentence.tokens[i + 1].pos_reason = "copula-adverb-adjective"
+      sentence.tokens[i + 1].pos_reason = 'copula-adverb-adjective'
     }
     // the city [verb] him.
-    if (next && next.pos.tag == "PRP" && token.pos.parent == "noun" && !token.punctuated) {
+    if (next && next.pos.tag == 'PRP' && token.pos.tag !== 'PP' && token.pos.parent == 'noun' && !token.punctuated) {
       token.pos = parts_of_speech['VB']
-      token.pos_reason = "before_[him|her|it]"
+      token.pos_reason = 'before_[him|her|it]'
     }
     //the misled worker -> misled is an adjective, not vb
-    if (last && next && last.pos.tag === "DT" && next.pos.parent === "noun" && token.pos.parent === "verb") {
+    if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
       token.pos = parts_of_speech['JJ']
-      token.pos_reason = "determiner-adjective-noun"
+      token.pos_reason = 'determiner-adjective-noun'
     }
 
     return token
@@ -208,43 +210,18 @@ var pos = (function() {
 
   //add a 'quiet' token for contractions so we can represent their grammar
   var handle_contractions = function(arr) {
-    var contractions = {
-      "i'd": ["i", "would"],
-      "she'd": ["she", "would"],
-      "he'd": ["he", "would"],
-      "they'd": ["they", "would"],
-      "we'd": ["we", "would"],
-      "i'll": ["i", "will"],
-      "she'll": ["she", "will"],
-      "he'll": ["he", "will"],
-      "they'll": ["they", "will"],
-      "we'll": ["we", "will"],
-      "i've": ["i", "have"],
-      "they've": ["they", "have"],
-      "we've": ["we", "have"],
-      "should've": ["should", "have"],
-      "would've": ["would", "have"],
-      "could've": ["could", "have"],
-      "must've": ["must", "have"],
-      "i'm": ["i", "am"],
-      "he's": ["he", "is"],
-      "she's": ["she", "is"],
-      "we're": ["we", "are"],
-      "they're": ["they", "are"],
-      "cannot": ["can", "not"]
-    }
     var before, after, fix;
     for (var i = 0; i < arr.length; i++) {
-      if (contractions.hasOwnProperty(arr[i].normalised)) {
+      if (pos_data.contractions.hasOwnProperty(arr[i].normalised)) {
         before = arr.slice(0, i)
         after = arr.slice(i + 1, arr.length)
         fix = [{
-          text: "",
-          normalised: contractions[arr[i].normalised][0],
+          text: '',
+          normalised: pos_data.contractions[arr[i].normalised][0],
           start: arr[i].start
         }, {
           text: arr[i].text,
-          normalised: contractions[arr[i].normalised][1],
+          normalised: pos_data.contractions[arr[i].normalised][1],
           start: undefined
         }]
         arr = before.concat(fix)
@@ -282,16 +259,16 @@ var pos = (function() {
         //it has a capital and isn't a month, etc.
         if (token.noun_capital && !values[token.normalised]) {
           token.pos = parts_of_speech['NN']
-          token.pos_reason = "noun_capitalised"
+          token.pos_reason = 'noun_capitalised'
           return token
         }
         //known words list
         var lex = lexicon_pass(token.normalised)
         if (lex) {
           token.pos = lex;
-          token.pos_reason = "lexicon"
+          token.pos_reason = 'lexicon'
           //if it's an abbreviation, forgive the punctuation (eg. 'dr.')
-          if(token.pos.tag==="NNAB"){
+          if(token.pos.tag==='NNAB'){
             token.punctuated=false
           }
           return token
@@ -300,7 +277,7 @@ var pos = (function() {
         //handle punctuation like ' -- '
         if (!token.normalised) {
           token.pos = parts_of_speech['UH']
-          token.pos_reason = "wordless_string"
+          token.pos_reason = 'wordless_string'
           return token
         }
 
@@ -310,7 +287,7 @@ var pos = (function() {
           var suffix = token.normalised.substr(len - 4, len - 1)
           if (wordnet_suffixes.hasOwnProperty(suffix)) {
             token.pos = parts_of_speech[wordnet_suffixes[suffix]]
-            token.pos_reason = "wordnet suffix"
+            token.pos_reason = 'wordnet suffix'
             return token
           }
         }
@@ -319,14 +296,14 @@ var pos = (function() {
         var r = rules_pass(token.normalised);
         if (r) {
           token.pos = r;
-          token.pos_reason = "regex suffix"
+          token.pos_reason = 'regex suffix'
           return token
         }
 
         //see if it's a number
         if (parseFloat(token.normalised)) {
           token.pos = parts_of_speech['CD']
-          token.pos_reason = "parsefloat"
+          token.pos_reason = 'parsefloat'
           return token
         }
 
@@ -336,9 +313,9 @@ var pos = (function() {
       //second pass, wrangle results a bit
       sentence.tokens = sentence.tokens.map(function(token, i) {
         //set ambiguous 'ed' endings as either verb/adjective
-        if ( token.pos_reason!=="lexicon" && token.normalised.match(/.ed$/)) {
+        if ( token.pos_reason!=='lexicon' && token.normalised.match(/.ed$/)) {
           token.pos = parts_of_speech['VB']
-          token.pos_reason = "ed"
+          token.pos_reason = 'ed'
         }
         return token
       })
@@ -350,13 +327,13 @@ var pos = (function() {
         var next = sentence.tokens[i + 1]
         if (token.pos) {
           //suggest noun after some determiners (a|the), posessive pronouns (her|my|its)
-          if (token.normalised == "the" || token.normalised == "a" || token.normalised == "an" || token.pos.tag === "PP") {
+          if (token.normalised == 'the' || token.normalised == 'a' || token.normalised == 'an' || token.pos.tag === 'PP') {
             need = 'noun'
             reason = token.pos.name
             return token //proceed
           }
           //suggest verb after personal pronouns (he|she|they), modal verbs (would|could|should)
-          if (token.pos.tag === "PRP" || token.pos.tag === "MD") {
+          if (token.pos.tag === 'PRP' && token.pos.tag !== 'PP' || token.pos.tag === 'MD') {
             need = 'verb'
             reason = token.pos.name
             return token //proceed
@@ -365,17 +342,17 @@ var pos = (function() {
         }
         //satisfy need on a conflict, and fix a likely error
         if (token.pos) {
-          if (need == "verb" && token.pos.parent == "noun" && (!next || (next.pos && next.pos.parent != "noun"))) {
+          if (need == 'verb' && token.pos.parent == 'noun' && (!next || (next.pos && next.pos.parent != 'noun'))) {
             if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
               token.pos = parts_of_speech['VB']
-              token.pos_reason = "signal from " + reason
+              token.pos_reason = 'signal from ' + reason
               need = null
             }
           }
-          if (need == "noun" && token.pos.parent == "verb" && (!next || (next.pos && next.pos.parent != "verb"))) {
+          if (need == 'noun' && token.pos.parent == 'verb' && (!next || (next.pos && next.pos.parent != 'verb'))) {
             if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-              token.pos = parts_of_speech["NN"]
-              token.pos_reason = "signal from " + reason
+              token.pos = parts_of_speech['NN']
+              token.pos_reason = 'signal from ' + reason
               need = null
             }
           }
@@ -384,7 +361,7 @@ var pos = (function() {
         if (need && !token.pos) {
           if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
             token.pos = parts_of_speech[need]
-            token.pos_reason = "signal from " + reason
+            token.pos_reason = 'signal from ' + reason
             need = null
           }
         }
@@ -410,14 +387,14 @@ var pos = (function() {
           //if there is no verb in the sentence, and there needs to be.
           if (has['adjective'] && has['noun'] && !has['verb']) {
             token.pos = parts_of_speech['VB']
-            token.pos_reason = "need one verb"
+            token.pos_reason = 'need one verb'
             has['verb'] = true
             return token
           }
 
           //fallback to a noun
           token.pos = parts_of_speech['NN']
-          token.pos_reason = "noun fallback"
+          token.pos_reason = 'noun fallback'
         }
         return token
       })
@@ -442,54 +419,62 @@ var pos = (function() {
       })
     }
 
-    //add analysis on each token
-    sentences = sentences.map(function(s) {
-      s.tokens = s.tokens.map(function(token, i) {
-        var last_token = s.tokens[i - 1] || null
-        var next_token = s.tokens[i + 1] || null
-        token.analysis = parents[token.pos.parent](token.normalised, next_token, last_token, token)
-        return token
-      })
-      return s
-    })
-
     //make them Sentence objects
     sentences = sentences.map(function(s) {
       var sentence = new Sentence(s.tokens)
       sentence.type = s.type
       return sentence
     })
+    //add analysis on each token
+    sentences = sentences.map(function(s) {
+      s.tokens = s.tokens.map(function(token, i) {
+        token.analysis = parents[token.pos.parent](token.normalised, s, i)
+        return token
+      })
+      return s
+    })
+
+    //add next-last references
+    sentences = sentences.map(function(sentence,i) {
+      sentence.last=sentences[i-1]
+      sentence.next=sentences[i+1]
+      return sentence
+    })
     //return a Section object, with its methods
     return new Section(sentences)
   }
 
-  if (typeof module !== "undefined" && module.exports) {
+  if (typeof module !== 'undefined' && module.exports) {
     module.exports = main;
   }
   return main
 })()
 
-// console.log( pos("Geroge Clooney walked, quietly into a bank. It was cold.") )
-// console.log( pos("it is a three-hundred and one").tags() )
-// console.log( pos("funny funny funny funny").sentences[0].tokens )
-// pos("In March 2009, while Secretary of State for Energy and Climate Change, Miliband attended the UK premiere of climate-change film The Age of Stupid, where he was ambushed").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("the Energy and Climate Change, Miliband").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// console.log(pos("Energy and Climate Change, Miliband").sentences[0].tokens)
-// console.log(pos("http://google.com").sentences[0].tokens)
-// console.log(pos("may live").tags())
-// console.log(pos("may 7th live").tags())
-// console.log(pos("She and Marc Emery married on July 23, 2006.").tags())
-// console.log(pos("spencer quickly acked").sentences[0].tokens)
-// console.log(pos("a hundred").sentences[0].tokens)
-// console.log(pos("Tony Reagan skates").sentences[0].tokens)
-// console.log(pos("She and Marc Emery married on July 23, 2006").sentences[0].tokens)
-// console.log(pos("Tony Hawk walked quickly to the store.").sentences[0].tokens)
-// console.log(pos("jahn j. jacobheimer").sentences[0].tokens[0].analysis.is_person())
-// pos("Dr. Conrad Murray recieved a guilty verdict").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("the Phantom of the Opera").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("Tony Hawk is nice").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("tony hawk is nice").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// console.log(pos("look after a kid").sentences[0].tags())
-// pos("Sather tried to stop the deal, but when he found out that Gretzky").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text+"  "+t.pos_reason)})
-// pos("Gretzky had tried skating").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text+"  "+t.pos_reason)})
+// console.log( pos('Geroge Clooney walked, quietly into a bank. It was cold.') )
+// console.log( pos('it is a three-hundred and one').tags() )
+// console.log( pos('funny funny funny funny').sentences[0].tokens )
+// pos('In March 2009, while Secretary of State for Energy and Climate Change, Miliband attended the UK premiere of climate-change film The Age of Stupid, where he was ambushed').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// pos('the Energy and Climate Change, Miliband').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// console.log(pos('Energy and Climate Change, Miliband').sentences[0].tokens)
+// console.log(pos('http://google.com').sentences[0].tokens)
+// console.log(pos('may live').tags())
+// console.log(pos('may 7th live').tags())
+// console.log(pos('She and Marc Emery married on July 23, 2006.').tags())
+// console.log(pos('Toronto is fun. Spencer and heather quickly walked. it was cool').sentences[0].referables())
+// console.log(pos('a hundred').sentences[0].tokens)
+// console.log(pos('Tony Reagan skates').sentences[0].tokens)
+// console.log(pos('She and Marc Emery married on July 23, 2006').sentences[0].tokens)
+// console.log(pos('Tony Hawk walked quickly to the store.').sentences[0].tokens)
+// console.log(pos('jahn j. jacobheimer').sentences[0].tokens[0].analysis.is_person())
+// pos('Dr. Conrad Murray recieved a guilty verdict').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// pos('the Phantom of the Opera').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// pos('Tony Hawk is nice').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// pos('tony hawk is nice').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text)})
+// console.log(pos('look after a kid').sentences[0].tags())
+// pos('Sather tried to stop the deal, but when he found out that Gretzky').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text+'  '+t.pos_reason)})
+// pos('Gretzky had tried skating').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '  '+t.text+'  '+t.pos_reason)})
 
+// console.log(pos('i think Tony Danza is cool. He rocks and he is golden.').sentences[0].tokens[2].analysis.referenced_by())
+// console.log(pos('i think Tony Danza is cool and he is golden.').sentences[0].tokens[6].analysis.reference_to())
+// console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
+// console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
