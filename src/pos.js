@@ -2,17 +2,20 @@ var pos = (function() {
   // 'use strict';
 
   if (typeof module !== 'undefined' && module.exports) {
-		lexicon = require('./data/'+lang+'/lexicon');
-    dates = require('./data/'+lang+'/dates');
-    numbers = require('./data/'+lang+'/numbers');
-    firstnames = require('./data/'+lang+'/firstnames');
+		if (typeof lang != 'string') lang = 'en';
+		var dPath = './data/'+lang+'/';
+		lexicon = require(dPath+'lexicon');
+    dates = require(dPath+'dates');
+    numbers = require(dPath+'numbers');
+    firstnames = require(dPath+'firstnames');
 		// .particles (possible 2nd part in a phrasal verb) and .contractions:
-		pos_data = require('./data/'+lang+'/pos_data');
+		pos_data = require(dPath+'pos_data');
 				
-    wordnet_suffixes = require('./data/'+lang+'/unambiguousSuffixes');
-		schema = require('./data/'+lang+'/schema');
-    word_rules = require('./data/word_rules'); // TODO - some are localized !
+    suffixes = require(dPath+'suffixes');
+		schema = require(dPath+'schema');
+    word_rules = require('./data/word_rules'); // TODO dictionary_rules - some are localized !
     tokenize = require('./methods/tokenization/tokenize').tokenize;
+		
     Sentence = require('./sentence');
     Section = require('./section');
     parents = require('./parents/parents');
@@ -254,7 +257,7 @@ var pos = (function() {
         var len = token.normalised.length;
         if (len > 4) {
           var suffix = token.normalised.substr(len - 4, len - 1)
-          if (wordnet_suffixes.hasOwnProperty(suffix)) return setPos(token, wordnet_suffixes[suffix], 'wordnet suffix');
+          if (suffixes.wordnet.hasOwnProperty(suffix)) return setPos(token, suffixes.wordnet[suffix], 'wordnet suffix');
         }
 
         // suffix regexes for words

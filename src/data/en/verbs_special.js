@@ -27,7 +27,7 @@ var zip = { cps:
 				['cps', 'mds'].forEach(function(type) {
 					res[type] = [];
 					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) { 
-						var arr = helpFns.replBase(a,['_'],['\'t']);
+						var arr = helpFns.replBase(a,0,['\'t']);
 						negate[arr[0]] = arr[1];
 						return arr; 
 					}));

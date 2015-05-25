@@ -2,13 +2,13 @@
 var verb_conjugate = (function() {
 
   if (typeof module !== 'undefined' && module.exports) {
-    verb_to_doer = require('./to_doer');
-    //verb_irregulars = require('./verb_irregulars')
 		if (typeof lang != 'string') lang = 'en';
-		var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
+		var dPath = '../../../data/'+lang+'/';
+		suffixes = require(dPath+'suffixes');
+		verbs_conjugate = require(dPath+'verbs_conjugate');
+    verb_rules = require('./verb_rules'); // TODO dictionaryRules
 		
-    verb_rules = require('./verb_rules');
-    suffix_rules = require('./suffix_rules');
+    to_doer = require('./to_doer');
   }
 
   //this method is the slowest in the whole library, basically TODO:whaaa
@@ -16,9 +16,9 @@ var verb_conjugate = (function() {
     var endsWith = function(str, suffix) {
       return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
-    var arr = Object.keys(suffix_rules);
+    var arr = Object.keys(suffixes.verbs);
     for (i = 0; i < arr.length; i++) {
-      if (endsWith(w, arr[i])) return suffix_rules[arr[i]];
+      if (endsWith(w, arr[i])) return suffixes.verbs[arr[i]];
     }
     return 'infinitive';
   }
@@ -40,12 +40,12 @@ var verb_conjugate = (function() {
       } else {
         present = w + 's'
       }
-      doer = verb_to_doer(infinitive)
+      doer = to_doer(infinitive)
     } else {
       gerund = w.replace(/[aeiou]$/, 'ing')
       past = w.replace(/[aeiou]$/, 'ed')
       present = w.replace(/[aeiou]$/, 'es')
-      doer = verb_to_doer(infinitive)
+      doer = to_doer(infinitive)
     }
     return {
       infinitive: infinitive,
@@ -66,7 +66,7 @@ var verb_conjugate = (function() {
       obj.gerund = obj.infinitive + 'ing'
     }
     if (!obj.doer) {
-      obj.doer = verb_to_doer(obj.infinitive)
+      obj.doer = to_doer(obj.infinitive)
     }
     if (!obj.present) {
       obj.present = obj.infinitive + 's'
@@ -106,6 +106,8 @@ var verb_conjugate = (function() {
 
     //for phrasal verbs ('look out'), conjugate look, then append 'out'
     var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
+		// TODO - when IN is done (see issue 40) we can build this regex
+		
     if(w.match(' ') && w.match(phrasal_reg)){
       var split=w.match(phrasal_reg,'')
       var phrasal_verb=split[1]

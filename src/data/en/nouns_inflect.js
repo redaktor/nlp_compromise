@@ -227,7 +227,7 @@ var zip = { irregulars:
 
   var main = (function () {
 				return {
-					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,['_'],['es']); }),
+					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
 					uncountables: zip.uc.reduce(helpFns.toObj,{})
 				};
 			})();

@@ -21,11 +21,16 @@
 //    require('./_build')(['en','de']);
 
 // -->
-// RETURNS module files, written in folders named after the language, e.g.
+// RETURNS compressed module files, 
+// written in folders named after the language, e.g.
 // ./en/...
 */
 
+
+
+
 /* TODO 
+// might be better to put reused strings in a 'constants' object
 // phrasal_verbs
 // firstnames
 */	
@@ -36,7 +41,8 @@ var util = require('util');
 
 var schema = require('./_dictionarySchema');
 var dict = require('./_dictionary');
-var name = require('./_dictionaryNamed');
+var name = require('./_dictionaryNames');
+var rule = require('./_dictionaryRules');
 var nodeExportStr = '\n  if (typeof module !== "undefined" && module.exports) module.exports = main;';
 var prefixFn = function(id) { return '\nvar '.concat(id,' = (function() {\n  '); }
 var endFnStr = '\n\n  return main;\n})();';
@@ -97,18 +103,29 @@ function generateLanguage(lang) {
 	var _fns = function() {
 		return {
 			toObj: function(h,s){ h[s]=true; return h; },
+			toObjValues: function(zip, obj){
+				if (!obj) obj = {}; 
+				return Object.keys(zip).reduce(function(h, k) {
+					zip[k].forEach(function(w) { h[w] = k; });
+					return h;
+				}, {});
+			},
 			repl: function(a,s,r){
 				if (typeof a === 'undefined') return null;
+				var std = ['&','_','#','~','!','%',';','@','0','1','2','3','4','5','6','7','8','9','>','`'];
+				if (!s && r) s = std.slice(0, r.length);
+				if (!r) r = std;
 				var _r = function(w){
 					s.forEach(function(rS, i) { w = w.replace(new RegExp(rS, 'g'), r[i]) });
 					return w;
 				}
 				return (a instanceof Array) ? a.map(_r) : _r(a);
 			},
+			
 			replBase: function(a,s,r){
 				if (typeof a === 'undefined') return null;
 				var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));
-				return [a[0], ((s instanceof Array) ? helpFns.repl(_s, s, r) : _s) ];
+				return [a[0], ((typeof s !== 'undefined') ? helpFns.repl(_s, s, r) : _s) ];
 			}
 		};
 	}
@@ -207,7 +224,7 @@ function generateLanguage(lang) {
 			// expand
 			unzip: function() {
 				return {
-					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,['_'],['es']); }),
+					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
 					uncountables: zip.uc.reduce(helpFns.toObj,{})
 				};
 			}
@@ -271,7 +288,7 @@ function generateLanguage(lang) {
 				['cps', 'mds'].forEach(function(type) {
 					res[type] = [];
 					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) { 
-						var arr = helpFns.replBase(a,['_'],['\'t']);
+						var arr = helpFns.replBase(a,0,['\'t']);
 						negate[arr[0]] = arr[1];
 						return arr; 
 					}));
@@ -298,11 +315,11 @@ function generateLanguage(lang) {
 				var _noDoers = {};
 				//var irregularFlags = [];
 				dict.VBP.words.filter(possibleOrig).forEach(function(o) {
-					var conjugateds = [helpFns.repl(o[lang], ['ing', 'er', 've'], ['&', '_', '#'])];
+					var conjugateds = [helpFns.repl(o[lang], ['ing', 'er', 've'], 0)];
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
-							if (isRef(oc, o)) conjugated = helpFns.repl(baseRepl(oc[lang], o[lang]), ['ing', 'er', 've'], ['&', '_', '#']);
+							if (isRef(oc, o)) conjugated = helpFns.repl(baseRepl(oc[lang], o[lang]), ['ing', 'er', 've'], 0);
 							did(o[lang]);
 						});
 						conjugateds.push( (conjugated) ? conjugated : 0 );
@@ -342,7 +359,7 @@ function generateLanguage(lang) {
 					var r = function(s) {return s;}
 					a.forEach(function(s, i) {
 						if (s && i > 0) s = s.replace('=',a[0]).replace('<', a[0].slice(0,-2));
-						if (s) s = helpFns.repl(s, ['&', '_', '#'], ['ing', 'er', 've']);
+						if (s) s = helpFns.repl(s, 0, ['ing', 'er', 've']);
 						if (i > 3 && !s) {
 							main.noDoers[r(a[0])] = 1;
 						} else if (i > 3) {
@@ -378,7 +395,7 @@ function generateLanguage(lang) {
 			"// 1 means 'default behavior'\n",
 			// compress
 			zip: function(lang) {
-				var repJJ = function(s) { return ((typeof s === 'string') ? helpFns.repl(s, ['ight', 'ing', 'ent', 'er', 'al', 'ed'], [':', '&', '_', '#', '~', '!']) : s); }
+				var repJJ = function(s) { return ((typeof s === 'string') ? helpFns.repl(s, ['ight', 'ing', 'ent', 'er', 'al', 'ed'], 0) : s); }
 				var types = {
 					/*JJ: 'adjective',*/ 
 					RB: 'adverb', 
@@ -440,7 +457,7 @@ function generateLanguage(lang) {
 			
 			// expand
 			unzip: function () {
-				var repJJ = function(s) { return (typeof s !== 'string') ? s : helpFns.repl(s, [':', '&', '_', '#', '~', '!'], ['ight', 'ing', 'ent', 'er', 'al', 'ed']); }
+				var repJJ = function(s) { return (typeof s !== 'string') ? s : helpFns.repl(s, 0, ['ight', 'ing', 'ent', 'er', 'al', 'ed']); }
 				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
 				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
 				zip.forEach(function(_a) {
@@ -477,7 +494,7 @@ function generateLanguage(lang) {
 				var demonyms = [];
 				var possibleDemo = function(o) { return meta(o, 'demonym'); };
 				dict.JJ.words.filter(possibleDemo).forEach(function(o) {
-					demonyms.push( helpFns.repl(o[lang], ['can', 'dan', 'ean', 'ian', 'ese', 'an'], [':', '&', '_', '#', '~', '!']) );
+					demonyms.push( helpFns.repl(o[lang], ['can', 'dan', 'ean', 'ian', 'ese', 'an'], 0) );
 					did(o[lang]);
 				});
 				return demonyms;
@@ -487,7 +504,7 @@ function generateLanguage(lang) {
 			unzip: {
 				array: 'zip',
 				fn: function(w) {
-					return helpFns.repl(w, [':', '&', '_', '#', '~', '!'], ['can', 'dan', 'ean', 'ian', 'ese', 'an'])
+					return helpFns.repl(w, 0, ['can', 'dan', 'ean', 'ian', 'ese', 'an'])
 				}
 			}
 		},
@@ -498,11 +515,11 @@ function generateLanguage(lang) {
 			// build
 			zip: function(lang) { 
 				return did(dict.JJ.words.filter(possibleRest).map(val).map(function(w) {
-					return helpFns.repl(w, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly'], [':', '&', '_', '#', '~', '!', '%', '>']);
+					return helpFns.repl(w, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly'], 0);
 				}));
 			},
 			unzip: function() {
-				return zip.map(function(w) { return helpFns.repl(w, [':', '&', '_', '#', '~', '!', '%', '>'], ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly']); });
+				return zip.map(function(w) { return helpFns.repl(w, 0, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly']); });
 			}
 		},
 		
@@ -536,7 +553,7 @@ function generateLanguage(lang) {
 		},
 		
 		
-		// OTHER : numbers, dates, honorifics, abbreviations, normalizations, multiples, unambiguousSuffixes
+		// OTHER : numbers, dates, honorifics, abbreviations, normalizations, multiples, suffixes
 		{ // 9
 			id: 'numbers',
 			description: '',
@@ -607,31 +624,6 @@ function generateLanguage(lang) {
 		},
 		
 		{ // 13
-			id: 'normalizations',
-			description: {},
-			// compress
-			zip: function(lang) { 
-				var res = {};
-				dict.normalizations.forEach(function(a){
-					if(!res.hasOwnProperty(a[1])) res[a[1]] = '';
-					res[a[1]] = res[a[1]].concat(a[0]);
-				});
-				return did(res);
-			},
-			// expand
-			unzip: function(a) {
-				var res = { normaler: {}, greek: {}	};
-				for (var normCh in zip) {
-						zip[normCh].split('').forEach(function(grCh){
-							res.normaler[grCh] = normCh;
-							res.greek[normCh] = grCh;
-						});
-				}
-				return res;
-			}
-		},
-		
-		{ // 14
 			id: 'multiples',
 			description: '',
 			// build
@@ -645,7 +637,7 @@ function generateLanguage(lang) {
 			}
 		},
 		
-		{ // 15
+		{ // 14
 			id: 'pos_data',
 			description: '',
 			// build
@@ -680,7 +672,7 @@ function generateLanguage(lang) {
 			}
 		},
 		
-		{ // 16
+		{ // 15
 			id: 'negate_data',
 			description: '',
 			// build
@@ -696,31 +688,12 @@ function generateLanguage(lang) {
 			}
 		},
 		
-		{ // 17
-			id: 'unambiguousSuffixes',
-			description: '',
-			// build
-			zip: function(lang) { 
-				return dict.unambiguousSuffixes[lang];
-			},
-			// convert it to an easier format
-			unzip: function() {
-				return Object.keys(zip).reduce(function(h, k) {
-					zip[k].forEach(function(w) { h[w] = k; });
-					return h;
-				}, {});
-			}
-		},
-		
-		{ // 18
+		{ // 16
 			id: 'firstnames',
 			description: '',
 			// build
 			zip: function(lang) {
-				var replN = function(w) { return helpFns.repl(w, 
-						['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia'], 
-						['=', ':', '&', '_', '#', '~', '!', '%', '>', '<', ';', '@']
-					); 
+				var replN = function(w) { return helpFns.repl(w, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia'], 0); 
 				}
 				var names = {male: {}, female: {}, ambiguous: []};			
 				['male', 'female'].forEach(function(type) {
@@ -734,7 +707,7 @@ function generateLanguage(lang) {
 			},
 			// convert it to an easier format
 			unzip: function() {
-				var replN = function(w) { return helpFns.repl(w, ['=', ':', '&', '_', '#', '~', '!', '%', '>', '<', ';', '@'], ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) }
+				var replN = function(w) { return helpFns.repl(w, 0, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) }
 				var o = {};
 				['male', 'female'].forEach(function(type) {
 					for (var k in zip[type]) {
@@ -746,6 +719,54 @@ function generateLanguage(lang) {
 				});
 				zip.ambiguous.map(replN).reduce(function(h,s){ h[s]='a'; return h; }, o);
 				return o;
+			}
+		},
+		
+		{ // 17
+			id: 'normalizations',
+			description: {},
+			// compress
+			zip: function(lang) { 
+				var res = {};
+				rule.normalizations.forEach(function(a){
+					if(!res.hasOwnProperty(a[1])) res[a[1]] = '';
+					res[a[1]] = res[a[1]].concat(a[0]);
+				});
+				return did(res);
+			},
+			// expand
+			unzip: function(a) {
+				var res = { normaler: {}, greek: {}	};
+				for (var normCh in zip) {
+						zip[normCh].split('').forEach(function(grCh){
+							res.normaler[grCh] = normCh;
+							res.greek[normCh] = grCh;
+						});
+				}
+				return res;
+			}
+		},
+		
+		{ // 18
+			id: 'suffixes',
+			description: '',
+			// build
+			zip: function(lang) { 
+				var o = {
+					wordnet: rule.unambiguousSuffixes[lang],
+					verbs: rule.verbSuffixes[lang]
+				};
+				var s = [ 'ed', 'er', 'le', 'es', 'ns', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', 'ant', 'nt' ];
+				return helpFns.repl(JSON.stringify(o), s, 0);
+			},
+			// convert it to an easier format
+			unzip: function() {
+				var r = [ 'ed', 'er', 'le', 'es', 'ns', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', 'ant', 'nt' ];
+				zip = JSON.parse(helpFns.repl(zip, 0, r));
+				return {
+					wordnet: helpFns.toObjValues(zip.wordnet),
+					verbs: helpFns.toObjValues(zip.verbs)
+				};
 			}
 		},
 		

@@ -172,7 +172,7 @@ var zip = { irregulars:
 					var r = function(s) {return s;}
 					a.forEach(function(s, i) {
 						if (s && i > 0) s = s.replace('=',a[0]).replace('<', a[0].slice(0,-2));
-						if (s) s = helpFns.repl(s, ['&', '_', '#'], ['ing', 'er', 've']);
+						if (s) s = helpFns.repl(s, 0, ['ing', 'er', 've']);
 						if (i > 3 && !s) {
 							main.noDoers[r(a[0])] = 1;
 						} else if (i > 3) {

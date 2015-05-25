@@ -1,7 +1,7 @@
     //generated from test data
  var suffix_rules = (function() {
 
-    var compact = {
+    var zip = {
       'gerund':[
         'ing'
       ],
@@ -88,16 +88,10 @@
         's'
         ]
     }
-    var suffix_rules = {}
-    var keys = Object.keys(compact)
-    var l = keys.length;
-    var l2, i;
-    for (i = 0; i < l; i++) {
-      l2 = compact[keys[i]].length
-      for (var o = 0; o < l2; o++) {
-        suffix_rules[compact[keys[i]][o]] = keys[i]
-      }
-    }
+    var suffix_rules = Object.keys(zip).reduce(function(h, k) {
+			zip[k].forEach(function(w) { h[w] = k; })
+			return h;
+		}, {});
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = suffix_rules;
   }

@@ -12,7 +12,7 @@ var lexicon = (function() {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
-  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','normalizations','multiples','pos_data','negate_data','unambiguousSuffixes','firstnames','schema'].forEach(reqDmodule);
+  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalizations','suffixes','schema'].forEach(reqDmodule);
   reqPmodules();
   
   var main = {};
@@ -65,7 +65,23 @@ var lexicon = (function() {
      'secretary',
      'purpose',
      'event' ],
-  NNS: [ 'friends' ],
+  NNS: 
+   [ 'leaves',
+     'quizzes',
+     'geese',
+     'indices',
+     'appendices',
+     'cactuses',
+     'echoes',
+     'embargoes',
+     'loaves',
+     'matrices',
+     'mosquitoes',
+     'radiuses',
+     'theses',
+     'thieves',
+     'these',
+     'friends' ],
   CC: 
    [ 'how',
      'or',

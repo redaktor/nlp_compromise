@@ -11,13 +11,13 @@ var Noun = function(str, sentence, word_i) {
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		
-		schema = require('../../data/'+lang+'/schema');
 		indefinite_article = require('./indefinite_article'); // TODO
-		
-    firstnames = require('../../data/'+lang+'/firstnames');
-		honourifics = require('../../data/'+lang+'/honorifics');
-		nouns_inflect = require('../../data/'+lang+'/nouns_inflect');
-		nouns = require('../../data/'+lang+'/nouns');
+		var dPath = '../../data/'+lang+'/';
+		schema = require(dPath+'schema');
+    firstnames = require(dPath+'firstnames');
+		honourifics = require(dPath+'honorifics');
+		nouns = require(dPath+'nouns');
+		nouns_inflect = require(dPath+'nouns_inflect');
   }
 	
   the.is_acronym = function() {
