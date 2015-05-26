@@ -4,7 +4,10 @@
 var sentence_parser = function(text) {
 
   if (typeof module !== "undefined" && module.exports) {
-    abbreviations = require("../../data/lexicon/abbreviations")
+		if (typeof lang != 'string') lang = 'en';
+		var dPath = '../../data/'+lang+'/';
+		dates = require(dPath+'dates');
+    abbreviations = require(dPath+'abbreviations');
   }
 
   var sentences = [];
@@ -13,7 +16,7 @@ var sentence_parser = function(text) {
 
   //date abbrevs.
   //these are added seperately because they are not nouns
-  abbreviations = abbreviations.concat(["jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "sept", "sep"]);
+  abbreviations = abbreviations.concat(Object.keys(dates.monthAbbrevs));
 
   //detection of non-sentence chunks
   var abbrev_reg = new RegExp("\\b(" + abbreviations.join("|") + ")[.!?] ?$", "i");

@@ -1,9 +1,7 @@
 
 var lang = 'en';
 var negate_data = (function() {
-  
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-var zip = { everyone: 'no one',
+  var zip = { everyone: 'no one',
   everybody: 'nobody',
   someone: 'no one',
   somebody: 'nobody',

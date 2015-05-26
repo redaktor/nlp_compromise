@@ -13,7 +13,7 @@ var pos = (function() {
 				
     suffixes = require(dPath+'suffixes');
 		schema = require(dPath+'schema');
-    word_rules = require('./data/word_rules'); // TODO dictionary_rules - some are localized !
+    word_rules = require(dPath+'word_rules');
     tokenize = require('./methods/tokenization/tokenize').tokenize;
 		
     Sentence = require('./sentence');

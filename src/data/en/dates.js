@@ -1,32 +1,31 @@
 
 var lang = 'en';
 var dates = (function() {
-  
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-var zip = { months: 
+  var zip = { months: 
    { january: 0,
-     jan: 0,
      february: 1,
-     feb: 1,
      march: 2,
-     mar: 2,
      april: 3,
-     apr: 3,
      may: 4,
      june: 5,
-     jun: 5,
      july: 6,
-     jul: 6,
      august: 7,
-     aug: 7,
      september: 8,
+     october: 9,
+     november: 10,
+     december: 11 },
+  monthAbbrevs: 
+   { jan: 0,
+     feb: 1,
+     mar: 2,
+     apr: 3,
+     jun: 5,
+     jul: 6,
+     aug: 7,
      sep: 8,
      sept: 8,
-     october: 9,
      oct: 9,
-     november: 10,
      nov: 10,
-     december: 11,
      dec: 11 },
   days: 
    { monday: 1,
@@ -39,6 +38,7 @@ var zip = { months:
 
   var main = (function () {
 				var res = zip;
+				for (var w in zip.monthAbbrevs) zip.months[w] = zip.monthAbbrevs[w];
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
 				res.monthsS = res.monthSearch + ',?';

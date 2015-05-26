@@ -1,4 +1,6 @@
 //build script for the client-side file
+
+// TODO - NOT DONE YET! [redaktor fork changes]
 module.exports = function(grunt) {
 
   var files = [

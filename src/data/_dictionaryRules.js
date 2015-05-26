@@ -1,5 +1,484 @@
-	
+// nlp_comprimise by @spencermountain  in 2014
+
+/* *********************************************************************************************************
+//	The main dictionary to build various language (or context) specific lexica -
+//  part 3 : Regex rules for each part of speech that convert it to all other parts of speech.
+********************************************************************************************************* */
+
+// see ./build.js for generating the lexica
+
 var main = {	
+	//: word_rules
+	// 'parts of speech' regex patterns
+	// 0: regex string, 1: pos type
+	wordRules: {
+		JJ: [
+			'.[cts]hy$',
+			'.[st]ty$',
+			'.[gk]y$',
+			'.some$',
+			'.[nrtumcd]al$',
+			'.que$',
+			'.[tnl]ary$',
+			'.lar$',
+			'[bszmp]{2}y',
+			'.[icldtgrv]ent$',
+			'.[oe]ry$',
+			'.[lsrnpb]ian$',
+			'.[^aeiou]ial$',
+			'.[^aeiou]eal$',
+			'.[vrl]id$',
+			'.ike$',
+			'.rmy$',
+			'.azy$',
+			'.bound$',
+			'.oid$',
+			'.rough$',
+			'.mum$',
+			'.ean$',
+			'.[ia]sed$',
+			'.llen$',
+			'.ried$',
+			'.gone$',
+			'.made$',
+			'.[pdltrkvyns]ing$',
+			'.ous$',
+			'.[gt]led$',
+			'[aeiou].*ist$',
+			'[a-z]*\\-[a-z]*\\-',
+			'.[^aeiou][ei]al$',
+			'.ffy$',
+			'.[^aeiou]ic$',
+			'.(gg|bb|zz)ly$',
+			'.[aeiou]my$',
+			'.[aeiou]ble$',
+			'.[^aeiou]ful$',
+			'.[^aeiou]ish$',
+			'..ic$',
+			'[aeiou][^aeiou]id$',
+			'.[^aeiou]ish$',
+			'.[^aeiou]ive$',
+			'[ea]{2}zy$'
+		],
+		VB: [
+			'.[lnr]ize$',
+			'.fies$',
+			'^(un|de|re)\\-[a-z]..',
+			'.zes$',
+			'.ends$',
+			'.ify$',
+			'.ens$',
+			'.oses$',
+			'.ishes$',
+			'.ects$',
+			'.bles$',
+			'.pose$',
+			'.tized$',
+			'.gate$',
+			'.nes$',
+			'.lked$',
+			".'n$",
+			".'t$",
+			'.tches$',
+			'.ize$',
+			'.[^aeiou]ise$',
+			'.[aeiou]te$'
+		],
+		JJS: [
+			'.[di]est$'
+		],
+		VBZ: [
+			'.[rln]ates$'
+		],
+		RB: [
+			'[rdntkdhs]ly$',
+			'.wards$',
+			'.where$',
+			'.fore$',
+			'.less$',
+			'. so$',
+			'.fully$'
+		],
+		JJR: [
+			'.[ilk]er$'
+		],
+		NN: [
+			'.rol$',
+			'.tors$',
+			'.vice$',
+			'.ices$',
+			'.ions$',
+			'.ances$',
+			'.tions$',
+			'.tures$',
+			'.ports$',
+			'.ints$',
+			'.ea$',
+			'[aeiou][pns]er$',
+			'.ia$',
+			'.sis$',
+			'.[aeiou]na$',
+			'.[^aeiou]ity$',
+			'.[^aeiou]ium$',
+			'.[^aeiou]ica$',
+			'[aeiou][^aeiou]is$',
+			'[^aeiou]ard$',
+			'[^aeiou]ism$',
+			'.[^aeiou]ity$',
+			'.[^aeiou]ium$',
+			'.[lstrn]us$'
+		],
+		CD: [
+			'.teen(th)?$',
+			'.tieth$',
+			'^-?[0-9]+(.[0-9]+)?$',
+			'^https?:?//[a-z0-9]',
+			'^www.[a-z0-9]'
+		],
+		MD: [
+			'.*ould$',
+			".'ll$"
+		],
+		NNO: [
+			"[a-z]'s$"
+		],
+		CP: [
+			".'re$"
+		]
+	},
+	
+	// regex rules for verb conjugation
+	// used in combination with the generic 'fallback' method
+	verbRules: {
+		infinitive: [
+			{
+				regex: '(eed)$',
+				present: '$1s',
+				gerund: '$1ing',
+				past: '$1ed',
+				doer: '$1er'
+			},
+			{
+				regex: '(e)(ep)$',
+				present: '$1$2s',
+				gerund: '$1$2ing',
+				past: '$1pt',
+				doer: '$1$2er'
+			},
+			{
+				regex: '(a[tg]|i[zn]|ur|nc|gl|is)e$',
+				present: '$1es',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '([i|f|rr])y$',
+				present: '$1ies',
+				gerund: '$1ying',
+				past: '$1ied'
+			},
+			{
+				regex: '([td]er)$',
+				present: '$1s',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '([bd]l)e$',
+				present: '$1es',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(ish|tch|ess)$',
+				present: '$1es',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(ion|end|e[nc]t)$',
+				present: '$1s',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(om)e$',
+				present: '$1es',
+				gerund: '$1ing',
+				past: 'ame'
+			},
+			{
+				regex: '([aeiu])([pt])$',
+				present: '$1$2s',
+				gerund: '$1$2$2ing',
+				past: '$1$2'
+			},
+			{
+				regex: '(er)$',
+				present: '$1s',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(en)$',
+				present: '$1s',
+				gerund: '$1ing',
+				past: '$1ed'
+			}
+		],
+		//:
+		present: [
+			{
+				regex: '(ies)$',
+				infinitive: 'y',
+				gerund: 'ying',
+				past: 'ied'
+			},
+			{
+				regex: '(tch|sh)es$',
+				infinitive: '$1',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(ss)es$',
+				infinitive: '$1',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '([tzlshicgrvdnkmu])es$',
+				infinitive: '$1e',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(n[dtk]|c[kt]|[eo]n|i[nl]|er|a[ytrl])s$',
+				infinitive: '$1',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(ow)s$',
+				infinitive: '$1',
+				gerund: '$1ing',
+				past: 'ew'
+			},
+			{
+				regex: '(op)s$',
+				infinitive: '$1',
+				gerund: '$1ping',
+				past: '$1ped'
+			},
+			{
+				regex: '([eirs])ts$',
+				infinitive: '$1t',
+				gerund: '$1tting',
+				past: '$1tted'
+			},
+			{
+				regex: '(ll)s$',
+				infinitive: '$1',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: '(el)s$',
+				infinitive: '$1',
+				gerund: '$1ling',
+				past: '$1led'
+			},
+			{
+				regex: '(ip)es$',
+				infinitive: '$1e',
+				gerund: '$1ing',
+				past: '$1ed'
+			},
+			{
+				regex: 'ss$',
+				infinitive: 'ss',
+				gerund: 'ssing',
+				past: 'ssed'
+			},
+			{
+				regex: 's$',
+				infinitive: '',
+				gerund: 'ing',
+				past: 'ed'
+			}
+		],
+		//:
+		gerund: [
+			{
+				regex: 'pping$',
+				infinitive: 'p',
+				present: 'ps',
+				past: 'pped'
+			},
+			{
+				regex: 'lling$',
+				infinitive: 'll',
+				present: 'lls',
+				past: 'lled'
+			},
+			{
+				regex: 'tting$',
+				infinitive: 't',
+				present: 'ts',
+				past: 't'
+			},
+			{
+				regex: 'ssing$',
+				infinitive: 'ss',
+				present: 'sses',
+				past: 'ssed'
+			},
+			{
+				regex: 'gging$',
+				infinitive: 'g',
+				present: 'gs',
+				past: 'gged'
+			},
+			{
+				regex: '([^aeiou])ying$',
+				infinitive: '$1y',
+				present: '$1ies',
+				past: '$1ied',
+				doer: '$1ier'
+			},
+			{
+				regex: '(i.)ing$',
+				infinitive: '$1e',
+				present: '$1es',
+				past: '$1ed'
+			},
+			{
+				regex: '(u[rtcb]|[bdtpkg]l|n[cg]|a[gdkvtc]|[ua]s|[dr]g|yz|o[rlsp]|cre)ing$',
+				infinitive: '$1e',
+				present: '$1es',
+				past: '$1ed'
+			},
+			{
+				regex: '(ch|sh)ing$',
+				infinitive: '$1',
+				present: '$1es',
+				past: '$1ed'
+			},
+			{
+				regex: '(..)ing$',
+				infinitive: '$1',
+				present: '$1s',
+				past: '$1ed'
+			}
+		],
+		//: 
+		past: [
+			{
+				regex: '(ued)$',
+				present: 'ues',
+				gerund: 'uing',
+				past: 'ued',
+				doer: 'uer'
+			},
+			{
+				regex: '(e|i)lled$',
+				present: '$1lls',
+				gerund: '$1lling',
+				past: '$1lled',
+				doer: '$1ller'
+			},
+			{
+				regex: '(sh|ch)ed$',
+				infinitive: '$1',
+				present: '$1es',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: '(tl|gl)ed$',
+				infinitive: '$1e',
+				present: '$1es',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: '(ss)ed$',
+				infinitive: '$1',
+				present: '$1es',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: 'pped$',
+				infinitive: 'p',
+				present: 'ps',
+				gerund: 'pping',
+				doer: 'pper'
+			},
+			{
+				regex: 'tted$',
+				infinitive: 't',
+				present: 'ts',
+				gerund: 'tting',
+				doer: 'tter'
+			},
+			{
+				regex: 'gged$',
+				infinitive: 'g',
+				present: 'gs',
+				gerund: 'gging',
+				doer: 'gger'
+			},
+			{
+				regex: '(h|ion|n[dt]|ai.|[cs]t|pp|all|ss|tt|int|ail|ld|en|oo.|er|k|pp|w|ou.|rt|ght|rm)ed$',
+				infinitive: '$1',
+				present: '$1s',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: '(..[^aeiou])ed$',
+				infinitive: '$1e',
+				present: '$1es',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: 'ied$',
+				infinitive: 'y',
+				present: 'ies',
+				gerund: 'ying',
+				doer: 'ier'
+			},
+			{
+				regex: '(.o)ed$',
+				infinitive: '$1o',
+				present: '$1os',
+				gerund: '$1oing',
+				doer: '$1oer'
+			},
+			{
+				regex: '(.i)ed$',
+				infinitive: '$1',
+				present: '$1s',
+				gerund: '$1ing',
+				doer: '$1er'
+			},
+			{
+				regex: '([rl])ew$',
+				infinitive: '$1ow',
+				present: '$1ows',
+				gerund: '$1owing'
+			},
+			{
+				regex: '([pl])t$',
+				infinitive: '$1t',
+				present: '$1ts',
+				gerund: '$1ting'
+			}
+		]
+	},
+	
 	//: unambigous suffixes
 	unambiguousSuffixes: {
 		en: {
@@ -21,6 +500,7 @@ var main = {
 	
 	verbSuffixes: {
 		en: {
+			// generated from test data
 			gerund: [
 				'ing'
 			],

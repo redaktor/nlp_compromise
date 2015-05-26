@@ -2,9 +2,10 @@
 var Verb = function(str, next, last, token) {
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
-		schema = require('../../data/'+lang+'/schema');
-		verbs_special = require('../../data/'+lang+'/verbs_special');
-    verb_conjugate = require('../../data/'+lang+'/verbs_conjugate');
+		var dPath = '../../data/'+lang+'/';
+		schema = require(dPath+'schema');
+		verbs_special = require(dPath+'verbs_special');
+    verb_conjugate = require(dPath+'verbs_conjugate');
   }
   var the = this;
   the.word = str || '';

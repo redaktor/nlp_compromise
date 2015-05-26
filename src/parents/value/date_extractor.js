@@ -1,6 +1,8 @@
 // generates properly-formatted dates from free-text date forms
 // by spencer kelly 2014
 
+// TODO - the regexes are valid for many languages - localize only 'linking words'
+
 var date_extractor = (function() {
 	if (typeof module !== 'undefined' && module.exports) dates = require('../../data/'+lang+'/dates');
   var days = '([0-9]{1,2}),?';

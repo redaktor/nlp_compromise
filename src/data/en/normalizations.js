@@ -1,10 +1,8 @@
-/* [object Object] */
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
 var lang = 'en';
 var normalizations = (function() {
-  
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-var zip = { '2': '²ƻ',
+  var zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
   '5': 'Ƽƽ',
   '8': 'Ȣȣ',

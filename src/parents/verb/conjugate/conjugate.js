@@ -1,13 +1,12 @@
 //turn a verb into its other grammatical forms.
 var verb_conjugate = (function() {
-
+	
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		var dPath = '../../../data/'+lang+'/';
 		suffixes = require(dPath+'suffixes');
 		verbs_conjugate = require(dPath+'verbs_conjugate');
-    verb_rules = require('./verb_rules'); // TODO dictionaryRules
-		
+    verb_rules = require(dPath+'verb_rules');
     to_doer = require('./to_doer');
   }
 
@@ -33,19 +32,19 @@ var verb_conjugate = (function() {
     }
     var present, past, gerund, doer;
     if (w.match(/[^aeiou]$/)) {
-      gerund = w + 'ing'
-      past = w + 'ed'
+      gerund = w + 'ing';
+      past = w + 'ed';
       if (w.match(/ss$/)) {
-        present = w + 'es' //'passes'
+        present = w + 'es'; //'passes'
       } else {
-        present = w + 's'
+        present = w + 's';
       }
-      doer = to_doer(infinitive)
+      doer = to_doer(infinitive);
     } else {
-      gerund = w.replace(/[aeiou]$/, 'ing')
-      past = w.replace(/[aeiou]$/, 'ed')
-      present = w.replace(/[aeiou]$/, 'es')
-      doer = to_doer(infinitive)
+      gerund = w.replace(/[aeiou]$/, 'ing');
+      past = w.replace(/[aeiou]$/, 'ed');
+      present = w.replace(/[aeiou]$/, 'es');
+      doer = to_doer(infinitive);
     }
     return {
       infinitive: infinitive,
@@ -59,50 +58,30 @@ var verb_conjugate = (function() {
 
   //make sure object has all forms
   var fufill = function(obj, prefix) {
-    if (!obj.infinitive) {
-      return obj
-    }
-    if (!obj.gerund) {
-      obj.gerund = obj.infinitive + 'ing'
-    }
-    if (!obj.doer) {
-      obj.doer = to_doer(obj.infinitive)
-    }
-    if (!obj.present) {
-      obj.present = obj.infinitive + 's'
-    }
-    if (!obj.past) {
-      obj.past = obj.infinitive + 'ed'
-    }
+    if (!obj.infinitive) return obj; 
+    if (!obj.gerund) obj.gerund = obj.infinitive + 'ing';
+    if (!obj.doer) obj.doer = to_doer(obj.infinitive);
+    if (!obj.present) obj.present = obj.infinitive + 's';
+    if (!obj.past) obj.past = obj.infinitive + 'ed';
     //add the prefix to all forms, if it exists
     if (prefix) {
       Object.keys(obj).forEach(function(k) {
-        obj[k] = prefix + obj[k]
+        obj[k] = prefix + obj[k];
       })
     }
     //future is 'will'+infinitive
-    if (!obj.future) {
-      obj.future = 'will ' + obj.infinitive
-    }
+    if (!obj.future) obj.future = 'will ' + obj.infinitive;
     //perfect is 'have'+past-tense
-    if (!obj.perfect) {
-      obj.perfect = 'have ' + obj.past
-    }
+    if (!obj.perfect) obj.perfect = 'have ' + obj.past;
     //pluperfect is 'had'+past-tense
-    if (!obj.pluperfect) {
-      obj.pluperfect = 'had ' + obj.past
-    }
+    if (!obj.pluperfect) obj.pluperfect = 'had ' + obj.past;
     //future perfect is 'will have'+past-tense
-    if (!obj.future_perfect) {
-      obj.future_perfect = 'will have ' + obj.past
-    }
-    return obj
+    if (!obj.future_perfect) obj.future_perfect = 'will have ' + obj.past;
+    return obj;
   }
 
   var main = function(w) {
-    if (w===undefined) {
-      return {}
-    }
+    if (w===undefined) return {};
 
     //for phrasal verbs ('look out'), conjugate look, then append 'out'
     var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
@@ -123,37 +102,30 @@ var verb_conjugate = (function() {
     }
 
     //for pluperfect ('had tried') remove 'had' and call it past-tense
-    if(w.match(/^had [a-z]/i)){
-      w=w.replace(/^had /i,'')
-    }
+    if(w.match(/^had [a-z]/i)) w = w.replace(/^had /i,'');
     //for perfect ('have tried') remove 'have' and call it past-tense
-    if(w.match(/^have [a-z]/i)){
-      w=w.replace(/^have /i,'')
-    }
-
+    if(w.match(/^have [a-z]/i)) w = w.replace(/^have /i,'');
     //for future perfect ('will have tried') remove 'will have' and call it past-tense
-    if(w.match(/^will have [a-z]/i)){
-      w=w.replace(/^will have /i,'')
-    }
+    if(w.match(/^will have [a-z]/i)) w = w.replace(/^will have /i,'');
 
     //chop it if it's future-tense
-    w = w.replace(/^will /i, '')
+    w = w.replace(/^will /i, '');
     //un-prefix the verb, and add it in later
-    var prefix = (w.match(/^(over|under|re|anti|full)\-?/i) || [])[0]
-    var verb = w.replace(/^(over|under|re|anti|full)\-?/i, '')
+    var prefix = (w.match(/^(over|under|re|anti|full)\-?/i) || [])[0];
+    var verb = w.replace(/^(over|under|re|anti|full)\-?/i, '');
     //check irregulars
     var obj = {};
-    var l = verbs_conjugate.irregulars.length
+    var l = verbs_conjugate.irregulars.length;
     var x, i;
     for (i = 0; i < l; i++) {
-      x = verbs_conjugate.irregulars[i]
+      x = verbs_conjugate.irregulars[i];
       if (verb === x.present || verb === x.gerund || verb === x.past || verb === x.infinitive) {
         obj = JSON.parse(JSON.stringify(verbs_conjugate.irregulars[i])); // object 'clone' hack, to avoid mem leak
         return fufill(obj, prefix)
       }
     }
     //guess the tense, so we know which transormation to make
-    var predicted = predict(w) || 'infinitive'
+    var predicted = predict(w) || 'infinitive';
 
     //check against suffix rules
     l = verb_rules[predicted].length
@@ -164,9 +136,9 @@ var verb_conjugate = (function() {
         obj[predicted] = w;
         Object.keys(r.repl).forEach(function(k) {
           if (k === predicted) {
-            obj[k] = w
+            obj[k] = w;
           } else {
-            obj[k] = w.replace(r.reg, r.repl[k])
+            obj[k] = (r.repl[k]) ? w.replace(r.reg, r.repl[k]) : 0;
           }
         });
         return fufill(obj);
@@ -174,13 +146,11 @@ var verb_conjugate = (function() {
     }
 
     //produce a generic transformation
-    return fallback(w)
+    return fallback(w);
   };
 
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = main;
-  }
-  return main
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
+  return main;
 })()
 
 // console.log(verb_conjugate('walking'))

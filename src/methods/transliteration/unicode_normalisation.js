@@ -2,65 +2,17 @@
 //http://en.wikipedia.org/wiki/List_of_Unicode_characters
 //https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
 var normalize = (function() {
-  //approximate visual (not semantic) relationship between unicode and ascii characters
-  var compact={
-      "2": "²ƻ",
-      "3": "³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ",
-      "5": "Ƽƽ",
-      "8": "Ȣȣ",
-      "!": "¡",
-      "?": "¿Ɂɂ",
-      "a": "ªÀÁÂÃÄÅàáâãäåĀāĂăĄąǍǎǞǟǠǡǺǻȀȁȂȃȦȧȺΆΑΔΛάαλАДадѦѧӐӑӒӓƛɅ",
-      "b": "ßþƀƁƂƃƄƅɃΒβϐϦБВЪЬбвъьѢѣҌҍҔҕƥƾ",
-      "c": "¢©ÇçĆćĈĉĊċČčƆƇƈȻȼͻͼͽϲϹϽϾϿЄСсєҀҁҪҫ",
-      "d": "ÐĎďĐđƉƊȡƋƌǷ",
-      "e": "ÈÉÊËèéêëĒēĔĕĖėĘęĚěƎƏƐǝȄȅȆȇȨȩɆɇΈΕΞΣέεξϱϵ϶ЀЁЕЭеѐёҼҽҾҿӖӗӘәӚӛӬӭ",
-      "f": "ƑƒϜϝӺӻ",
-      "g": "ĜĝĞğĠġĢģƓǤǥǦǧǴǵ",
-      "h": "ĤĥĦħƕǶȞȟΉΗЂЊЋНнђћҢңҤҥҺһӉӊ",
-      "I": "ÌÍÎÏ",
-      "i": "ìíîïĨĩĪīĬĭĮįİıƖƗȈȉȊȋΊΐΪίιϊІЇії",
-      "j": "ĴĵǰȷɈɉϳЈј",
-      "k": "ĶķĸƘƙǨǩΚκЌЖКжкќҚқҜҝҞҟҠҡ",
-      "l": "ĹĺĻļĽľĿŀŁłƚƪǀǏǐȴȽΙӀӏ",
-      "m": "ΜϺϻМмӍӎ",
-      "n": "ÑñŃńŅņŇňŉŊŋƝƞǸǹȠȵΝΠήηϞЍИЙЛПийлпѝҊҋӅӆӢӣӤӥπ",
-      "o": "ÒÓÔÕÖØðòóôõöøŌōŎŏŐőƟƠơǑǒǪǫǬǭǾǿȌȍȎȏȪȫȬȭȮȯȰȱΌΘΟΦΩδθοσόϕϘϙϬϭϴОФоѲѳѺѻѼѽӦӧӨөӪӫ¤ƍΏ",
-      "p": "ƤƿΡρϷϸϼРрҎҏÞ",
-      "q": "Ɋɋ",
-      "r": "ŔŕŖŗŘřƦȐȑȒȓɌɍЃГЯгяѓҐґҒғӶӷſ",
-      "s": "ŚśŜŝŞşŠšƧƨȘșȿςϚϛϟϨϩЅѕ",
-      "t": "ŢţŤťŦŧƫƬƭƮȚțȶȾΓΤτϮϯТт҂Ҭҭ",
-      "u": "µÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųƯưƱƲǓǔǕǖǗǘǙǚǛǜȔȕȖȗɄΰμυϋύϑЏЦЧцџҴҵҶҷҸҹӋӌӇӈ",
-      "v": "ƔνѴѵѶѷ",
-      "w": "ŴŵƜωώϖϢϣШЩшщѡѿ",
-      "x": "×ΧχϗϰХхҲҳӼӽӾӿ",
-      "y": "¥ÝýÿŶŷŸƳƴȲȳɎɏΎΥΨΫγψϒϓϔЎУучўѰѱҮүҰұӮӯӰӱӲӳ",
-      "z": "ŹźŻżŽžƩƵƶȤȥɀΖζ"
-    }
-  //decompress data into an array
-  var data = []
-  Object.keys(compact).forEach(function(k){
-    compact[k].split('').forEach(function(s){
-        data.push([s,k])
-    })
-  })
-
-  //convert array to two hashes
-  var normaler = {}
-  var greek = {}
-  data.forEach(function(arr) {
-    normaler[arr[0]] = arr[1]
-    greek[arr[1]] = arr[0]
-  })
-
+	if (typeof module !== 'undefined' && module.exports) {
+		if (typeof lang != 'string') lang = 'en';
+		normalizations = require('../../data/'+lang+'/'+'normalizations');
+	}
   var normalize = function(str, options) {
     options = options || {}
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normaler[s] && r < options.percentage) {
-        return normaler[s] || s
+      if (normalizations.normaler[s] && r < options.percentage) {
+        return normalizations.normaler[s] || s
       } else {
         return s
       }
@@ -73,8 +25,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (greek[s] && r < options.percentage) {
-        return greek[s] || s
+      if (normalizations.greek[s] && r < options.percentage) {
+        return normalizations.greek[s] || s
       } else {
         return s
       }

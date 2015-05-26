@@ -12,7 +12,7 @@ var lexicon = (function() {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
-  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalizations','suffixes','schema'].forEach(reqDmodule);
+  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalizations','suffixes','verb_rules','word_rules','schema'].forEach(reqDmodule);
   reqPmodules();
   
   var main = {};

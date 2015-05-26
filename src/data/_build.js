@@ -582,22 +582,24 @@ function generateLanguage(lang) {
 			description: '',
 			// build
 			zip: function(lang) { 
-				var dates = {month: {}, day: {}};
-				['month', 'day'].forEach(function(cat) {
-					for (var i in dict.DA[cat]) {
-						var a = (dict.DA[cat][i][lang] instanceof Array) ? dict.DA[cat][i][lang] : [dict.DA[cat][i][lang]];
-						a.forEach(function(w) {
-							dates[cat][w] = parseInt(i, 10);
+				var dates = {months: {}, monthAbbrevs: {}, days: {}};
+				['month', 'day'].forEach(function(c, n) {
+					// months are 0 based, days are 1 based
+					dict.DA[c].forEach(function(o, i) {
+						var a = (o[lang] instanceof Array) ? o[lang] : [o[lang]];
+						a.forEach(function(w, j) { 
+							cat = (c === 'month' && j>0) ? 'monthAbbrevs' : c+'s';
+							dates[cat][w] = i+n; 
 						});
-					}
+					});
 				});
-				
-				return {months: dates.month, days: dates.day};
+				return dates;
 			},
 			// expand
 			// TODO - res.monthsS isn't really cross language
 			unzip: function() {
 				var res = zip;
+				for (var w in zip.monthAbbrevs) zip.months[w] = zip.monthAbbrevs[w];
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
 				res.monthsS = res.monthSearch + ',?';
@@ -724,7 +726,7 @@ function generateLanguage(lang) {
 		
 		{ // 17
 			id: 'normalizations',
-			description: {},
+			description: 'approximate visual (not semantic) relationship between unicode and ascii characters',
 			// compress
 			zip: function(lang) { 
 				var res = {};
@@ -771,6 +773,62 @@ function generateLanguage(lang) {
 		},
 		
 		{ // 19
+			id: 'verb_rules',
+			description: 'regex rules for verb conjugation\nused in combination with the generic "fallback" method',
+			// build
+			zip: function(lang) { 
+				var rs = rule.verbRules;
+				for (var cat in rs) {
+					rs[cat] = rs[cat].map(function(o){
+						return [o.regex, o.infinitive||0, o.present||0, o.gerund||0, o.past||0, o.doer||0];
+					});
+				}
+				return helpFns.repl(JSON.stringify(rs), ['\\$1e', '\\$1s', '\\$1es', '\\$1ed', '\\$1ing', 'ing'], 0);
+			},
+			// convert it to an easier format
+			unzip: function() {
+				var rs = JSON.parse(helpFns.repl(zip, 0, ['$1e', '$1s', '$1es', '$1ed', '$1ing', 'ing']));
+				for (var cat in rs) {
+					rs[cat] = rs[cat].map(function(a){
+						return {
+							reg: new RegExp(a[0],'i'),
+							repl: {
+								infinitive:a[1],
+								present:a[2],
+								gerund:a[3],
+								past:a[4],
+								doer:a[5]
+							}
+						};
+					});
+				}
+				return rs;
+			}
+		},
+		
+		{ // 20
+			id: 'word_rules',
+			description: '',
+			// build
+			zip: function(lang) {
+				return rule.wordRules;
+			},
+			// convert it to an easier format
+			unzip: function() {
+				var a = [];
+				for (var k in zip) {
+					zip[k].forEach(function(r){
+						a.push({
+							reg: new RegExp(r, "i"),
+							pos: k
+						});
+					});
+				}
+				return a;
+			}
+		},
+		
+		{ // 21
 			id: 'schema',
 			description: '',
 			// compress
@@ -924,7 +982,7 @@ function generateLanguage(lang) {
 		namesRaw.push('lexicon.js');
 		var names = JSON.stringify( namesRaw );
 		var logStr = "var util = require('util'); \nvar names = " + names + ";".concat(	
-				"\nnames.forEach(function(n, i) { console.log( n ); console.log( require('./'+n) ); });"
+				"\nnames.forEach(function(n, i) { console.log( n ); console.log( util.inspect(require('./'+n), {depth: null}) ); });"
 		);
 		fs.writeFileSync(	path.join('./', lang, '/', 'logExpandedModules.js'), logStr	);
 		return lStr;
@@ -953,13 +1011,13 @@ function generateLanguage(lang) {
 		var unzip = 'zip;\n';
 		if (g.hasOwnProperty('unzip') && g.unzip.hasOwnProperty('array')) {
 			var str = g.unzip.fn.toString(-1);
-			if (str.indexOf('helpFns.' > -1)) prefix = prefix.concat('\n', helpersImportStr); 
+			if (str.indexOf('helpFns.') > -1) prefix = prefix.concat('\n', helpersImportStr); 
 			var arr = (g.unzip.array === 'zip' || g.unzip.array === '') ? 'zip' : 'zip.'.concat(g.unzip.array); 
 			if (g.unzip.array != 'zip' && g.unzip.array != '') _main = _main.concat('zip;\n  main.', g.unzip.array, ' = ');
 			unzip = arr.concat('.map(', g.unzip.fn.toString(-1), ');\n');
 		} else if (g.hasOwnProperty('unzip')) {
 			var str = g.unzip.toString(-1);
-			if (str.indexOf('helpFns' > -1)) prefix = prefix.concat('\n', helpersImportStr);
+			if (str.indexOf('helpFns') > -1) prefix = prefix.concat('\n', helpersImportStr);
 			unzip = '('.concat(str, ')();\n');
 		}
 		

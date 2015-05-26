@@ -33,6 +33,8 @@ We MUST know the gender of each noun for several other languages !
 Useful would be an option to either disable 'last' and 'next' in the tokens -
 OR a customized toJSON method (used automatically by JSON.parse ...) :
 'last' and 'next' create a Circular and thus the object can't become a JSON ...
+
+see verbs -> conjugate -> .fulfill - what if not irregular and no verb_rule .infinitive ??? 
 */
 
 
@@ -3947,33 +3949,34 @@ var main = {
 		parent: 'value',
 		tag: 'DA',
 		
-		month: {
-			// 0 based
-			0: { en: ['january', 'jan'] },
-			1: { en: ['february', 'feb'] },
-			2: { en: ['march', 'mar'] },
-			3: { en: ['april', 'apr'] },
-			4: { en: ['may'] },
-			5: { en: ['june', 'jun'] },
-			6: { en: ['july', 'jul'] },
-			7: { en: ['august', 'aug'] },
+		month: [
+			// note: first element is full name
+			// 0 based		
+			{ en: ['january', 'jan'] },
+			{ en: ['february', 'feb'] },
+			{ en: ['march', 'mar'] },
+			{ en: ['april', 'apr'] },
+			{ en: ['may'] },
+			{ en: ['june', 'jun'] },
+			{ en: ['july', 'jul'] },
+			{ en: ['august', 'aug'] },
 			// TODO note EN: added 'sep' ! While 'sept' might be more common different Press and UK standards (e.g. IPTC, NHS) require 3-letter abbreviations !
-			8: { en: ['september', 'sep', 'sept'] }, 
-			9: { en: ['october', 'oct'] },
-			10: { en: ['november', 'nov'] },
-			11: { en: ['december', 'dec'] }
-		},
+			{ en: ['september', 'sep', 'sept'] }, 
+			{ en: ['october', 'oct'] },
+			{ en: ['november', 'nov'] },
+			{ en: ['december', 'dec'] }
+		],
 		
-		day: {
-			// 1 based
-			1: { en: ['monday'] },
-			2: { en: ['tuesday'] },
-			3: { en: ['wednesday'] },
-			4: { en: ['thursday'] },
-			5: { en: ['friday'] },
-			6: { en: ['saturday'] },
-			7: { en: ['sunday'] }
-		}
+		day: [
+			// 1 based	
+			{ en: ['monday'] },
+			{ en: ['tuesday'] },
+			{ en: ['wednesday'] },
+			{ en: ['thursday'] },
+			{ en: ['friday'] },
+			{ en: ['saturday'] },
+			{ en: ['sunday'] }
+		]
 	}
 };
 if (typeof module !== "undefined" && module.exports) module.exports = main;

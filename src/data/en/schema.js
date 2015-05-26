@@ -1,9 +1,7 @@
 
 var lang = 'en';
 var schema = (function() {
-  
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-var zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
+  var zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
   tags: 
    [ [ 'VB', 'verb, generic', 0 ],
      [ 'VBD', 'past-tense verb', 0, 'past' ],
