@@ -61,10 +61,11 @@ var britishize = (function() {
     }
     return str
   }
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) {
     exports.britishize = main;
   }
+	//::
   return main
 })()
 
@@ -123,10 +124,9 @@ var americanize = (function() {
 
     return str
   }
-
-  if (typeof module !== "undefined" && module.exports) {
-    exports.americanize = main;
-  }
+	//::NODE::
+  if (typeof module !== "undefined" && module.exports) exports.americanize = main;
+  //::
   return main;
 })();
 

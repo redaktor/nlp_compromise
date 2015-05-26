@@ -3,10 +3,11 @@
 // by @spencermountain, 2015 mit
 // many credits to http://www.allmyphrasalverbs.com/
 var phrasal_verbs = (function () {
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) {
     verb_conjugate = require("../../parents/verb/conjugate/conjugate")
   }
+	//::
   //start the list with some randoms
   var main = [
     "be onto",
@@ -116,11 +117,11 @@ var phrasal_verbs = (function () {
       main[phrasal]=tags[k]
     })
   })
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) {
     module.exports = main;
   }
-
+	//::
   return main
 })()
 // console.log(JSON.stringify(phrasal_verbs, null, 2))

@@ -2,14 +2,14 @@
 // Ignore periods/questions/exclamations used in acronyms/abbreviations/numbers, etc.
 // @spencermountain 2015 MIT
 var sentence_parser = function(text) {
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		var dPath = '../../data/'+lang+'/';
 		dates = require(dPath+'dates');
     abbreviations = require(dPath+'abbreviations');
   }
-
+	//::
   var sentences = [];
   //first do a greedy-split..
   var chunks = text.split(/(\S.+?[.\?!])(?=\s+|$|")/g);
@@ -45,9 +45,9 @@ var sentence_parser = function(text) {
 
   return sentences;
 }
-if (typeof module !== "undefined" && module.exports) {
-  exports.sentences = sentence_parser;
-}
+//::NODE::
+if (typeof module !== "undefined" && module.exports) exports.sentences = sentence_parser;
+//::
 // console.log(sentence_parser('Tony is nice. He lives in Japan.').length === 2)
 // console.log(sentence_parser('I like that Color').length === 1)
 // console.log(sentence_parser("She was dead. He was ill.").length === 2)

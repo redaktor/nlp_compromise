@@ -1,8 +1,10 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
 var Sentence = function(tokens) {
+	//::NODE::
 	if (typeof module !== 'undefined' && module.exports) negate_data = require('./data/'+lang+'/negate_data');
-  var the = this;
+  //::
+	var the = this;
   the.tokens = tokens || [];
 
   var capitalise = function(s) {
@@ -52,7 +54,9 @@ var Sentence = function(tokens) {
   }
 
   the.insert = function(token, i) {
-    if (i && token) the.tokens.splice(i, 0, token);
+    if (i && token) {
+			the.tokens.splice(i, 0, token);
+		}
   }
 
   // negate makes the sentence mean the opposite thing.
@@ -128,8 +132,10 @@ var Sentence = function(tokens) {
             tok.text = tok.text.replace(/^will /i, "won't ");
             tok.normalised = tok.normalised.replace(/^will /i, "won't ");
           }
-          if (tok.capitalised) tok.text = capitalise(tok.text);
-          return the;
+          if (tok.capitalised) {
+						tok.text = capitalise(tok.text);
+					}
+					return the;
         }
 
         return the;
@@ -207,5 +213,6 @@ var Sentence = function(tokens) {
 
   return the;
 }
-
+//::NODE::
 if (typeof module !== 'undefined' && module.exports) module.exports = Sentence;
+//::

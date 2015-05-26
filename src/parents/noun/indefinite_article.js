@@ -2,9 +2,7 @@
 //chooses an indefinite aricle 'a/an' for a word
 var indefinite_article = (function() {
   var main = function(str) {
-    if (!str) {
-      return null
-    }
+    if (!str) {return null}
     var irregulars = {
       'hour': 'an',
       'heir': 'an',
@@ -17,9 +15,9 @@ var indefinite_article = (function() {
 
     var is_acronym = function(s) {
       //no periods
-      if (s.length <= 5 && s.match(/^[A-Z]*$/)) return true;
+      if (s.length <= 5 && s.match(/^[A-Z]*$/)) {return true}
       //with periods
-      if (s.length >= 4 && s.match(/^([A-Z]\.)*$/)) return true;
+      if (s.length >= 4 && s.match(/^([A-Z]\.)*$/)) {return true}
       return false;
     }
 
@@ -49,19 +47,26 @@ var indefinite_article = (function() {
     //begin business time
     ////////////////////
     //explicit irregular forms
-    if (irregulars.hasOwnProperty(str)) return irregulars[str];
-    //spelled-out acronyms
-    if (is_acronym(str) && an_acronyms.hasOwnProperty(str.substr(0, 1)) ) return 'an';
-    //'a' regexes
+    if (irregulars.hasOwnProperty(str)) {
+			return irregulars[str];
+		}
+		//spelled-out acronyms
+    if (is_acronym(str) && an_acronyms.hasOwnProperty(str.substr(0, 1)) ) {
+			return 'an';
+		}
+		//'a' regexes
     for (var i = 0; i < a_regexs.length; i++) {
-      if (str.match(a_regexs[i])) return 'a';
+      if (str.match(a_regexs[i])) {return 'a'}
     }
     //basic vowel-startings
-    if (str.match(/^[aeiou]/i)) return 'an';
-    return 'a';
+    if (str.match(/^[aeiou]/i)) {
+			return 'an';
+		}
+		return 'a';
   }
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })();
 

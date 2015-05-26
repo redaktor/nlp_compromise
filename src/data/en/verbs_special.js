@@ -2,7 +2,9 @@
 var lang = 'en';
 var verbs_special = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = { cps: 
    [ [ 'is', '=n_' ],
      [ 'am', 'ain_' ],
@@ -36,7 +38,9 @@ var zip = { cps:
 				return res;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

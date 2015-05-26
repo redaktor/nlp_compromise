@@ -2,11 +2,12 @@
 var to_comparative = (function() {
 
   var main = function(str, lang) {
-		if (typeof lang != 'string') lang = 'en';
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
 			adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
-		
+		//::
     var transforms = [{
       reg: /y$/i,
       repl: 'ier'
@@ -39,38 +40,40 @@ var to_comparative = (function() {
       /ous$/
     ];
 		
-    if (!(adjectives_decline.to_comparative[str])) return null;
-
+    if (!(adjectives_decline.to_comparative[str])) {
+			return null
+		}
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl);
+        return str.replace(transforms[i].reg, transforms[i].repl)
       }
     }
 
     if (adjectives_decline.convertables.hasOwnProperty(str)) {
-      return (str.match(/e$/)) ? str + 'r' : str + 'er';
+      return (str.match(/e$/)) ? str + 'r' : str + 'er'
     }
 
     if (adjectives_decline.to_comparative.hasOwnProperty(str)) {
-      return adjectives_decline.to_comparative[str];
+      return adjectives_decline.to_comparative[str]
     }
 
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return 'more ' + str;
+        return 'more ' + str
       }
     }
 
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
-        return str + 'er';
+        return str + 'er'
       }
     }
     return 'more ' + str;
   }
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })();
 

@@ -130,7 +130,9 @@ var word_rules = (function() {
 				return a;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

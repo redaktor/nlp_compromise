@@ -2,7 +2,9 @@
 var lang = 'en';
 var firstnames = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = { male: 
    { will: '3m,&,ard,is,3ms',
      fred: ',e~ck,d&,~ck,dy',
@@ -293,7 +295,9 @@ var zip = { male:
 				return o;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

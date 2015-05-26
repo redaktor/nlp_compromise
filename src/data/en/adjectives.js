@@ -2,7 +2,9 @@
 var lang = 'en';
 var adjectives = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = [ 's_le',
   'fem%e',
   'm%e',
@@ -685,7 +687,9 @@ var zip = [ 's_le',
 				return zip.map(function(w) { return helpFns.repl(w, 0, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly']); });
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

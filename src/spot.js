@@ -1,9 +1,9 @@
 //just a wrapper for text -> entities
 //most of this logic is in ./parents/noun
 var spot = (function() {
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) pos = require("./pos");
-
+	//::
   var main = function(text, options) {
     options = options || {};
     //collect 'entities' from all nouns
@@ -28,8 +28,9 @@ var spot = (function() {
 
     return arr;
   }
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+	//::
   return main;
 })()
 

@@ -3,7 +3,9 @@
 var lang = 'en';
 var nouns_inflect = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = { irregulars: 
    [ [ 'child', '=ren' ],
      [ 'person', 'people' ],
@@ -232,7 +234,9 @@ var zip = { irregulars:
 				};
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

@@ -11,8 +11,9 @@ var to_number = (function() {
   // these sets of numbers each have different rules
   // [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so are ignored
   // var decimal_multiple={'tenth':0.1, 'hundredth':0.01, 'thousandth':0.001, 'millionth':0.000001,'billionth':0.000000001};
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) numbers = require('../../data'+lang+'/numbers');
-
+	//::
   var main = function(s) {
     var ones = numbers.ones;
 		var tens = numbers.tens;
@@ -27,8 +28,12 @@ var to_number = (function() {
     //parse-out currency
     s = s.replace(/[$£€]/, '');
     //try to finish-fast
-    if (s.match(/[0-9]\.[0-9]/) && parseFloat(s) == s) return parseFloat(s);
-    if (parseInt(s, 10) == s) return parseInt(s, 10);
+    if (s.match(/[0-9]\.[0-9]/) && parseFloat(s) == s) {
+			return parseFloat(s)
+		}
+		if (parseInt(s, 10) == s) {
+			return parseInt(s, 10)
+		}
     //try to die fast. (phone numbers or times)
     if (s.match(/[0-9][\-:][0-9]/)) {
       return null;
@@ -62,11 +67,11 @@ var to_number = (function() {
       w = words[i];
 
       //skip 'and' eg. five hundred and twelve
-      if (w == 'and') continue;
+      if (w == 'and') {continue}
 
       //..we're doing decimals now
       if (w == 'point' || w == 'decimal') {
-        if (decimal_mode) return null; //two point one point six
+        if (decimal_mode) {return null} //two point one point six
         decimal_mode = true;
         total += current_sum;
         current_sum = 0;
@@ -79,10 +84,16 @@ var to_number = (function() {
       if (decimal_mode) {
         x = null;
         //allow consecutive ones in decimals eg. 'two point zero five nine'
-        if (ones[w] !== undefined) x = ones[w];
-        if (teens[w] !== undefined) x = teens[w];
-        if (parseInt(w, 10) == w) x = parseInt(w, 10);
-        if (!x) return null;
+        if (ones[w] !== undefined) {
+					x = ones[w]
+				}
+				if (teens[w] !== undefined) {
+					x = teens[w]
+				}
+        if (parseInt(w, 10) == w) {
+					x = parseInt(w, 10)
+				}
+        if (!x) {return null}
         if (x < 10) {
           total += x * local_multiplier;
           local_multiplier = local_multiplier * 0.1; // next number is next decimal place
@@ -111,7 +122,7 @@ var to_number = (function() {
       //ones rules
       if (ones[w] !== undefined) {
 				// eg. five seven OR five seventeen
-        if (did.ones || did.teens) return null; 
+        if (did.ones || did.teens) {return null} 
         did.ones = true;
         current_sum += ones[w];
         continue;
@@ -119,7 +130,7 @@ var to_number = (function() {
       //teens rules
       if (teens[w]) {
 				// eg. five seven OR fifteen seventeen OR sixty fifteen
-        if (did.ones || did.teens || did.tens) return null;
+        if (did.ones || did.teens || did.tens) {return null}
         did.teens = true;
         current_sum += teens[w];
         continue;
@@ -127,14 +138,14 @@ var to_number = (function() {
       //tens rules
       if (tens[w]) {
 				// eg. five seventy OR fiveteen seventy OR twenty seventy
-        if (did.ones || did.teens || did.tens) return null;
+        if (did.ones || did.teens || did.tens) {return null}
         did.tens = true;
         current_sum += tens[w];
         continue;
       }
       //multiple rules
       if (multiple[w]) {
-        if (did.multiple[w]) return null; // eg. five hundred six hundred
+        if (did.multiple[w]) {return null} // eg. five hundred six hundred
         did.multiple[w] = true;
         //reset our concerns. allow 'five hundred five'
         did.ones = false;
@@ -154,15 +165,18 @@ var to_number = (function() {
       //if word is not a known thing now, die
       return null;
     }
-    if (current_sum) total += (current_sum || 1) * local_multiplier;
+    if (current_sum) {
+			total += (current_sum || 1) * local_multiplier
+		}
     //combine with global multiplier, like 'minus' or 'half'
     total = total * global_multiplier;
 
     return total;
   }
 
-  //kick it into module
+  //::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })()
 

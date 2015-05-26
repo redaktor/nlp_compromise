@@ -28,7 +28,9 @@ var adverbs_decline = (function() {
 				return res;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

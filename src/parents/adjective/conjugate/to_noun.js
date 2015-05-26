@@ -2,14 +2,18 @@
 var adj_to_noun = (function() {
 	
   var main = function(w, lang) {
-		if (typeof lang != 'string') lang = 'en';
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
 			adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
-    if (!w) return '';
-    if (adjectives_decline.to_noun.hasOwnProperty(w)) return adjectives_decline.to_noun[w];
-    if (w.match(' ')) return w;
-    if (w.match(/w$/))return w;
+		//::
+    if (!w) {return ''}
+    if (adjectives_decline.to_noun.hasOwnProperty(w)) {
+			return adjectives_decline.to_noun[w];
+		}
+		if (w.match(' ')) {return w}
+    if (w.match(/w$/)){return w}
 		
     var transforms=[
       {reg:/y$/, repl:'iness'},
@@ -27,14 +31,18 @@ var adj_to_noun = (function() {
 
     for(var i=0; i<transforms.length; i++){
       if(w.match(transforms[i].reg)){
-        return w.replace(transforms[i].reg, transforms[i].repl);
+        return w.replace(transforms[i].reg, transforms[i].repl)
       }
     }
 
-    if (w.match(/s$/)) return w;
-    return w + 'ness';
+    if (w.match(/s$/)) {
+			return w;
+		}
+		return w + 'ness';
   };
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports)  module.exports = main;
+	//::
   return main;
 })()
 

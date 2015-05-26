@@ -2,10 +2,12 @@
 //http://en.wikipedia.org/wiki/List_of_Unicode_characters
 //https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
 var normalize = (function() {
+	//::NODE::
 	if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		normalizations = require('../../data/'+lang+'/'+'normalizations');
 	}
+	//::
   var normalize = function(str, options) {
     options = options || {}
     options.percentage = options.percentage || 50
@@ -38,10 +40,11 @@ var normalize = (function() {
     normalize: normalize,
     denormalize: denormalize
   }
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) {
     module.exports = obj;
   }
+	//::
   return obj
 })()
 

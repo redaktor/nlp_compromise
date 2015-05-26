@@ -2,10 +2,12 @@
 var to_adjective = (function() {	
 
   var main = function(str, lang) {
-		if (typeof lang != 'string') lang = 'en';
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
 			var adverbs_decline = require('../../../data/'+lang+'/adverbs_decline');
 		}
+		//::
     var transforms = [{
       'reg': /bly$/i,
       'repl': 'ble'
@@ -38,8 +40,10 @@ var to_adjective = (function() {
     }
     return str;
   }
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
-  return main;
+  //::
+	return main;
 })();
 
 // console.log(to_adjective('quickly') === 'quick')

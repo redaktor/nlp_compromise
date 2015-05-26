@@ -3,10 +3,15 @@
 // some regex borrowed from pksunkara/inflect
 // https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
 
-var inflect = (function() {
-	// TODO lang
+var inflect = (function() {	
+	//::NODE::
+  if (typeof module !== 'undefined' && module.exports) {
+		if (typeof lang != 'string') lang = 'en';
+		nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
+	}
+	//::
   var titlecase = function(str) {
-    if (!str) return '';
+    if (!str) {return ''};
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   var pluralize_rules = [
@@ -121,20 +126,16 @@ var inflect = (function() {
 	var lang = 0;
 	var nouns_inflect = {};
 	var methods = {
-		setLang: function(lang) {
-			if (typeof module !== 'undefined' && module.exports) {
-				nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
-			}
-		},
 		pluralize: function(str, l) {
-			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
 			var low = str.toLowerCase()
 				//uncountable
-			if (uncountable_nouns[low]) return str;
-			
+			if (uncountable_nouns[low]) {
+				return str
+			}
 			//is it already plural?
-			if(is_plural(low)===true) return str;
-			
+			if(is_plural(low)===true) {
+				return str
+			}
 			//irregular
 			var found = irregulars.filter(function(r) {
 				return r[0] === low;
@@ -163,12 +164,15 @@ var inflect = (function() {
 		},
 		
 		singularize: function(str, l) {
-			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
 			var low = str.toLowerCase();
 				//uncountable
-			if (uncountable_nouns[low]) return str;
+			if (uncountable_nouns[low]) {
+				return str;
+			}
 			//is it already singular?
-			if(is_plural(low) === false) return str;
+			if(is_plural(low) === false) {
+				return str;
+			}
 			//irregular
 			var found = irregulars.filter(function(r) {
 				return r[1] === low;
@@ -198,7 +202,6 @@ var inflect = (function() {
 		},
 		
 		is_plural: function(str, l) {
-			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
 			str=(str||'').toLowerCase()
 			//handle 'mayors of chicago'
 			var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
@@ -232,7 +235,6 @@ var inflect = (function() {
 		},
 		
 		inflect: function(str, l) {
-			if ((!lang || l != lang) && typeof l != 'string') this.setLang('en');
 			if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
 				return {
 					plural: str,
@@ -252,9 +254,10 @@ var inflect = (function() {
 			}
 		}
 	}
-
+	//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = methods;
-  return methods;
+  //::
+	return methods;
 })();
 
 // console.log(inflect.singularize('kisses')=="kiss")

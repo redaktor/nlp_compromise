@@ -67,7 +67,9 @@ var multiples = (function() {
 
   var main = zip;
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

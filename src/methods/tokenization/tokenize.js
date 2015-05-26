@@ -1,21 +1,22 @@
 //split a string into 'words' - as intended to be most helpful for this library.
 //
 var tokenize = (function() {
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
     multiples = require('../../data/'+lang+'/multiples');
     sentence_parser = require('./sentence').sentences;
   }
+	//::
   //these expressions ought to be one token, not two, because they are a distinct POS together
   var multi_words = Object.keys(multiples).map(function(m) {
     return m.split(' ');
   });
 
   var normalise = function(str) {
-    if (!str) return '';
+    if (!str) { return '' }
     str = str.toLowerCase().replace(/[,\.!:;\?\(\)]/, '').replace(/’/g, "'").replace(/'/g, '');
-    if (!str.match(/[a-z0-9]/i)) return '';
+    if (!str.match(/[a-z0-9]/i)) { return '' }
     return str;
   }
 
@@ -71,10 +72,9 @@ var tokenize = (function() {
       }
     })
   }
-
-  if (typeof module !== 'undefined' && module.exports) {
-    exports.tokenize = main;
-  }
+	//::NODE::
+  if (typeof module !== 'undefined' && module.exports) exports.tokenize = main;
+  //::
   return main;
 })()
 // console.log(tokenize('i live in new york')[0].tokens.length==4)

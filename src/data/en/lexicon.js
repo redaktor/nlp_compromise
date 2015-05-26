@@ -1,6 +1,7 @@
 
 var lexicon = (function() {
   var lang = 'en';
+//::NODE::
   var m = {};
   var pm = {};
   function reqDmodule(n) { m[n] = require('./' + n.concat('.js')); }
@@ -12,9 +13,10 @@ var lexicon = (function() {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
-  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalizations','suffixes','verb_rules','word_rules','schema'].forEach(reqDmodule);
+  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalisations','suffixes','verb_rules','word_rules','schema'].forEach(reqDmodule);
   reqPmodules();
-  
+//::
+
   var main = {};
   var zip = { EX: [ 'there' ],
   NN: 
@@ -427,13 +429,13 @@ var lexicon = (function() {
 				}
 				
 				var toMain = function(key, o) {
-					o[key].forEach(function(w) { if (!main[w]) main[w] = key; });
+					o[key].forEach(function(w) { if (!main[w]) {main[w] = key} });
 				}
 				// irregulars to main
-				for (var key in did) toMain(key, did);
-				for (var key in lexiZip) toMain(key, lexiZip);
+				for (var key in did) { toMain(key, did) }
+				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
-				for (var key in zip) toMain(key, zip);
+				for (var key in zip) { toMain(key, zip) }
 				
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
@@ -441,8 +443,8 @@ var lexicon = (function() {
 					var d = pm.to_doer(v);
 					var map = {'infinitive': 'VBP', 'past': 'VBD', 'gerund': 'VBG', 'present': 'VBZ', 'participle': 'VBN'};
 					for (var type in map) {
-						if (c[type] && !main[c[type]]) main[c[type]] = map[type];
-						if (d && !main[d]) main[d] = 'NNA';
+						if (c[type] && !main[c[type]]) { main[c[type]] = map[type] }
+						if (d && !main[d]) { main[d] = 'NNA' }
 					}
 				});
 				// decline all adjectives to their adverbs. (13ms)
@@ -450,22 +452,30 @@ var lexicon = (function() {
 				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
 					main[j] = 'JJ';
 					var adv = pm.to_adverb(j);
-					if (adv && adv !== j && !main[adv]) main[adv] = main[adv] || 'RB';
+					if (adv && adv !== j && !main[adv]) {
+						main[adv] = main[adv] || 'RB'
+					}
 					var c = pm.to_comparative(j);
-					if (c && !c.match(/^more ./) && c !== j && !main[c]) main[c] = main[c] || 'JJR';
+					if (c && !c.match(/^more ./) && c !== j && !main[c]) {
+						main[c] = main[c] || 'JJR'
+					}
 					var s = pm.to_superlative(j);
-					if (s && !s.match(/^most ./) && s !== j && !main[s]) main[s] = main[s] || 'JJS';
+					if (s && !s.match(/^most ./) && s !== j && !main[s]) {
+						main[s] = main[s] || 'JJS'
+					}
 				});
 				
 				
 				
 				return main;
 			}
-			if (cat in did) return did[cat];
+			if (cat in did) { return did[cat] }
 			return [];
 		}
   unzip();
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

@@ -43,12 +43,16 @@ var schema = (function() {
 				var res = {};
 				zip.tags.forEach(function(a) {
 					res[a[0]] = { name:a[1], parent:zip.parents[a[2]], tag:a[0] };
-					if (a.length > 3) res[a[0]].tense = a[3];
+					if (a.length > 3) {
+						res[a[0]].tense = a[3];
+					}
 				});
 				return res;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

@@ -1,58 +1,72 @@
 //build script for the client-side file
 
-// TODO - NOT DONE YET! [redaktor fork changes]
+// TODO - LOCALIZATION NOT DONE YET! [redaktor fork changes]
 module.exports = function(grunt) {
-
+	var lang = 'en';
+	var dPath = './src/data/'+lang+'/';
+	var pPath = './src/parents/';
+	var mPath = './src/methods/';
   var files = [
-    //lexicon data
-    './src/parents/verb/conjugate/verb_irregulars.js',
-    './src/parents/adjective/conjugate/convertables.js',
-    './src/data/lexicon/adjectives.js',
-    './src/data/lexicon/multiples.js',
-    './src/data/lexicon/verbs.js',
-    './src/data/lexicon/honourifics.js',
-    './src/data/lexicon/uncountables.js',
-    './src/data/lexicon/demonyms.js',
-    './src/data/lexicon/values.js',
-    './src/data/lexicon/abbreviations.js',
-    './src/data/lexicon/firstnames.js',
-    //methods
-    './src/methods/tokenization/sentence.js',
-    './src/methods/tokenization/ngram.js',
-    './src/methods/tokenization/tokenize.js',
-    './src/methods/transliteration/unicode_normalisation.js',
-    './src/methods/syllables/syllable.js',
-    './src/methods/localization/britishize.js',
-    //data
-    './src/data/word_rules.js',
-    './src/data/unambiguous_suffixes.js',
-    './src/data/parts_of_speech.js',
-    //values
-    './src/parents/value/to_number.js',
-    './src/parents/value/date_extractor.js',
-    './src/parents/value/index.js',
-    //nouns
-    './src/parents/noun/indefinite_article.js',
-    './src/parents/noun/conjugate/inflect.js',
-    './src/parents/noun/index.js',
-    //adverbs
-    './src/parents/adverb/conjugate/to_adjective.js',
-    './src/parents/adverb/index.js',
-    //verbs
-    './src/parents/verb/conjugate/suffix_rules.js',
-    './src/parents/verb/conjugate/verb_rules.js',
-    './src/parents/verb/conjugate/to_doer.js',
-    './src/parents/verb/conjugate/conjugate.js',
-    './src/parents/verb/index.js',
-    //adjectives
-    './src/parents/adjective/conjugate/to_noun.js',
-    './src/parents/adjective/conjugate/to_comparative.js',
-    './src/parents/adjective/conjugate/to_superlative.js',
-    './src/parents/adjective/conjugate/to_adverb.js',
-    './src/parents/adjective/index.js',
-    './src/parents/parents.js',
-    './src/data/lexicon/phrasal_verbs.js',
-    './src/data/lexicon.js',
+		// helpers
+		dPath+'helpFns.js',
+    // lexicon data
+    dPath+'multiples.js',
+    dPath+'verbs_conjugate.js',
+    dPath+'verbs_special.js',
+    dPath+'verbs.js',
+    dPath+'nouns_inflect.js',
+    dPath+'nouns.js',
+    dPath+'adjectives_decline.js',
+    dPath+'adjectives_demonym.js',
+    dPath+'adjectives.js',
+		dPath+'adverbs_decline.js',
+    dPath+'abbreviations.js',
+    dPath+'honorifics.js',
+    dPath+'dates.js',
+    dPath+'numbers.js',
+    dPath+'firstnames.js',
+    // rules and schema
+    dPath+'pos_data.js',
+		dPath+'negate_data.js',
+		dPath+'word_rules.js',
+    dPath+'verb_rules.js',
+    dPath+'normalisations.js',
+    dPath+'suffixes.js',
+		
+    dPath+'schema.js',
+    // methods
+    mPath+'tokenization/sentence.js',
+    mPath+'tokenization/ngram.js',
+    mPath+'tokenization/tokenize.js',
+    mPath+'transliteration/unicode_normalisation.js',
+    mPath+'syllables/syllable.js',
+    mPath+'localization/britishize.js',
+    // values
+    pPath+'value/to_number.js',
+    pPath+'value/date_extractor.js',
+    pPath+'value/index.js',
+    // nouns
+    pPath+'noun/indefinite_article.js',
+    pPath+'noun/conjugate/inflect.js',
+    pPath+'noun/index.js',
+    // adverbs
+    pPath+'adverb/conjugate/to_adjective.js',
+    pPath+'adverb/index.js',
+    // verbs
+    pPath+'verb/conjugate/to_doer.js',
+    pPath+'verb/conjugate/conjugate.js',
+    pPath+'verb/index.js',
+    // adjectives
+    pPath+'adjective/conjugate/to_noun.js',
+    pPath+'adjective/conjugate/to_comparative.js',
+    pPath+'adjective/conjugate/to_superlative.js',
+    pPath+'adjective/conjugate/to_adverb.js',
+    pPath+'adjective/index.js',
+		
+    './src/data/lexicon/phrasal_verbs.js', // TODO
+    pPath+'parents.js',
+    dPath+'lexicon.js',
+		
     './src/sentence.js',
     './src/section.js',
     './src/pos.js',
@@ -67,6 +81,10 @@ module.exports = function(grunt) {
     concat: {
       options: {
         banner: '/*! <%= pkg.name %>  <%= pkg.version %>  by @spencermountain <%= grunt.template.today("yyyy-mm-dd") %>  <%= pkg.license%> */\nvar nlp = (function() {\n',
+				process: function(src, filepath) {
+					// remove node.js only and trailing whitespace
+          return src.replace(/^.*\/\/::NODE::[\s\S]*?.*[\s\S]*?\/\/::.*?$/gm, '').replace(/[ \t]+$/gm, '');
+        },
         footer: "\nreturn nlp;\n})()"
       },
       dist: {
@@ -95,18 +113,22 @@ module.exports = function(grunt) {
       }
     },
 
+// deprecated
+// NOTE: the files for "coding" DO PASS
+// this will produce errors for generated modules strictly optimized for COMPRESSION !
+
     jscs: {
-      all: files,
+      all: ['./client_side/nlp.js'],
       options: {
-        "requireCurlyBraces": true,
-        "disallowMixedSpacesAndTabs": true,
-        "disallowTrailingWhitespace": true,
-        "disallowEmptyBlocks": true,
-        "disallowFunctionDeclarations": true,
-        "disallowImplicitTypeConversion": ["numeric", "boolean", "binary", "string"],
-        "requireAnonymousFunctions": true,
-        "requireOperatorBeforeLineBreak": true
-        // disallowTrailingComma:true
+        requireCurlyBraces: true,
+        disallowMixedSpacesAndTabs: true,
+        disallowEmptyBlocks: true,
+        disallowFunctionDeclarations: true,
+        disallowImplicitTypeConversion: ["numeric", "boolean", "binary", "string"],
+        requireAnonymousFunctions: true,
+        requireOperatorBeforeLineBreak: true,
+        disallowTrailingWhitespace: true
+        //disallowTrailingComma:true
       }
     },
 

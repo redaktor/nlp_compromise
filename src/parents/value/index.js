@@ -2,14 +2,14 @@
 var Value = function(str, next, last, token) {
   var the = this
   the.word = str || '';
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) {
 		schema = require('../../data/'+lang+'/schema');
 		dates = require('../../data/'+lang+'/dates');
     to_number = require('./to_number');
     date_extractor = require('./date_extractor');
   }
-
+	//::
   the.date = function(options) {
     options = options || {};
     return date_extractor(the.word, options);
@@ -24,21 +24,21 @@ var Value = function(str, next, last, token) {
   }
 
   the.number = function() {
-    if (the.is_date()) return null;
+    if (the.is_date()) {return null}
     return to_number(the.word);
   }
 
   the.which = (function() {
-    if (the.date()) return schema['DA'];
-    if (the.number()) return schema['NU'];
+    if (the.date()) { return schema['DA']}
+    if (the.number()){return schema['NU']}
     return schema['CD'];
   })()
 
   return the;
 };
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Value;
-}
+//::NODE::
+if (typeof module !== "undefined" && module.exports) module.exports = Value;
+//::
 
 // console.log(new Value("fifty five").number())
 // console.log(new Value("june 5th 1998").date())

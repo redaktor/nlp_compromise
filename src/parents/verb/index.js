@@ -1,5 +1,6 @@
 //wrapper for verb's methods
 var Verb = function(str, next, last, token) {
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		var dPath = '../../data/'+lang+'/';
@@ -7,6 +8,7 @@ var Verb = function(str, next, last, token) {
 		verbs_special = require(dPath+'verbs_special');
     verb_conjugate = require(dPath+'verbs_conjugate');
   }
+	//::
   var the = this;
   the.word = str || '';
   the.next = next;
@@ -50,29 +52,31 @@ var Verb = function(str, next, last, token) {
     ];
     var forms = verb_conjugate.irregulars(the.word);
     for (var i = 0; i < order.length; i++) {
-      if (forms[order[i]] === the.word) return order[i];
+      if (forms[order[i]] === the.word) {
+				return order[i]
+			}
     }
   })()
 
   //past/present/future   //wahh?!
   the.tense = (function() {
-    if (the.word.match(/\bwill\b/)) return 'future';
-    if (the.form === 'present') return 'present';
-    if (the.form === 'past') return 'past';
+    if (the.word.match(/\bwill\b/)) {return 'future'}
+    if (the.form === 'present') {return 'present'}
+    if (the.form === 'past') {return 'past'}
     return 'present';
   })()
 
   //the most accurate part_of_speech
   the.which = (function() {
-    if (verbs_special.cps[the.word]) return schema['CP'];
-    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) return schema['VBG'];
+    if (verbs_special.cps[the.word]) {return schema['CP']}
+    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) {return schema['VBG']}
     var form = the.form;
     return schema[tenses[form]];
   })()
 
   //is this verb negative already?
   the.negative = function() {
-    if (the.word.match(/n't$/)) return true;
+    if (the.word.match(/n't$/)) {return true}
     if ((verbs_special.mds[the.word] || verbs_special.cps[the.word]) && the.next && the.next.normalised === 'not') {
       return true;
     }
@@ -81,7 +85,8 @@ var Verb = function(str, next, last, token) {
 
   return the;
 }
+//::NODE::
 if (typeof module !== 'undefined' && module.exports) module.exports = Verb;
-
+//::
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)

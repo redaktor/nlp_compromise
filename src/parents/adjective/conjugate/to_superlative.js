@@ -2,11 +2,12 @@
 var to_superlative = (function() {
 
   var main = function(str, lang) {
-		if (typeof lang != 'string') lang = 'en';
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
 			adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
-		
+		//::
     var transforms = [{
       reg: /y$/i,
       repl: 'iest'
@@ -51,10 +52,15 @@ var to_superlative = (function() {
       }
     }
 
-    if (adjectives_decline.convertables.hasOwnProperty(str)) return generic_transformation(str);
-		if (!(adjectives_decline.to_superlative[str])) return 'most '.concat(str);
-    if (adjectives_decline.to_superlative.hasOwnProperty(str)) return adjectives_decline.to_superlative[str];
-		
+    if (adjectives_decline.convertables.hasOwnProperty(str)) {
+			return generic_transformation(str)
+		}
+		if (!(adjectives_decline.to_superlative[str])) {
+			return 'most '.concat(str)
+		}
+		if (adjectives_decline.to_superlative.hasOwnProperty(str)) {
+			return adjectives_decline.to_superlative[str]
+		}
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
@@ -69,9 +75,10 @@ var to_superlative = (function() {
     }
     return 'most ' + str;
   }
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
-  return main;
+  //::
+	return main;
 })();
 
 // console.log(to_superlative('dry'))

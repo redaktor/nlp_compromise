@@ -1,7 +1,7 @@
 /* approximate visual (not semantic) relationship between unicode and ascii characters */
 
 var lang = 'en';
-var normalizations = (function() {
+var normalisations = (function() {
   var zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
   '5': 'Ƽƽ',
@@ -47,7 +47,9 @@ var normalizations = (function() {
 				return res;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

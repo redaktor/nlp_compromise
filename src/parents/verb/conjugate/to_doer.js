@@ -2,10 +2,12 @@
 //turn 'walk' into 'walker'
 var verb_to_doer = (function() {
   var main = function(str) {
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
 			if (typeof lang != 'string') lang = 'en';
 			var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
 		}
+		//::
     str = str || '';
     var transforms = [{
       'reg': /e$/i,
@@ -21,7 +23,7 @@ var verb_to_doer = (function() {
       'repl': '$1tter'
     }]
 
-    if (verbs_conjugate.noDoers.hasOwnProperty(str)) return null;
+    if (verbs_conjugate.noDoers.hasOwnProperty(str)) {return null}
     if (verbs_conjugate.irregularDoers.hasOwnProperty(str)) {
       return verbs_conjugate.irregularDoers[str];
     }
@@ -32,8 +34,9 @@ var verb_to_doer = (function() {
     }
     return str + 'er';
   }
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })();
 

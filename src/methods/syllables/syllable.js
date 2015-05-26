@@ -85,10 +85,9 @@ var syllables = (function(str) {
 
     return all
   }
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+	//::NODE::
+  if (typeof module !== "undefined" && module.exports) module.exports = main;
+  //::
   return main
 })()
 

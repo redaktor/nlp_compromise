@@ -2,7 +2,9 @@
 var lang = 'en';
 var adjectives_demonym = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = [ 'afgh%',
   'alb%~',
   'alger~',
@@ -107,7 +109,9 @@ var zip = [ 'afgh%',
 					return helpFns.repl(w, 0, ['can', 'dan', 'ean', 'ian', 'ese', 'an'])
 				});
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

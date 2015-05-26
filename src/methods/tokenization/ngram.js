@@ -56,10 +56,9 @@ var ngram = (function() {
     });
     return results
   }
-
-  if (typeof module !== "undefined" && module.exports) {
-    exports.ngram = main;
-  }
+	//::NODE::
+  if (typeof module !== "undefined" && module.exports) exports.ngram = main;
+  //::
   return main
 })()
 

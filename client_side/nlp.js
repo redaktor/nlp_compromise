@@ -1,3305 +1,3345 @@
-/*! nlp_compromise  0.5.2  by @spencermountain 2015-05-18  MIT */
+/*! nlp_compromise  0.5.2  by @spencermountain 2015-05-26  MIT */
 var nlp = (function() {
-var verb_irregulars = (function() {
-  var types = [
-    'infinitive',
-    'gerund',
-    'past',
-    'present',
-    'doer',
-    'future'
-  ]
 
-  //list of verb irregular verb forms, compacted to save space. ('_' -> infinitive )
-  var compact = [
-    [
-      "arise",
-      "arising",
-      "arose",
-      "_s",
-      "_r"
-    ],
-    [
-      "babysit",
-      "_ting",
-      "babysat",
-      "_s",
-      "_ter"
-    ],
-    [
-      "be",
-      "_ing",
-      "was",
-      "is",
-      ""
-    ],
-    [
-      "beat",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "become",
-      "becoming",
-      "became",
-      "_s",
-      "_r"
-    ],
-    [
-      "bend",
-      "_ing",
-      "bent",
-      "_s",
-      "_er"
-    ],
-    [
-      "begin",
-      "_ning",
-      "began",
-      "_s",
-      "_ner"
-    ],
-    [
-      "bet",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "bind",
-      "_ing",
-      "bound",
-      "_s",
-      "_er"
-    ],
-    [
-      "bite",
-      "biting",
-      "bit",
-      "_s",
-      "_r"
-    ],
-    [
-      "bleed",
-      "_ing",
-      "bled",
-      "_s",
-      "_er"
-    ],
-    [
-      "blow",
-      "_ing",
-      "blew",
-      "_s",
-      "_er"
-    ],
-    [
-      "break",
-      "_ing",
-      "broke",
-      "_s",
-      "_er"
-    ],
-    [
-      "breed",
-      "_ing",
-      "bred",
-      "_s",
-      "_er"
-    ],
-    [
-      "bring",
-      "_ing",
-      "brought",
-      "_s",
-      "_er"
-    ],
-    [
-      "broadcast",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "build",
-      "_ing",
-      "built",
-      "_s",
-      "_er"
-    ],
-    [
-      "buy",
-      "_ing",
-      "bought",
-      "_s",
-      "_er"
-    ],
-    [
-      "catch",
-      "_ing",
-      "caught",
-      "_es",
-      "_er"
-    ],
-    [
-      "choose",
-      "choosing",
-      "chose",
-      "_s",
-      "_r"
-    ],
-    [
-      "come",
-      "coming",
-      "came",
-      "_s",
-      "_r"
-    ],
-    [
-      "cost",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "cut",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "deal",
-      "_ing",
-      "_t",
-      "_s",
-      "_er"
-    ],
-    [
-      "dig",
-      "_ging",
-      "dug",
-      "_s",
-      "_ger"
-    ],
-    [
-      "do",
-      "_ing",
-      "did",
-      "_es",
-      "_er"
-    ],
-    [
-      "draw",
-      "_ing",
-      "drew",
-      "_s",
-      "_er"
-    ],
-    [
-      "drink",
-      "_ing",
-      "drank",
-      "_s",
-      "_er"
-    ],
-    [
-      "drive",
-      "driving",
-      "drove",
-      "_s",
-      "_r"
-    ],
-    [
-      "eat",
-      "_ing",
-      "ate",
-      "_s",
-      "_er"
-    ],
-    [
-      "fall",
-      "_ing",
-      "fell",
-      "_s",
-      "_er"
-    ],
-    [
-      "feed",
-      "_ing",
-      "fed",
-      "_s",
-      "_er"
-    ],
-    [
-      "feel",
-      "_ing",
-      "felt",
-      "_s",
-      "_er"
-    ],
-    [
-      "fight",
-      "_ing",
-      "fought",
-      "_s",
-      "_er"
-    ],
-    [
-      "find",
-      "_ing",
-      "found",
-      "_s",
-      "_er"
-    ],
-    [
-      "fly",
-      "_ing",
-      "flew",
-      "_s",
-      "flier"
-    ],
-    [
-      "forbid",
-      "_ing",
-      "forbade",
-      "_s",
+var helpFns = (function() {
+  var main = (function () {
+		return {
+			toObj: function(h,s){ h[s]=true; return h; },
+			toObjValues: function(zip, obj){
+				if (!obj) {obj = {}}
+				return Object.keys(zip).reduce(function(h, k) {
+					zip[k].forEach(function(w) { h[w] = k; });
+					return h;
+				}, {});
+			},
+			repl: function(a,s,r){
+				if (typeof a === 'undefined') {return null}
+				var std = ['&','_','#','~','!','%',';','@','0','1','2','3','4','5','6','7','8','9','>','`'];
+				if (!s && r) {
+					s = std.slice(0, r.length);
+				}
+				if (!r) {
+					r = std;
+				}
+				var _r = function(w){
+					s.forEach(function(rS, i) { w = w.replace(new RegExp(rS, 'g'), r[i]) });
+					return w;
+				}
+				return (a instanceof Array) ? a.map(_r) : _r(a);
+			},
+			replBase: function(a,s,r){
+				if (typeof a === 'undefined') {return null}
+				var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));
+				return [a[0], ((typeof s !== 'undefined') ? helpFns.repl(_s, s, r) : _s) ];
+			}
+		};
+	})();
 
-    ],
-    [
-      "forget",
-      "_ing",
-      "forgot",
-      "_s",
-      "_er"
-    ],
-    [
-      "forgive",
-      "forgiving",
-      "forgave",
-      "_s",
-      "_r"
-    ],
-    [
-      "freeze",
-      "freezing",
-      "froze",
-      "_s",
-      "_r"
-    ],
-    [
-      "get",
-      "_ting",
-      "got",
-      "_s",
-      "_ter"
-    ],
-    [
-      "give",
-      "giving",
-      "gave",
-      "_s",
-      "_r"
-    ],
-    [
-      "go",
-      "_ing",
-      "went",
-      "_es",
-      "_er"
-    ],
-    [
-      "grow",
-      "_ing",
-      "grew",
-      "_s",
-      "_er"
-    ],
-    [
-      "hang",
-      "_ing",
-      "hung",
-      "_s",
-      "_er"
-    ],
-    [
-      "have",
-      "having",
-      "had",
-      "has",
 
-    ],
-    [
-      "hear",
-      "_ing",
-      "_d",
-      "_s",
-      "_er"
-    ],
-    [
-      "hide",
-      "hiding",
-      "hid",
-      "_s",
-      "_r"
-    ],
-    [
-      "hit",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "hold",
-      "_ing",
-      "held",
-      "_s",
-      "_er"
-    ],
-    [
-      "hurt",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "know",
-      "_ing",
-      "knew",
-      "_s",
-      "_er"
-    ],
-    [
-      "relay",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "lay",
-      "_ing",
-      "laid",
-      "_s",
-      "_er"
-    ],
-    [
-      "lead",
-      "_ing",
-      "led",
-      "_s",
-      "_er"
-    ],
-    [
-      "leave",
-      "leaving",
-      "left",
-      "_s",
-      "_r"
-    ],
-    [
-      "lend",
-      "_ing",
-      "lent",
-      "_s",
-      "_er"
-    ],
-    [
-      "let",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "lie",
-      "lying",
-      "lay",
-      "_s",
-      "_r"
-    ],
-    [
-      "light",
-      "_ing",
-      "lit",
-      "_s",
-      "_er"
-    ],
-    [
-      "lose",
-      "losing",
-      "lost",
-      "_s",
-      "_r"
-    ],
-    [
-      "make",
-      "making",
-      "made",
-      "_s",
-      "_r"
-    ],
-    [
-      "mean",
-      "_ing",
-      "_t",
-      "_s",
-      "_er"
-    ],
-    [
-      "meet",
-      "_ing",
-      "met",
-      "_s",
-      "_er"
-    ],
-    [
-      "pay",
-      "_ing",
-      "paid",
-      "_s",
-      "_er"
-    ],
-    [
-      "put",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "quit",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "read",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "ride",
-      "riding",
-      "rode",
-      "_s",
-      "_r"
-    ],
-    [
-      "ring",
-      "_ing",
-      "rang",
-      "_s",
-      "_er"
-    ],
-    [
-      "rise",
-      "rising",
-      "rose",
-      "_s",
-      "_r"
-    ],
-    [
-      "run",
-      "_ning",
-      "ran",
-      "_s",
-      "_ner"
-    ],
-    [
-      "say",
-      "_ing",
-      "said",
-      "_s",
-
-    ],
-    [
-      "see",
-      "_ing",
-      "saw",
-      "_s",
-      "_r"
-    ],
-    [
-      "sell",
-      "_ing",
-      "sold",
-      "_s",
-      "_er"
-    ],
-    [
-      "send",
-      "_ing",
-      "sent",
-      "_s",
-      "_er"
-    ],
-    [
-      "set",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "shake",
-      "shaking",
-      "shook",
-      "_s",
-      "_r"
-    ],
-    [
-      "shine",
-      "shining",
-      "shone",
-      "_s",
-      "_r"
-    ],
-    [
-      "shoot",
-      "_ing",
-      "shot",
-      "_s",
-      "_er"
-    ],
-    [
-      "show",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "shut",
-      "_ting",
-      "_",
-      "_s",
-      "_ter"
-    ],
-    [
-      "sing",
-      "_ing",
-      "sang",
-      "_s",
-      "_er"
-    ],
-    [
-      "sink",
-      "_ing",
-      "sank",
-      "_s",
-      "_er"
-    ],
-    [
-      "sit",
-      "_ting",
-      "sat",
-      "_s",
-      "_ter"
-    ],
-    [
-      "slide",
-      "sliding",
-      "slid",
-      "_s",
-      "_r"
-    ],
-    [
-      "speak",
-      "_ing",
-      "spoke",
-      "_s",
-      "_er"
-    ],
-    [
-      "spend",
-      "_ing",
-      "spent",
-      "_s",
-      "_er"
-    ],
-    [
-      "spin",
-      "_ning",
-      "spun",
-      "_s",
-      "_ner"
-    ],
-    [
-      "spread",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "stand",
-      "_ing",
-      "stood",
-      "_s",
-      "_er"
-    ],
-    [
-      "steal",
-      "_ing",
-      "stole",
-      "_s",
-      "_er"
-    ],
-    [
-      "stick",
-      "_ing",
-      "stuck",
-      "_s",
-      "_er"
-    ],
-    [
-      "sting",
-      "_ing",
-      "stung",
-      "_s",
-      "_er"
-    ],
-    [
-      "strike",
-      "striking",
-      "struck",
-      "_s",
-      "_r"
-    ],
-    [
-      "swear",
-      "_ing",
-      "swore",
-      "_s",
-      "_er"
-    ],
-    [
-      "swim",
-      "_ing",
-      "swam",
-      "_s",
-      "_mer"
-    ],
-    [
-      "swing",
-      "_ing",
-      "swung",
-      "_s",
-      "_er"
-    ],
-    [
-      "take",
-      "taking",
-      "took",
-      "_s",
-      "_r"
-    ],
-    [
-      "teach",
-      "_ing",
-      "taught",
-      "_s",
-      "_er"
-    ],
-    [
-      "tear",
-      "_ing",
-      "tore",
-      "_s",
-      "_er"
-    ],
-    [
-      "tell",
-      "_ing",
-      "told",
-      "_s",
-      "_er"
-    ],
-    [
-      "think",
-      "_ing",
-      "thought",
-      "_s",
-      "_er"
-    ],
-    [
-      "throw",
-      "_ing",
-      "threw",
-      "_s",
-      "_er"
-    ],
-    [
-      "understand",
-      "_ing",
-      "understood",
-      "_s",
-
-    ],
-    [
-      "wake",
-      "waking",
-      "woke",
-      "_s",
-      "_r"
-    ],
-    [
-      "wear",
-      "_ing",
-      "wore",
-      "_s",
-      "_er"
-    ],
-    [
-      "win",
-      "_ning",
-      "won",
-      "_s",
-      "_ner"
-    ],
-    [
-      "withdraw",
-      "_ing",
-      "withdrew",
-      "_s",
-      "_er"
-    ],
-    [
-      "write",
-      "writing",
-      "wrote",
-      "_s",
-      "_r"
-    ],
-    [
-      "tie",
-      "tying",
-      "_d",
-      "_s",
-      "_r"
-    ],
-    [
-      "obey",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "ski",
-      "_ing",
-      "_ied",
-      "_s",
-      "_er"
-    ],
-    [
-      "boil",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "miss",
-      "_ing",
-      "_ed",
-      "_",
-      "_er"
-    ],
-    [
-      "act",
-      "_ing",
-      "_ed",
-      "_s",
-      "_or"
-    ],
-    [
-      "compete",
-      "competing",
-      "_d",
-      "_s",
-      "competitor"
-    ],
-    [
-      "being",
-      "are",
-      "were",
-      "are",
-
-    ],
-    [
-      "imply",
-      "_ing",
-      "implied",
-      "implies",
-      "implier"
-    ],
-    [
-      "ice",
-      "icing",
-      "_d",
-      "_s",
-      "_r"
-    ],
-    [
-      "develop",
-      "_ing",
-      "_",
-      "_s",
-      "_er"
-    ],
-    [
-      "wait",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "aim",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "spill",
-      "_ing",
-      "spilt",
-      "_s",
-      "_er"
-    ],
-    [
-      "drop",
-      "_ping",
-      "_ped",
-      "_s",
-      "_per"
-    ],
-    [
-      "head",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "log",
-      "_ging",
-      "_ged",
-      "_s",
-      "_ger"
-    ],
-    [
-      "rub",
-      "_bing",
-      "_bed",
-      "_s",
-      "_ber"
-    ],
-    [
-      "smash",
-      "_ing",
-      "_ed",
-      "_es",
-      "_er"
-    ],
-    [
-      "add",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "word",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "suit",
-      "_ing",
-      "_ed",
-      "_s",
-      "_er"
-    ],
-    [
-      "be",
-      "am",
-      "was",
-      "am",
-      ""
-    ]
-  ]
-  //expand compact version out
-  var main=compact.map(function(arr){
-    var obj={}
-    for(var i=0; i<arr.length; i++){
-      obj[types[i]]=arr[i].replace(/_/, arr[0])
-    }
-    return obj
-  })
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main;
 })();
 
-// console.log(JSON.stringify(verb_irregulars, null, 2));
+var lang = 'en';
+var multiples = (function() {
+  var zip = { 'ad hominem': 'NN',
+  'will be': 'CP',
+  'ought to': 'MD',
+  'a la': 'IN',
+  'a priori': 'FW',
+  'et cetera': 'FW',
+  'on board': 'JJ',
+  'vice versa': 'JJ',
+  'en route': 'JJ',
+  'upside down': 'JJ',
+  'up front': 'JJ',
+  'in situ': 'JJ',
+  'in vitro': 'JJ',
+  'ad hoc': 'JJ',
+  'de facto': 'JJ',
+  'ad infinitum': 'JJ',
+  'for keeps': 'JJ',
+  'off guard': 'JJ',
+  'spot on': 'JJ',
+  'ipso facto': 'JJ',
+  'fed up': 'JJ',
+  'brand new': 'JJ',
+  'old fashioned': 'JJ',
+  'bona fide': 'JJ',
+  'well off': 'JJ',
+  'far off': 'JJ',
+  'straight forward': 'JJ',
+  'hard up': 'JJ',
+  'sui generis': 'JJ',
+  'en suite': 'JJ',
+  'avant garde': 'JJ',
+  'sans serif': 'JJ',
+  'gung ho': 'JJ',
+  'super duper': 'JJ',
+  'of course': 'RB',
+  'at least': 'RB',
+  'no longer': 'RB',
+  'sort of': 'RB',
+  'at first': 'RB',
+  'once again': 'RB',
+  'once more': 'RB',
+  'up to': 'RB',
+  'by now': 'RB',
+  'all but': 'RB',
+  'just about': 'RB',
+  'a lot': 'RB',
+  'by far': 'RB',
+  'at best': 'RB',
+  'at large': 'RB',
+  'for good': 'RB',
+  'for sure': 'RB',
+  'at most': 'RB',
+  'per se': 'RB',
+  'at worst': 'RB',
+  'upwards of': 'RB',
+  'en masse': 'RB',
+  'point blank': 'RB',
+  'ad nauseam': 'RB',
+  'not withstanding': 'RB',
+  'de jure': 'RB',
+  'par excellence': 'RB',
+  'de trop': 'RB',
+  'a posteriori': 'RB' };
 
-//these are adjectives that can become comparative + superlative with out "most/more"
-//its a whitelist for conjugation
-//this data is shared between comparative/superlative methods
-var convertables= [
-  "absurd",
-  "aggressive",
-  "alert",
-  "alive",
-  "awesome",
-  "beautiful",
-  "big",
-  "bitter",
-  "black",
-  "blue",
-  "bored",
-  "boring",
-  "brash",
-  "brave",
-  "brief",
-  "bright",
-  "broad",
-  "brown",
-  "calm",
-  "charming",
-  "cheap",
-  "clean",
-  "cold",
-  "cool",
-  "cruel",
-  "cute",
-  "damp",
-  "deep",
-  "dear",
-  "dead",
-  "dark",
-  "dirty",
-  "drunk",
-  "dull",
-  "eager",
-  "efficient",
-  "even",
-  "faint",
-  "fair",
-  "fanc",
-  "fast",
-  "fat",
-  "feeble",
-  "few",
-  "fierce",
-  "fine",
-  "flat",
-  "forgetful",
-  "frail",
-  "full",
-  "gentle",
-  "glib",
-  "great",
-  "green",
-  "gruesome",
-  "handsome",
-  "hard",
-  "harsh",
-  "high",
-  "hollow",
-  "hot",
-  "impolite",
-  "innocent",
-  "keen",
-  "kind",
-  "lame",
-  "lean",
-  "light",
-  "little",
-  "loose",
-  "long",
-  "loud",
-  "low",
-  "lush",
-  "macho",
-  "mean",
-  "meek",
-  "mellow",
-  "mundane",
-  "near",
-  "neat",
-  "new",
-  "nice",
-  "normal",
-  "odd",
-  "old",
-  "pale",
-  "pink",
-  "plain",
-  "poor",
-  "proud",
-  "purple",
-  "quick",
-  "rare",
-  "rapid",
-  "red",
-  "rich",
-  "ripe",
-  "rotten",
-  "round",
-  "rude",
-  "sad",
-  "safe",
-  "scarce",
-  "scared",
-  "shallow",
-  "sharp",
-  "short",
-  "shrill",
-  "simple",
-  "slim",
-  "slow",
-  "small",
-  "smart",
-  "smooth",
-  "soft",
-  "sore",
-  "sour",
-  "square",
-  "stale",
-  "steep",
-  "stiff",
-  "straight",
-  "strange",
-  "strong",
-  "sweet",
-  "swift",
-  "tall",
-  "tame",
-  "tart",
-  "tender",
-  "tense",
-  "thick",
-  "thin",
-  "tight",
-  "tough",
-  "vague",
-  "vast",
-  "vulgar",
-  "warm",
-  "weak",
-  "wet",
-  "white",
-  "wide",
-  "wild",
-  "wise",
-  "young",
-  "yellow",
-  "easy",
-  "narrow",
-  "late",
-  "early",
-  "soon",
-  "close",
-  "empty",
-  "dry",
-  "windy",
-  "noisy",
-  "thirsty",
-  "hungry",
-  "fresh",
-  "quiet",
-  "clear",
-  "heavy",
-  "happy",
-  "funny",
-  "lucky",
-  "pretty",
-  "important",
-  "interesting",
-  "attractive",
-  "dangerous",
-  "intellegent",
-  "pure",
-  "orange",
-  "large",
-  "firm",
-  "grand",
-  "formal",
-  "raw",
-  "weird",
-  "glad",
-  "mad",
-  "strict",
-  "tired",
-  "solid",
-  "extreme",
-  "mature",
-  "true",
-  "free",
-  "curly",
-  "angry"
-].reduce(function(h,s){
-  h[s]=true
-  return h
-},{})
+  var main = zip;
 
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = convertables;
-}
 
-//adjectives that either aren't covered by rules, or have superlative/comparative forms
-//this list is the seed, from which various forms are conjugated
+
+  return main;
+})();
+// types: infinitive, gerund, past, present, doer, future
+
+var lang = 'en';
+var verbs_conjugate = (function() {
+
+
+var zip = { irregulars:
+   [ [ 'be', '=&', 'was', 'is', 0 ],
+     [ 'ha#', '<v&', '<d', '<s', 0 ],
+     [ 'do', '=&', 'did', '=es' ],
+     [ 'begin', '=n&', '<an', '=s', '=n_' ],
+     [ 'go', '=&', 'went', '=es' ],
+     [ 'say', '=&', '<aid', '=<', 0 ],
+     [ 'hear', '=&', '=d', '=s' ],
+     [ 'show', '=&', '=ed', '=s' ],
+     [ 'br&', '=&', 'brought', '=s' ],
+     [ 'take', '<k&', 'took', '=s' ],
+     [ 'put', '=t&', '=', '=s' ],
+     [ 'gi#', '<v&', 'ga#', '=s' ],
+     [ 'find', '=&', 'found', '=s' ],
+     [ 'speak', '=&', 'spoke', '=s' ],
+     [ 'make', '<k&', '<de', '=s' ],
+     [ 'know', '=&', '<ew', '=s' ],
+     [ 'see', '=&', '<aw', '=<' ],
+     [ 'come', '<m&', 'came', '=s' ],
+     [ 'lea#', '<v&', 'left', '=s' ],
+     [ 'set', '=t&', '=', '=<' ],
+     [ 'get', '=tin<', '<ot', '=s' ],
+     [ 'und_stand', '=&', 'und_stood', '=s', 0 ],
+     [ 'arise', '<s&', 'arose', '=s' ],
+     [ 'babysit', '=t&', '<at', '=s' ],
+     [ 'beat', '=&', '=', '=s' ],
+     [ 'become', '<m&', 'became', '=s' ],
+     [ 'bend', '=&', '<nt', '=s' ],
+     [ 'bet', '=t&', '=', '=s', 0 ],
+     [ 'bind', '=&', 'bound', '=s' ],
+     [ 'bite', '<t&', '<t', '=s' ],
+     [ 'bleed', '=&', '<d', '=s' ],
+     [ 'blow', '=&', '<ew', '=s' ],
+     [ 'break', '=&', 'broke', '=s' ],
+     [ 'breed', '=&', '<d', '=s' ],
+     [ 'broadcast', '=&', '=', '=s' ],
+     [ 'build', '=&', '<lt', '=s' ],
+     [ 'buy', '=&', '<ought', '=s' ],
+     [ 'catch', '=&', 'caught', '=es' ],
+     [ 'choose', '<s&', 'chose', '=s' ],
+     [ 'cost', '=&', '=', '=s' ],
+     [ 'cut', '=t&', '=', '=s' ],
+     [ 'deal', '=&', '=t', '=s', '=_' ],
+     [ 'dig', '=g&', '<ug', '=s' ],
+     [ 'draw', '=&', '<ew', '=s' ],
+     [ 'drink', '=&', 'drank', '=s' ],
+     [ 'dri#', '<v&', 'dro#', '=s' ],
+     [ 'eat', '=&', 'at<', '=s' ],
+     [ 'fall', '=&', 'fell', '=s' ],
+     [ 'feed', '=&', '<d', '=s' ],
+     [ 'feel', '=&', '<lt', '=s' ],
+     [ 'fight', '=&', 'fought', '=s' ],
+     [ 'fly', '=&', '<lew', '=s' ],
+     [ 'forbid', '=&', '<ade', '=s', 0 ],
+     [ 'forget', '=&', '<ot', '=s' ],
+     [ 'forgi#', '<v&', 'forga#', '=s' ],
+     [ 'freeze', '<z&', 'froze', '=s' ],
+     [ 'grow', '=&', '<ew', '=s' ],
+     [ 'hang', '=&', 'hung', '=s' ],
+     [ 'hide', '<d&', '<d', '=s' ],
+     [ 'hit', '=t&', '=', '=s' ],
+     [ 'hold', '=&', 'held', '=s' ],
+     [ 'hurt', '=&', '=', '=s' ],
+     [ 'relay', '=&', '=ed', '=s' ],
+     [ 'lay', '=&', '<aid', '=s' ],
+     [ 'lead', '=&', '<d', '=s' ],
+     [ 'lend', '=&', '<nt', '=s' ],
+     [ 'let', '=t&', '=', '=s' ],
+     [ 'lie', '<y&', '<ay', '=s' ],
+     [ 'light', '=&', 'lit', '=s' ],
+     [ 'lose', '<s&', '<st', '=s' ],
+     [ 'mean', '=&', '=t', '=s' ],
+     [ 'meet', '=&', '<t', '=s' ],
+     [ 'pay', '=&', '<aid', '=s' ],
+     [ 'quit', '=t&', '=', '=s' ],
+     [ 'read', '=&', '=', '=s' ],
+     [ 'ride', '<d&', 'rode', '=s' ],
+     [ 'r&', '=&', 'rang', '=s' ],
+     [ 'rise', '<s&', 'rose', '=s' ],
+     [ 'run', '=n&', '<an', '=s', '=ne<' ],
+     [ 'sell', '=&', 'sold', '=s' ],
+     [ 'send', '=&', '<nt', '=s' ],
+     [ 'shake', '<k&', 'shook', '=s' ],
+     [ 'shine', '<n&', 'shone', '=s' ],
+     [ 'shoot', '=&', '<t', '=s' ],
+     [ 'shut', '=t&', '=', '=s' ],
+     [ 's&', '=&', 'sang', '=s' ],
+     [ 'sink', '=&', 'sank', '=s' ],
+     [ 'sit', '=t&', '<at', '=<' ],
+     [ 'slide', '<d&', '<d', '=s' ],
+     [ 'spend', '=&', '<nt', '=s' ],
+     [ 'spin', '=n&', '<un', '=s', '=n_' ],
+     [ 'spread', '=&', '=', '=s' ],
+     [ 'stand', '=&', 'stood', '=s' ],
+     [ 'steal', '=&', 'stole', '=s' ],
+     [ 'stick', '=&', 'stuck', '=s' ],
+     [ 'st&', '=&', 'stung', '=s' ],
+     [ 'strike', '<k&', 'struck', '=s' ],
+     [ 'swear', '=&', 'swore', '=s' ],
+     [ 'swim', '=&', '<am', '=s' ],
+     [ 'sw&', '=&', 'swung', '=s' ],
+     [ 'teach', '=&', 'taught', '=s' ],
+     [ 'tear', '=&', 'tore', '=s' ],
+     [ 'tell', '=&', 'told', '=s' ],
+     [ 'think', '=&', 'thought', '=s' ],
+     [ 'throw', '=&', '<ew', '=s' ],
+     [ 'wake', '<k&', 'woke', '=s' ],
+     [ 'wear', '=&', 'wore', '=s' ],
+     [ 'win', '=n&', '<on', '=s', '=n_' ],
+     [ 'withdraw', '=&', '<ew', '=s' ],
+     [ 'write', '<t&', 'wrote', '=s' ],
+     [ 'tie', '<y&', '=d', '=s', '=r' ],
+     [ 'obey', '=&', '=ed', '=s' ],
+     [ 'ski', '=&', '=ied', '=<' ],
+     [ 'boil', '=&', '=ed', '=s' ],
+     [ 'bear', '=&', 'bore', '=s' ],
+     [ 'miss', '=&', '=ed', '=' ],
+     [ 'act', '=&', '=ed', '=s' ],
+     [ 'compete', '<t&', '=d', '=s' ],
+     [ 'be&', 'are', 'w_e', 'are' ],
+     [ 'imply', '=&', '<lied', '<lies' ],
+     [ 'ice', '<c&', '=d', '=s' ],
+     [ 'beget', '=t&', '<ot', '=s' ],
+     [ 'de#lop', '=&', '=', '=s' ],
+     [ 'wait', '=&', '=ed', '=s' ],
+     [ 'aim', '=&', '=ed', '=s' ],
+     [ 'spill', '=&', '<lt', '=s' ],
+     [ 'burst', '=&', '=', '=s' ],
+     [ 'cast', '=&', '=', '=s' ],
+     [ 'crow', '=&', '=ed', '=s' ],
+     [ 'flee', '<e&', '<ed', '=s' ],
+     [ 'fly', '=&', '<lew', '<lies' ],
+     [ 'forsake', '<k&', 'forsook', '=s' ],
+     [ 'grind', '=&', 'ground', '=s' ],
+     [ 'melt', '=&', '=ed', '=s' ],
+     [ 'mow', '=&', '=ed', '=s' ],
+     [ 'pen', '=&', '=t', '=s' ],
+     [ 'pro#', '<v&', '=d', '=s' ],
+     [ 'rid', '=&', '=', '=es' ],
+     [ 'shine', '<n&', 'shone', '=s' ],
+     [ 'shrink', '=&', 'shrank', '=s' ],
+     [ 'shut', '=t&', '=', '=s' ],
+     [ 'slay', '=&', '<ew', '=s' ],
+     [ 'slink', '=&', 'slunk', '=s' ],
+     [ 'smite', '<t&', 'smote', '=s' ],
+     [ 'spit', '=t&', '<at', '=s' ],
+     [ 'spread', '=&', '=', '=s' ],
+     [ 'stink', '=&', 'stank', '=s' ],
+     [ 'stri#', '<v&', 'stro#', '=s' ],
+     [ 'thrust', '=&', '=', '=s' ],
+     [ 'tread', '=&', 'trod', '=s' ],
+     [ 'wea#', '<v&', 'wo#', '=s' ],
+     [ 'wed', '=d&', '=', '=s' ],
+     [ 'win', '=n&', '<on', '=s' ],
+     [ 'dream', '=&', '=t', '=s', '=_' ],
+     [ 'sail', '=&', '=ed', '=s', '=_' ],
+     [ 'rub', '=b&', '=bed', '=s', '=be<' ],
+     [ 'claim', '=&', '=ed', '=s', '=ant' ] ],
+  noDoers: { appear: 1, happen: 1, seem: 1, try: 1, aid: 1, fail: 1, marry: 1 },
+  irregularDoers: {} };
+
+  var main = zip;
+  main.irregulars = zip.irregulars.map(function (a) {
+					var types = ['infinitive','gerund','past','present','doer','future'];
+					var obj = {};
+					var r = function(s) {return s;}
+					a.forEach(function(s, i) {
+						if (s && i > 0) {
+							s = s.replace('=',a[0]).replace('<', a[0].slice(0,-2));
+						}
+						if (s) {
+							s = helpFns.repl(s, 0, ['ing', 'er', 've']);
+						}
+						if (i > 3 && !s) {
+							main.noDoers[r(a[0])] = 1;
+						} else if (i > 3) {
+							main.irregularDoers[r(a[0])] = s;
+						} else {
+							obj[types[i]] = s;
+						}
+					});
+					return obj;
+				});
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var verbs_special = (function() {
+
+
+var zip = { cps:
+   [ [ 'is', '=n_' ],
+     [ 'am', 'ain_' ],
+     [ 'are', '=n_' ],
+     [ 'was', '=n_' ],
+     [ 'were', '=n_' ],
+     [ 'will be', 'won_ be' ] ],
+  mds:
+   [ [ 'did', '=n_' ],
+     [ 'would', '=n_' ],
+     [ 'could', '=n_' ],
+     [ 'should', '=n_' ],
+     [ 'can', '=_' ],
+     [ 'will', 'won_' ],
+     [ 'must', '=n_' ],
+     [ 'shall', '<nt' ],
+     [ 'shall', '<n_' ] ] };
+
+  var main = (function () {
+				var res = {};
+				var negate = {};
+				['cps', 'mds'].forEach(function(type) {
+					res[type] = [];
+					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) {
+						var arr = helpFns.replBase(a,0,['\'t']);
+						negate[arr[0]] = arr[1];
+						return arr;
+					}));
+				});
+				res.negate = negate;
+				return res;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var verbs = (function() {
+  var zip = [ 'use',
+  'form',
+  'hope',
+  'consider',
+  'work',
+  'like',
+  'achieve',
+  'suppose',
+  'watch',
+  'occur',
+  'change',
+  'fix',
+  'exist',
+  'create',
+  'help',
+  'serve',
+  'maintain',
+  'start',
+  'stay',
+  'move',
+  'want',
+  'receive',
+  'need',
+  'finish',
+  'produce',
+  'introduce',
+  'convert',
+  'collapse',
+  'stake',
+  'forsee',
+  'suck',
+  'answer',
+  'argue',
+  'tend',
+  'examine',
+  'depend',
+  'figure',
+  'mind',
+  'surround',
+  'suspect',
+  'reflect',
+  'wonder',
+  'end',
+  'thank',
+  'file',
+  'regard',
+  'report',
+  'imagine',
+  'ensure',
+  'cause',
+  'enter',
+  'stop',
+  'defeat',
+  'surge',
+  'launch',
+  'turn',
+  'control',
+  'relate',
+  'remember',
+  'join',
+  'listen',
+  'train',
+  'spring',
+  'enjoy',
+  'recognize',
+  'obtain',
+  'learn',
+  'fill',
+  'announce',
+  'prevent',
+  'realize',
+  'involve',
+  'remove',
+  'visit',
+  'test',
+  'prepare',
+  'ask',
+  'carry',
+  'determine',
+  'raise',
+  'love',
+  'pull',
+  'improve',
+  'contain',
+  'offer',
+  'talk',
+  'pick',
+  'care',
+  'express',
+  'remain',
+  'operate',
+  'close',
+  'add',
+  'mention',
+  'support',
+  'decide',
+  'walk',
+  'vary',
+  'demand',
+  'describe',
+  'agree',
+  'allow',
+  'suffer',
+  'study',
+  'press',
+  'contribute',
+  'compare',
+  'apply',
+  'direct',
+  'discuss',
+  'indicate',
+  'require',
+  'reach',
+  'expect',
+  'play',
+  'permit',
+  'kill',
+  'charge',
+  'increase',
+  'believe',
+  'continue',
+  'live',
+  'represent',
+  'edit',
+  'cover',
+  'extend',
+  'design',
+  'supply',
+  'suggest',
+  'approach',
+  'call',
+  'include',
+  'save',
+  'discover',
+  'establish',
+  'keep',
+  'assume',
+  'attend',
+  'unite',
+  'explain',
+  'publish',
+  'accept',
+  'settle',
+  'reduce',
+  'look',
+  'interact',
+  'concern',
+  'labor',
+  'return',
+  'select',
+  'die',
+  'provide',
+  'seek',
+  'wish',
+  'follow',
+  'disagree',
+  'attack',
+  'attempt',
+  'brake',
+  'brush',
+  'burn',
+  'bang',
+  'bomb',
+  'budget',
+  'comfort',
+  'cook',
+  'copy',
+  'cough',
+  'crush',
+  'cry',
+  'check',
+  'claw',
+  'clip',
+  'combine',
+  'damage',
+  'desire',
+  'doubt',
+  'drain',
+  'dance',
+  'decrease',
+  'defect',
+  'deposit',
+  'drift',
+  'dip',
+  'dive',
+  'divorce',
+  'exchange',
+  'envy',
+  'exert',
+  'exercise',
+  'export',
+  'fold',
+  'flood',
+  'focus',
+  'forecast',
+  'fracture',
+  'grip',
+  'guide',
+  'guard',
+  'guarantee',
+  'guess',
+  'hate',
+  'heat',
+  'handle',
+  'hire',
+  'host',
+  'hunt',
+  'hurry',
+  'import',
+  'judge',
+  'jump',
+  'jam',
+  'kick',
+  'kiss',
+  'knock',
+  'laugh',
+  'lift',
+  'lock',
+  'lecture',
+  'link',
+  'load',
+  'loan',
+  'lump',
+  'message',
+  'murder',
+  'neglect',
+  'overlap',
+  'overtake',
+  'overuse',
+  'print',
+  'protest',
+  'pump',
+  'push',
+  'post',
+  'progress',
+  'promise',
+  'purchase',
+  'regret',
+  'request',
+  'reward',
+  'roll',
+  'rent',
+  'repair',
+  'scale',
+  'screw',
+  'shock',
+  'sleep',
+  'slip',
+  'smash',
+  'smell',
+  'smoke',
+  'sneeze',
+  'snow',
+  'surprise',
+  'scratch',
+  'search',
+  'share',
+  'shave',
+  'splash',
+  'stain',
+  'stress',
+  'switch',
+  'taste',
+  'touch',
+  'trade',
+  'trick',
+  'twist',
+  'trap',
+  'travel',
+  'tune',
+  'undergo',
+  'undo',
+  'uplift',
+  'vote',
+  'wash',
+  'wave',
+  'whistle',
+  'wreck',
+  'yawn',
+  'betray',
+  'restrict',
+  'perform',
+  'worry',
+  'point',
+  'activate',
+  'fear',
+  'plan',
+  'note',
+  'face',
+  'predict',
+  'differ',
+  'deserve',
+  'torture',
+  'recall',
+  'count',
+  'admit',
+  'insist',
+  'lack',
+  'pass',
+  'belong',
+  'complain',
+  'constitute',
+  'rely',
+  'refuse',
+  'range',
+  'cite',
+  'flash',
+  'arrive',
+  'reveal',
+  'consist',
+  'observe',
+  'notice',
+  'trust',
+  'display',
+  'view',
+  'stare',
+  'acknowledge',
+  'owe',
+  'gaze',
+  'treat',
+  'account',
+  'gather',
+  'address',
+  'confirm',
+  'estimate',
+  'manage',
+  'participate',
+  'sneak',
+  'drop',
+  'mirror',
+  'experience',
+  'arch',
+  'dislike',
+  'favor',
+  'earn',
+  'emphasize',
+  'match',
+  'question',
+  'emerge',
+  'encourage',
+  'matter',
+  'name',
+  'head',
+  'line',
+  'slam',
+  'list',
+  'warn',
+  'ignore',
+  'resemble',
+  'feature',
+  'place',
+  'reverse',
+  'accuse',
+  'spoil',
+  'retain',
+  'survive',
+  'praise',
+  'function',
+  'please',
+  'date',
+  'remind',
+  'deliver',
+  'echo',
+  'engage',
+  'deny',
+  'yield',
+  'center',
+  'gain',
+  'anticipate',
+  'reason',
+  'side',
+  'thrive',
+  'defy',
+  'dodge',
+  'enable',
+  'applaud',
+  'persist',
+  'pose',
+  'reject',
+  'attract',
+  'await',
+  'inhibit',
+  'declare',
+  'process',
+  'risk',
+  'urge',
+  'value',
+  'block',
+  'confront',
+  'credit',
+  'cross',
+  'amuse',
+  'dare',
+  'resent',
+  'smile',
+  'gloss',
+  'threaten',
+  'collect',
+  'depict',
+  'dismiss',
+  'submit',
+  'benefit',
+  'step',
+  'deem',
+  'limit',
+  'sense',
+  'issue',
+  'embody',
+  'force',
+  'govern',
+  'replace',
+  'bother',
+  'cater',
+  'adopt',
+  'empower',
+  'outweigh',
+  'alter',
+  'enrich',
+  'influence',
+  'prohibit',
+  'pursue',
+  'warrant',
+  'convey',
+  'approve',
+  'reserve',
+  'rest',
+  'strain',
+  'wander',
+  'adjust',
+  'dress',
+  'market',
+  'mingle',
+  'disapprove',
+  'evaluate',
+  'flow',
+  'inhabit',
+  'pop',
+  'rule',
+  'depart',
+  'roam',
+  'assert',
+  'disappear',
+  'envision',
+  'pause',
+  'afford',
+  'challenge',
+  'grab',
+  'grumble',
+  'house',
+  'portray',
+  'revel',
+  'base',
+  'conduct',
+  'review',
+  'stem',
+  'crave',
+  'mark',
+  'store',
+  'target',
+  'unlock',
+  'weigh',
+  'resist',
+  'drag',
+  'pour',
+  'reckon',
+  'assign',
+  'cling',
+  'rank',
+  'attach',
+  'decline',
+  'destroy',
+  'interfere',
+  'paint',
+  'skip',
+  'sprinkle',
+  'wither',
+  'allege',
+  'retire',
+  'score',
+  'monitor',
+  'expand',
+  'honor',
+  'pack',
+  'assist',
+  'float',
+  'appeal',
+  'stretch',
+  'undermine',
+  'assemble',
+  'boast',
+  'bounce',
+  'grasp',
+  'install',
+  'borrow',
+  'crack',
+  'elect',
+  'shout',
+  'contrast',
+  'overcome',
+  'relax',
+  'relent',
+  'strengthen',
+  'conform',
+  'dump',
+  'pile',
+  'scare',
+  'relive',
+  'resort',
+  'rush',
+  'boost',
+  'cease',
+  'command',
+  'excel',
+  'plug',
+  'plunge',
+  'proclaim',
+  'discourage',
+  'endure',
+  'ruin',
+  'stumble',
+  'abandon',
+  'cheat',
+  'convince',
+  'merge',
+  'harm',
+  'multiply',
+  'overwhelm',
+  'chew',
+  'invent',
+  'bury',
+  'wipe',
+  'has',
+  'does',
+  'added',
+  'took',
+  'define',
+  'goes',
+  'measure',
+  'enhance',
+  'distinguish',
+  'avoid',
+  'hit',
+  'don\'t',
+  'won\'t',
+  'what\'s' ];
+
+  var main = zip;
+
+
+
+  return main;
+})();
+/* singular nouns having irregular plurals */
+
+var lang = 'en';
+var nouns_inflect = (function() {
+
+
+var zip = { irregulars:
+   [ [ 'child', '=ren' ],
+     [ 'person', 'people' ],
+     [ 'leaf', '<av_' ],
+     [ 'database', '=s' ],
+     [ 'quiz', '=z_' ],
+     [ 'goose', 'ge_e' ],
+     [ 'phenomenon', '<a' ],
+     [ 'barracks', '=' ],
+     [ 'deer', '=' ],
+     [ 'syllabus', '<i' ],
+     [ 'index', '<ic_' ],
+     [ 'appendix', '<ic_' ],
+     [ 'criterion', '<a' ],
+     [ 'man', '<en' ],
+     [ 'sex', '=e<' ],
+     [ 'narrative', '=s' ],
+     [ 'addendum', '<a' ],
+     [ 'alga', '=e' ],
+     [ 'alumna', '=e' ],
+     [ 'alumnus', '<i' ],
+     [ 'bacillus', '<i' ],
+     [ 'beau', '=x' ],
+     [ 'cactus', '=_' ],
+     [ 'château', '=x' ],
+     [ 'corpus', '<ora' ],
+     [ 'curriculum', '<a' ],
+     [ 'die', '<ice' ],
+     [ 'echo', '=_' ],
+     [ 'embargo', '=_' ],
+     [ 'foot', 'feet' ],
+     [ 'formula', '=s' ],
+     [ 'genus', '<era' ],
+     [ 'graffito', '<ti' ],
+     [ 'hippopotamus', '<i' ],
+     [ 'larva', '=e' ],
+     [ 'libretto', '<ti' ],
+     [ 'loaf', '<av_' ],
+     [ 'matrix', '<ic_' ],
+     [ 'memorandum', '<a' ],
+     [ 'mosquito', '=_' ],
+     [ 'opus', '<era' ],
+     [ 'ovum', '<a' ],
+     [ 'ox', '=en' ],
+     [ 'radius', '=_' ],
+     [ 'referendum', '<a' ],
+     [ 'tableau', '=x' ],
+     [ 'that', '<ose' ],
+     [ 'that', '<__' ],
+     [ 'thief', '<ev_' ],
+     [ 'this', '<_e' ],
+     [ 'tooth', 'teeth' ],
+     [ 'vita', '=e' ],
+     [ 'i', 'we' ],
+     [ 'he', 't=y' ],
+     [ 'she', 'they' ],
+     [ 'mine', 'ours' ],
+     [ 'myself', 'yourselv_' ],
+     [ 'myself', 'ourselv_' ],
+     [ 'yourself', 'themselv_' ],
+     [ 'his', 't<eirs' ],
+     [ 'himself', 'themselv_' ],
+     [ 'her', 't<eirs' ],
+     [ 'hers', 't<irs' ],
+     [ 'herself', 'themselv_' ],
+     [ 'its', 'the<rs' ],
+     [ 'theirs', '=' ],
+     [ 'themself', '<lv_' ] ],
+  uc:
+   [ 'oxen',
+     'grammar',
+     'series',
+     'sheep',
+     'fish',
+     'aircraft',
+     'bass',
+     'bison',
+     'fowl',
+     'halibut',
+     'moose',
+     'salmon',
+     'spacecraft',
+     'tuna',
+     'trout',
+     'advice',
+     'information',
+     'knowledge',
+     'trouble',
+     'enjoyment',
+     'fun',
+     'recreation',
+     'relaxation',
+     'meat',
+     'rice',
+     'bread',
+     'cake',
+     'coffee',
+     'ice',
+     'water',
+     'oil',
+     'grass',
+     'hair',
+     'fruit',
+     'wildlife',
+     'equipment',
+     'machinery',
+     'furniture',
+     'mail',
+     'luggage',
+     'jewelry',
+     'clothing',
+     'money',
+     'mathematics',
+     'economics',
+     'physics',
+     'civics',
+     'ethics',
+     'gymnastics',
+     'mumps',
+     'measles',
+     'news',
+     'tennis',
+     'baggage',
+     'currency',
+     'soap',
+     'toothpaste',
+     'food',
+     'sugar',
+     'butter',
+     'flour',
+     'research',
+     'leather',
+     'wool',
+     'wood',
+     'coal',
+     'weather',
+     'homework',
+     'cotton',
+     'silk',
+     'patience',
+     'impatience',
+     'vinegar',
+     'art',
+     'beef',
+     'blood',
+     'cash',
+     'chaos',
+     'cheese',
+     'chewing',
+     'conduct',
+     'confusion',
+     'education',
+     'electricity',
+     'entertainment',
+     'fiction',
+     'forgiveness',
+     'gold',
+     'gossip',
+     'ground',
+     'happiness',
+     'history',
+     'honey',
+     'hospitality',
+     'importance',
+     'justice',
+     'laughter',
+     'leisure',
+     'lightning',
+     'literature',
+     'luck',
+     'melancholy',
+     'milk',
+     'mist',
+     'music',
+     'noise',
+     'oxygen',
+     'paper',
+     'pay',
+     'peace',
+     'peanut',
+     'pepper',
+     'petrol',
+     'plastic',
+     'pork',
+     'power',
+     'pressure',
+     'rain',
+     'recognition',
+     'sadness',
+     'safety',
+     'salt',
+     'sand',
+     'scenery',
+     'shopping',
+     'silver',
+     'snow',
+     'softness',
+     'space',
+     'speed',
+     'steam',
+     'sunshine',
+     'tea',
+     'thunder',
+     'time',
+     'traffic',
+     'trousers',
+     'violence',
+     'warmth',
+     'wine',
+     'steel',
+     'soccer',
+     'hockey',
+     'golf',
+     'gum',
+     'liquid',
+     'species',
+     'fahrenheit',
+     'celcius',
+     'kelvin',
+     'hertz' ] };
+
+  var main = (function () {
+				return {
+					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
+					uncountables: zip.uc.reduce(helpFns.toObj,{})
+				};
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var nouns = (function() {
+
+
+var zip = { entityBlacklist:
+   [ 'west',
+     'western',
+     'east',
+     'eastern',
+     'north',
+     'northern',
+     'south',
+     'southern',
+     'today',
+     'yesterday',
+     'tomorrow',
+     'era',
+     'century',
+     'my',
+     'your',
+     'itself',
+     'the' ],
+  personBlacklist:
+   [ 'center',
+     'house',
+     'park',
+     'square',
+     'centre',
+     'memorial',
+     'school',
+     'bridge',
+     'university',
+     'college',
+     'foundation',
+     'institute',
+     'club',
+     'museum',
+     'hall',
+     'arena',
+     'stadium',
+     'the',
+     'ave',
+     'blvd',
+     'uss',
+     'ss',
+     'for' ],
+  prps:
+   [ 'i',
+     'you',
+     'he',
+     'she',
+     'it',
+     'we',
+     'they',
+     'me',
+     'him',
+     'her',
+     'us',
+     'them',
+     'thou',
+     'il',
+     'elle',
+     '\'em' ],
+  pps:
+   [ [ 'mine', 0 ],
+     [ 'yours', 1 ],
+     [ 'his', 2 ],
+     [ 'her', 3 ],
+     [ 'its', 4 ],
+     [ 'our', 5 ],
+     [ 'their', 6 ],
+     [ 'them', 6 ] ] };
+
+  var main = (function () {
+				var _pps = {};
+				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
+				return {
+					pps: _pps,
+					prps: zip.prps.reduce(helpFns.toObj, {}),
+					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}),
+					personBlacklist: zip.personBlacklist,
+				}
+			})();
+
+
+
+  return main;
+})();
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
+
+var lang = 'en';
+var adjectives_decline = (function() {
+
+
+var zip = [ [ 'wrong', '=' ],
+  [ 'public', '=ly' ],
+  [ 'vague', '=ly', 1 ],
+  [ 'icy', 'icily' ],
+  [ 's_le', 's_ly' ],
+  [ 'fem!e', 'womanly' ],
+  [ 'm!e', 'manly' ],
+  [ 'simple', 'simply', 1 ],
+  [ 'whole', 'wholly' ],
+  [ 'speci!', 'e=ly' ],
+  [ 'stra&', '=', 1 ],
+  [ 'gay', '=' ],
+  [ 'fast', '=', 1 ],
+  [ 'hard', '=', 1, '=est' ],
+  [ 'late', '=', 1, '=st' ],
+  [ 'early', '=', 1 ],
+  [ 'best', '=' ],
+  [ 'latt~', '=' ],
+  [ 'bad', '=ly', 'worse', 'worst' ],
+  [ 'idle', 'idly' ],
+  [ 'black', 0, 1 ],
+  [ 'white', 0, 1 ],
+  [ 'green', 0, '=~', 1 ],
+  [ 'r%', 0, '=d~', 1 ],
+  [ 'blue', 0, 1 ],
+  [ 'yellow', 0, '=~', 1 ],
+  [ 'cyan', 0 ],
+  [ 'mag#a', 0 ],
+  [ 'brown', 0, 1 ],
+  [ 'orange', 0, 1 ],
+  [ 'gold', 0 ],
+  [ 'grey', 0, '=~', 0 ],
+  [ 'gray', 0, '=~', 0 ],
+  [ 'foreign', 0 ],
+  [ 'mod~n', 0 ],
+  [ 'next', 0 ],
+  [ 'difficult', 0 ],
+  [ 'degen~ate', 0 ],
+  [ 'young', 0, 1 ],
+  [ 'awake', 0 ],
+  [ 'back', 0 ],
+  [ 'complex', 0 ],
+  [ 'cool', 0, 1 ],
+  [ 'dirty', 0, 1 ],
+  [ 'done', 0 ],
+  [ 'empty', 0, 1 ],
+  [ 'fat', 0, 1 ],
+  [ 'f~tile', 0 ],
+  [ 'frozen', 0 ],
+  [ 'm%ium', 0 ],
+  [ 'par!lel', 0 ],
+  [ 'outdoor', 0 ],
+  [ 'unknown', 0 ],
+  [ 'und~siz%', 0 ],
+  [ 'us%', 0 ],
+  [ 'welcome', 0 ],
+  [ 'fix%', 0 ],
+  [ 'mix%', 0 ],
+  [ 'sup~', 0 ],
+  [ 'sup~b', 0 ],
+  [ 'guilty', 0 ],
+  [ 'tiny', 0 ],
+  [ 'able', 0 ],
+  [ 'unable', 0 ],
+  [ 'same', 0 ],
+  [ 'adult', 0 ],
+  [ 'good', 'well', 'bett~', 'best' ],
+  [ 'sad', 1, '=d~', 1 ],
+  [ 'ov~we&', 1 ],
+  [ 'main', 1 ],
+  [ 'nearby', 1 ],
+  [ 'asleep', 1 ],
+  [ 'weekly', 1 ],
+  [ 'secret', 1, 'more =', 'top =' ],
+  [ 'c~tain', 1 ],
+  [ 'ready', 1, 'readi~', 'readiest' ],
+  [ 'nice', 1, 1, '=st' ],
+  [ 'inn~', 1, 0, '=most' ],
+  [ 'out~', 1, 0, '=most' ],
+  [ 'far', 1, 'furth~', 'furthest' ],
+  [ 'clean', 1, 1, 1, '=liness' ],
+  [ 'naive', 1, 0, 0, '=ty' ],
+  'stra&',
+  'r%',
+  'full',
+  'absurd',
+  '!~t',
+  '!ive',
+  'big',
+  'bitt~',
+  'brash',
+  'brave',
+  'brief',
+  'br&',
+  'broad',
+  'c!m',
+  'charm_',
+  'cheap',
+  'close',
+  'cold',
+  'cruel',
+  'curly',
+  'cute',
+  'damp',
+  'dark',
+  'dead',
+  'dear',
+  'deep',
+  'drunk',
+  'dry',
+  'dull',
+  'eag~',
+  'easy',
+  'even',
+  'extreme',
+  'faint',
+  'fair',
+  'fanc',
+  'feeble',
+  'few',
+  'fi~ce',
+  'fine',
+  'firm',
+  'flat',
+  'forgetful',
+  'frail',
+  'free',
+  'fresh',
+  'funny',
+  'g#le',
+  'glad',
+  'glib',
+  'grand',
+  'great',
+  'harsh',
+  'heavy',
+  'high',
+  'hollow',
+  'hot',
+  'impolite',
+  'important',
+  'keen',
+  'kind',
+  'lame',
+  'large',
+  'l&',
+  'loose',
+  'loud',
+  'low',
+  'lush',
+  'macho',
+  'mad',
+  'mature',
+  'meek',
+  'mellow',
+  'mundane',
+  'narrow',
+  'near',
+  'neat',
+  'new',
+  'noisy',
+  'odd',
+  'old',
+  'p!e',
+  'pink',
+  'plain',
+  'poor',
+  'pure',
+  'purple',
+  'quick',
+  'quiet',
+  'rare',
+  'raw',
+  'rich',
+  'round',
+  'rude',
+  'safe',
+  'scarce',
+  'sh!low',
+  'sharp',
+  'short',
+  'shrill',
+  'slim',
+  'slow',
+  'sm!l',
+  'smooth',
+  'soft',
+  'soon',
+  'sore',
+  'sour',
+  'square',
+  'st!e',
+  'steep',
+  'stiff',
+  'strange',
+  'strict',
+  'strong',
+  'sweet',
+  'swift',
+  't!l',
+  'tame',
+  'tart',
+  'tend~',
+  'tense',
+  'thick',
+  'thin',
+  't&',
+  'tough',
+  'true',
+  'vast',
+  'vulgar',
+  'warm',
+  'weak',
+  'weird',
+  'wet',
+  'wild',
+  'windy',
+  'wise',
+  'aggressive',
+  'awesome',
+  'beautiful',
+  'bor%',
+  'bor_',
+  'effici#',
+  'gruesome',
+  'handsome',
+  'innoc#',
+  'lean',
+  'little',
+  'long',
+  'mean',
+  'norm!',
+  'proud',
+  'rapid',
+  'scar%',
+  'smart',
+  'thirsty',
+  'hungry',
+  'clear',
+  'happy',
+  'lucky',
+  'pretty',
+  'int~est_',
+  'attractive',
+  'dang~ous',
+  'intellig#',
+  'intelleg#',
+  'form!',
+  'tir%',
+  'solid',
+  'angry' ];
+
+  var main = (function () {
+				var repJJ = function(s) { return (typeof s !== 'string') ? s : helpFns.repl(s, 0, ['ight', 'ing', 'ent', 'er', 'al', 'ed']); }
+				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
+				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
+				zip.forEach(function(_a) {
+					if (typeof _a === 'string') {
+						res.convertables.push(repJJ(_a));
+					} else {
+						var a = _a.map(function(w){ return repJJ(w); });
+						if (a.length > 1) {
+							if (a[1] === 0) { res.adv_donts.push(a[0]); }
+							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = expand(a[1], a[0]); }
+						}
+						if (a[2] && a[2] === 1) {
+							res.convertables.push(a[0])
+						} else if (a.length>2) {
+							res.to_comparative[a[0]] = expand(a[2], a[0])
+						}
+						if (a.length>3 && a[3]!=1) {
+							res.to_superlative[a[0]] = expand(a[3], a[0])
+						}
+						if (a.length>4 && a[4]!=1) {
+							res.to_noun[a[0]] = expand(a[4], a[0])
+						}
+					}
+				});
+				res.convertables = res.convertables.reduce(helpFns.toObj, {});
+				res.adv_donts = res.adv_donts.reduce(helpFns.toObj, {});
+				return res;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var adjectives_demonym = (function() {
+
+
+var zip = [ 'afgh%',
+  'alb%~',
+  'alger~',
+  'argentine',
+  'armen~',
+  'austral~',
+  'aussie',
+  'austr~',
+  'b%gladeshi',
+  'belg~',
+  'boliv~',
+  'bosn~',
+  'brazil~',
+  'bulgar~',
+  'cambod~',
+  '&ad~',
+  'chil#',
+  'chin!',
+  'colomb~',
+  'croat',
+  'cub%',
+  'czech',
+  'domini&',
+  'egypt~',
+  'british',
+  'eston~',
+  'ethiop~',
+  'finnish',
+  'french',
+  'gamb~',
+  'georg~',
+  'germ%',
+  'greek',
+  'hait~',
+  'hungar~',
+  'ind~',
+  'indones~',
+  'ir%~',
+  'iraqi',
+  'irish',
+  'israeli',
+  'ital~',
+  'jamai&',
+  'jap%!',
+  'jor_~',
+  'keny%',
+  'kor#',
+  'kuwaiti',
+  'latv~',
+  'leb%!',
+  'liber~',
+  'liby%',
+  'lithu%~',
+  'macedon~',
+  'malays~',
+  'mexi&',
+  'mongol~',
+  'moroc&',
+  'dutch',
+  'nicaragu%',
+  'niger~',
+  'norweg~',
+  'om%i',
+  'pakist%i',
+  'palestin~',
+  'filipino',
+  'polish',
+  'portugu!',
+  'qatari',
+  'rom%~',
+  'russ~',
+  'rw%_',
+  'samo%',
+  'saudi',
+  'scottish',
+  'senegal!',
+  'serb~',
+  'singapor#',
+  'slovak',
+  'somali',
+  'su_!',
+  'swedish',
+  'swiss',
+  'syr~',
+  'taiw%!',
+  'thai',
+  'tunis~',
+  'ug%_',
+  'ukrain~',
+  'ameri&',
+  'hindi',
+  'sp%ish',
+  'venezuel%',
+  'vietnam!',
+  'welsh',
+  'afri&',
+  'europ#',
+  'as~',
+  'californ~' ];
+
+  var main = zip.map(function (w) {
+					return helpFns.repl(w, 0, ['can', 'dan', 'ean', 'ian', 'ese', 'an'])
+				});
+
+
+
+  return main;
+})();
+
+var lang = 'en';
 var adjectives = (function() {
 
-  var main = [
-    "colonial",
-    "moody",
-    "literal",
-    "actual",
-    "probable",
-    "apparent",
-    "usual",
-    "aberrant",
-    "ablaze",
-    "able",
-    "absolute",
-    "aboard",
-    "abrupt",
-    "absent",
-    "absorbing",
-    "abundant",
-    "accurate",
-    "adult",
-    "afraid",
-    "agonizing",
-    "ahead",
-    "aloof",
-    "amazing",
-    "arbitrary",
-    "arrogant",
-    "asleep",
-    "astonishing",
-    "average",
-    "awake",
-    "aware",
-    "awkward",
-    "back",
-    "bad",
-    "bankrupt",
-    "bawdy",
-    "beneficial",
-    "bent",
-    "best",
-    "better",
-    "bizarre",
-    "bloody",
-    "bouncy",
-    "brilliant",
-    "broken",
-    "burly",
-    "busy",
-    "cagey",
-    "careful",
-    "caring",
-    "certain",
-    "chief",
-    "chilly",
-    "civil",
-    "clever",
-    "closed",
-    "cloudy",
-    "colossal",
-    "commercial",
-    "common",
-    "complete",
-    "complex",
-    "concerned",
-    "concrete",
-    "congruent",
-    "constant",
-    "cooing",
-    "correct",
-    "cowardly",
-    "craven",
-    "cuddly",
-    "daily",
-    "damaged",
-    "damaging",
-    "dapper",
-    "dashing",
-    "deadpan",
-    "deeply",
-    "defiant",
-    "degenerate",
-    "delicate",
-    "delightful",
-    "desperate",
-    "determined",
-    "didactic",
-    "difficult",
-    "discreet",
-    "done",
-    "double",
-    "doubtful",
-    "downtown",
-    "dreary",
-    "east",
-    "eastern",
-    "elderly",
-    "elegant",
-    "elfin",
-    "elite",
-    "eminent",
-    "encouraging",
-    "entire",
-    "erect",
-    "ethereal",
-    "exact",
-    "expert",
-    "extra",
-    "exuberant",
-    "exultant",
-    "false",
-    "fancy",
-    "faulty",
-    "female",
-    "fertile",
-    "fierce ",
-    "financial",
-    "first",
-    "fit",
-    "fixed",
-    "flagrant",
-    "foamy",
-    "foolish",
-    "foregoing",
-    "foreign",
-    "former",
-    "fortunate",
-    "frantic",
-    "freezing",
-    "frequent",
-    "fretful",
-    "friendly",
-    "fun",
-    "furry",
-    "future",
-    "gainful",
-    "gaudy",
-    "giant",
-    "giddy",
-    "gigantic",
-    "gleaming",
-    "global",
-    "gold",
-    "gone",
-    "good",
-    "goofy",
-    "graceful",
-    "grateful",
-    "gratis",
-    "gray",
-    "grey",
-    "groovy",
-    "gross",
-    "guarded",
-    "half",
-    "handy",
-    "hanging",
-    "hateful",
-    "heady",
-    "heavenly",
-    "hellish",
-    "helpful",
-    "hesitant",
-    "highfalutin",
-    "homely",
-    "honest",
-    "huge",
-    "humdrum",
-    "hurried",
-    "hurt",
-    "icy",
-    "ignorant",
-    "ill",
-    "illegal",
-    "immediate",
-    "immense",
-    "imminent",
-    "impartial",
-    "imperfect",
-    "imported",
-    "initial",
-    "innate",
-    "inner",
-    "inside",
-    "irate",
-    "jolly",
-    "juicy",
-    "junior",
-    "juvenile",
-    "kaput",
-    "kindly",
-    "knowing",
-    "labored",
-    "languid",
-    "latter",
-    "learned",
-    "left",
-    "legal",
-    "lethal",
-    "level",
-    "lewd",
-    "likely",
-    "literate",
-    "lively",
-    "living",
-    "lonely",
-    "longing",
-    "loutish",
-    "lovely",
-    "loving",
-    "lowly",
-    "luxuriant",
-    "lying",
-    "macabre",
-    "madly",
-    "magenta",
-    "main",
-    "major",
-    "makeshift",
-    "male",
-    "mammoth",
-    "measly",
-    "meaty",
-    "medium",
-    "mere",
-    "middle",
-    "miniature",
-    "minor",
-    "miscreant",
-    "mobile",
-    "moldy",
-    "mute",
-    "naive",
-    "nearby",
-    "necessary",
-    "neighborly",
-    "next",
-    "nimble",
-    "nonchalant",
-    "nondescript",
-    "nonstop",
-    "north",
-    "nosy",
-    "obeisant",
-    "obese",
-    "obscene",
-    "observant",
-    "obsolete",
-    "offbeat",
-    "official",
-    "ok",
-    "open",
-    "opposite",
-    "organic",
-    "outdoor",
-    "outer",
-    "outgoing",
-    "oval",
-    "over",
-    "overall",
-    "overt",
-    "overweight",
-    "overwrought",
-    "painful",
-    "past",
-    "peaceful",
-    "perfect",
-    "petite",
-    "picayune",
-    "placid",
-    "plant",
-    "pleasant",
-    "polite",
-    "potential",
-    "pregnant",
-    "premium",
-    "present",
-    "pricey",
-    "prickly",
-    "primary",
-    "prior",
-    "private",
-    "profuse",
-    "proper",
-    "public",
-    "pumped",
-    "puny",
-    "quack",
-    "quaint",
-    "quickest",
-    "rabid",
-    "racial",
-    "ready",
-    "real",
-    "rebel",
-    "recondite",
-    "redundant",
-    "relevant",
-    "remote",
-    "resolute",
-    "resonant",
-    "right",
-    "rightful",
-    "ritzy",
-    "robust",
-    "romantic",
-    "roomy",
-    "rough",
-    "royal",
-    "salty",
-    "same",
-    "scary",
-    "scientific",
-    "screeching",
-    "second",
-    "secret",
-    "secure",
-    "sedate",
-    "seemly",
-    "selfish",
-    "senior",
-    "separate",
-    "severe",
-    "shiny",
-    "shocking",
-    "shut",
-    "shy",
-    "sick",
-    "significant",
-    "silly",
-    "sincere",
-    "single",
-    "skinny",
-    "slight",
-    "slimy",
-    "smelly",
-    "snobbish",
-    "social",
-    "somber",
-    "sordid",
-    "sorry",
-    "southern",
-    "spare",
-    "special",
-    "specific",
-    "spicy",
-    "splendid",
-    "squeamish",
-    "standard",
-    "standing",
-    "steadfast",
-    "steady",
-    "stereotyped",
-    "still",
-    "striped",
-    "stupid",
-    "sturdy",
-    "subdued",
-    "subsequent",
-    "substantial",
-    "sudden",
-    "super",
-    "superb",
-    "superficial",
-    "supreme",
-    "sure",
-    "taboo",
-    "tan",
-    "tasteful",
-    "tawdry",
-    "telling",
-    "temporary",
-    "terrific",
-    "tested",
-    "thoughtful",
-    "tidy",
-    "tiny",
-    "top",
-    "torpid",
-    "tranquil",
-    "trite",
-    "ugly",
-    "ultra",
-    "unbecoming",
-    "understood",
-    "uneven",
-    "unfair",
-    "unlikely",
-    "unruly",
-    "unsightly",
-    "untidy",
-    "unwritten",
-    "upbeat",
-    "upper",
-    "uppity",
-    "upset",
-    "upstairs",
-    "uptight",
-    "used",
-    "useful",
-    "utter",
-    "uttermost",
-    "vagabond",
-    "vanilla",
-    "various",
-    "vengeful",
-    "verdant",
-    "violet",
-    "volatile",
-    "wanting",
-    "wary",
-    "wasteful",
-    "weary",
-    "weekly",
-    "welcome",
-    "western",
-    "whole",
-    "wholesale",
-    "wiry",
-    "wistful",
-    "womanly",
-    "wooden",
-    "woozy",
-    "wound",
-    "wrong",
-    "wry",
-    "zany",
-    "sacred",
-    "unknown",
-    "detailed",
-    "ongoing",
-    "prominent",
-    "permanent",
-    "diverse",
-    "partial",
-    "moderate",
-    "contemporary",
-    "intense",
-    "widespread",
-    "ultimate",
-    "ideal",
-    "adequate",
-    "sophisticated",
-    "naked",
-    "dominant",
-    "precise",
-    "intact",
-    "adverse",
-    "genuine",
-    "subtle",
-    "universal",
-    "resistant",
-    "routine",
-    "distant",
-    "unexpected",
-    "soviet",
-    "blind",
-    "artificial",
-    "mild",
-    "legitimate",
-    "unpublished",
-    "superior",
-    "intermediate",
-    "everyday",
-    "dumb",
-    "excess",
-    "sexy",
-    "fake",
-    "monthly",
-    "premature",
-    "sheer",
-    "generic",
-    "insane",
-    "contrary",
-    "twin",
-    "upcoming",
-    "bottom",
-    "costly",
-    "indirect",
-    "sole",
-    "unrelated",
-    "hispanic",
-    "improper",
-    "underground",
-    "legendary",
-    "reluctant",
-    "beloved",
-    "inappropriate",
-    "corrupt",
-    "irrelevant",
-    "justified",
-    "obscure",
-    "profound",
-    "hostile",
-    "influential",
-    "inadequate",
-    "abstract",
-    "timely",
-    "authentic",
-    "bold",
-    "intimate",
-    "straightforward",
-    "rival",
-    "right-wing",
-    "racist",
-    "symbolic",
-    "unprecedented",
-    "loyal",
-    "talented",
-    "troubled",
-    "noble",
-    "instant",
-    "incorrect",
-    "dense",
-    "blond",
-    "deliberate",
-    "blank",
-    "rear",
-    "feminine",
-    "apt",
-    "stark",
-    "alcoholic",
-    "teenage",
-    "vibrant",
-    "humble",
-    "vain",
-    "covert",
-    "bland",
-    "trendy",
-    "foul",
-    "populist",
-    "alarming",
-    "hooked",
-    "wicked",
-    "deaf",
-    "left-wing",
-    "lousy",
-    "malignant",
-    "stylish",
-    "upscale",
-    "hourly",
-    "refreshing",
-    "cozy",
-    "slick",
-    "dire",
-    "yearly",
-    "inbred",
-    "part-time",
-    "finite",
-    "backwards",
-    "nightly",
-    "unauthorized",
-    "cheesy",
-    "indoor",
-    "surreal",
-    "bald",
-    "masculine",
-    "shady",
-    "spirited",
-    "eerie",
-    "horrific",
-    "smug",
-    "stern",
-    "hefty",
-    "savvy",
-    "bogus",
-    "elaborate",
-    "gloomy",
-    "pristine",
-    "extravagant",
-    "serene",
-    "advanced",
-    "perverse",
-    "devout",
-    "crisp",
-    "rosy",
-    "slender",
-    "melancholy",
-    "faux",
-    "phony",
-    "danish",
-    "lofty",
-    "nuanced",
-    "lax",
-    "adept",
-    "barren",
-    "shameful",
-    "sleek",
-    "solemn",
-    "vacant",
-    "dishonest",
-    "brisk",
-    "fluent",
-    "insecure",
-    "humid",
-    "menacing",
-    "moot",
-    "soothing",
-    "self-loathing",
-    "far-reaching",
-    "harrowing",
-    "scathing",
-    "perplexing",
-    "calming",
-    "unconvincing",
-    "unsuspecting",
-    "unassuming",
-    "surprising",
-    "unappealing",
-    "vexing",
-    "unending",
-    "easygoing",
-    "appetizing",
-    "disgruntled",
-    "retarded",
-    "undecided",
-    "unregulated",
-    "unsupervised",
-    "unrecognized",
-    "crazed",
-    "distressed",
-    "jagged",
-    "paralleled",
-    "cramped",
-    "warped",
-    "antiquated",
-    "fabled",
-    "deranged",
-    "diseased",
-    "ragged",
-    "intoxicated",
-    "hallowed",
-    "crowded",
-    "ghastly",
-    "disorderly",
-    "saintly",
-    "wily",
-    "sly",
-    "sprightly",
-    "ghostly",
-    "oily",
-    "hilly",
-    "grisly",
-    "earthly",
-    "friendly",
-    "unwieldy",
-    "many",
-    "most",
-    "last",
-    "expected",
-    "far",
-    "due",
-    "divine",
-    "all",
-    "together",
-    "only",
-    "outside",
-    "multiple",
-    "appropriate",
-    "evil",
-    "favorite",
-    "limited",
-    "random",
-    "republican",
-    "okay",
-    "essential",
-    "secondary",
-    "gay",
-    "south",
-    "pro",
-    "northern",
-    "urban",
-    "acute",
-    "prime",
-    "arab",
-    "overnight",
-    "mixed",
-    "crucial",
-    "behind",
-    "above",
-    "beyond",
-    "against",
-    "under",
-    "other",
-    "less"
-  ]
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+var zip = [ 's_le',
+  'fem%e',
+  'm%e',
+  'speci%',
+  'latt!',
+  'mag~a',
+  'mod!n',
+  'degen!ate',
+  'f!tile',
+  'm;ium',
+  'par%lel',
+  'und!siz;',
+  'us;',
+  'fix;',
+  'mix;',
+  'sup!',
+  'sup!b',
+  'ov!we&',
+  'c!tain',
+  'inn!',
+  'out!',
+  'practic%',
+  'theoretic%',
+  'sporadic',
+  'basic',
+  'grammatic%',
+  '%phabetic%',
+  'economic%',
+  'conic%',
+  'politic%',
+  'v!tic%',
+  'critic%',
+  'f#astic',
+  'mystic%',
+  'pornographic',
+  'jol@',
+  'coloni%',
+  'moody',
+  'lit!%',
+  'actu%',
+  'probable',
+  'appar~',
+  'usu%',
+  'ab!r#',
+  'ablaze',
+  'absolute',
+  'aboard',
+  'abrupt',
+  'abs~',
+  'absorb_',
+  'abund#',
+  'accurate',
+  'afraid',
+  'agoniz_',
+  '%oof',
+  'amaz_',
+  'arbitrary',
+  'arrog#',
+  'astonish_',
+  'av!age',
+  'aware',
+  'awkward',
+  'bankrupt',
+  'bawdy',
+  'benefici%',
+  'b~',
+  'bett!',
+  'bizarre',
+  'bloody',
+  'bouncy',
+  'brilli#',
+  'broken',
+  'bur@',
+  'busy',
+  'cagey',
+  'careful',
+  'car_',
+  'chief',
+  'chil@',
+  'civil',
+  'clev!',
+  'clos;',
+  'cloudy',
+  'coloss%',
+  'comm!ci%',
+  'common',
+  'complete',
+  'conc!n;',
+  'concrete',
+  'congru~',
+  'const#',
+  'coo_',
+  'correct',
+  'coward@',
+  'craven',
+  'cudd@',
+  'dai@',
+  'damag;',
+  'damag_',
+  'dapp!',
+  'dash_',
+  'deadpan',
+  'deep@',
+  'defi#',
+  'delicate',
+  'del&ful',
+  'desp!ate',
+  'det!min;',
+  'didactic',
+  'discreet',
+  'double',
+  'doubtful',
+  'downtown',
+  'dreary',
+  'east',
+  'east!n',
+  'eld!@',
+  'eleg#',
+  'elfin',
+  'elite',
+  'emin~',
+  'encourag_',
+  '~ire',
+  '!ect',
+  'eth!e%',
+  'exact',
+  'exp!t',
+  'extra',
+  'exub!#',
+  'exult#',
+  'f%se',
+  'fancy',
+  'faulty',
+  'financi%',
+  'first',
+  'fit',
+  'flagr#',
+  'foamy',
+  'foolish',
+  'forego_',
+  'form!',
+  'fortunate',
+  'fr#ic',
+  'freez_',
+  'frequ~',
+  'fretful',
+  'friend@',
+  'fun',
+  'furry',
+  'future',
+  'gainful',
+  'gaudy',
+  'gi#',
+  'giddy',
+  'gig#ic',
+  'gleam_',
+  'glob%',
+  'gone',
+  'goofy',
+  'graceful',
+  'grateful',
+  'gratis',
+  'groovy',
+  'gross',
+  'guard;',
+  'h%f',
+  'handy',
+  'hang_',
+  'hateful',
+  'heady',
+  'heaven@',
+  'hellish',
+  'helpful',
+  'hesit#',
+  'highf%utin',
+  'home@',
+  'honest',
+  'huge',
+  'humdrum',
+  'hurri;',
+  'hurt',
+  'ignor#',
+  'ill',
+  'illeg%',
+  'imm;iate',
+  'immense',
+  'immin~',
+  'imparti%',
+  'imp!fect',
+  'import;',
+  'initi%',
+  'innate',
+  'inside',
+  'irate',
+  'juicy',
+  'junior',
+  'juvenile',
+  'kaput',
+  'kind@',
+  'know_',
+  'labor;',
+  'languid',
+  'learn;',
+  'left',
+  'leg%',
+  'leth%',
+  'level',
+  'lewd',
+  'like@',
+  'lit!ate',
+  'live@',
+  'liv_',
+  'lone@',
+  'long_',
+  'loutish',
+  'love@',
+  'lov_',
+  'low@',
+  'luxuri#',
+  '@_',
+  'macabre',
+  'mad@',
+  'mag~a',
+  'major',
+  'makeshift',
+  'mammoth',
+  'marri;',
+  'meas@',
+  'meaty',
+  'm!e',
+  'middle',
+  'miniature',
+  'minor',
+  'miscre#',
+  'mobile',
+  'moldy',
+  'mute',
+  'necessary',
+  'neighbor@',
+  'nimble',
+  'nonch%#',
+  'nondescript',
+  'nonstop',
+  'north',
+  'nosy',
+  'obeis#',
+  'obese',
+  'obscene',
+  'obs!v#',
+  'obsolete',
+  'offbeat',
+  'offici%',
+  'ok',
+  'open',
+  'opposite',
+  'organic',
+  'outgo_',
+  'ov%',
+  'ov!',
+  'ov!%l',
+  'ov!t',
+  'ov!wrought',
+  'painful',
+  'past',
+  'peaceful',
+  'p!fect',
+  'petite',
+  'picayune',
+  'placid',
+  'pl#',
+  'pleas#',
+  'polite',
+  'pot~i%',
+  'pregn#',
+  'premium',
+  'pres~',
+  'pricey',
+  'prick@',
+  'primary',
+  'prior',
+  'private',
+  'profuse',
+  'prop!',
+  'pump;',
+  'puny',
+  'quack',
+  'quaint',
+  'quickest',
+  'rabid',
+  'raci%',
+  're%',
+  'rebel',
+  'recondite',
+  'r;und#',
+  'relev#',
+  'remote',
+  'resolute',
+  'reson#',
+  'r&',
+  'r&ful',
+  'ripe',
+  'ritzy',
+  'robust',
+  'rom#ic',
+  'roomy',
+  'rotten',
+  'rough',
+  'roy%',
+  's%ty',
+  'scary',
+  'sci~ific',
+  'screech_',
+  'second',
+  'secure',
+  's;ate',
+  'seem@',
+  'selfish',
+  'senior',
+  'separate',
+  'sev!e',
+  'shiny',
+  'shock_',
+  'shut',
+  'shy',
+  'sick',
+  'signific#',
+  'sil@',
+  'sinc!e',
+  'skinny',
+  'sl&',
+  'slimy',
+  'smel@',
+  'snobbish',
+  'soci%',
+  'somb!',
+  'sordid',
+  'sorry',
+  'south!n',
+  'spare',
+  'specific',
+  'spicy',
+  'splendid',
+  'squeamish',
+  'standard',
+  'stand_',
+  'steadfast',
+  'steady',
+  'st!eotyp;',
+  'still',
+  'strip;',
+  'stupid',
+  'sturdy',
+  'subdu;',
+  'subsequ~',
+  'subst#i%',
+  'sudden',
+  'sup!fici%',
+  'supreme',
+  'sure',
+  'taboo',
+  'tan',
+  'tasteful',
+  'tawdry',
+  'tell_',
+  'temporary',
+  't!rific',
+  'test;',
+  'thoughtful',
+  'tidy',
+  'top',
+  'torpid',
+  'tranquil',
+  'trite',
+  'ug@',
+  'ultra',
+  'unbecom_',
+  'und!stood',
+  'uneven',
+  'unfair',
+  'unlike@',
+  'unru@',
+  'uns&@',
+  'untidy',
+  'unwritten',
+  'upbeat',
+  'upp!',
+  'uppity',
+  'upset',
+  'upstairs',
+  'upt&',
+  'useful',
+  'utt!',
+  'utt!most',
+  'vagabond',
+  'vanilla',
+  'various',
+  'vengeful',
+  'v!d#',
+  'violet',
+  'volatile',
+  'w#_',
+  'wary',
+  'wasteful',
+  'weary',
+  'west!n',
+  'wholes%e',
+  'wide',
+  'wiry',
+  'wistful',
+  'wooden',
+  'woozy',
+  'wound',
+  'wry',
+  'zany',
+  'sacr;',
+  'detail;',
+  'ongo_',
+  'promin~',
+  'p!man~',
+  'div!se',
+  'parti%',
+  'mod!ate',
+  'contemporary',
+  'intense',
+  'widespread',
+  'ultimate',
+  'ide%',
+  'adequate',
+  'sophisticat;',
+  'nak;',
+  'domin#',
+  'precise',
+  'intact',
+  'adv!se',
+  'genuine',
+  'subtle',
+  'univ!s%',
+  'resist#',
+  'routine',
+  'dist#',
+  'unexpect;',
+  'soviet',
+  'blind',
+  'artifici%',
+  'mild',
+  'legitimate',
+  'unpublish;',
+  'sup!ior',
+  'int!m;iate',
+  'ev!yday',
+  'dumb',
+  'excess',
+  'sexy',
+  'fake',
+  'month@',
+  'premature',
+  'she!',
+  'gen!ic',
+  'insane',
+  'contrary',
+  'twin',
+  'upcom_',
+  'bottom',
+  'cost@',
+  'indirect',
+  'sole',
+  'unrelat;',
+  'hispanic',
+  'improp!',
+  'und!ground',
+  'legendary',
+  'reluct#',
+  'belov;',
+  'inappropriate',
+  'corrupt',
+  'irrelev#',
+  'justifi;',
+  'obscure',
+  'profound',
+  'hostile',
+  'influ~i%',
+  'inadequate',
+  'abstract',
+  'time@',
+  'auth~ic',
+  'bold',
+  'intimate',
+  'stra&forward',
+  'riv%',
+  'r&-w_',
+  'racist',
+  'symbolic',
+  'unprec;~;',
+  'loy%',
+  't%~;',
+  'troubl;',
+  'noble',
+  'inst#',
+  'incorrect',
+  'dense',
+  'blond',
+  'delib!ate',
+  'blank',
+  'rear',
+  'feminine',
+  'apt',
+  'stark',
+  '%coholic',
+  'teenage',
+  'vibr#',
+  'humble',
+  'vain',
+  'cov!t',
+  'bland',
+  'trendy',
+  'foul',
+  'populist',
+  '%arm_',
+  'hook;',
+  'wick;',
+  'deaf',
+  'left-w_',
+  'lousy',
+  'm%ign#',
+  'stylish',
+  'upsc%e',
+  'hour@',
+  'refresh_',
+  'cozy',
+  'slick',
+  'dire',
+  'year@',
+  'inbr;',
+  'part-time',
+  'finite',
+  'backwards',
+  'n&@',
+  'unauthoriz;',
+  'cheesy',
+  'indoor',
+  'surre%',
+  'b%d',
+  'masculine',
+  'shady',
+  'spirit;',
+  'e!ie',
+  'horrific',
+  'smug',
+  'st!n',
+  'hefty',
+  'savvy',
+  'bogus',
+  'elaborate',
+  'gloomy',
+  'pristine',
+  'extravag#',
+  's!ene',
+  'advanc;',
+  'p!v!se',
+  'devout',
+  'crisp',
+  'rosy',
+  'slend!',
+  'melancho@',
+  'faux',
+  'phony',
+  'danish',
+  'lofty',
+  'nuanc;',
+  'lax',
+  'adept',
+  'barren',
+  'shameful',
+  'sleek',
+  'solemn',
+  'vac#',
+  'dishonest',
+  'brisk',
+  'flu~',
+  'insecure',
+  'humid',
+  'menac_',
+  'moot',
+  'sooth_',
+  'self-loath_',
+  'far-reach_',
+  'harrow_',
+  'scath_',
+  'p!plex_',
+  'c%m_',
+  'unconvinc_',
+  'unsuspect_',
+  'unassum_',
+  'surpris_',
+  'unappe%_',
+  'vex_',
+  'unend_',
+  'easygo_',
+  'appetiz_',
+  'disgruntl;',
+  'retard;',
+  'undecid;',
+  'unregulat;',
+  'unsup!vis;',
+  'unrecogniz;',
+  'craz;',
+  'distress;',
+  'jagg;',
+  'par%lel;',
+  'cramp;',
+  'warp;',
+  '#iquat;',
+  'fabl;',
+  'd!ang;',
+  'diseas;',
+  'ragg;',
+  'intoxicat;',
+  'h%low;',
+  'crowd;',
+  'ghast@',
+  'disord!@',
+  'saint@',
+  'wi@',
+  's@',
+  'spr&@',
+  'ghost@',
+  'oi@',
+  'hil@',
+  'gris@',
+  'earth@',
+  'friend@',
+  'unwieldy',
+  'oth!',
+  'many',
+  'last',
+  'expect;',
+  'due',
+  'less',
+  'divine',
+  '%l',
+  'togeth!',
+  'on@',
+  'outside',
+  'multiple',
+  'appropriate',
+  'approximate',
+  'evil',
+  'favorite',
+  'limit;',
+  'random',
+  'republican',
+  'okay',
+  'ess~i%',
+  'secondary',
+  'south',
+  'pro',
+  'north!n',
+  'urban',
+  'acute',
+  'prime',
+  'arab',
+  'ov!n&',
+  'cruci%',
+  'beyond',
+  'against',
+  'und!',
+  'definite',
+  'effective',
+  'especi%',
+  'hopeful',
+  'obvious',
+  'particular',
+  'possible',
+  'relative',
+  's!ious',
+  'typic%',
+  'virtu%' ];
 
-  return main
-})()
+  var main = (function () {
+				return zip.map(function(w) { return helpFns.repl(w, 0, ['ight', 'ing', 'ant', 'ent', 'er', 'al', 'ed', 'ly']); });
+			})();
 
-//common terms that are multi-word, but one part-of-speech
-//these should not include phrasal verbs, like 'looked out'. These are handled elsewhere.
-var multiples = (function() {
 
-  var main = {
-    "of course": "RB",
-    "at least": "RB",
-    "no longer": "RB",
-    "sort of": "RB",
-    "at first": "RB",
-    "once again": "RB",
-    "once more": "RB",
-    "up to": "RB",
-    "by now": "RB",
-    "all but": "RB",
-    "just about": "RB",
-    "on board": "JJ",
-    "a lot": "RB",
-    "by far": "RB",
-    "at best": "RB",
-    "at large": "RB",
-    "for good": "RB",
-    "vice versa": "JJ",
-    "en route": "JJ",
-    "for sure": "RB",
-    "upside down": "JJ",
-    "at most": "RB",
-    "per se": "RB",
-    "at worst": "RB",
-    "upwards of": "RB",
-    "en masse": "RB",
-    "point blank": "RB",
-    "up front": "JJ",
-    "in situ": "JJ",
-    "in vitro": "JJ",
-    "ad hoc": "JJ",
-    "de facto": "JJ",
-    "ad infinitum": "JJ",
-    "ad nauseam": "RB",
-    "for keeps": "JJ",
-    "a priori": "FW",
-    "et cetera": "FW",
-    "off guard": "JJ",
-    "spot on": "JJ",
-    "ipso facto": "JJ",
-    "not withstanding": "RB",
-    "de jure": "RB",
-    "a la": "IN",
-    "ad hominem": "NN",
-    "par excellence": "RB",
-    "de trop": "RB",
-    "a posteriori": "RB",
-    "fed up": "JJ",
-    "brand new": "JJ",
-    "old fashioned": "JJ",
-    "bona fide": "JJ",
-    "well off": "JJ",
-    "far off": "JJ",
-    "straight forward": "JJ",
-    "hard up": "JJ",
-    "sui generis": "JJ",
-    "en suite": "JJ",
-    "avant garde": "JJ",
-    "sans serif": "JJ",
-    "gung ho": "JJ",
-    "super duper": "JJ",
-    "new york":"NN",
-    "new england":"NN",
-    "new hampshire":"NN",
-    "new delhi":"NN",
-    "new jersey":"NN",
-    "new mexico":"NN",
-    "united states":"NN",
-    "united kingdom":"NN",
-    "great britain":"NN",
-    "head start":"NN"
-  }
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
 
-  return main
-})()
+  return main;
+})();
 
-//most-frequent non-irregular verbs, to be conjugated for the lexicon
-//this list is the seed, from which various forms are conjugated
-var verbs = (function() {
-    //verbs
-    var main = [
-      "collapse",
-      "stake",
-      "forsee",
-      "suck",
-      "answer",
-      "argue",
-      "tend",
-      "examine",
-      "depend",
-      "form",
-      "figure",
-      "mind",
-      "surround",
-      "suspect",
-      "reflect",
-      "wonder",
-      "hope",
-      "end",
-      "thank",
-      "file",
-      "regard",
-      "report",
-      "imagine",
-      "consider",
-      "ensure",
-      "cause",
-      "work",
-      "enter",
-      "stop",
-      "defeat",
-      "surge",
-      "launch",
-      "turn",
-      "like",
-      "control",
-      "relate",
-      "remember",
-      "join",
-      "listen",
-      "train",
-      "spring",
-      "enjoy",
-      "fail",
-      "recognize",
-      "obtain",
-      "learn",
-      "fill",
-      "announce",
-      "prevent",
-      "achieve",
-      "realize",
-      "involve",
-      "remove",
-      "aid",
-      "visit",
-      "test",
-      "prepare",
-      "ask",
-      "carry",
-      "suppose",
-      "determine",
-      "raise",
-      "love",
-      "use",
-      "pull",
-      "improve",
-      "contain",
-      "offer",
-      "talk",
-      "pick",
-      "care",
-      "express",
-      "remain",
-      "operate",
-      "close",
-      "add",
-      "mention",
-      "support",
-      "decide",
-      "walk",
-      "vary",
-      "demand",
-      "describe",
-      "agree",
-      "happen",
-      "allow",
-      "suffer",
-      "study",
-      "press",
-      "watch",
-      "seem",
-      "occur",
-      "contribute",
-      "claim",
-      "compare",
-      "apply",
-      "direct",
-      "discuss",
-      "indicate",
-      "require",
-      "change",
-      "fix",
-      "reach",
-      "prove",
-      "expect",
-      "exist",
-      "play",
-      "permit",
-      "kill",
-      "charge",
-      "increase",
-      "believe",
-      "create",
-      "continue",
-      "live",
-      "help",
-      "represent",
-      "edit",
-      "serve",
-      "appear",
-      "cover",
-      "maintain",
-      "start",
-      "stay",
-      "move",
-      "extend",
-      "design",
-      "supply",
-      "suggest",
-      "want",
-      "approach",
-      "call",
-      "include",
-      "try",
-      "receive",
-      "save",
-      "discover",
-      "marry",
-      "need",
-      "establish",
-      "keep",
-      "assume",
-      "attend",
-      "unite",
-      "explain",
-      "publish",
-      "accept",
-      "settle",
-      "reduce",
-      "do",
-      "look",
-      "interact",
-      "concern",
-      "labor",
-      "return",
-      "select",
-      "die",
-      "provide",
-      "seek",
-      "wish",
-      "finish",
-      "follow",
-      "disagree",
-      "produce",
-      "attack",
-      "attempt",
-      "brake",
-      "brush",
-      "burn",
-      "bang",
-      "bomb",
-      "budget",
-      "comfort",
-      "cook",
-      "copy",
-      "cough",
-      "crush",
-      "cry",
-      "check",
-      "claw",
-      "clip",
-      "combine",
-      "damage",
-      "desire",
-      "doubt",
-      "drain",
-      "dance",
-      "decrease",
-      "defect",
-      "deposit",
-      "drift",
-      "dip",
-      "dive",
-      "divorce",
-      "dream",
-      "exchange",
-      "envy",
-      "exert",
-      "exercise",
-      "export",
-      "fold",
-      "flood",
-      "focus",
-      "forecast",
-      "fracture",
-      "grip",
-      "guide",
-      "guard",
-      "guarantee",
-      "guess",
-      "hate",
-      "heat",
-      "handle",
-      "hire",
-      "host",
-      "hunt",
-      "hurry",
-      "import",
-      "judge",
-      "jump",
-      "jam",
-      "kick",
-      "kiss",
-      "knock",
-      "laugh",
-      "lift",
-      "lock",
-      "lecture",
-      "link",
-      "load",
-      "loan",
-      "lump",
-      "melt",
-      "message",
-      "murder",
-      "neglect",
-      "overlap",
-      "overtake",
-      "overuse",
-      "print",
-      "protest",
-      "pump",
-      "push",
-      "post",
-      "progress",
-      "promise",
-      "purchase",
-      "regret",
-      "request",
-      "reward",
-      "roll",
-      "rub",
-      "rent",
-      "repair",
-      "sail",
-      "scale",
-      "screw",
-      "shock",
-      "sleep",
-      "slip",
-      "smash",
-      "smell",
-      "smoke",
-      "sneeze",
-      "snow",
-      "surprise",
-      "scratch",
-      "search",
-      "share",
-      "shave",
-      "spit",
-      "splash",
-      "stain",
-      "stress",
-      "switch",
-      "taste",
-      "touch",
-      "trade",
-      "trick",
-      "twist",
-      "trap",
-      "travel",
-      "tune",
-      "undergo",
-      "undo",
-      "uplift",
-      "vote",
-      "wash",
-      "wave",
-      "whistle",
-      "wreck",
-      "yawn",
-      "betray",
-      "restrict",
-      "perform",
-      "worry",
-      "point",
-      "activate",
-      "fear",
-      "plan",
-      "note",
-      "face",
-      "predict",
-      "differ",
-      "deserve",
-      "torture",
-      "recall",
-      "count",
-      "admit",
-      "insist",
-      "lack",
-      "pass",
-      "belong",
-      "complain",
-      "constitute",
-      "rely",
-      "refuse",
-      "range",
-      "cite",
-      "flash",
-      "arrive",
-      "reveal",
-      "consist",
-      "observe",
-      "notice",
-      "trust",
-      "display",
-      "view",
-      "stare",
-      "acknowledge",
-      "owe",
-      "gaze",
-      "treat",
-      "account",
-      "gather",
-      "address",
-      "confirm",
-      "estimate",
-      "manage",
-      "participate",
-      "sneak",
-      "drop",
-      "mirror",
-      "experience",
-      "strive",
-      "arch",
-      "dislike",
-      "favor",
-      "earn",
-      "emphasize",
-      "match",
-      "question",
-      "emerge",
-      "encourage",
-      "matter",
-      "name",
-      "head",
-      "line",
-      "slam",
-      "list",
-      "warn",
-      "ignore",
-      "resemble",
-      "feature",
-      "place",
-      "reverse",
-      "accuse",
-      "spoil",
-      "retain",
-      "survive",
-      "praise",
-      "function",
-      "please",
-      "date",
-      "remind",
-      "deliver",
-      "echo",
-      "engage",
-      "deny",
-      "yield",
-      "center",
-      "gain",
-      "anticipate",
-      "reason",
-      "side",
-      "thrive",
-      "defy",
-      "dodge",
-      "enable",
-      "applaud",
-      "bear",
-      "persist",
-      "pose",
-      "reject",
-      "attract",
-      "await",
-      "inhibit",
-      "declare",
-      "process",
-      "risk",
-      "urge",
-      "value",
-      "block",
-      "confront",
-      "credit",
-      "cross",
-      "amuse",
-      "dare",
-      "resent",
-      "smile",
-      "gloss",
-      "threaten",
-      "collect",
-      "depict",
-      "dismiss",
-      "submit",
-      "benefit",
-      "step",
-      "deem",
-      "limit",
-      "sense",
-      "issue",
-      "embody",
-      "force",
-      "govern",
-      "replace",
-      "bother",
-      "cater",
-      "adopt",
-      "empower",
-      "outweigh",
-      "alter",
-      "enrich",
-      "influence",
-      "prohibit",
-      "pursue",
-      "warrant",
-      "convey",
-      "approve",
-      "reserve",
-      "rest",
-      "strain",
-      "wander",
-      "adjust",
-      "dress",
-      "market",
-      "mingle",
-      "disapprove",
-      "evaluate",
-      "flow",
-      "inhabit",
-      "pop",
-      "rule",
-      "depart",
-      "roam",
-      "assert",
-      "disappear",
-      "envision",
-      "pause",
-      "afford",
-      "challenge",
-      "grab",
-      "grumble",
-      "house",
-      "portray",
-      "revel",
-      "base",
-      "conduct",
-      "review",
-      "stem",
-      "crave",
-      "mark",
-      "store",
-      "target",
-      "unlock",
-      "weigh",
-      "resist",
-      "drag",
-      "pour",
-      "reckon",
-      "assign",
-      "cling",
-      "rank",
-      "attach",
-      "decline",
-      "destroy",
-      "interfere",
-      "paint",
-      "skip",
-      "sprinkle",
-      "wither",
-      "allege",
-      "retire",
-      "score",
-      "monitor",
-      "expand",
-      "honor",
-      "pack",
-      "assist",
-      "float",
-      "appeal",
-      "stretch",
-      "undermine",
-      "assemble",
-      "boast",
-      "bounce",
-      "grasp",
-      "install",
-      "borrow",
-      "crack",
-      "elect",
-      "shout",
-      "contrast",
-      "overcome",
-      "relax",
-      "relent",
-      "strengthen",
-      "conform",
-      "dump",
-      "pile",
-      "scare",
-      "relive",
-      "resort",
-      "rush",
-      "boost",
-      "cease",
-      "command",
-      "excel",
-      "plug",
-      "plunge",
-      "proclaim",
-      "discourage",
-      "endure",
-      "ruin",
-      "stumble",
-      "abandon",
-      "cheat",
-      "convince",
-      "merge",
-      "convert",
-      "harm",
-      "multiply",
-      "overwhelm",
-      "chew",
-      "invent",
-      "bury",
-      "wipe",
-      "added",
-      "took",
-      "define",
-      "goes",
-      "measure",
-      "enhance",
-      "distinguish",
-      "avoid",
-      //contractions
-      "don't",
-      "won't",
-      "what's" //somewhat ambiguous (what does|what are)
+var lang = 'en';
+var adverbs_decline = (function() {
+  var zip = [ [ 'wholly', 'whole' ],
+  [ 'idly', 'idle' ],
+  [ '=y', 'full' ],
+  [ '=ly', 'practical' ],
+  [ '=ly', 'theoretical' ],
+  [ '=ally', 'sporadic' ],
+  [ '=ally', 'basic' ],
+  [ '=ly', 'grammatical' ],
+  [ '=ly', 'alphabetical' ],
+  [ '=ly', 'economical' ],
+  [ '=ly', 'conical' ],
+  [ '=ly', 'political' ],
+  [ '=ly', 'vertical' ],
+  [ '=ly', 'critical' ],
+  [ '=ally', 'fantastic' ],
+  [ '=ly', 'mystical' ],
+  [ '=ally', 'pornographic' ],
+  [ '=', 'jolly' ] ];
 
-    ]
+  var main = (function () {
+				var res = {};
+				zip.forEach(function(a) {
+					res[a[0].replace('=', a[1])] = a[1];
+				});
+				return res;
+			})();
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
 
-  return main
-})()
 
-//these are common person titles used in the lexicon and sentence segmentation methods
-//they are also used to identify that a noun is a person
-var honourifics = (function() {
+  return main;
+})();
 
-  var main = [
-    //honourifics
-    "jr",
-    "mr",
-    "mrs",
-    "ms",
-    "dr",
-    "prof",
-    "sr",
-    "sen",
-    "corp",
-    "rep",
-    "gov",
-    "atty",
-    "supt",
-    "det",
-    "rev",
-    "col",
-    "gen",
-    "lt",
-    "cmdr",
-    "adm",
-    "capt",
-    "sgt",
-    "cpl",
-    "maj",
-    "miss",
-    "misses",
-    "mister",
-    "sir",
-    "esq",
-    "mstr",
-    "phd",
-    "adj",
-    "adv",
-    "asst",
-    "bldg",
-    "brig",
-    "comdr",
-    "hon",
-    "messrs",
-    "mlle",
-    "mme",
-    "op",
-    "ord",
-    "pvt",
-    "reps",
-    "res",
-    "sens",
-    "sfc",
-    "surg",
-  ]
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-
-  return main
-})()
-
-//common nouns that have no plural form. These are suprisingly rare
-//used in noun.inflect(), and added as nouns in lexicon
-var uncountables = (function() {
-
-  var main = [
-    "aircraft",
-    "bass",
-    "bison",
-    "fowl",
-    "halibut",
-    "moose",
-    "salmon",
-    "spacecraft",
-    "tuna",
-    "trout",
-    "advice",
-    "information",
-    "knowledge",
-    "trouble",
-    "enjoyment",
-    "fun",
-    "recreation",
-    "relaxation",
-    "meat",
-    "rice",
-    "bread",
-    "cake",
-    "coffee",
-    "ice",
-    "water",
-    "oil",
-    "grass",
-    "hair",
-    "fruit",
-    "wildlife",
-    "equipment",
-    "machinery",
-    "furniture",
-    "mail",
-    "luggage",
-    "jewelry",
-    "clothing",
-    "money",
-    "mathematics",
-    "economics",
-    "physics",
-    "civics",
-    "ethics",
-    "gymnastics",
-    "mumps",
-    "measles",
-    "news",
-    "tennis",
-    "baggage",
-    "currency",
-    "soap",
-    "toothpaste",
-    "food",
-    "sugar",
-    "butter",
-    "flour",
-    "research",
-    "leather",
-    "wool",
-    "wood",
-    "coal",
-    "weather",
-    "homework",
-    "cotton",
-    "silk",
-    "patience",
-    "impatience",
-    "vinegar",
-    "art",
-    "beef",
-    "blood",
-    "cash",
-    "chaos",
-    "cheese",
-    "chewing",
-    "conduct",
-    "confusion",
-    "education",
-    "electricity",
-    "entertainment",
-    "fiction",
-    "forgiveness",
-    "gold",
-    "gossip",
-    "ground",
-    "happiness",
-    "history",
-    "honey",
-    "hospitality",
-    "importance",
-    "justice",
-    "laughter",
-    "leisure",
-    "lightning",
-    "literature",
-    "luck",
-    "melancholy",
-    "milk",
-    "mist",
-    "music",
-    "noise",
-    "oxygen",
-    "paper",
-    "pay",
-    "peace",
-    "peanut",
-    "pepper",
-    "petrol",
-    "plastic",
-    "pork",
-    "power",
-    "pressure",
-    "rain",
-    "recognition",
-    "sadness",
-    "safety",
-    "salt",
-    "sand",
-    "scenery",
-    "shopping",
-    "silver",
-    "snow",
-    "softness",
-    "space",
-    "speed",
-    "steam",
-    "sunshine",
-    "tea",
-    "thunder",
-    "time",
-    "traffic",
-    "trousers",
-    "violence",
-    "warmth",
-    "wine",
-    "steel",
-    "soccer",
-    "hockey",
-    "golf",
-    "fish",
-    "gum",
-    "liquid",
-    "series",
-    "sheep",
-    "species",
-    "fahrenheit",
-    "celcius",
-    "kelvin",
-    "hertz"
-  ]
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-
-  return main
-})()
-
-//adjectival forms of place names, as adjectives.
-var demonyms = (function() {
-  var main = [
-    "afghan",
-    "albanian",
-    "algerian",
-    "argentine",
-    "armenian",
-    "australian",
-    "aussie",
-    "austrian",
-    "bangladeshi",
-    "belgian",
-    "bolivian",
-    "bosnian",
-    "brazilian",
-    "bulgarian",
-    "cambodian",
-    "canadian",
-    "chilean",
-    "chinese",
-    "colombian",
-    "croat",
-    "cuban",
-    "czech",
-    "dominican",
-    "egyptian",
-    "british",
-    "estonian",
-    "ethiopian",
-    "finnish",
-    "french",
-    "gambian",
-    "georgian",
-    "german",
-    "greek",
-    "haitian",
-    "hungarian",
-    "indian",
-    "indonesian",
-    "iranian",
-    "iraqi",
-    "irish",
-    "israeli",
-    "italian",
-    "jamaican",
-    "japanese",
-    "jordanian",
-    "kenyan",
-    "korean",
-    "kuwaiti",
-    "latvian",
-    "lebanese",
-    "liberian",
-    "libyan",
-    "lithuanian",
-    "macedonian",
-    "malaysian",
-    "mexican",
-    "mongolian",
-    "moroccan",
-    "dutch",
-    "nicaraguan",
-    "nigerian",
-    "norwegian",
-    "omani",
-    "pakistani",
-    "palestinian",
-    "filipino",
-    "polish",
-    "portuguese",
-    "qatari",
-    "romanian",
-    "russian",
-    "rwandan",
-    "samoan",
-    "saudi",
-    "scottish",
-    "senegalese",
-    "serbian",
-    "singaporean",
-    "slovak",
-    "somali",
-    "sudanese",
-    "swedish",
-    "swiss",
-    "syrian",
-    "taiwanese",
-    "thai",
-    "tunisian",
-    "ugandan",
-    "ukrainian",
-    "american",
-    "hindi",
-    "spanish",
-    "venezuelan",
-    "vietnamese",
-    "welsh",
-    "african",
-    "european",
-    "asian",
-    "californian",
-  ]
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
-
-})()
-
-//terms that are "CD", a 'value' term
-var values = (function() {
-
-  var main = [
-    //numbers
-    'zero',
-    'one',
-    'two',
-    'three',
-    'four',
-    'five',
-    'six',
-    'seven',
-    'eight',
-    'nine',
-    'ten',
-    'eleven',
-    'twelve',
-    'thirteen',
-    'fourteen',
-    'fifteen',
-    'sixteen',
-    'seventeen',
-    'eighteen',
-    'nineteen',
-    'twenty',
-    'thirty',
-    'forty',
-    'fifty',
-    'sixty',
-    'seventy',
-    'eighty',
-    'ninety',
-    'hundred',
-    'thousand',
-    'million',
-    'billion',
-    'trillion',
-    'quadrillion',
-    'quintillion',
-    'sextillion',
-    'septillion',
-    'octillion',
-    'nonillion',
-    'decillion',
-
-    //months
-    "january",
-    "february",
-    // "march",
-    "april",
-    // "may",
-    "june",
-    "july",
-    "august",
-    "september",
-    "october",
-    "november",
-    "december",
-    "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "sept", "sep",
-
-    //days
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday"
-  ].reduce(function(h, s) {
-    h[s] = "CD"
-    return h
-  }, {})
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-
-  return main
-})()
-
-//these are common word shortenings used in the lexicon and sentence segmentation methods
-//there are all nouns, or at the least, belong beside one.
+var lang = 'en';
 var abbreviations = (function() {
+  var zip = [ 'ave',
+  'blvd',
+  'uss',
+  'ss',
+  'arc',
+  'al',
+  'cl',
+  'ct',
+  'cres',
+  'exp',
+  'rd',
+  'st',
+  'dist',
+  'mt',
+  'ft',
+  'fy',
+  'hwy',
+  'la',
+  'pd',
+  'pl',
+  'plz',
+  'tce',
+  'vs',
+  'etc',
+  'esp',
+  'llb',
+  'md',
+  'bl',
+  'ma',
+  'ba',
+  'lit',
+  'fl',
+  'ex',
+  'eg',
+  'ie',
+  'ala',
+  'ariz',
+  'ark',
+  'cal',
+  'calif',
+  'colo',
+  'conn',
+  'del',
+  'fed',
+  'fla',
+  'ga',
+  'ida',
+  'ind',
+  'ia',
+  'kan',
+  'kans',
+  'ken',
+  'ky',
+  'la',
+  'md',
+  'mich',
+  'minn',
+  'mont',
+  'neb',
+  'nebr',
+  'nev',
+  'okla',
+  'penna',
+  'penn',
+  'pa',
+  'dak',
+  'tenn',
+  'tex',
+  'ut',
+  'vt',
+  'va',
+  'wash',
+  'wis',
+  'wisc',
+  'wy',
+  'wyo',
+  'usafa',
+  'alta',
+  'ont',
+  'que',
+  'sask',
+  'yuk',
+  'bc',
+  'dept',
+  'univ',
+  'assn',
+  'bros',
+  'inc',
+  'ltd',
+  'co',
+  'yahoo',
+  'joomla',
+  'jeopardy' ];
 
-  if (typeof module !== "undefined" && module.exports) {
-    honourifics=require("./honourifics") //stored seperately, for 'noun.is_person()'
-  }
+  var main = zip;
 
-  var main = [
-    //common abbreviations
-    "arc", "al", "ave", "blvd", "cl", "ct", "cres", "exp", "rd", "st", "dist", "mt", "ft", "fy", "hwy", "la", "pd", "pl", "plz", "tce", "vs", "etc", "esp", "llb", "md", "bl", "ma", "ba", "lit", "fl", "ex", "eg", "ie",
-    //place main
-    "ala", "ariz", "ark", "cal", "calif", "col", "colo", "conn", "del", "fed", "fla", "ga", "ida", "ind", "ia", "kan", "kans", "ken", "ky", "la", "md", "mich", "minn", "mont", "neb", "nebr", "nev", "okla", "penna", "penn", "pa", "dak", "tenn", "tex", "ut", "vt", "va", "wash", "wis", "wisc", "wy", "wyo", "usafa", "alta", "ont", "que", "sask", "yuk", "bc",
-    //org main
-    "dept", "univ", "assn", "bros", "inc", "ltd", "co", "corp",
-    //proper nouns with exclamation marks
-    "yahoo", "joomla", "jeopardy"
-  ]
-  //person titles like 'jr', (stored seperately)
-  main=main.concat(honourifics)
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
 
-  return main
-})()
+  return main;
+})();
 
-// common first-names in compressed form.
-//from http://www.ssa.gov/oact/babynames/limits.html  and http://www.servicealberta.gov.ab.ca/pdf/vs/2001_Boys.pdf
-//not sure what regional/cultural/demographic bias this has. Probably a lot.
-// 73% of people are represented in the top 1000 names
-//used to reduce redundant named-entities in longer text. (don't spot the same person twice.)
-//used to identify gender for coreference resolution
-var firstnames = (function () {
+var lang = 'en';
+var honorifics = (function() {
+  var zip = [ 'jr',
+  'mr',
+  'mrs',
+  'ms',
+  'dr',
+  'prof',
+  'sr',
+  'sen',
+  'corp',
+  'rep',
+  'gov',
+  'atty',
+  'supt',
+  'det',
+  'rev',
+  'col',
+  'gen',
+  'lt',
+  'cmdr',
+  'adm',
+  'capt',
+  'sgt',
+  'cpl',
+  'maj',
+  'miss',
+  'misses',
+  'mister',
+  'sir',
+  'esq',
+  'mstr',
+  'phd',
+  'adj',
+  'adv',
+  'asst',
+  'bldg',
+  'brig',
+  'comdr',
+  'hon',
+  'hc',
+  'messrs',
+  'mlle',
+  'mme',
+  'op',
+  'ord',
+  'pvt',
+  'reps',
+  'res',
+  'sens',
+  'sfc',
+  'surg' ];
 
-    var main = []
+  var main = zip;
 
-    //an ad-hoc prefix encoding for names. 2ms decompression of names
-    var male_names = {
-      "will": "iam,ie,ard,is,iams",
-      "fred": ",erick,die,rick,dy",
-      "marc": "us,,o,os,el",
-      "darr": "ell,yl,en,el,in",
-      "fran": "k,cis,cisco,klin,kie",
-      "terr": "y,ance,ence,ell",
-      "rand": "y,all,olph,al",
-      "brad": "ley,,ford,y",
-      "jeff": "rey,,ery,ry",
-      "john": ",ny,nie,athan",
-      "greg": "ory,,g,orio",
-      "mar": "k,tin,vin,io,shall,ty,lon,lin",
-      "car": "l,los,lton,roll,y,ey",
-      "ken": "neth,,t,ny,dall,drick",
-      "har": "old,ry,vey,ley,lan,rison",
-      "ste": "ven,phen,ve,wart,phan,rling",
-      "jer": "ry,emy,ome,emiah,maine,ald",
-      "mic": "hael,heal,ah,key,hel",
-      "dar": "yl,in,nell,win,ius",
-      "dan": "iel,ny,,e",
-      "wil": "bur,son,bert,fred,fredo",
-      "ric": "hard,ky,ardo,k,key",
-      "cli": "fford,nton,fton,nt,ff",
-      "cla": "rence,ude,yton,rk,y",
-      "ben": "jamin,,nie,ny,ito",
-      "rod": "ney,erick,olfo,ger,",
-      "rob": "ert,erto,bie,",
-      "gar": "y,ry,rett,land",
-      "sam": "uel,,my,mie",
-      "and": "rew,re,y,res",
-      "jos": "eph,e,hua,h",
-      "joe": ",l,y,sph",
-      "leo": "nard,n,,nardo",
-      "tom": ",my,as,mie",
-      "bry": "an,ant,ce,on",
-      "ant": "hony,onio,oine,on",
-      "jac": "k,ob,kson",
-      "cha": "rles,d,rlie,se",
-      "sha": "wn,ne,un",
-      "bre": "nt,tt,ndan,t",
-      "jes": "se,us,s",
-      "al": "bert,an,len,fred,exander,ex,vin,lan,fredo,berto,ejandro,fonso,ton,,onzo,i,varo",
-      "ro": "nald,ger,y,nnie,land,n,ss,osevelt,gelio,lando,man,cky,yce,scoe,ry",
-      "de": "nnis,rek,an,rrick,lbert,vin,wey,xter,wayne,metrius,nis,smond",
-      "ja": "mes,son,y,red,vier,ke,sper,mal,rrod",
-      "el": "mer,lis,bert,ias,ijah,don,i,ton,liot,liott,vin,wood",
-      "ma": "tthew,nuel,urice,thew,x,tt,lcolm,ck,son",
-      "do": "nald,uglas,n,nnie,ug,minic,yle,mingo,minick",
-      "er": "ic,nest,ik,nesto,ick,vin,nie,win",
-      "ra": "ymond,lph,y,mon,fael,ul,miro,phael",
-      "ed": "ward,win,die,gar,uardo,,mund,mond",
-      "co": "rey,ry,dy,lin,nrad,rnelius",
-      "le": "roy,wis,ster,land,vi",
-      "lo": "uis,nnie,renzo,ren,well,uie,u,gan",
-      "da": "vid,le,ve,mon,llas,mian,mien",
-      "jo": "nathan,n,rge,rdan,nathon,aquin",
-      "ru": "ssell,ben,dolph,dy,fus,ssel,sty",
-      "ke": "vin,ith,lvin,rmit",
-      "ar": "thur,nold,mando,turo,chie,mand",
-      "re": "ginald,x,ynaldo,uben,ggie",
-      "ge": "orge,rald,ne,rard,offrey,rardo",
-      "la": "rry,wrence,nce,urence,mar,mont",
-      "mo": "rris,ses,nte,ises,nty",
-      "ju": "an,stin,lio,lian,lius,nior",
-      "pe": "ter,dro,rry,te,rcy",
-      "tr": "avis,oy,evor,ent",
-      "he": "nry,rbert,rman,ctor,ath",
-      "no": "rman,el,ah,lan,rbert",
-      "em": "anuel,il,ilio,mett,manuel",
-      "wa": "lter,yne,rren,llace,de",
-      "mi": "ke,guel,lton,tchell,les",
-      "sa": "lvador,lvatore,ntiago,ul,ntos",
-      "ch": "ristopher,ris,ester,ristian,uck",
-      "pa": "ul,trick,blo,t",
-      "st": "anley,uart,an",
-      "hu": "gh,bert,go,mberto",
-      "br": "ian,uce,andon,ain",
-      "vi": "ctor,ncent,rgil,cente",
-      "ca": "lvin,meron,leb",
-      "gu": "y,illermo,stavo",
-      "lu": "is,ther,ke,cas",
-      "gr": "ant,ady,over,aham",
-      "ne": "il,lson,al,d",
-      "t": "homas,imothy,odd,ony,heodore,im,yler,ed,yrone,aylor,erence,immy,oby,eddy,yson",
-      "s": "cott,ean,idney,ergio,eth,pencer,herman,ylvester,imon,heldon,cotty,olomon",
-      "r": "yan",
-      "n": "icholas,athan,athaniel,ick,icolas",
-      "a": "dam,aron,drian,ustin,ngelo,braham,mos,bel,gustin,ugust,dolfo",
-      "b": "illy,obby,arry,ernard,ill,ob,yron,lake,ert,oyd,illie,laine,art,uddy,urton",
-      "e": "ugene,arl,verett,nrique,van,arnest,frain,than,steban",
-      "h": "oward,omer,orace,ans,al",
-      "p": "hillip,hilip,reston,hil,ierre",
-      "c": "raig,urtis,lyde,ecil,esar,edric,leveland,urt",
-      "j": "immy,im,immie",
-      "g": "lenn,ordon,len,ilbert,abriel,ilberto",
-      "m": "elvin,yron,erle,urray",
-      "k": "yle,arl,urt,irk,ristopher",
-      "o": "scar,tis,liver,rlando,mar,wen,rville,tto",
-      "l": "loyd,yle,ionel",
-      "f": "loyd,ernando,elix,elipe,orrest,abian,idel",
-      "w": "esley,endell,m,oodrow,inston",
-      "d": "ustin,uane,wayne,wight,rew,ylan",
-      "z": "achary",
-      "v": "ernon,an,ance",
-      "i": "an,van,saac,ra,rving,smael,gnacio,rvin",
-      "q": "uentin,uinton",
-      "x": "avier"
-    }
-    var female_names = {
-      "mari": "a,e,lyn,an,anne,na,ssa,bel,sa,sol,tza",
-      "kris": "ten,tin,tina,ti,tine,ty,ta,tie",
-      "jean": "ette,ne,nette,nie,ine,nine",
-      "chri": "stine,stina,sty,stie,sta,sti",
-      "marg": "aret,ie,arita,uerite,ret,o",
-      "ange": "la,lica,lina,lia,line",
-      "fran": "ces,cine,cisca",
-      "kath": "leen,erine,y,ryn,arine",
-      "sher": "ry,ri,yl,i,rie",
-      "caro": "l,lyn,line,le,lina",
-      "dian": "e,a,ne,na",
-      "jenn": "ifer,ie,y,a",
-      "luci": "lle,a,nda,le",
-      "kell": "y,i,ey,ie",
-      "rosa": ",lie,lind",
-      "jani": "ce,e,s,ne",
-      "stac": "y,ey,ie,i",
-      "shel": "ly,ley,ia",
-      "laur": "a,en,ie,el",
-      "trac": "y,ey,i,ie",
-      "jane": "t,,lle,tte",
-      "bett": "y,ie,e,ye",
-      "rose": "mary,marie,tta",
-      "joan": ",ne,n,na",
-      "mar": "y,tha,jorie,cia,lene,sha,yann,cella,ta,la,cy,tina",
-      "lor": "i,raine,etta,a,ena,ene,na,ie",
-      "sha": "ron,nnon,ri,wna,nna,na,una",
-      "dor": "othy,is,a,een,thy,othea",
-      "cla": "ra,udia,ire,rice,udette",
-      "eli": "zabeth,sa,sabeth,se,za",
-      "kar": "en,la,a,i,in",
-      "tam": "my,ara,i,mie,ika",
-      "ann": "a,,e,ie,ette",
-      "car": "men,rie,la,a,mela",
-      "mel": "issa,anie,inda",
-      "ali": "ce,cia,son,sha,sa",
-      "bri": "ttany,dget,ttney,dgette",
-      "lyn": "n,da,ne,ette",
-      "del": "ores,la,ia,oris",
-      "ter": "esa,ri,i",
-      "son": "ia,ya,ja,dra",
-      "deb": "orah,ra,bie,ora",
-      "jac": "queline,kie,quelyn,lyn",
-      "lat": "oya,asha,onya,isha",
-      "che": "ryl,lsea,ri,rie",
-      "vic": "toria,ki,kie,ky",
-      "sus": "an,ie,anne,ana",
-      "rob": "erta,yn",
-      "est": "her,elle,ella,er",
-      "lea": "h,,nne,nn",
-      "lil": "lian,lie,a,y",
-      "ma": "ureen,ttie,xine,bel,e,deline,ggie,mie,ble,ndy,ude,yra,nuela,vis,gdalena,tilda",
-      "jo": "yce,sephine,,di,dy,hanna,sefina,sie,celyn,lene,ni,die",
-      "be": "verly,rtha,atrice,rnice,th,ssie,cky,linda,ulah,rnadette,thany,tsy,atriz",
-      "ca": "therine,thy,ssandra,ndace,ndice,mille,itlin,ssie,thleen,llie",
-      "le": "slie,na,ona,ticia,igh,la,nora,ola,sley,ila",
-      "el": "aine,len,eanor,sie,la,ena,oise,vira,sa,va,ma",
-      "sa": "ndra,rah,ra,lly,mantha,brina,ndy,die,llie",
-      "mi": "chelle,ldred,chele,nnie,riam,sty,ndy,randa,llie",
-      "co": "nnie,lleen,nstance,urtney,ra,rinne,nsuelo,rnelia",
-      "ju": "lie,dith,dy,lia,anita,ana,stine",
-      "da": "wn,nielle,rlene,na,isy,rla,phne",
-      "re": "becca,nee,na,bekah,ba",
-      "al": "ma,lison,berta,exandra,yssa,ta",
-      "ra": "chel,mona,chael,quel,chelle",
-      "an": "drea,ita,a,gie,toinette,tonia",
-      "ge": "raldine,rtrude,orgia,nevieve,orgina",
-      "de": "nise,anna,siree,na,ana,e",
-      "ja": "smine,na,yne",
-      "lu": "cy,z,la,pe,ella,isa",
-      "je": "ssica,nifer,well,ri",
-      "ad": "a,rienne,die,ele,riana,eline",
-      "pa": "tricia,mela,ula,uline,tsy,m,tty,ulette,tti,trice,trica,ige",
-      "ke": "ndra,rri,isha,ri",
-      "mo": "nica,lly,nique,na,llie",
-      "lo": "uise,is,la",
-      "he": "len,ather,idi,nrietta,lene,lena",
-      "me": "gan,rcedes,redith,ghan,agan",
-      "wi": "lma,lla,nnie",
-      "ga": "il,yle,briela,brielle,le",
-      "er": "in,ica,ika,ma,nestine",
-      "ce": "cilia,lia,celia,leste,cile",
-      "ka": "tie,y,trina,yla,te",
-      "ol": "ga,ivia,lie,a",
-      "li": "nda,sa,ndsay,ndsey,zzie",
-      "na": "ncy,talie,omi,tasha,dine",
-      "la": "verne,na,donna,ra",
-      "vi": "rginia,vian,ola",
-      "ha": "rriet,nnah",
-      "pe": "ggy,arl,nny,tra",
-      "br": "enda,andi,ooke",
-      "ki": "mberly,m,mberley,rsten",
-      "au": "drey,tumn,dra",
-      "bo": "nnie,bbie,nita,bbi",
-      "do": "nna,lores,lly,minique",
-      "gl": "oria,adys,enda,enna",
-      "tr": "icia,ina,isha,udy",
-      "ta": "ra,nya,sha,bitha",
-      "ro": "sie,xanne,chelle,nda",
-      "am": "y,anda,ber,elia",
-      "fa": "ye,nnie,y",
-      "ni": "cole,na,chole,kki",
-      "ve": "ronica,ra,lma,rna",
-      "gr": "ace,etchen,aciela,acie",
-      "b": "arbara,lanca,arbra,ianca",
-      "r": "uth,ita,honda",
-      "s": "hirley,tephanie,ylvia,heila,uzanne,ue,tella,ophia,ilvia,ophie,tefanie,heena,ummer,elma,ocorro,ybil,imone",
-      "c": "ynthia,rystal,indy,harlene,ristina,leo",
-      "e": "velyn,mily,dna,dith,thel,mma,va,ileen,unice,ula,ssie,ffie,tta,ugenia",
-      "a": "shley,pril,gnes,rlene,imee,bigail,ida,bby,ileen",
-      "t": "heresa,ina,iffany,helma,onya,oni,herese,onia",
-      "i": "rene,da,rma,sabel,nez,ngrid,va,mogene,sabelle",
-      "w": "anda,endy,hitney",
-      "p": "hyllis,riscilla,olly",
-      "n": "orma,ellie,ora,ettie,ell",
-      "f": "lorence,elicia,lora,reda,ern,rieda",
-      "v": "alerie,anessa",
-      "j": "ill,illian",
-      "y": "vonne,olanda,vette",
-      "g": "ina,wendolyn,wen,oldie",
-      "l": "ydia",
-      "m": "yrtle,yra,uriel,yrna",
-      "h": "ilda",
-      "o": "pal,ra,felia",
-      "k": "rystal",
-      "d": "ixie,ina",
-      "u": "rsula"
-    }
-    var ambiguous = [
-      "casey",
-      "jamie",
-      "lee",
-      "jaime",
-      "jessie",
-      "morgan",
-      "rene",
-      "robin",
-      "devon",
-      "kerry",
-      "alexis",
-      "guadalupe",
-      "blair",
-      "kasey",
-      "jean",
-      "marion",
-      "aubrey",
-      "shelby",
-      "jan",
-      "shea",
-      "jade",
-      "kenyatta",
-      "kelsey",
-      "shay",
-      "lashawn",
-      "trinity",
-      "regan",
-      "jammie",
-      "cassidy",
-      "cheyenne",
-      "reagan",
-      "shiloh",
-      "marlo",
-      "andra",
-      "devan",
-      "rosario",
-      "lee"
-    ]
 
-    var i, arr, i2, l, keys;
-    //add data into the main obj
-    //males
-    keys = Object.keys(male_names)
-    l = keys.length
-    for (i = 0; i < l; i++) {
-      arr = male_names[keys[i]].split(',')
-      for (i2 = 0; i2 < arr.length; i2++) {
-        main[keys[i] + arr[i2]] = "m"
-      }
-    }
 
-    //females
-    keys = Object.keys(female_names)
-    l = keys.length
-    for (i = 0; i < l; i++) {
-      arr = female_names[keys[i]].split(',')
-      for (i2 = 0; i2 < arr.length; i2++) {
-        main[keys[i] + arr[i2]] = "f"
-      }
-    }
-    //unisex names
-    l = ambiguous.length
-    for (i = 0; i < l; i += 1) {
-      main[ambiguous[i]] = "a"
-    }
+  return main;
+})();
 
-    if (typeof module !== "undefined" && module.exports) {
-      module.exports = main;
-    }
-    return main
-  })()
-  // console.log(firstnames['spencer'])
-  // console.log(firstnames['jill'])
-  // console.log(firstnames['sue'])
-  // console.log(firstnames['jan'])
-  // console.log(JSON.stringify(Object.keys(firstnames).length, null, 2));
+var lang = 'en';
+var dates = (function() {
+  var zip = { months:
+   { january: 0,
+     february: 1,
+     march: 2,
+     april: 3,
+     may: 4,
+     june: 5,
+     july: 6,
+     august: 7,
+     september: 8,
+     october: 9,
+     november: 10,
+     december: 11 },
+  monthAbbrevs:
+   { jan: 0,
+     feb: 1,
+     mar: 2,
+     apr: 3,
+     jun: 5,
+     jul: 6,
+     aug: 7,
+     sep: 8,
+     sept: 8,
+     oct: 9,
+     nov: 10,
+     dec: 11 },
+  days:
+   { monday: 1,
+     tuesday: 2,
+     wednesday: 3,
+     thursday: 4,
+     friday: 5,
+     saturday: 6,
+     sunday: 7 } };
 
+  var main = (function () {
+				var res = zip;
+				for (var w in zip.monthAbbrevs) { zip.months[w] = zip.monthAbbrevs[w] }
+				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
+				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
+				res.monthsS = res.monthSearch + ',?';
+				return res;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var numbers = (function() {
+  var zip = { ones:
+   { zero: 0,
+     null: 0,
+     nil: 0,
+     a: 1,
+     one: 1,
+     two: 2,
+     three: 3,
+     third: 3,
+     four: 4,
+     fourth: 4,
+     five: 5,
+     fifth: 5,
+     six: 6,
+     sixth: 6,
+     seven: 7,
+     seventh: 7,
+     eight: 8,
+     eighth: 8,
+     nine: 9,
+     ninth: 9 },
+  teens:
+   { ten: 10,
+     teenth: 10,
+     eleven: 11,
+     eleventh: 11,
+     twelve: 12,
+     twelfth: 12,
+     thirteen: 13,
+     thirteenth: 13,
+     fourteen: 14,
+     fourteenth: 14,
+     fifteen: 15,
+     fifteenth: 15,
+     sixteen: 16,
+     sixteenth: 16,
+     seventeen: 17,
+     seventeenth: 17,
+     eighteen: 18,
+     eighteenth: 18,
+     nineteen: 19,
+     nineteenth: 19 },
+  tens:
+   { twenty: 20,
+     twentieth: 20,
+     thirty: 30,
+     thirtieth: 30,
+     forty: 40,
+     fortieth: 40,
+     fifty: 50,
+     fiftieth: 50,
+     sixty: 60,
+     sixtieth: 60,
+     seventy: 70,
+     seventieth: 70,
+     eighty: 80,
+     eightieth: 80,
+     ninety: 90,
+     ninetieth: 90 },
+  multiple:
+   { hundred: 100,
+     thousand: 1000,
+     million: 1000000,
+     billion: 1000000000,
+     trillion: 1000000000000,
+     quadrillion: 1000000000000000,
+     quintillion: 1000000000000000000,
+     sextillion: 1e+21,
+     septillion: 1e+24,
+     octillion: 1e+27,
+     nonillion: 1e+30,
+     decillion: 1.0000000000000001e+33 } };
+
+  var main = zip;
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var firstnames = (function() {
+
+
+var zip = { male:
+   { will: '3m,&,ard,is,3ms',
+     fred: ',e~ck,d&,~ck,dy',
+     marc: 'us,,o,os,;',
+     darr: ';l,yl,2,;,@',
+     fran: 'k,cis,cisco,kl@,k&',
+     terr: 'y,0ce,2ce,;l',
+     rand: 'y,all,olph,al',
+     brad: '1y,,ford,y',
+     jeff: 'rey,,ery,ry',
+     john: ',ny,n&,ath0',
+     greg: 'ory,,g,o~o',
+     mar: 'k,t@,v@,io,shall,ty,lon,l@',
+     car: 'l,los,lton,roll,y,ey',
+     ken: '!th,,t,ny,dall,d~ck',
+     har: 'old,ry,vey,1y,#n,~son',
+     ste: 'v2,ph2,ve,wart,ph0,rl@g',
+     jer: 'ry,emy,ome,em3h,mai!,ald',
+     mic: 'ha;,heal,ah,key,h;',
+     dar: 'yl,@,!ll,w@,ius',
+     dan: '&l,ny,,e',
+     wil: 'bur,son,bert,fred,fredo',
+     ric: 'hard,ky,ardo,k,key',
+     cli: 'fford,nton,fton,nt,ff',
+     cla: 'r2ce,ude,yton,rk,y',
+     ben: 'jam@,,n&,ny,ito',
+     rod: '!y,e~ck,olfo,ger,',
+     rob: 'ert,erto,b&,',
+     gar: 'y,ry,rett,#nd',
+     sam: 'u;,,my,m&',
+     and: 'rew,re,y,res',
+     jos: 'eph,e,hua,h',
+     joe: ',l,y,sph',
+     leo: '_rd,n,,_rdo',
+     tom: ',my,as,m&',
+     bry: '0,0t,ce,on',
+     ant: 'hony,onio,oi!,on',
+     jac: 'k,ob,kson',
+     cha: 'r1s,d,rl&,se',
+     sha: 'wn,!,un',
+     bre: 'nt,tt,nd0,t',
+     jes: 'se,us,s',
+     al: 'bert,0,1n,fred,ex0der,ex,v@,#n,fredo,berto,ej0dro,fonso,ton,,onzo,i,varo',
+     ro: '_ld,ger,y,nn&,#nd,n,ss,osev;t,g;io,#ndo,m0,cky,yce,scoe,ry',
+     de: 'nnis,rek,0,r~ck,lbert,v@,wey,xter,way!,met~us,nis,smond',
+     ja: 'mes,son,y,red,v&r,ke,sper,mal,rrod',
+     el: 'mer,lis,bert,3s,ijah,don,i,ton,liot,liott,v@,wood',
+     ma: 'tthew,nu;,u~ce,thew,x,tt,lcolm,ck,son',
+     do: '_ld,ug#s,n,nn&,ug,m@ic,y1,m@go,m@ick',
+     er: 'ic,!st,ik,!sto,ick,v@,n&,w@',
+     ra: 'ymond,lph,y,mon,fa;,ul,miro,pha;',
+     ed: 'ward,w@,d&,gar,uardo,,mund,mond',
+     co: 'rey,ry,dy,l@,n%d,r!lius',
+     le: 'roy,wis,ster,#nd,vi',
+     lo: 'uis,nn&,r2zo,r2,w;l,u&,u,g0',
+     da: 'vid,1,ve,mon,l#s,mi0,m&n',
+     jo: '_th0,n,rge,rd0,_thon,aqu@',
+     ru: 'ss;l,b2,dolph,dy,fus,ss;,sty',
+     ke: 'v@,ith,lv@,rmit',
+     ar: 'thur,nold,m0do,turo,ch&,m0d',
+     re: 'gi_ld,x,y_ldo,ub2,gg&',
+     ge: 'orge,%ld,!,%rd,offrey,%rdo',
+     la: 'rry,wr2ce,nce,ur2ce,mar,mont',
+     mo: 'r~s,ses,nte,ises,nty',
+     ju: '0,st@,lio,li0,lius,nior',
+     pe: 'ter,dro,rry,te,rcy',
+     tr: 'avis,oy,evor,2t',
+     he: 'nry,rbert,rm0,ctor,ath',
+     no: 'rm0,;,ah,#n,rbert',
+     em: '0u;,il,ilio,mett,m0u;',
+     wa: 'lter,y!,rr2,l#ce,de',
+     mi: 'ke,gu;,lton,tch;l,1s',
+     sa: 'lvador,lvatore,nt3go,ul,ntos',
+     ch: '~stopher,~s,ester,~sti0,uck',
+     pa: 'ul,t~ck,blo,t',
+     st: '01y,uart,0',
+     hu: 'gh,bert,go,mberto',
+     br: 'i0,uce,0don,a@',
+     vi: 'ctor,nc2t,rgil,c2te',
+     ca: 'lv@,meron,1b',
+     gu: 'y,il1rmo,stavo',
+     lu: 'is,ther,ke,cas',
+     gr: '0t,ady,over,aham',
+     ne: 'il,lson,al,d',
+     t: 'homas,imothy,odd,ony,heodore,im,y1r,ed,yro!,aylor,er2ce,immy,oby,eddy,yson',
+     s: 'cott,e0,id!y,ergio,eth,p2cer,herm0,ylvester,imon,h;don,cotty,olomon',
+     r: 'y0',
+     n: 'icho#s,ath0,ath0&l,ick,ico#s',
+     a: 'dam,aron,d~0,ust@,ng;o,b%ham,mos,b;,gust@,ugust,dolfo',
+     b: 'illy,obby,arry,er_rd,ill,ob,yron,#ke,ert,oyd,ill&,#i!,art,uddy,urton',
+     e: 'uge!,arl,verett,n~que,v0,ar!st,f%@,th0,steb0',
+     h: 'oward,omer,o%ce,0s,al',
+     p: 'hillip,hilip,reston,hil,&rre',
+     c: '%ig,urtis,lyde,ecil,esar,ed~c,1ve#nd,urt',
+     j: 'immy,im,imm&',
+     g: '1nn,ordon,1n,ilbert,abr&l,ilberto',
+     m: ';v@,yron,er1,ur%y',
+     k: 'y1,arl,urt,irk,~stopher',
+     o: 'scar,tis,liver,r#ndo,mar,w2,rvil1,tto',
+     l: 'loyd,y1,io!l',
+     f: 'loyd,er_ndo,;ix,;ipe,orrest,abi0,id;',
+     w: 'es1y,2d;l,m,oodrow,@ston',
+     d: 'ust@,ua!,way!,wight,rew,y#n',
+     z: 'achary',
+     v: 'ernon,0,0ce',
+     i: '0,v0,saac,%,rv@g,sma;,g_cio,rv@',
+     q: 'u2t@,u@ton',
+     x: 'av&r' },
+  female:
+   { mari: 'a,e,lyn,0,0!,_,ssa,b;,sa,sol,tza',
+     kris: 't2,t@,ti_,ti,ti!,ty,ta,t&',
+     jean: 'ette,!,!tte,n&,i!,ni!',
+     chri: 'sti!,sti_,sty,st&,sta,sti',
+     marg: 'aret,&,a~ta,ue~te,ret,o',
+     ange: '#,lica,li_,l3,li!',
+     fran: 'ces,ci!,cisca',
+     kath: '12,e~!,y,ryn,a~!',
+     sher: 'ry,~,yl,i,r&',
+     caro: 'l,lyn,li!,1,li_',
+     dian: 'e,a,!,_',
+     jenn: 'ifer,&,y,a',
+     luci: 'l1,a,nda,1',
+     kell: 'y,i,ey,&',
+     rosa: ',l&,l@d',
+     jani: 'ce,e,s,!',
+     stac: 'y,ey,&,i',
+     shel: 'ly,1y,3',
+     laur: 'a,2,&,;',
+     trac: 'y,ey,i,&',
+     jane: 't,,l1,tte',
+     bett: 'y,&,e,ye',
+     rose: 'mary,mar&,tta',
+     joan: ',!,n,_',
+     mar: 'y,tha,jor&,c3,1!,sha,y0n,c;#,ta,#,cy,ti_',
+     lor: 'i,%i!,etta,a,e_,e!,_,&',
+     sha: 'ron,nnon,~,w_,n_,_,u_',
+     dor: 'othy,is,a,e2,thy,othea',
+     cla: '%,ud3,ire,~ce,udette',
+     eli: 'zabeth,sa,sabeth,se,za',
+     kar: '2,#,a,i,@',
+     tam: 'my,a%,i,m&,ika',
+     ann: 'a,,e,&,ette',
+     car: 'm2,r&,#,a,me#',
+     mel: 'issa,0&,@da',
+     ali: 'ce,c3,son,sha,sa',
+     bri: 'tt0y,dget,tt!y,dgette',
+     lyn: 'n,da,!,ette',
+     del: 'ores,#,3,o~s',
+     ter: 'esa,~,i',
+     son: '3,ya,ja,d%',
+     deb: 'o%h,%,b&,o%',
+     jac: 'qu;i!,k&,qu;yn,lyn',
+     lat: 'oya,asha,onya,isha',
+     che: 'ryl,lsea,~,r&',
+     vic: 'to~a,ki,k&,ky',
+     sus: '0,&,0!,a_',
+     rob: 'erta,yn',
+     est: 'her,;1,;#,er',
+     lea: 'h,,n!,nn',
+     lil: 'li0,l&,a,y',
+     ma: 'ure2,tt&,xi!,b;,e,d;i!,gg&,m&,b1,ndy,ude,y%,nue#,vis,gda1_,tilda',
+     jo: 'yce,sephi!,,di,dy,h0_,sefi_,s&,c;yn,1!,ni,d&',
+     be: 'verly,rtha,at~ce,rnice,th,ss&,cky,l@da,u#h,r_dette,th0y,tsy,at~z',
+     ca: 'the~!,thy,ss0d%,ndace,ndice,mil1,itl@,ss&,th12,ll&',
+     le: 'sl&,_,o_,tic3,igh,#,no%,o#,s1y,i#',
+     el: 'ai!,1n,e0or,s&,#,e_,oise,vi%,sa,va,ma',
+     sa: 'nd%,%h,%,lly,m0tha,b~_,ndy,d&,ll&',
+     mi: 'ch;1,ldred,ch;e,nn&,~am,sty,ndy,%nda,ll&',
+     co: 'nn&,l12,nst0ce,urt!y,%,~n!,nsu;o,r!l3',
+     ju: 'l&,dith,dy,l3,0ita,a_,sti!',
+     da: 'wn,n&l1,r1!,_,isy,r#,ph!',
+     re: 'becca,!e,_,bekah,ba',
+     al: 'ma,lison,berta,ex0d%,yssa,ta',
+     ra: 'ch;,mo_,cha;,qu;,ch;1',
+     an: 'drea,ita,a,g&,toi!tte,ton3',
+     ge: '%ldi!,rtrude,org3,!v&ve,orgi_',
+     de: 'nise,0_,siree,_,a_,e',
+     ja: 'smi!,_,y!',
+     lu: 'cy,z,#,pe,;#,isa',
+     je: 'ssica,nifer,w;l,~',
+     ad: 'a,r&n!,d&,;e,~a_,;i!',
+     pa: 't~c3,me#,u#,uli!,tsy,m,tty,u1tte,tti,t~ce,t~ca,ige',
+     ke: 'nd%,r~,isha,~',
+     mo: 'nica,lly,nique,_,ll&',
+     lo: 'uise,is,#',
+     he: '1n,ather,idi,nr&tta,1!,1_',
+     me: 'g0,rcedes,redith,gh0,ag0',
+     wi: 'lma,l#,nn&',
+     ga: 'il,y1,br&#,br&l1,1',
+     er: '@,ica,ika,ma,!sti!',
+     ce: 'cil3,l3,c;3,1ste,ci1',
+     ka: 't&,y,t~_,y#,te',
+     ol: 'ga,iv3,l&,a',
+     li: 'nda,sa,ndsay,ndsey,zz&',
+     na: 'ncy,tal&,omi,tasha,di!',
+     la: 'ver!,_,don_,%',
+     vi: 'rg@3,vi0,o#',
+     ha: 'rr&t,n_h',
+     pe: 'ggy,arl,nny,t%',
+     br: '2da,0di,ooke',
+     ki: 'mberly,m,mber1y,rst2',
+     au: 'drey,tumn,d%',
+     bo: 'nn&,bb&,nita,bbi',
+     do: 'n_,lores,lly,m@ique',
+     gl: 'o~a,adys,2da,2_',
+     tr: 'ic3,i_,isha,udy',
+     ta: '%,nya,sha,bitha',
+     ro: 's&,x0!,ch;1,nda',
+     am: 'y,0da,ber,;3',
+     fa: 'ye,nn&,y',
+     ni: 'co1,_,cho1,kki',
+     ve: 'ronica,%,lma,r_',
+     gr: 'ace,etch2,ac&#,ac&',
+     b: 'arba%,#nca,arb%,i0ca',
+     r: 'uth,ita,honda',
+     s: 'hir1y,teph0&,ylv3,hei#,uz0!,ue,t;#,oph3,ilv3,oph&,tef0&,hee_,ummer,;ma,ocorro,ybil,imo!',
+     c: 'ynth3,rystal,@dy,har1!,~sti_,1o',
+     e: 'v;yn,mily,d_,dith,th;,mma,va,i12,unice,u#,ss&,ff&,tta,ug23',
+     a: 'sh1y,p~l,g!s,r1!,imee,bigail,ida,bby,i12',
+     t: 'heresa,i_,iff0y,h;ma,onya,oni,herese,on3',
+     i: 're!,da,rma,sab;,!z,ng~d,va,moge!,sab;1',
+     w: '0da,2dy,hit!y',
+     p: 'hyllis,~scil#,olly',
+     n: 'orma,;l&,o%,ett&,;l',
+     f: 'lor2ce,;ic3,lo%,reda,ern,r&da',
+     v: 'a1r&,a!ssa',
+     j: 'ill,illi0',
+     y: 'von!,o#nda,vette',
+     g: 'i_,w2dolyn,w2,old&',
+     l: 'yd3',
+     m: 'yrt1,y%,ur&l,yr_',
+     h: 'ilda',
+     o: 'pal,%,f;3',
+     k: 'rystal',
+     d: 'ix&,i_',
+     u: 'rsu#' },
+  ambiguous:
+   [ 'casey',
+     'jam&',
+     '1e',
+     'jaime',
+     'jess&',
+     'morg0',
+     're!',
+     'rob@',
+     'devon',
+     'kerry',
+     'a1xis',
+     'guadalupe',
+     'b#ir',
+     'kasey',
+     'je0',
+     'ma~on',
+     'aubrey',
+     'sh;by',
+     'j0',
+     'shea',
+     'jade',
+     'k2yatta',
+     'k;sey',
+     'shay',
+     '#shawn',
+     't~nity',
+     'reg0',
+     'jamm&',
+     'cassidy',
+     'chey2!',
+     'reag0',
+     'shiloh',
+     'marlo',
+     '0d%',
+     'dev0',
+     'rosa~o',
+     '1e' ] };
+
+  var main = (function () {
+				var replN = function(w) { return helpFns.repl(w, 0, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) }
+				var o = {};
+				['male', 'female'].forEach(function(type) {
+					for (var k in zip[type]) {
+						var arr = replN(zip[type][k]).split(',');
+						arr.forEach(function(w, i) {
+							o[k + w] = type.charAt(0);
+						})
+					}
+				});
+				zip.ambiguous.map(replN).reduce(function(h,s){ h[s]='a'; return h; }, o);
+				return o;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var pos_data = (function() {
+
+
+var zip = { particles:
+   [ 'do',
+     'together',
+     'in',
+     'out',
+     'on',
+     'off',
+     'of',
+     'with',
+     'over',
+     'under',
+     'up',
+     'down',
+     'about',
+     'before',
+     'after',
+     'to',
+     'through',
+     'onto',
+     'around',
+     'behind',
+     'above',
+     'away',
+     'across',
+     'ahead',
+     'upon',
+     'aback',
+     'forth',
+     'along',
+     'apart',
+     'way' ],
+  cs: [ 'woul|d', 'wi|ll', 'ha|ve', 'a|m', 'i|s', 'a|re', 'not' ],
+  contractions:
+   { would: [ 2 ],
+     could: [ 2 ],
+     should: [ 2 ],
+     can: [ 6 ],
+     i: [ 0, 1, 2, 3 ],
+     he: [ 0, 1, 4 ],
+     she: [ 0, 1, 4 ],
+     it: [ 1, 4 ],
+     we: [ 0, 1, 2, 5 ],
+     they: [ 0, 1, 2, 5 ] } };
+
+  var main = (function () {
+				zip.particles = zip.particles.reduce(helpFns.toObj, {});
+				var c = zip.contractions;
+				var _cs = [];
+				for (var k in c) { c[k].forEach(function(i){ var a = zip.cs[i].split('|'); _cs[k+((a[1]) ? "'"+a[1] : a[0])] = [k,a.join('')]; }) }
+				zip.contractions = _cs;
+				return zip;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var negate_data = (function() {
+  var zip = { everyone: 'no one',
+  everybody: 'nobody',
+  someone: 'no one',
+  somebody: 'nobody',
+  always: 'never' };
+
+  var main = (function () {
+
+				var negate = verbs_special.negate || {};
+				for (var k in zip) { negate[k] = zip[k]; }
+				return negate;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var word_rules = (function() {
+  var zip = { JJ:
+   [ '.[cts]hy$',
+     '.[st]ty$',
+     '.[gk]y$',
+     '.some$',
+     '.[nrtumcd]al$',
+     '.que$',
+     '.[tnl]ary$',
+     '.lar$',
+     '[bszmp]{2}y',
+     '.[icldtgrv]ent$',
+     '.[oe]ry$',
+     '.[lsrnpb]ian$',
+     '.[^aeiou]ial$',
+     '.[^aeiou]eal$',
+     '.[vrl]id$',
+     '.ike$',
+     '.rmy$',
+     '.azy$',
+     '.bound$',
+     '.oid$',
+     '.rough$',
+     '.mum$',
+     '.ean$',
+     '.[ia]sed$',
+     '.llen$',
+     '.ried$',
+     '.gone$',
+     '.made$',
+     '.[pdltrkvyns]ing$',
+     '.ous$',
+     '.[gt]led$',
+     '[aeiou].*ist$',
+     '[a-z]*\\-[a-z]*\\-',
+     '.[^aeiou][ei]al$',
+     '.ffy$',
+     '.[^aeiou]ic$',
+     '.(gg|bb|zz)ly$',
+     '.[aeiou]my$',
+     '.[aeiou]ble$',
+     '.[^aeiou]ful$',
+     '.[^aeiou]ish$',
+     '..ic$',
+     '[aeiou][^aeiou]id$',
+     '.[^aeiou]ish$',
+     '.[^aeiou]ive$',
+     '[ea]{2}zy$' ],
+  VB:
+   [ '.[lnr]ize$',
+     '.fies$',
+     '^(un|de|re)\\-[a-z]..',
+     '.zes$',
+     '.ends$',
+     '.ify$',
+     '.ens$',
+     '.oses$',
+     '.ishes$',
+     '.ects$',
+     '.bles$',
+     '.pose$',
+     '.tized$',
+     '.gate$',
+     '.nes$',
+     '.lked$',
+     '.\'n$',
+     '.\'t$',
+     '.tches$',
+     '.ize$',
+     '.[^aeiou]ise$',
+     '.[aeiou]te$' ],
+  JJS: [ '.[di]est$' ],
+  VBZ: [ '.[rln]ates$' ],
+  RB:
+   [ '[rdntkdhs]ly$',
+     '.wards$',
+     '.where$',
+     '.fore$',
+     '.less$',
+     '. so$',
+     '.fully$' ],
+  JJR: [ '.[ilk]er$' ],
+  NN:
+   [ '.rol$',
+     '.tors$',
+     '.vice$',
+     '.ices$',
+     '.ions$',
+     '.ances$',
+     '.tions$',
+     '.tures$',
+     '.ports$',
+     '.ints$',
+     '.ea$',
+     '[aeiou][pns]er$',
+     '.ia$',
+     '.sis$',
+     '.[aeiou]na$',
+     '.[^aeiou]ity$',
+     '.[^aeiou]ium$',
+     '.[^aeiou]ica$',
+     '[aeiou][^aeiou]is$',
+     '[^aeiou]ard$',
+     '[^aeiou]ism$',
+     '.[^aeiou]ity$',
+     '.[^aeiou]ium$',
+     '.[lstrn]us$' ],
+  CD:
+   [ '.teen(th)?$',
+     '.tieth$',
+     '^-?[0-9]+(.[0-9]+)?$',
+     '^https?:?//[a-z0-9]',
+     '^www.[a-z0-9]' ],
+  MD: [ '.*ould$', '.\'ll$' ],
+  NNO: [ '[a-z]\'s$' ],
+  CP: [ '.\'re$' ] };
+
+  var main = (function () {
+				var a = [];
+				for (var k in zip) {
+					zip[k].forEach(function(r){
+						a.push({
+							reg: new RegExp(r, "i"),
+							pos: k
+						});
+					});
+				}
+				return a;
+			})();
+
+
+
+  return main;
+})();
+/* regex rules for verb conjugation
+used in combination with the generic "fallback" method */
+
+var lang = 'en';
+var verb_rules = (function() {
+
+
+var zip = '{"infinitive":[["(eed)$",0,"_","!","&d","&r"],["(e)(ep)$",0,"$1$2s","$1$2%","$1pt","$1$2er"],["(a[tg]|i[zn]|ur|nc|gl|is)e$",0,"&s","!","&d",0],["([i|f|rr])y$",0,"$1ies","$1y%","$1ied",0],["([td]er)$",0,"_","!","&d",0],["([bd]l)e$",0,"&s","!","&d",0],["(ish|tch|ess)$",0,"&s","!","&d",0],["(ion|end|e[nc]t)$",0,"_","!","&d",0],["(om)e$",0,"&s","!","ame",0],["([aeiu])([pt])$",0,"$1$2s","$1$2$2%","$1$2",0],["(er)$",0,"_","!","&d",0],["(en)$",0,"_","!","&d",0]],"present":[["(ies)$","y",0,"y%","ied",0],["(tch|sh)es$","$1",0,"!","&d",0],["(ss)es$","$1",0,"!","&d",0],["([tzlshicgrvdnkmu])es$","&",0,"!","&d",0],["(n[dtk]|c[kt]|[eo]n|i[nl]|er|a[ytrl])s$","$1",0,"!","&d",0],["(ow)s$","$1",0,"!","ew",0],["(op)s$","$1",0,"$1p%","$1ped",0],["([eirs])ts$","$1t",0,"$1tt%","$1tted",0],["(ll)s$","$1",0,"!","&d",0],["(el)s$","$1",0,"$1l%","$1led",0],["(ip)es$","&",0,"!","&d",0],["ss$","ss",0,"ss%","ssed",0],["s$",0,0,"%","ed",0]],"gerund":[["pp%$","p","ps",0,"pped",0],["ll%$","ll","lls",0,"lled",0],["tt%$","t","ts",0,"t",0],["ss%$","ss","sses",0,"ssed",0],["gg%$","g","gs",0,"gged",0],["([^aeiou])y%$","$1y","$1ies",0,"$1ied","$1ier"],["(i.)%$","&","&s",0,"&d",0],["(u[rtcb]|[bdtpkg]l|n[cg]|a[gdkvtc]|[ua]s|[dr]g|yz|o[rlsp]|cre)%$","&","&s",0,"&d",0],["(ch|sh)%$","$1","&s",0,"&d",0],["(..)%$","$1","_",0,"&d",0]],"past":[["(ued)$",0,"ues","u%","ued","uer"],["(e|i)lled$",0,"$1lls","$1ll%","$1lled","$1ller"],["(sh|ch)ed$","$1","&s","!",0,"&r"],["(tl|gl)ed$","&","&s","!",0,"&r"],["(ss)ed$","$1","&s","!",0,"&r"],["pped$","p","ps","pp%",0,"pper"],["tted$","t","ts","tt%",0,"tter"],["gged$","g","gs","gg%",0,"gger"],["(h|ion|n[dt]|ai.|[cs]t|pp|all|ss|tt|int|ail|ld|en|oo.|er|k|pp|w|ou.|rt|ght|rm)ed$","$1","_","!",0,"&r"],["(..[^aeiou])ed$","&","&s","!",0,"&r"],["ied$","y","ies","y%",0,"ier"],["(.o)ed$","$1o","$1os","$1o%",0,"$1oer"],["(.i)ed$","$1","_","!",0,"&r"],["([rl])ew$","$1ow","$1ows","$1ow%",0,0],["([pl])t$","$1t","$1ts","$1t%",0,0]]}';
+
+  var main = (function () {
+				var rs = JSON.parse(helpFns.repl(zip, 0, ['$1e', '$1s', '$1es', '$1ed', '$1ing', 'ing']));
+				for (var cat in rs) {
+					rs[cat] = rs[cat].map(function(a){
+						return {
+							reg: new RegExp(a[0],'i'),
+							repl: {
+								infinitive:a[1],
+								present:a[2],
+								gerund:a[3],
+								past:a[4],
+								doer:a[5]
+							}
+						};
+					});
+				}
+				return rs;
+			})();
+
+
+
+  return main;
+})();
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
+
+var lang = 'en';
+var normalisations = (function() {
+  var zip = { '2': '²ƻ',
+  '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
+  '5': 'Ƽƽ',
+  '8': 'Ȣȣ',
+  '!': '¡',
+  '?': '¿Ɂɂ',
+  a: 'ªÀÁÂÃÄÅàáâãäåĀāĂăĄąǍǎǞǟǠǡǺǻȀȁȂȃȦȧȺΆΑΔΛάαλАДадѦѧӐӑӒӓƛɅ',
+  b: 'ßþƀƁƂƃƄƅɃΒβϐϦБВЪЬбвъьѢѣҌҍҔҕƥƾ',
+  c: '¢©ÇçĆćĈĉĊċČčƆƇƈȻȼͻͼͽϲϹϽϾϿЄСсєҀҁҪҫ',
+  d: 'ÐĎďĐđƉƊȡƋƌǷ',
+  e: 'ÈÉÊËèéêëĒēĔĕĖėĘęĚěƎƏƐǝȄȅȆȇȨȩɆɇΈΕΞΣέεξϱϵ϶ЀЁЕЭеѐёҼҽҾҿӖӗӘәӚӛӬӭ',
+  f: 'ƑƒϜϝӺӻ',
+  g: 'ĜĝĞğĠġĢģƓǤǥǦǧǴǵ',
+  h: 'ĤĥĦħƕǶȞȟΉΗЂЊЋНнђћҢңҤҥҺһӉӊ',
+  I: 'ÌÍÎÏ',
+  i: 'ìíîïĨĩĪīĬĭĮįİıƖƗȈȉȊȋΊΐΪίιϊІЇії',
+  j: 'ĴĵǰȷɈɉϳЈј',
+  k: 'ĶķĸƘƙǨǩΚκЌЖКжкќҚқҜҝҞҟҠҡ',
+  l: 'ĹĺĻļĽľĿŀŁłƚƪǀǏǐȴȽΙӀӏ',
+  m: 'ΜϺϻМмӍӎ',
+  n: 'ÑñŃńŅņŇňŉŊŋƝƞǸǹȠȵΝΠήηϞЍИЙЛПийлпѝҊҋӅӆӢӣӤӥπ',
+  o: 'ÒÓÔÕÖØðòóôõöøŌōŎŏŐőƟƠơǑǒǪǫǬǭǾǿȌȍȎȏȪȫȬȭȮȯȰȱΌΘΟΦΩδθοσόϕϘϙϬϭϴОФоѲѳѺѻѼѽӦӧӨөӪӫ¤ƍΏ',
+  p: 'ƤƿΡρϷϸϼРрҎҏÞ',
+  q: 'Ɋɋ',
+  r: '­®ŔŕŖŗŘřƦȐȑȒȓɌɍЃГЯгяѓҐґҒғӶӷſ',
+  s: 'ŚśŜŝŞşŠšƧƨȘșȿςϚϛϟϨϩЅѕ',
+  t: 'ŢţŤťŦŧƫƬƭƮȚțȶȾΓΤτϮϯТт҂Ҭҭ',
+  u: 'µÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųƯưƱƲǓǔǕǖǗǘǙǚǛǜȔȕȖȗɄΰμυϋύϑЏЦЧцџҴҵҶҷҸҹӋӌӇӈ',
+  v: 'ƔνѴѵѶѷ',
+  w: 'ŴŵƜωώϖϢϣШЩшщѡѿ',
+  x: '×ΧχϗϰХхҲҳӼӽӾӿ',
+  y: '¥ÝýÿŶŷŸƳƴȲȳɎɏΎΥΨΫγψϒϓϔЎУучўѰѱҮүҰұӮӯӰӱӲӳ',
+  z: 'ŹźŻżŽžƩƵƶȤȥɀΖζ' };
+
+  var main = (function (a) {
+				var res = { normaler: {}, greek: {}	};
+				for (var normCh in zip) {
+						zip[normCh].split('').forEach(function(grCh){
+							res.normaler[grCh] = normCh;
+							res.greek[normCh] = grCh;
+						});
+				}
+				return res;
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var suffixes = (function() {
+
+
+var zip = '{"wordnet":{"NN":["ceae","inae","idae","#af","rgan","eman","sman","star","boat","tube","rica","tica","nica","auce","tics","ency","ancy","poda","tude","xide","body","we&","tree","rrel","stem","ch_","ic_","__","ad_","nc_","iz_","ay_","nn_","at~","a#s","id~","rm~","et~","l#t","uage","ings","aphy","chid","tein","vein","hair","tris","unit","cake","nake","illa","ella","ic#","il#","et#","sc#","cell","bell","bill","palm","toma","game","lamp","bone","mann","me%","wood","book","!on","agon","odon","dron","iron","tion","itor","ator","root","cope","t_a","hora","lora","bird","worm","f_n","horn","wort","ourt","stry","etry","bush","n~s","gist","rata","lata","tata","moth","lity","nity","sity","rity","city","dity","vity","drug","dium","llum","trum","inum","lium","tium","atum","rium","icum","anum","nium","orum","icus","opus","chus","ngus","thus","rius","rpus"],"JJ":["liac","siac","clad","deaf","xial","hial","chal","rpal","asal","rial","teal","oeal","vial","phal","sial","heal","rbal","neal","geal","dial","eval","bial","ugal","kian","izan","rtan","odan","llan","zian","eian","eyan","ndan","eban","near","unar","#ar","liar","-day","-way","tech","sick","tuck","inct","unct","wide","7o","uddy","e&y","ut&","al&","rr&","on&","rt&","ob&","op&","ch&","dd&","ct&","ti&","ek&","ay&","rk&","te&","mm&","tr&","aw&","rb&","bb&","ax&","br&","pi&","ck&","rc&","en&","fi&","lv&","mn&","kl&","ht&","li&","et&","rd&","lu&","rv&","az&","ok&","gh&","sk&","em&","ad&","iv&","mb&","pt&","zl&","or&","pl&","wn&","af&","ni&","ak&","gu&","od&","ov&","ol&","ym&","ll&","bl&","cl&","&&","to&","it&","oy&","ey&","ur&","om&","ix&","pp&","in&","lt&","ic&","ex&","nd&","am&","ow&","dg&","%&","eg&","nn&","us&","ib&","nc&","um&","dl&","di&","rg&","ap&","ot&","ul&","id&","nk&","av&","rl&","rn&","an&","rm&","lm&","ag&","iz&","ev&","of&","th&","_&","ar&","at&","el&","st&","ew&","!&","ng&","ld&","gg&","os&","fl&","sh&","ac&","ff&","tt&","uc&","il&","ud&","ir&","yz&","-f&","mp&","ik&","ft&","im&","hree","l#l","4n","lden","nken","apen","ozen","ob_","-set","nvex","5y","laid","paid","xvii","xxii","-air","tair","icit","knit","nlit","xxiv","-six","-old","held","ci#","ib#","ab#","gi#","full","-ply","bbly","ggly","zzly","-one","mane","mune","rung","uing","ma%","ya%","ua%","pa%","ur%","awny","eeny","ainy","orny","siny","tood","shod","-toe","d-on","-top","-for","odox","wept","eepy","oopy","hird","d_n","worn","mart","ltry","oury","ngry","arse","b5","c5","m5","i5","g2","k2","p2","w2","v2","y2","owsy","e!y","easy","ifth","&th","urth","ixth","00th","ghth","ilty","orty","ifty","i%y","ghty","kety","afty","irty","roud","true","wful","dful","rful","mful","gful","lful","hful","kful","iful","yful","sful","t0","cave","s0","f0","c0","xxvi","urvy","nown","hewn","lown","-two","lowy","ctyl"],"VB":["wrap","hear","draw","rlay","away","elay","duce","~ce","elch","ooch","pick","huck","back","hack","ruct","lict","nect","vict","eact","tect","v3","lude","vide","rude","c&e","ce&","0l","hten","rken","shen","open","qu_","ov_","ef_","~et","uiet","pret","ulge","lign","pugn","othe","rbid","raid","veil","vail","roil","join","dain","feit","mmit","_it","voke","make","weld","uild","id#","rg#","ot#","rb#","self","fill","till","eels","sult","pply","sume","dime","lame","lump","rump","vene","cook","look","from","elop","grow","adow","ploy","sorb","pare","uire","jure","lore","surf","narl","earn","ourn","hirr","tort","-fry","u;","lyse","s;","h;","t;","n;","l;","r;","a!e","g;","owse","oosh","r~h","cuss","u~s","s~s","v~t","i!t","g~t","f~t","xist","i%o","ccur","ieve","e0","olve","down","-dye","laze","lyze","raze","ooze"],"RB":["that","oubt","much","diem","high","atim","sely","nely","ibly","#ly","dely","ally","gely","imly","tely","ully","ably","owly","vely","cely","mely","mply","ngly","exly","ffly","rmly","rely","uely","time","iori","oors","w;","orst","east","ways"]},"v_bs":{"g_und":["ing"],"infinit0":["4","1","tion","rify","r~s","ify","age","nce","ect",";","ine","2","ace","ash","ure","tch","7","ack","and","ute","3","ock","@","ase","5","9","0","i%","nge","lay","~t","ain","a%","e&","_","#"],"past":["&","lt","%","pt","ew","ld"],"pr~e%":["rks","cks","nks","ngs","mps","t~","z~","_s","#s","acks","7s","ands","ocks","lays","eads","lls","els","ils","ows","nds","ays","ams","ars","ops","ffs","als","urs","lds","ews","ips","~","ts","!","s"]}}';
+
+  var main = (function () {
+				var r = [ 'ed', 'er', 'le', 'es', 'ns', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', 'ant', 'nt' ];
+				zip = JSON.parse(helpFns.repl(zip, 0, r));
+				return {
+					wordnet: helpFns.toObjValues(zip.wordnet),
+					verbs: helpFns.toObjValues(zip.verbs)
+				};
+			})();
+
+
+
+  return main;
+})();
+
+var lang = 'en';
+var schema = (function() {
+  var zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
+  tags:
+   [ [ 'VB', 'verb, generic', 0 ],
+     [ 'VBD', 'past-tense verb', 0, 'past' ],
+     [ 'VBN', 'past-participle verb', 0, 'past' ],
+     [ 'VBP', 'infinitive verb', 0, 'present' ],
+     [ 'VBF', 'future-tense verb', 0, 'future' ],
+     [ 'VBZ', 'present-tense verb', 0, 'present' ],
+     [ 'CP', 'copula', 0 ],
+     [ 'VBG', 'gerund verb', 0 ],
+     [ 'JJ', 'adjective, generic', 1 ],
+     [ 'JJR', 'comparative adjective', 1 ],
+     [ 'JJS', 'superlative adjective', 1 ],
+     [ 'RB', 'adverb', 2 ],
+     [ 'RBR', 'comparative adverb', 2 ],
+     [ 'RBS', 'superlative adverb', 2 ],
+     [ 'NN', 'noun, generic', 3 ],
+     [ 'NNP', 'singular proper noun', 3 ],
+     [ 'NNA', 'noun, active', 3 ],
+     [ 'NNPA', 'noun, acronym', 3 ],
+     [ 'NNPS', 'plural proper noun', 3 ],
+     [ 'NNAB', 'noun, abbreviation', 3 ],
+     [ 'NNS', 'plural noun', 3 ],
+     [ 'NNO', 'possessive noun', 3 ],
+     [ 'NNG', 'gerund noun', 3 ],
+     [ 'PP', 'possessive pronoun', 4 ],
+     [ 'FW', 'foreign word', 4 ],
+     [ 'CD', 'cardinal value, generic', 5 ],
+     [ 'DA', 'date', 5 ],
+     [ 'NU', 'number', 5 ],
+     [ 'IN', 'preposition', 4 ],
+     [ 'MD', 'modal verb', 0 ],
+     [ 'CC', 'co-ordating conjunction', 4 ],
+     [ 'PRP', 'personal pronoun', 3 ],
+     [ 'DT', 'determiner', 4 ],
+     [ 'UH', 'interjection', 4 ],
+     [ 'EX', 'existential there', 4 ] ] };
+
+  var main = (function () {
+				var res = {};
+				zip.tags.forEach(function(a) {
+					res[a[0]] = { name:a[1], parent:zip.parents[a[2]], tag:a[0] };
+					if (a.length > 3) {
+						res[a[0]].tense = a[3];
+					}
+				});
+				return res;
+			})();
+
+
+
+  return main;
+})();
 //(Rule-based sentence boundary segmentation) - chop given text into its proper sentences.
 // Ignore periods/questions/exclamations used in acronyms/abbreviations/numbers, etc.
 // @spencermountain 2015 MIT
 var sentence_parser = function(text) {
-
-  if (typeof module !== "undefined" && module.exports) {
-    abbreviations = require("../../data/lexicon/abbreviations")
-  }
 
   var sentences = [];
   //first do a greedy-split..
@@ -3307,7 +3347,7 @@ var sentence_parser = function(text) {
 
   //date abbrevs.
   //these are added seperately because they are not nouns
-  abbreviations = abbreviations.concat(["jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "sept", "sep"]);
+  abbreviations = abbreviations.concat(Object.keys(dates.monthAbbrevs));
 
   //detection of non-sentence chunks
   var abbrev_reg = new RegExp("\\b(" + abbreviations.join("|") + ")[.!?] ?$", "i");
@@ -3336,9 +3376,7 @@ var sentence_parser = function(text) {
 
   return sentences;
 }
-if (typeof module !== "undefined" && module.exports) {
-  exports.sentences = sentence_parser;
-}
+
 // console.log(sentence_parser('Tony is nice. He lives in Japan.').length === 2)
 // console.log(sentence_parser('I like that Color').length === 1)
 // console.log(sentence_parser("She was dead. He was ill.").length === 2)
@@ -3403,9 +3441,6 @@ var ngram = (function() {
     return results
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    exports.ngram = main;
-  }
   return main
 })()
 
@@ -3416,72 +3451,59 @@ var ngram = (function() {
 //
 var tokenize = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    sentence_parser = require("./sentence").sentences
-    multiples= require("../../data/lexicon/multiples")
-  }
   //these expressions ought to be one token, not two, because they are a distinct POS together
-  var multi_words=Object.keys(multiples).map(function(m) {
-    return m.split(' ')
-  })
-
+  var multi_words = Object.keys(multiples).map(function(m) {
+    return m.split(' ');
+  });
 
   var normalise = function(str) {
-    if (!str) {
-      return ""
-    }
-    str = str.toLowerCase()
-    str = str.replace(/[,\.!:;\?\(\)]/, '')
-    str = str.replace(/’/g, "'")
-    str = str.replace(/"/g, "")
-    if (!str.match(/[a-z0-9]/i)) {
-      return ''
-    }
-    return str
+    if (!str) { return '' }
+    str = str.toLowerCase().replace(/[,\.!:;\?\(\)]/, '').replace(/’/g, "'").replace(/'/g, '');
+    if (!str.match(/[a-z0-9]/i)) { return '' }
+    return str;
   }
 
   var sentence_type = function(sentence) {
     if (sentence.match(/\?$/)) {
-      return "interrogative";
+      return 'interrogative';
     } else if (sentence.match(/\!$/)) {
-      return "exclamative";
-    } else {
-      return "declarative";
+      return 'exclamative';
     }
+    return 'declarative';
   }
 
   //some multi-word tokens should be combined here
   var combine_multiples = function(arr) {
-    var better = []
-    var normalised=arr.map(function(a){return normalise(a)})//cached results
-    for (var i = 0; i < arr.length; i++) {
+    var better = [];
+    var normalised = arr.map(function(a){return normalise(a)}); //cached results
+
+		arr.forEach(function(w, i) {
       for (var o = 0; o < multi_words.length; o++) {
-        if (arr[i + 1] && normalised[i] === multi_words[o][0] && normalised[i+1] === multi_words[o][1]) { //
+        if (arr[i + 1] && normalised[i] === multi_words[o][0] && normalised[i+1] === multi_words[o][1]) {
           //we have a match
-          arr[i] = arr[i] + ' ' + arr[i + 1]
-          arr[i + 1] = null
-          break
+          w = w + ' ' + arr[i + 1];
+          arr[i + 1] = null;
+          break;
         }
       }
-      better.push(arr[i])
-    }
-    return better.filter(function(w) {
-      return w
-    })
+      better.push(w);
+    });
+
+    return better.filter(function(w) { return w; })
   }
 
   var main = function(str) {
     var sentences = sentence_parser(str)
     return sentences.map(function(sentence) {
       var arr = sentence.split(' ');
-      arr = combine_multiples(arr)
+      arr = combine_multiples(arr);
       var tokens = arr.map(function(w, i) {
         return {
           text: w,
           normalised: normalise(w),
           title_case: (w.match(/^[A-Z][a-z]/) !== null), //use for merge-tokens
           noun_capital: i > 0 && (w.match(/^[A-Z][a-z]/) !== null), //use for noun signal
-          punctuated: (w.match(/[,;:\(\)"]/) !== null) || undefined,
+          punctuated: (w.match(/[,;:\(\)']/) !== null) || undefined,
           end: (i === (arr.length - 1)) || undefined,
           start: (i === 0) || undefined
         }
@@ -3494,80 +3516,26 @@ var tokenize = (function() {
     })
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    exports.tokenize = main;
-  }
-  return main
+  return main;
 })()
-// console.log(tokenize("i live in new york")[0].tokens.length==4)
-// console.log(tokenize("I speak optimistically of course.")[0].tokens.length==4)
-// console.log(tokenize("Joe is 9")[0].tokens.length==3)
-// console.log(tokenize("Joe in Toronto")[0].tokens.length==3)
-// console.log(tokenize("I am mega-rich")[0].tokens.length==3)
+// console.log(tokenize('i live in new york')[0].tokens.length==4)
+// console.log(tokenize('I speak optimistically of course.')[0].tokens.length==4)
+// console.log(tokenize('Joe is 9')[0].tokens.length==3)
+// console.log(tokenize('Joe in Toronto')[0].tokens.length==3)
+// console.log(tokenize('I am mega-rich')[0].tokens.length==3)
 
 // a hugely-ignorant, and widely subjective transliteration of latin, cryllic, greek unicode characters to english ascii.
 //http://en.wikipedia.org/wiki/List_of_Unicode_characters
 //https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
 var normalize = (function() {
-  //approximate visual (not semantic) relationship between unicode and ascii characters
-  var compact={
-      "2": "²ƻ",
-      "3": "³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ",
-      "5": "Ƽƽ",
-      "8": "Ȣȣ",
-      "!": "¡",
-      "?": "¿Ɂɂ",
-      "a": "ªÀÁÂÃÄÅàáâãäåĀāĂăĄąǍǎǞǟǠǡǺǻȀȁȂȃȦȧȺΆΑΔΛάαλАДадѦѧӐӑӒӓƛɅ",
-      "b": "ßþƀƁƂƃƄƅɃΒβϐϦБВЪЬбвъьѢѣҌҍҔҕƥƾ",
-      "c": "¢©ÇçĆćĈĉĊċČčƆƇƈȻȼͻͼͽϲϹϽϾϿЄСсєҀҁҪҫ",
-      "d": "ÐĎďĐđƉƊȡƋƌǷ",
-      "e": "ÈÉÊËèéêëĒēĔĕĖėĘęĚěƎƏƐǝȄȅȆȇȨȩɆɇΈΕΞΣέεξϱϵ϶ЀЁЕЭеѐёҼҽҾҿӖӗӘәӚӛӬӭ",
-      "f": "ƑƒϜϝӺӻ",
-      "g": "ĜĝĞğĠġĢģƓǤǥǦǧǴǵ",
-      "h": "ĤĥĦħƕǶȞȟΉΗЂЊЋНнђћҢңҤҥҺһӉӊ",
-      "I": "ÌÍÎÏ",
-      "i": "ìíîïĨĩĪīĬĭĮįİıƖƗȈȉȊȋΊΐΪίιϊІЇії",
-      "j": "ĴĵǰȷɈɉϳЈј",
-      "k": "ĶķĸƘƙǨǩΚκЌЖКжкќҚқҜҝҞҟҠҡ",
-      "l": "ĹĺĻļĽľĿŀŁłƚƪǀǏǐȴȽΙӀӏ",
-      "m": "ΜϺϻМмӍӎ",
-      "n": "ÑñŃńŅņŇňŉŊŋƝƞǸǹȠȵΝΠήηϞЍИЙЛПийлпѝҊҋӅӆӢӣӤӥπ",
-      "o": "ÒÓÔÕÖØðòóôõöøŌōŎŏŐőƟƠơǑǒǪǫǬǭǾǿȌȍȎȏȪȫȬȭȮȯȰȱΌΘΟΦΩδθοσόϕϘϙϬϭϴОФоѲѳѺѻѼѽӦӧӨөӪӫ¤ƍΏ",
-      "p": "ƤƿΡρϷϸϼРрҎҏÞ",
-      "q": "Ɋɋ",
-      "r": "ŔŕŖŗŘřƦȐȑȒȓɌɍЃГЯгяѓҐґҒғӶӷſ",
-      "s": "ŚśŜŝŞşŠšƧƨȘșȿςϚϛϟϨϩЅѕ",
-      "t": "ŢţŤťŦŧƫƬƭƮȚțȶȾΓΤτϮϯТт҂Ҭҭ",
-      "u": "µÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųƯưƱƲǓǔǕǖǗǘǙǚǛǜȔȕȖȗɄΰμυϋύϑЏЦЧцџҴҵҶҷҸҹӋӌӇӈ",
-      "v": "ƔνѴѵѶѷ",
-      "w": "ŴŵƜωώϖϢϣШЩшщѡѿ",
-      "x": "×ΧχϗϰХхҲҳӼӽӾӿ",
-      "y": "¥ÝýÿŶŷŸƳƴȲȳɎɏΎΥΨΫγψϒϓϔЎУучўѰѱҮүҰұӮӯӰӱӲӳ",
-      "z": "ŹźŻżŽžƩƵƶȤȥɀΖζ"
-    }
-  //decompress data into an array
-  var data = []
-  Object.keys(compact).forEach(function(k){
-    compact[k].split('').forEach(function(s){
-        data.push([s,k])
-    })
-  })
-
-  //convert array to two hashes
-  var normaler = {}
-  var greek = {}
-  data.forEach(function(arr) {
-    normaler[arr[0]] = arr[1]
-    greek[arr[1]] = arr[0]
-  })
 
   var normalize = function(str, options) {
     options = options || {}
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normaler[s] && r < options.percentage) {
-        return normaler[s] || s
+      if (normalizations.normaler[s] && r < options.percentage) {
+        return normalizations.normaler[s] || s
       } else {
         return s
       }
@@ -3580,8 +3548,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (greek[s] && r < options.percentage) {
-        return greek[s] || s
+      if (normalizations.greek[s] && r < options.percentage) {
+        return normalizations.greek[s] || s
       } else {
         return s
       }
@@ -3594,9 +3562,6 @@ var normalize = (function() {
     denormalize: denormalize
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = obj;
-  }
   return obj
 })()
 
@@ -3699,9 +3664,6 @@ var syllables = (function(str) {
     return all
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main
 })()
 
@@ -3775,9 +3737,6 @@ var britishize = (function() {
     return str
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    exports.britishize = main;
-  }
   return main
 })()
 
@@ -3837,947 +3796,13 @@ var americanize = (function() {
     return str
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    exports.americanize = main;
-  }
   return main;
 })();
 
 // console.log(americanize("synthesise")=="synthesize")
 // console.log(americanize("synthesised")=="synthesized")
 
-//regex patterns and parts of speech],
-var word_rules = [
-  [".[cts]hy$", "JJ"],
-  [".[st]ty$", "JJ"],
-  [".[lnr]ize$", "VB"],
-  [".[gk]y$", "JJ"],
-  [".fies$", "VB"],
-  [".some$", "JJ"],
-  [".[nrtumcd]al$", "JJ"],
-  [".que$", "JJ"],
-  [".[tnl]ary$", "JJ"],
-  [".[di]est$", "JJS"],
-  ["^(un|de|re)\\-[a-z]..", "VB"],
-  [".lar$", "JJ"],
-  ["[bszmp]{2}y", "JJ"],
-  [".zes$", "VB"],
-  [".[icldtgrv]ent$", "JJ"],
-  [".[rln]ates$", "VBZ"],
-  [".[oe]ry$", "JJ"],
-  ["[rdntkdhs]ly$", "RB"],
-  [".[lsrnpb]ian$", "JJ"],
-  [".[^aeiou]ial$", "JJ"],
-  [".[^aeiou]eal$", "JJ"],
-  [".[vrl]id$", "JJ"],
-  [".[ilk]er$", "JJR"],
-  [".ike$", "JJ"],
-  [".ends$", "VB"],
-  [".wards$", "RB"],
-  [".rmy$", "JJ"],
-  [".rol$", "NN"],
-  [".tors$", "NN"],
-  [".azy$", "JJ"],
-  [".where$", "RB"],
-  [".ify$", "VB"],
-  [".bound$", "JJ"],
-  [".ens$", "VB"],
-  [".oid$", "JJ"],
-  [".vice$", "NN"],
-  [".rough$", "JJ"],
-  [".mum$", "JJ"],
-  [".teen(th)?$", "CD"],
-  [".oses$", "VB"],
-  [".ishes$", "VB"],
-  [".ects$", "VB"],
-  [".tieth$", "CD"],
-  [".ices$", "NN"],
-  [".bles$", "VB"],
-  [".pose$", "VB"],
-  [".ions$", "NN"],
-  [".ean$", "JJ"],
-  [".[ia]sed$", "JJ"],
-  [".tized$", "VB"],
-  [".llen$", "JJ"],
-  [".fore$", "RB"],
-  [".ances$", "NN"],
-  [".gate$", "VB"],
-  [".nes$", "VB"],
-  [".less$", "RB"],
-  [".ried$", "JJ"],
-  [".gone$", "JJ"],
-  [".made$", "JJ"],
-  [".[pdltrkvyns]ing$", "JJ"],
-  [".tions$", "NN"],
-  [".tures$", "NN"],
-  [".ous$", "JJ"],
-  [".ports$", "NN"],
-  [". so$", "RB"],
-  [".ints$", "NN"],
-  [".[gt]led$", "JJ"],
-  ["[aeiou].*ist$", "JJ"],
-  [".lked$", "VB"],
-  [".fully$", "RB"],
-  [".*ould$", "MD"],
-  ["^-?[0-9]+(.[0-9]+)?$", "CD"],
-  ["[a-z]*\\-[a-z]*\\-", "JJ"],
-  ["[a-z]'s$", "NNO"],
-  [".'n$", "VB"],
-  [".'re$", "CP"],
-  [".'ll$", "MD"],
-  [".'t$", "VB"],
-  [".tches$", "VB"],
-  ["^https?\:?\/\/[a-z0-9]", "CD"],//the colon is removed in normalisation
-  ["^www\.[a-z0-9]", "CD"],
-  [".ize$", "VB"],
-  [".[^aeiou]ise$", "VB"],
-  [".[aeiou]te$", "VB"],
-  [".ea$", "NN"],
-  ["[aeiou][pns]er$", "NN"],
-  [".ia$", "NN"],
-  [".sis$", "NN"],
-  [".[aeiou]na$", "NN"],
-  [".[^aeiou]ity$", "NN"],
-  [".[^aeiou]ium$", "NN"],
-  [".[^aeiou][ei]al$", "JJ"],
-  [".ffy$", "JJ"],
-  [".[^aeiou]ic$", "JJ"],
-  [".(gg|bb|zz)ly$", "JJ"],
-  [".[aeiou]my$", "JJ"],
-  [".[aeiou]ble$", "JJ"],
-  [".[^aeiou]ful$", "JJ"],
-  [".[^aeiou]ish$", "JJ"],
-  [".[^aeiou]ica$", "NN"],
-  ["[aeiou][^aeiou]is$", "NN"],
-  ["[^aeiou]ard$", "NN"],
-  ["[^aeiou]ism$", "NN"],
-  [".[^aeiou]ity$", "NN"],
-  [".[^aeiou]ium$", "NN"],
-  [".[lstrn]us$", "NN"],
-  ["..ic$", "JJ"],
-  ["[aeiou][^aeiou]id$", "JJ"],
-  [".[^aeiou]ish$", "JJ"],
-  [".[^aeiou]ive$", "JJ"],
-  ["[ea]{2}zy$", "JJ"],
-].map(function(a) {
-  return {
-    reg: new RegExp(a[0], "i"),
-    pos: a[1]
-  }
-})
-
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = word_rules;
-}
-// console.log(word_rules)
-
-// word suffixes with a high pos signal, generated with wordnet
-//by spencer kelly spencermountain@gmail.com  2014
-var wordnet_suffixes = (function() {
-
-  var data = {
-  "NN": [
-    "ceae",
-    "inae",
-    "idae",
-    "leaf",
-    "rgan",
-    "eman",
-    "sman",
-    "star",
-    "boat",
-    "tube",
-    "rica",
-    "tica",
-    "nica",
-    "auce",
-    "tics",
-    "ency",
-    "ancy",
-    "poda",
-    "tude",
-    "xide",
-    "body",
-    "weed",
-    "tree",
-    "rrel",
-    "stem",
-    "cher",
-    "icer",
-    "erer",
-    "ader",
-    "ncer",
-    "izer",
-    "ayer",
-    "nner",
-    "ates",
-    "ales",
-    "ides",
-    "rmes",
-    "etes",
-    "llet",
-    "uage",
-    "ings",
-    "aphy",
-    "chid",
-    "tein",
-    "vein",
-    "hair",
-    "tris",
-    "unit",
-    "cake",
-    "nake",
-    "illa",
-    "ella",
-    "icle",
-    "ille",
-    "etle",
-    "scle",
-    "cell",
-    "bell",
-    "bill",
-    "palm",
-    "toma",
-    "game",
-    "lamp",
-    "bone",
-    "mann",
-    "ment",
-    "wood",
-    "book",
-    "nson",
-    "agon",
-    "odon",
-    "dron",
-    "iron",
-    "tion",
-    "itor",
-    "ator",
-    "root",
-    "cope",
-    "tera",
-    "hora",
-    "lora",
-    "bird",
-    "worm",
-    "fern",
-    "horn",
-    "wort",
-    "ourt",
-    "stry",
-    "etry",
-    "bush",
-    "ness",
-    "gist",
-    "rata",
-    "lata",
-    "tata",
-    "moth",
-    "lity",
-    "nity",
-    "sity",
-    "rity",
-    "city",
-    "dity",
-    "vity",
-    "drug",
-    "dium",
-    "llum",
-    "trum",
-    "inum",
-    "lium",
-    "tium",
-    "atum",
-    "rium",
-    "icum",
-    "anum",
-    "nium",
-    "orum",
-    "icus",
-    "opus",
-    "chus",
-    "ngus",
-    "thus",
-    "rius",
-    "rpus"
-  ],
-  "JJ": [
-    "liac",
-    "siac",
-    "clad",
-    "deaf",
-    "xial",
-    "hial",
-    "chal",
-    "rpal",
-    "asal",
-    "rial",
-    "teal",
-    "oeal",
-    "vial",
-    "phal",
-    "sial",
-    "heal",
-    "rbal",
-    "neal",
-    "geal",
-    "dial",
-    "eval",
-    "bial",
-    "ugal",
-    "kian",
-    "izan",
-    "rtan",
-    "odan",
-    "llan",
-    "zian",
-    "eian",
-    "eyan",
-    "ndan",
-    "eban",
-    "near",
-    "unar",
-    "lear",
-    "liar",
-    "-day",
-    "-way",
-    "tech",
-    "sick",
-    "tuck",
-    "inct",
-    "unct",
-    "wide",
-    "endo",
-    "uddy",
-    "eedy",
-    "uted",
-    "aled",
-    "rred",
-    "oned",
-    "rted",
-    "obed",
-    "oped",
-    "ched",
-    "dded",
-    "cted",
-    "tied",
-    "eked",
-    "ayed",
-    "rked",
-    "teed",
-    "mmed",
-    "tred",
-    "awed",
-    "rbed",
-    "bbed",
-    "axed",
-    "bred",
-    "pied",
-    "cked",
-    "rced",
-    "ened",
-    "fied",
-    "lved",
-    "mned",
-    "kled",
-    "hted",
-    "lied",
-    "eted",
-    "rded",
-    "lued",
-    "rved",
-    "azed",
-    "oked",
-    "ghed",
-    "sked",
-    "emed",
-    "aded",
-    "ived",
-    "mbed",
-    "pted",
-    "zled",
-    "ored",
-    "pled",
-    "wned",
-    "afed",
-    "nied",
-    "aked",
-    "gued",
-    "oded",
-    "oved",
-    "oled",
-    "ymed",
-    "lled",
-    "bled",
-    "cled",
-    "eded",
-    "toed",
-    "ited",
-    "oyed",
-    "eyed",
-    "ured",
-    "omed",
-    "ixed",
-    "pped",
-    "ined",
-    "lted",
-    "iced",
-    "exed",
-    "nded",
-    "amed",
-    "owed",
-    "dged",
-    "nted",
-    "eged",
-    "nned",
-    "used",
-    "ibed",
-    "nced",
-    "umed",
-    "dled",
-    "died",
-    "rged",
-    "aped",
-    "oted",
-    "uled",
-    "ided",
-    "nked",
-    "aved",
-    "rled",
-    "rned",
-    "aned",
-    "rmed",
-    "lmed",
-    "aged",
-    "ized",
-    "eved",
-    "ofed",
-    "thed",
-    "ered",
-    "ared",
-    "ated",
-    "eled",
-    "sted",
-    "ewed",
-    "nsed",
-    "nged",
-    "lded",
-    "gged",
-    "osed",
-    "fled",
-    "shed",
-    "aced",
-    "ffed",
-    "tted",
-    "uced",
-    "iled",
-    "uded",
-    "ired",
-    "yzed",
-    "-fed",
-    "mped",
-    "iked",
-    "fted",
-    "imed",
-    "hree",
-    "llel",
-    "aten",
-    "lden",
-    "nken",
-    "apen",
-    "ozen",
-    "ober",
-    "-set",
-    "nvex",
-    "osey",
-    "laid",
-    "paid",
-    "xvii",
-    "xxii",
-    "-air",
-    "tair",
-    "icit",
-    "knit",
-    "nlit",
-    "xxiv",
-    "-six",
-    "-old",
-    "held",
-    "cile",
-    "ible",
-    "able",
-    "gile",
-    "full",
-    "-ply",
-    "bbly",
-    "ggly",
-    "zzly",
-    "-one",
-    "mane",
-    "mune",
-    "rung",
-    "uing",
-    "mant",
-    "yant",
-    "uant",
-    "pant",
-    "urnt",
-    "awny",
-    "eeny",
-    "ainy",
-    "orny",
-    "siny",
-    "tood",
-    "shod",
-    "-toe",
-    "d-on",
-    "-top",
-    "-for",
-    "odox",
-    "wept",
-    "eepy",
-    "oopy",
-    "hird",
-    "dern",
-    "worn",
-    "mart",
-    "ltry",
-    "oury",
-    "ngry",
-    "arse",
-    "bose",
-    "cose",
-    "mose",
-    "iose",
-    "gish",
-    "kish",
-    "pish",
-    "wish",
-    "vish",
-    "yish",
-    "owsy",
-    "ensy",
-    "easy",
-    "ifth",
-    "edth",
-    "urth",
-    "ixth",
-    "00th",
-    "ghth",
-    "ilty",
-    "orty",
-    "ifty",
-    "inty",
-    "ghty",
-    "kety",
-    "afty",
-    "irty",
-    "roud",
-    "true",
-    "wful",
-    "dful",
-    "rful",
-    "mful",
-    "gful",
-    "lful",
-    "hful",
-    "kful",
-    "iful",
-    "yful",
-    "sful",
-    "tive",
-    "cave",
-    "sive",
-    "five",
-    "cive",
-    "xxvi",
-    "urvy",
-    "nown",
-    "hewn",
-    "lown",
-    "-two",
-    "lowy",
-    "ctyl"
-  ],
-  "VB": [
-    "wrap",
-    "hear",
-    "draw",
-    "rlay",
-    "away",
-    "elay",
-    "duce",
-    "esce",
-    "elch",
-    "ooch",
-    "pick",
-    "huck",
-    "back",
-    "hack",
-    "ruct",
-    "lict",
-    "nect",
-    "vict",
-    "eact",
-    "tect",
-    "vade",
-    "lude",
-    "vide",
-    "rude",
-    "cede",
-    "ceed",
-    "ivel",
-    "hten",
-    "rken",
-    "shen",
-    "open",
-    "quer",
-    "over",
-    "efer",
-    "eset",
-    "uiet",
-    "pret",
-    "ulge",
-    "lign",
-    "pugn",
-    "othe",
-    "rbid",
-    "raid",
-    "veil",
-    "vail",
-    "roil",
-    "join",
-    "dain",
-    "feit",
-    "mmit",
-    "erit",
-    "voke",
-    "make",
-    "weld",
-    "uild",
-    "idle",
-    "rgle",
-    "otle",
-    "rble",
-    "self",
-    "fill",
-    "till",
-    "eels",
-    "sult",
-    "pply",
-    "sume",
-    "dime",
-    "lame",
-    "lump",
-    "rump",
-    "vene",
-    "cook",
-    "look",
-    "from",
-    "elop",
-    "grow",
-    "adow",
-    "ploy",
-    "sorb",
-    "pare",
-    "uire",
-    "jure",
-    "lore",
-    "surf",
-    "narl",
-    "earn",
-    "ourn",
-    "hirr",
-    "tort",
-    "-fry",
-    "uise",
-    "lyse",
-    "sise",
-    "hise",
-    "tise",
-    "nise",
-    "lise",
-    "rise",
-    "anse",
-    "gise",
-    "owse",
-    "oosh",
-    "resh",
-    "cuss",
-    "uess",
-    "sess",
-    "vest",
-    "inst",
-    "gest",
-    "fest",
-    "xist",
-    "into",
-    "ccur",
-    "ieve",
-    "eive",
-    "olve",
-    "down",
-    "-dye",
-    "laze",
-    "lyze",
-    "raze",
-    "ooze"
-  ],
-  "RB": [
-    "that",
-    "oubt",
-    "much",
-    "diem",
-    "high",
-    "atim",
-    "sely",
-    "nely",
-    "ibly",
-    "lely",
-    "dely",
-    "ally",
-    "gely",
-    "imly",
-    "tely",
-    "ully",
-    "ably",
-    "owly",
-    "vely",
-    "cely",
-    "mely",
-    "mply",
-    "ngly",
-    "exly",
-    "ffly",
-    "rmly",
-    "rely",
-    "uely",
-    "time",
-    "iori",
-    "oors",
-    "wise",
-    "orst",
-    "east",
-    "ways"
-  ]
-}
-    //convert it to an easier format
-  var data = Object.keys(data).reduce(function(h, k) {
-    data[k].forEach(function(w) {
-      h[w] = k
-    })
-    return h
-  }, {})
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = data;
-  }
-  return data;
-})();
-
-//the parts of speech used by this library. mostly standard, but some changes.
-var parts_of_speech = (function() {
-
-  var main = {
-    //verbs
-    "VB": {
-      "name": "verb, generic",
-      "parent": "verb",
-      "tag": "VB"
-    },
-    "VBD": {
-      "name": "past-tense verb",
-      "parent": "verb",
-      "tense": "past",
-      "tag": "VBD"
-    },
-    "VBN": {
-      "name": "past-participle verb",
-      "parent": "verb",
-      "tense": "past",
-      "tag": "VBN"
-    },
-    "VBP": {
-      "name": "infinitive verb",
-      "parent": "verb",
-      "tense": "present",
-      "tag": "VBP"
-    },
-    "VBF": {
-      "name": "future-tense verb",
-      "parent": "verb",
-      "tense": "future",
-      "tag": "VBF"
-    },
-    "VBZ": {
-      "name": "present-tense verb",
-      "tense": "present",
-      "parent": "verb",
-      "tag": "VBZ"
-    },
-    "CP": {
-      "name": "copula",
-      "parent": "verb",
-      "tag": "CP"
-    },
-    "VBG": {
-      "name": "gerund verb",
-      "parent": "verb",
-      "tag": "VBG"
-    },
-
-    //adjectives
-    "JJ": {
-      "name": "adjective, generic",
-      "parent": "adjective",
-      "tag": "JJ"
-    },
-    "JJR": {
-      "name": "comparative adjective",
-      "parent": "adjective",
-      "tag": "JJR"
-    },
-    "JJS": {
-      "name": "superlative adjective",
-      "parent": "adjective",
-      "tag": "JJS"
-    },
-
-    //adverbs
-    "RB": {
-      "name": "adverb",
-      "parent": "adverb",
-      "tag": "RB"
-    },
-    "RBR": {
-      "name": "comparative adverb",
-      "parent": "adverb",
-      "tag": "RBR"
-    },
-    "RBS": {
-      "name": "superlative adverb",
-      "parent": "adverb",
-      "tag": "RBS"
-    },
-
-    //nouns
-    "NN": {
-      "name": "noun, generic",
-      "parent": "noun",
-      "tag": "NN"
-    },
-    "NNP": {
-      "name": "singular proper noun",
-      "parent": "noun",
-      "tag": "NNP"
-    },
-    "NNA": {
-      "name": "noun, active",
-      "parent": "noun",
-      "tag": "NNA"
-    },
-    "NNPA": {
-      "name": "noun, acronym",
-      "parent": "noun",
-      "tag": "NNPA"
-    },
-    "NNPS": {
-      "name": "plural proper noun",
-      "parent": "noun",
-      "tag": "NNPS"
-    },
-    "NNAB": {
-      "name": "noun, abbreviation",
-      "parent": "noun",
-      "tag": "NNAB"
-    },
-    "NNS": {
-      "name": "plural noun",
-      "parent": "noun",
-      "tag": "NNS"
-    },
-    "NNO": {
-      "name": "possessive noun",
-      "parent": "noun",
-      "tag": "NNO"
-    },
-    "NNG": {
-      "name": "gerund noun",
-      "parent": "noun",
-      "tag": "VBG"
-    },
-
-    //glue
-    "PP": {
-      "name": "possessive pronoun",
-      "parent": "glue",
-      "tag": "PP"
-    },
-    "FW": {
-      "name": "foreign word",
-      "parent": "glue",
-      "tag": "FW"
-    },
-    "CD": {
-      "name": "cardinal value, generic",
-      "parent": "value",
-      "tag": "CD"
-    },
-    "DA": {
-      "name": "date",
-      "parent": "value",
-      "tag": "DA"
-    },
-    "NU": {
-      "name": "number",
-      "parent": "value",
-      "tag": "NU"
-    },
-    "IN": {
-      "name": "preposition",
-      "parent": "glue",
-      "tag": "IN"
-    },
-    "MD": {
-      "name": "modal verb",
-      "parent": "verb", //dunno
-      "tag": "MD"
-    },
-    "CC": {
-      "name": "co-ordating conjunction",
-      "parent": "glue",
-      "tag": "CC"
-    },
-    "PRP": {
-      "name": "personal pronoun",
-      "parent": "noun",
-      "tag": "PRP"
-    },
-    "DT": {
-      "name": "determiner",
-      "parent": "glue",
-      "tag": "DT"
-    },
-    "UH": {
-      "name": "interjection",
-      "parent": "glue",
-      "tag": "UH"
-    },
-    "EX": {
-      "name": "existential there",
-      "parent": "glue",
-      "tag": "EX"
-    }
-  }
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-
-  return main
-})()
-
-// converts spoken numbers into integers  "fifty seven point eight" -> 57.8
+// converts spoken numbers into integers  'fifty seven point eight' -> 57.8
 //
 // Spoken numbers take the following format
 // [sixty five] (thousand) [sixty five] (hundred) [sixty five]
@@ -4786,109 +3811,34 @@ var parts_of_speech = (function() {
 // multiple not repeat
 
 var to_number = (function() {
-  "use strict";
-  //these sets of numbers each have different rules
-  //[tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so are ignored
-  var ones = {
-    'a': 1,
-    'zero': 0,
-    'one': 1,
-    'two': 2,
-    'three': 3,
-    'four': 4,
-    'five': 5,
-    'six': 6,
-    'seven': 7,
-    'eight': 8,
-    'nine': 9,
-    "first": 1,
-    "second": 2,
-    "third": 3,
-    "fourth": 4,
-    "fifth": 5,
-    "sixth": 6,
-    "seventh": 7,
-    "eighth": 8,
-    "ninth": 9
-  }
-  var teens = {
-    'ten': 10,
-    'eleven': 11,
-    'twelve': 12,
-    'thirteen': 13,
-    'fourteen': 14,
-    'fifteen': 15,
-    'sixteen': 16,
-    'seventeen': 17,
-    'eighteen': 18,
-    'nineteen': 19,
-    "eleventh": 11,
-    "twelfth": 12,
-    "thirteenth": 13,
-    "fourteenth": 14,
-    "fifteenth": 15,
-    "sixteenth": 16,
-    "seventeenth": 17,
-    "eighteenth": 18,
-    "nineteenth": 19
-  }
-  var tens = {
-    'twenty': 20,
-    'thirty': 30,
-    'forty': 40,
-    'fifty': 50,
-    'sixty': 60,
-    'seventy': 70,
-    'eighty': 80,
-    'ninety': 90,
-    "twentieth": 20,
-    "thirtieth": 30,
-    "fourtieth": 40,
-    "fiftieth": 50,
-    "sixtieth": 60,
-    "seventieth": 70,
-    "eightieth": 80,
-    "ninetieth": 90
-  }
-  var multiple = {
-      'hundred': 100,
-      'grand': 1000,
-      'thousand': 1000,
-      'million': 1000000,
-      'billion': 1000000000,
-      'trillion': 1000000000000,
-      'quadrillion': 1000000000000000,
-      'quintillion': 1000000000000000000,
-      'sextillion': 1000000000000000000000,
-      'septillion': 1000000000000000000000000,
-      'octillion': 1000000000000000000000000000,
-      'nonillion': 1000000000000000000000000000000,
-      'decillion': 1000000000000000000000000000000000
-    }
-    // var decimal_multiple={'tenth':0.1, 'hundredth':0.01, 'thousandth':0.001, 'millionth':0.000001,'billionth':0.000000001};
+  'use strict';
+  // these sets of numbers each have different rules
+  // [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so are ignored
+  // var decimal_multiple={'tenth':0.1, 'hundredth':0.01, 'thousandth':0.001, 'millionth':0.000001,'billionth':0.000000001};
 
   var main = function(s) {
-    //remember these concerns for possible errors
-    var ones_done = false
-    var teens_done = false
-    var tens_done = false
-    var multiple_done = {}
-    var total = 0
-    var global_multiplier = 1
+    var ones = numbers.ones;
+		var tens = numbers.tens;
+		var teens = numbers.teens;
+		var multiple = numbers.multiple;
+		//remember these concerns for possible errors
+		var did = {ones:0, teens:0, tens:0, multiple: {}};
+    var total = 0;
+    var global_multiplier = 1;
       //pretty-printed numbers
-    s = s.replace(/, ?/g, '')
+    s = s.replace(/, ?/g, '');
     //parse-out currency
-    s = s.replace(/[$£€]/, '')
+    s = s.replace(/[$£€]/, '');
     //try to finish-fast
     if (s.match(/[0-9]\.[0-9]/) && parseFloat(s) == s) {
-      return parseFloat(s)
-    }
-    if (parseInt(s, 10) == s) {
-      return parseInt(s, 10)
-    }
+			return parseFloat(s)
+		}
+		if (parseInt(s, 10) == s) {
+			return parseInt(s, 10)
+		}
     //try to die fast. (phone numbers or times)
     if (s.match(/[0-9][\-:][0-9]/)) {
-      return null
+      return null;
     }
     //support global multipliers, like 'half-million' by doing 'million' then multiplying by 0.5
     var mults = [{
@@ -4900,11 +3850,11 @@ var to_number = (function() {
     }, {
       reg: /^(a\s)?quarter[\s\-]/i,
       mult: 0.25
-    }]
+    }];
     for (i = 0; i < mults.length; i++) {
       if (s.match(mults[i].reg)) {
-        global_multiplier = mults[i].mult
-        s = s.replace(mults[i].reg, '')
+        global_multiplier = mults[i].mult;
+        s = s.replace(mults[i].reg, '');
         break;
       }
     }
@@ -4913,163 +3863,136 @@ var to_number = (function() {
     var words = s.toString().split(/[\s\-]+/);
     var w, x;
     var current_sum = 0;
-    var local_multiplier = 1
-    var decimal_mode = false
+    var local_multiplier = 1;
+    var decimal_mode = false;
     for (var i = 0; i < words.length; i++) {
-      w = words[i]
+      w = words[i];
 
       //skip 'and' eg. five hundred and twelve
-      if (w == "and") {
-        continue;
-      }
+      if (w == 'and') {continue}
 
       //..we're doing decimals now
-      if (w == "point" || w == "decimal") {
-        if (decimal_mode) {
-          return null
-        } //two point one point six
-        decimal_mode = true
-        total += current_sum
-        current_sum = 0
-        ones_done = false
-        local_multiplier = 0.1
+      if (w == 'point' || w == 'decimal') {
+        if (decimal_mode) {return null} //two point one point six
+        decimal_mode = true;
+        total += current_sum;
+        current_sum = 0;
+        did.ones = 0;
+        local_multiplier = 0.1;
         continue;
       }
 
       //handle special rules following a decimal
       if (decimal_mode) {
-        x = null
+        x = null;
         //allow consecutive ones in decimals eg. 'two point zero five nine'
         if (ones[w] !== undefined) {
-          x = ones[w]
-        }
-        if (teens[w] !== undefined) {
-          x = teens[w]
-        }
+					x = ones[w]
+				}
+				if (teens[w] !== undefined) {
+					x = teens[w]
+				}
         if (parseInt(w, 10) == w) {
-          x = parseInt(w, 10)
-        }
-        if (!x) {
-          return null
-        }
+					x = parseInt(w, 10)
+				}
+        if (!x) {return null}
         if (x < 10) {
-          total += x * local_multiplier
-          local_multiplier = local_multiplier * 0.1 // next number is next decimal place
-          current_sum = 0
+          total += x * local_multiplier;
+          local_multiplier = local_multiplier * 0.1; // next number is next decimal place
+          current_sum = 0;
           continue;
         }
         //two-digit decimals eg. 'two point sixteen'
         if (x < 100) {
-          total += x * (local_multiplier * 0.1)
-          local_multiplier = local_multiplier * 0.01 // next number is next decimal place
-          current_sum = 0
+          total += x * (local_multiplier * 0.1);
+          local_multiplier = local_multiplier * 0.01; // next number is next decimal place
+          current_sum = 0;
           continue;
         }
       }
 
       //if it's already an actual number
       if (w.match(/^[0-9]\.[0-9]$/)) {
-        current_sum += parseFloat(w)
+        current_sum += parseFloat(w);
         continue;
       }
       if (parseInt(w, 10) == w) {
-        current_sum += parseInt(w, 10)
+        current_sum += parseInt(w, 10);
         continue;
       }
 
       //ones rules
       if (ones[w] !== undefined) {
-        if (ones_done) {
-          return null
-        } // eg. five seven
-        if (teens_done) {
-          return null
-        } // eg. five seventeen
-        ones_done = true
-        current_sum += ones[w]
+				// eg. five seven OR five seventeen
+        if (did.ones || did.teens) {return null}
+        did.ones = true;
+        current_sum += ones[w];
         continue;
       }
       //teens rules
       if (teens[w]) {
-        if (ones_done) {
-          return null
-        } // eg. five seventeen
-        if (teens_done) {
-          return null
-        } // eg. fifteen seventeen
-        if (tens_done) {
-          return null
-        } // eg. sixty fifteen
-        teens_done = true
-        current_sum += teens[w]
+				// eg. five seven OR fifteen seventeen OR sixty fifteen
+        if (did.ones || did.teens || did.tens) {return null}
+        did.teens = true;
+        current_sum += teens[w];
         continue;
       }
       //tens rules
       if (tens[w]) {
-        if (ones_done) {
-          return null
-        } // eg. five seventy
-        if (teens_done) {
-          return null
-        } // eg. fiveteen seventy
-        if (tens_done) {
-          return null
-        } // eg. twenty seventy
-        tens_done = true
-        current_sum += tens[w]
+				// eg. five seventy OR fiveteen seventy OR twenty seventy
+        if (did.ones || did.teens || did.tens) {return null}
+        did.tens = true;
+        current_sum += tens[w];
         continue;
       }
       //multiple rules
       if (multiple[w]) {
-        if (multiple_done[w]) {
-          return null
-        } // eg. five hundred six hundred
-        multiple_done[w] = true
+        if (did.multiple[w]) {return null} // eg. five hundred six hundred
+        did.multiple[w] = true;
         //reset our concerns. allow 'five hundred five'
-        ones_done = false
-        teens_done = false
-        tens_done = false
+        did.ones = false;
+        did.teens = false;
+        did.tens = false;
         //case of 'hundred million', (2 consecutive multipliers)
         if (current_sum === 0) {
-          total = total || 1 //dont ever multiply by 0
-          total *= multiple[w]
+          total = total || 1; //dont ever multiply by 0
+          total *= multiple[w];
         } else {
-          current_sum *= multiple[w]
-          total += current_sum
+          current_sum *= multiple[w];
+          total += current_sum;
         }
-        current_sum = 0
+        current_sum = 0;
         continue;
       }
       //if word is not a known thing now, die
-      return null
+      return null;
     }
     if (current_sum) {
-      total += (current_sum || 1) * local_multiplier
-    }
+			total += (current_sum || 1) * local_multiplier
+		}
     //combine with global multiplier, like 'minus' or 'half'
-    total = total * global_multiplier
+    total = total * global_multiplier;
 
-    return total
+    return total;
   }
 
-  //kick it into module
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+
   return main;
 })()
 
-// console.log(to_number("sixteen hundred"))
-// console.log(to_number("a hundred"))
-// console.log(to_number("four point seven seven"))
+// console.log(to_number('sixteen hundred'))
+// console.log(to_number('a hundred'))
+// console.log(to_number('four point seven seven'))
 
-// #generates properly-formatted dates from free-text date forms
-// #by spencer kelly 2014
+// generates properly-formatted dates from free-text date forms
+// by spencer kelly 2014
+
+// TODO - the regexes are valid for many languages - localize only 'linking words'
 
 var date_extractor = (function() {
-  var months = "(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|aug|sept|oct|nov|dec),?";
-  var days = "([0-9]{1,2}),?";
-  var years = "([12][0-9]{3})";
+
+	var days = '([0-9]{1,2}),?';
+  var years = '([12][0-9]{3})';
 
   var to_obj = function(arr, places) {
     return Object.keys(places).reduce(function(h, k) {
@@ -5079,11 +4002,11 @@ var date_extractor = (function() {
   }
 
   var regexes = [{
-    reg: String(months) + " " + String(days) + "-" + String(days) + " " + String(years),
-    example: "March 7th-11th 1987",
+    reg: dates.monthsS + ' ' + days + '-' + days + ' ' + years,
+    //example: 'March 7th-11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5094,11 +4017,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + String(months) + " to " + String(days) + " of " + String(months) + " " + String(years),
-    example: "28th of September to 5th of October 2008",
+    reg: days + ' of ' + dates.monthsS + ' to ' + days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '28th of September to 5th of October 2008',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -5110,11 +4033,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(days) + " to " + String(months) + " " + String(days) + " " + String(years),
-    example: "March 7th to june 11th 1987",
+    reg: dates.monthsS + ' ' + days + ' to ' + dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'March 7th to june 11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5127,11 +4050,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: "between " + String(days) + " " + String(months) + " and " + String(days) + " " + String(months) + " " + String(years),
-    example: "between 13 February and 15 February 1945",
+    reg: 'between ' + days + ' ' + dates.monthsS + ' and ' + days + ' ' + dates.monthsS + ' ' + years,
+    //example: 'between 13 February and 15 February 1945',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -5144,11 +4067,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: "between " + String(months) + " " + String(days) + " and " + String(months) + " " + String(days) + " " + String(years),
-    example: "between March 7th and june 11th 1987",
+    reg: 'between ' + dates.monthsS + ' ' + days + ' and ' + dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'between March 7th and june 11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5161,11 +4084,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(days) + " " + String(years),
-    example: "March 1st 1987",
+    reg: dates.monthsS + ' ' + days + ' ' + years,
+    //example: 'March 1st 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5175,11 +4098,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " - " + String(days) + " of " + String(months) + " " + String(years),
-    example: "3rd - 5th of March 1969",
+    reg: days + ' - ' + days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '3rd - 5th of March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -5190,11 +4113,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + String(months) + " " + String(years),
-    example: "3rd of March 1969",
+    reg: days + ' of ' + dates.monthsS + ' ' + years,
+    //example: '3rd of March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -5204,11 +4127,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + years + ",? to " + String(months) + " " + String(years),
-    example: "September 1939 to April 1945",
+    reg: dates.monthsS + ' ' + years + ',? to ' + dates.monthsS + ' ' + years,
+    //example: 'September 1939 to April 1945',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5219,11 +4142,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + String(years),
-    example: "March 1969",
+    reg: dates.monthsS + ' ' + years,
+    //example: 'March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5232,11 +4155,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(months) + " " + days,
-    example: "March 18th",
+    reg: dates.monthsS + ' ' + days,
+    //example: 'March 18th',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -5245,11 +4168,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: String(days) + " of " + months,
-    example: "18th of March",
+    reg: days + ' of ' + dates.monthsS,
+    //example: '18th of March',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 2,
@@ -5258,11 +4181,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }, {
-    reg: years + " ?- ?" + String(years),
-    example: "1997-1998",
+    reg: years + ' ?- ?' + years,
+    //example: '1997-1998',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         year: 1,
@@ -5272,10 +4195,10 @@ var date_extractor = (function() {
     }
   }, {
     reg: years,
-    example: "1998",
+    //example: '1998',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         year: 1
@@ -5283,35 +4206,11 @@ var date_extractor = (function() {
       return to_obj(arr, places);
     }
   }].map(function(o) {
-    o.reg = new RegExp(o.reg, "g");
+    o.reg = new RegExp(o.reg, 'g');
     return o;
   });
 
   //0 based months, 1 based days...
-  var months_obj = {
-    january: 0,
-    february: 1,
-    march: 2,
-    april: 3,
-    may: 4,
-    june: 5,
-    july: 6,
-    august: 7,
-    september: 8,
-    october: 9,
-    november: 10,
-    december: 11,
-    jan: 0,
-    feb: 1,
-    mar: 2,
-    apr: 3,
-    aug: 7,
-    sept: 8,
-    oct: 9,
-    nov: 10,
-    dec: 11
-  };
-
   //thirty days hath september...
   var last_dates = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -5329,28 +4228,28 @@ var date_extractor = (function() {
     obj.day = parseInt(obj.day, 10) || undefined;
     obj.to_day = parseInt(obj.to_day, 10) || undefined;
     obj.to_year = parseInt(obj.to_year, 10) || undefined;
-    obj.month = months_obj[obj.month];
-    obj.to_month = months_obj[obj.to_month];
+    obj.month = dates.months[obj.month];
+    obj.to_month = dates.months[obj.to_month];
     //swap to_month and month
     if (obj.to_month !== undefined && obj.month === undefined) {
-      obj.month = obj.to_month;
+      obj.month = obj.to_month
     }
     if (obj.to_month === undefined && obj.month !== undefined) {
-      obj.to_month = obj.month;
+      obj.to_month = obj.month
     }
     //swap to_year and year
     if (obj.to_year && !obj.year) {
-      obj.year = obj.to_year;
+      obj.year = obj.to_year
     }
     if (!obj.to_year && obj.year && obj.to_month !== undefined) {
-      obj.to_year = obj.year;
+      obj.to_year = obj.year
     }
     if (options.assume_year && !obj.year) {
-      obj.year = d.getFullYear();
+      obj.year = d.getFullYear()
     }
     //make sure date is in that month..
     if (obj.day !== undefined && (obj.day > 31 || (obj.month !== undefined && obj.day > last_dates[obj.month]))) {
-      obj.day = undefined;
+      obj.day = undefined
     }
     //make sure to date is after from date. fail everything if so...
     //todo: do this smarter
@@ -5398,7 +4297,7 @@ var date_extractor = (function() {
     return {};
   };
 
-  //pass through sequence of regexes until tempate is matched..
+  //pass through sequence of regexes until template is matched..
   var main = function(str, options) {
     options = options || {};
     str = preprocess(str)
@@ -5407,7 +4306,7 @@ var date_extractor = (function() {
     for(var i=0; i<l; i+=1){
       obj=regexes[i]
       if (str.match(obj.reg)) {
-        clone_reg=new RegExp(obj.reg.source,"i");//this avoids a memory-leak
+        clone_reg=new RegExp(obj.reg.source,'i');//this avoids a memory-leak
         arr = clone_reg.exec(str);
         good = obj.process(arr);
         return postprocess(good, options);
@@ -5416,94 +4315,71 @@ var date_extractor = (function() {
   };
 
   //export modules
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
+
   return main;
 
 })();
 
-// console.log(date_extractor("1998"))
-// console.log(date_extractor("1999"))
+// console.log(date_extractor('1998'))
+// console.log(date_extractor('1999'))
 
 //wrapper for value's methods
 var Value = function(str, next, last, token) {
   var the = this
   the.word = str || '';
 
-  if (typeof module !== "undefined" && module.exports) {
-    to_number = require("./to_number")
-    date_extractor = require("./date_extractor")
-    parts_of_speech = require("../../data/parts_of_speech")
-  }
-
   the.date = function(options) {
-    options = options || {}
-    return date_extractor(the.word, options)
+    options = options || {};
+    return date_extractor(the.word, options);
   }
 
   the.is_date = function() {
-    var months = /(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|aug|sept|oct|nov|dec)/i
-    var times = /1?[0-9]:[0-9]{2}/
-    var days = /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tues|wed|thurs|fri|sat|sun)\b/i
-    if (the.word.match(months) || the.word.match(times) || the.word.match(days)) {
-      return true
+    var times = /1?[0-9]:[0-9]{2}/;
+    if (the.word.match(new RegExp(dates.dayS)) || the.word.match(new RegExp(dates.monthS)) || the.word.match(times)) {
+      return true;
     }
-    return false
+    return false;
   }
 
   the.number = function() {
-    if (the.is_date()) {
-      return null
-    }
-    return to_number(the.word)
+    if (the.is_date()) {return null}
+    return to_number(the.word);
   }
 
   the.which = (function() {
-    if (the.date()) {
-      return parts_of_speech['DA']
-    }
-    if (the.number()) {
-      return parts_of_speech['NU']
-    }
-    return parts_of_speech['CD']
+    if (the.date()) { return schema['DA']}
+    if (the.number()){return schema['NU']}
+    return schema['CD'];
   })()
 
   return the;
 };
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Value;
-}
+
 
 // console.log(new Value("fifty five").number())
 // console.log(new Value("june 5th 1998").date())
 
+// TODO - localize
 //chooses an indefinite aricle 'a/an' for a word
 var indefinite_article = (function() {
   var main = function(str) {
-    if (!str) {
-      return null
-    }
+    if (!str) {return null}
     var irregulars = {
-      "hour": "an",
-      "heir": "an",
-      "heirloom": "an",
-      "honest": "an",
-      "honour": "an",
-      "honor": "an",
-      "uber": "an" //german u
+      'hour': 'an',
+      'heir': 'an',
+      'heirloom': 'an',
+      'honest': 'an',
+      'honour': 'an',
+      'honor': 'an',
+      'uber': 'an' //german u
     }
 
     var is_acronym = function(s) {
       //no periods
-      if (s.length <= 5 && s.match(/^[A-Z]*$/)) {
-        return true
-      }
+      if (s.length <= 5 && s.match(/^[A-Z]*$/)) {return true}
       //with periods
-      if (s.length >= 4 && s.match(/^([A-Z]\.)*$/)) {
-        return true
-      }
-      return false
+      if (s.length >= 4 && s.match(/^([A-Z]\.)*$/)) {return true}
+      return false;
     }
 
     //pronounced letters of acronyms that get a 'an'
@@ -5520,7 +4396,7 @@ var indefinite_article = (function() {
       R: true,
       S: true,
       X: true
-    }
+    };
 
     //'a' regexes
     var a_regexs = [
@@ -5533,131 +4409,39 @@ var indefinite_article = (function() {
     ////////////////////
     //explicit irregular forms
     if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
-    }
-    //spelled-out acronyms
+			return irregulars[str];
+		}
+		//spelled-out acronyms
     if (is_acronym(str) && an_acronyms.hasOwnProperty(str.substr(0, 1)) ) {
-      return "an"
-    }
-    //'a' regexes
+			return 'an';
+		}
+		//'a' regexes
     for (var i = 0; i < a_regexs.length; i++) {
-      if (str.match(a_regexs[i])) {
-        return "a"
-      }
+      if (str.match(a_regexs[i])) {return 'a'}
     }
     //basic vowel-startings
     if (str.match(/^[aeiou]/i)) {
-      return "an"
-    }
-    return "a"
+			return 'an';
+		}
+		return 'a';
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main;
 })();
 
-// console.log(indefinite_article("wolf") === "a")
+// console.log(indefinite_article('wolf') === 'a')
 
-//converts nouns from plural and singular, and viceversases
-//some regex borrowed from pksunkara/inflect
-//https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
+// TODO - localize 'of|in|by|for' use
+// converts nouns from plural and singular, and viceversases
+// some regex borrowed from pksunkara/inflect
+// https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
 
 var inflect = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    uncountables = require("../../../data/lexicon/uncountables")
-  }
-  //words that shouldn't ever inflect, for metaphysical reasons
-  uncountable_nouns = uncountables.reduce(function(h, a) {
-    h[a] = true
-    return h
-  }, {})
-
   var titlecase = function(str) {
-    if (!str) {
-      return ''
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1)
+    if (!str) {return ''};
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
-  var irregulars = [
-    ['child', 'children'],
-    ['person', 'people'],
-    ['leaf', 'leaves'],
-    ['database', 'databases'],
-    ['quiz', 'quizzes'],
-    ['child', 'children'],
-    ['stomach', 'stomachs'],
-    ['sex', 'sexes'],
-    ['move', 'moves'],
-    ['shoe', 'shoes'],
-    ["goose", "geese"],
-    ["phenomenon", "phenomena"],
-    ['barracks', 'barracks'],
-    ['deer', 'deer'],
-    ['syllabus', 'syllabi'],
-    ['index', 'indices'],
-    ['appendix', 'appendices'],
-    ['criterion', 'criteria'],
-    ['i', 'we'],
-    ['man', 'men'],
-    ['move', 'moves'],
-    ['she', 'they'],
-    ['he', 'they'],
-    ['myself', 'ourselves'],
-    ['yourself', 'yourselves'],
-    ['himself', 'themselves'],
-    ['herself', 'themselves'],
-    ['themself', 'themselves'],
-    ['mine', 'ours'],
-    ['hers', 'theirs'],
-    ['his', 'theirs'],
-    ['its', 'theirs'],
-    ['theirs', 'theirs'],
-    ['sex', 'sexes'],
-    ['rodeo', 'rodeos'],
-    ['epoch', 'epochs'],
-    ['zero', 'zeros'],
-    ['avocado', 'avocados'],
-    ['halo', 'halos'],
-    ['tornado', 'tornados'],
-    ['tuxedo', 'tuxedos'],
-    ['sombrero', 'sombreros'],
-    ['addendum', 'addenda'],
-    ['alga', 'algae'],
-    ['alumna', 'alumnae'],
-    ['alumnus', 'alumni'],
-    ['bacillus', 'bacilli'],
-    ['cactus', 'cacti'],
-    ['beau', 'beaux'],
-    ['château', 'châteaux'],
-    ['chateau', 'chateaux'],
-    ['tableau', 'tableaux'],
-    ['corpus', 'corpora'],
-    ['curriculum', 'curricula'],
-    ['echo', 'echoes'],
-    ['embargo', 'embargoes'],
-    ['foot', 'feet'],
-    ['genus', 'genera'],
-    ['hippopotamus', 'hippopotami'],
-    ['larva', 'larvae'],
-    ['libretto', 'libretti'],
-    ['loaf', 'loaves'],
-    ['matrix', 'matrices'],
-    ['memorandum', 'memoranda'],
-    ['mosquito', 'mosquitoes'],
-    ['opus', 'opera'],
-    ['ovum', 'ova'],
-    ['ox', 'oxen'],
-    ['radius', 'radii'],
-    ['referendum', 'referenda'],
-    ['thief', 'thieves'],
-    ['that', 'those'],
-    ['this', 'these'],
-    ['tooth', 'teeth'],
-  ]
-
   var pluralize_rules = [
     [/(ax|test)is$/i, '$1es'],
     [/(octop|vir|radi|nucle|fung|cact|stimul)us$/i, '$1i'],
@@ -5688,45 +4472,30 @@ var inflect = (function() {
       reg: a[0],
       repl: a[1]
     }
-  })
-
-  var pluralize = function(str) {
-    var low = str.toLowerCase()
-      //uncountable
-    if (uncountable_nouns[low]) {
-      return str
-    }
-    //is it already plural?
-    if(is_plural(low)===true){
-      return str
-    }
-    //irregular
-    var found = irregulars.filter(function(r) {
-      return r[0] === low
-    })
-    if (found[0]) {
-      if (titlecase(low) === str) { //handle capitalisation properly
-        return titlecase(found[0][1])
-      } else {
-        return found[0][1]
-      }
-    }
-    //inflect first word of preposition-phrase
-    if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-      var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1]
-      if (first) {
-        var better_first = pluralize(first)
-        return better_first + str.replace(first, '')
-      }
-    }
-    //regular
-    for (var i = 0; i < pluralize_rules.length; i++) {
-      if (str.match(pluralize_rules[i].reg)) {
-        return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl)
-      }
-    }
-  }
-
+  });
+	//similar to plural/singularize rules, but not the same
+	var plural_indicators=[
+		/(^v)ies$/i,
+		/ises$/i,
+		/ives$/i,
+		/(antenn|formul|nebul|vertebr|vit)ae$/i,
+		/(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
+		/(buffal|tomat|tornad)oes$/i,
+		/(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
+		/(vert|ind|cort)ices$/i,
+		/(matr|append)ices$/i,
+		/(x|ch|ss|sh|s|z|o)es$/i,
+		/men$/i,
+		/news$/i,
+		/.tia$/i,
+		/(^f)ves$/i,
+		/(lr)ves$/i,
+		/(^aeiouy|qu)ies$/i,
+		/(m|l)ice$/i,
+		/(cris|ax|test)es$/i,
+		/(alias|status)es$/i,
+		/ics$/i
+	];
   var singularize_rules = [
     [/([^v])ies$/i, '$1y'],
     [/ises$/i, 'isis'],
@@ -5757,155 +4526,164 @@ var inflect = (function() {
       reg: a[0],
       repl: a[1]
     }
-  })
+  });
+	//similar to plural/singularize rules, but not the same
+	var singular_indicators=[
+		/(ax|test)is$/i,
+		/(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
+		/(octop|vir)i$/i,
+		/(rl)f$/i,
+		/(alias|status)$/i,
+		/(bu)s$/i,
+		/(al|ad|at|er|et|ed|ad)o$/i,
+		/(ti)um$/i,
+		/(ti)a$/i,
+		/sis$/i,
+		/(?:(^f)fe|(lr)f)$/i,
+		/hive$/i,
+		/(^aeiouy|qu)y$/i,
+		/(x|ch|ss|sh|z)$/i,
+		/(matr|vert|ind|cort)(ix|ex)$/i,
+		/(m|l)ouse$/i,
+		/(m|l)ice$/i,
+		/(antenn|formul|nebul|vertebr|vit)a$/i,
+		/.sis$/i,
+		/^(?!talis|.*hu)(.*)man$/i
+	];
 
-  var singularize = function(str) {
-    var low = str.toLowerCase()
-      //uncountable
-    if (uncountable_nouns[low]) {
-      return str
-    }
-    //is it already singular?
-    if(is_plural(low) === false){
-      return str
-    }
-    //irregular
-    var found = irregulars.filter(function(r) {
-      return r[1] === low
-    })
-    if (found[0]) {
-      if (titlecase(low) === str) { //handle capitalisation properly
-        return titlecase(found[0][0])
-      } else {
-        return found[0][0]
-      }
-    }
-    //inflect first word of preposition-phrase
-    if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-      var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/)
-      if (first && first[1]) {
-        var better_first = singularize(first[1])
-        return better_first + str.replace(first[1], '')
-      }
-    }
-    //regular
-    for (var i = 0; i < singularize_rules.length; i++) {
-      if (str.match(singularize_rules[i].reg)) {
-        return str.replace(singularize_rules[i].reg, singularize_rules[i].repl)
-      }
-    }
-    return str
-  }
+	var lang = 0;
+	var nouns_inflect = {};
+	var methods = {
+		pluralize: function(str, l) {
+			var low = str.toLowerCase()
+				//uncountable
+			if (uncountable_nouns[low]) {
+				return str
+			}
+			//is it already plural?
+			if(is_plural(low)===true) {
+				return str
+			}
+			//irregular
+			var found = irregulars.filter(function(r) {
+				return r[0] === low;
+			})
+			if (found[0]) {
+				if (titlecase(low) === str) { //handle capitalisation properly
+					return titlecase(found[0][1]);
+				} else {
+					return found[0][1];
+				}
+			}
+			//inflect first word of preposition-phrase
+			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+				var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
+				if (first) {
+					var better_first = pluralize(first);
+					return better_first + str.replace(first, '');
+				}
+			}
+			//regular
+			for (var i = 0; i < pluralize_rules.length; i++) {
+				if (str.match(pluralize_rules[i].reg)) {
+					return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
+				}
+			}
+		},
 
-  var is_plural = function(str) {
-    str=(str||'').toLowerCase()
-    //handle 'mayors of chicago'
-    var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
-    if (preposition && preposition[1]) {
-      str = preposition[1]
-    }
-    // if it's a known irregular case
-    for (var i = 0; i < irregulars.length; i++) {
-      if (irregulars[i][1] === str) {
-        return true
-      }
-      if (irregulars[i][0] === str) {
-        return false
-      }
-    }
-    //similar to plural/singularize rules, but not the same
-    var plural_indicators=[
-      /(^v)ies$/i,
-      /ises$/i,
-      /ives$/i,
-      /(antenn|formul|nebul|vertebr|vit)ae$/i,
-      /(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
-      /(buffal|tomat|tornad)oes$/i,
-      /(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
-      /(vert|ind|cort)ices$/i,
-      /(matr|append)ices$/i,
-      /(x|ch|ss|sh|s|z|o)es$/i,
-      /men$/i,
-      /news$/i,
-      /.tia$/i,
-      /(^f)ves$/i,
-      /(lr)ves$/i,
-      /(^aeiouy|qu)ies$/i,
-      /(m|l)ice$/i,
-      /(cris|ax|test)es$/i,
-      /(alias|status)es$/i,
-      /ics$/i
-    ]
-    for (var i = 0; i < plural_indicators.length; i++) {
-      if (str.match(plural_indicators[i])) {
-        return true
-      }
-    }
-    //similar to plural/singularize rules, but not the same
-    var singular_indicators=[
-      /(ax|test)is$/i,
-      /(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
-      /(octop|vir)i$/i,
-      /(rl)f$/i,
-      /(alias|status)$/i,
-      /(bu)s$/i,
-      /(al|ad|at|er|et|ed|ad)o$/i,
-      /(ti)um$/i,
-      /(ti)a$/i,
-      /sis$/i,
-      /(?:(^f)fe|(lr)f)$/i,
-      /hive$/i,
-      /(^aeiouy|qu)y$/i,
-      /(x|ch|ss|sh|z)$/i,
-      /(matr|vert|ind|cort)(ix|ex)$/i,
-      /(m|l)ouse$/i,
-      /(m|l)ice$/i,
-      /(antenn|formul|nebul|vertebr|vit)a$/i,
-      /.sis$/i,
-      /^(?!talis|.*hu)(.*)man$/i
-    ]
-    for (var i = 0; i < singular_indicators.length; i++) {
-      if (str.match(singular_indicators[i])) {
-        return false
-      }
-    }
-    // 'looks pretty plural' rules
-    if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
-      return true
-    }
-    return false
-  }
+		singularize: function(str, l) {
+			var low = str.toLowerCase();
+				//uncountable
+			if (uncountable_nouns[low]) {
+				return str;
+			}
+			//is it already singular?
+			if(is_plural(low) === false) {
+				return str;
+			}
+			//irregular
+			var found = irregulars.filter(function(r) {
+				return r[1] === low;
+			})
+			if (found[0]) {
+				if (titlecase(low) === str) { //handle capitalisation properly
+					return titlecase(found[0][0]);
+				} else {
+					return found[0][0];
+				}
+			}
+			//inflect first word of preposition-phrase
+			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+				var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
+				if (first && first[1]) {
+					var better_first = singularize(first[1]);
+					return better_first + str.replace(first[1], '');
+				}
+			}
+			//regular
+			for (var i = 0; i < singularize_rules.length; i++) {
+				if (str.match(singularize_rules[i].reg)) {
+					return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
+				}
+			}
+			return str;
+		},
 
-  var inflect = function(str) {
-    if (uncountable_nouns[str]) { //uncountables shouldn't ever inflect
-      return {
-        plural: str,
-        singular: str
-      }
-    }
-    if (is_plural(str)) {
-      return {
-        plural: str,
-        singular: singularize(str)
-      }
-    } else {
-      return {
-        singular: str,
-        plural: pluralize(str)
-      }
-    }
-  }
+		is_plural: function(str, l) {
+			str=(str||'').toLowerCase()
+			//handle 'mayors of chicago'
+			var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
+			if (preposition && preposition[1]) {
+				str = preposition[1];
+			}
+			// if it's a known irregular case
+			for (var i = 0; i < irregulars.length; i++) {
+				if (irregulars[i][1] === str) {
+					return true;
+				}
+				if (irregulars[i][0] === str) {
+					return false;
+				}
+			}
+			for (var i = 0; i < plural_indicators.length; i++) {
+				if (str.match(plural_indicators[i])) {
+					return true;
+				}
+			}
+			for (var i = 0; i < singular_indicators.length; i++) {
+				if (str.match(singular_indicators[i])) {
+					return false;
+				}
+			}
+			// 'looks pretty plural' rules
+			if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+				return true;
+			}
+			return false;
+		},
 
-  var methods = {
-    inflect: inflect,
-    is_plural: is_plural,
-    singularize: singularize,
-    pluralize: pluralize
-  }
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = methods;
-  }
-  return methods;
+		inflect: function(str, l) {
+			if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
+				return {
+					plural: str,
+					singular: str
+				};
+			}
+			if (is_plural(str)) {
+				return {
+					plural: str,
+					singular: singularize(str)
+				};
+			} else {
+				return {
+					singular: str,
+					plural: pluralize(str)
+				};
+			}
+		}
+	}
+
+	return methods;
 })();
 
 // console.log(inflect.singularize('kisses')=="kiss")
@@ -5931,297 +4709,268 @@ var inflect = (function() {
 // console.log(inflect.is_plural('children')==true)
 // console.log(inflect.singularize('mayors of chicago')=="mayor of chicago")
 
-//wrapper for noun's methods
-var Noun = function(str, next, last, token) {
-  var the = this
-  the.word = str || '';
-  the.next = next
-  the.last = last
+// wrapper for noun's methods
+var Noun = function(str, sentence, word_i) {
 
-  if (typeof module !== "undefined" && module.exports) {
-    parts_of_speech = require("../../data/parts_of_speech")
-    firstnames = require("../../data/lexicon/firstnames")
-    honourifics = require("../../data/lexicon/honourifics")
-    inflect = require("./conjugate/inflect")
-    indefinite_article = require("./indefinite_article")
+
+
+  var the = this;
+  var token, next;
+  if(sentence!==undefined && word_i!==undefined){
+    token=sentence.tokens[word_i];
+    next=sentence.tokens[word_i+i];
   }
-  //personal pronouns
-  var prps = {
-    "it": "PRP",
-    "they": "PRP",
-    "i": "PRP",
-    "them": "PRP",
-    "you": "PRP",
-    "she": "PRP",
-    "me": "PRP",
-    "he": "PRP",
-    "him": "PRP",
-    "her": "PRP",
-    "us": "PRP",
-    "we": "PRP",
-    "thou": "PRP"
-  }
-  var blacklist = {
-    "itself": 1,
-    "west": 1,
-    "western": 1,
-    "east": 1,
-    "eastern": 1,
-    "north": 1,
-    "northern": 1,
-    "south": 1,
-    "southern": 1,
-    "the": 1,
-    "one": 1,
-    "your": 1,
-    "my": 1,
-    "today": 1,
-    "yesterday": 1,
-    "tomorrow": 1,
-    "era": 1,
-    "century": 1,
-    "it": 1
-  }
+  the.word = str || '';
+
+
   the.is_acronym = function() {
     var s = the.word
-      //no periods
+    // no periods
     if (s.length <= 5 && s.match(/^[A-Z]*$/)) {
-      return true
-    }
-    //with periods
+			return true;
+		}
+		// with periods
     if (s.length >= 4 && s.match(/^([A-Z]\.)*$/)) {
-      return true
-    }
-    return false
+			return true;
+		}
+    return false;
   }
 
   the.is_entity = function() {
-    if (!token) {
-      return false
-    }
-    if (token.normalised.length < 3 || !token.normalised.match(/[a-z]/i)) {
-      return false
-    }
-    //prepositions
-    if (prps[token.normalised]) {
-      return false
-    }
-    //blacklist
-    if (blacklist[token.normalised]) {
-      return false
-    }
-    //discredit specific nouns forms
+    if (!token) {return false}
+    if (token.normalised.length < 3 || !token.normalised.match(/[a-z]/i)) {return false}
+    // prepositions
+    if (nouns.prps[token.normalised]) {return false}
+    // blacklist
+    if (nouns.entityBlacklist[token.normalised]) {return false}
+    // discredit specific nouns forms
     if (token.pos) {
-      if (token.pos.tag == "NNA") { //eg. 'singer'
-        return false
-      }
-      if (token.pos.tag == "NNO") { //eg. "spencer's"
-        return false
-      }
-      if (token.pos.tag == "NNG") { //eg. 'walking'
-        return false
-      }
-      if(token.pos.tag=="NNP"){//yes! eg. 'Edinburough'
-         return true
-       }
+      if (token.pos.tag == 'NNA') {return false}
+      if (token.pos.tag == 'NNO') {return false}
+      if (token.pos.tag == 'NNG') {return false}
+      if (token.pos.tag=='NNP') {return false}
     }
-    //distinct capital is very good signal
-    if (token.noun_capital) {
-      return true
-    }
-    //multiple-word nouns are very good signal
-    if (token.normalised.match(/ /)) {
-      return true
-    }
-    //if it has an acronym/abbreviation, like 'business ltd.'
-    if (token.normalised.match(/\./)) {
-      return true
-    }
-    //appears to be a non-capital acronym, and not just caps-lock
-    if (token.normalised.length < 5 && token.text.match(/^[A-Z]*$/)) {
-      return true
-    }
-    //acronyms are a-ok
-    if (the.is_acronym()) {
-      return true
-    }
+    // distinct capital is very good signal
+    if (token.noun_capital) {return true}
+    // multiple-word nouns are very good signal
+    if (token.normalised.match(/ /)) {return true}
+    // if it has an acronym/abbreviation, like 'business ltd.'
+    if (token.normalised.match(/\./)) {return true}
+    // appears to be a non-capital acronym, and not just caps-lock
+    if (token.normalised.length < 5 && token.text.match(/^[A-Z]*$/)) {return true}
+    // acronyms are a-ok
+    if (the.is_acronym()) {return true}
     //else, be conservative
-    return false
+    return false;
   }
 
   the.conjugate = function() {
-    return inflect.inflect(the.word)
+    return nouns_inflect.inflect(the.word);
   },
 
   the.is_plural = function() {
-    return inflect.is_plural(the.word)
+    return nouns_inflect.is_plural(the.word);
   }
 
   the.article = function() {
-    return indefinite_article(the.word)
+    return (the.is_plural()) ? "the" : indefinite_article(the.word);
   }
 
   the.pluralize = function() {
-    return inflect.pluralize(the.word)
+    return nouns_inflect.pluralize(the.word);
   }
 
   the.singularize = function() {
-    return inflect.singularize(the.word)
+    return nouns_inflect.singularize(the.word);
   }
 
-  //uses common first-name list + honourifics to guess if this noun is the name of a person
+  // uses common first-name list + honourifics to guess if this noun is the name of a person
   the.is_person = function() {
-    var i, l;
+    var i;
     //remove things that are often named after people
-    var blacklist=[
-      "center",
-      "centre",
-      "memorial",
-      "school",
-      "bridge",
-      "university",
-      "house",
-      "college",
-      "square",
-      "park",
-      "foundation",
-      "institute",
-      "ss",
-      "of",
-      "the",
-      "for"
-    ]
-    l= blacklist.length
+    var l = nouns.personBlacklist.length;
     for (i = 0; i < l; i++) {
-      if(the.word.match(new RegExp("\\b" + blacklist[i] + "\\b","i"))){
-        return false
-      }
+      if(the.word.match(new RegExp('\\b' + nouns.personBlacklist[i] + '\\b','i'))) {return false}
     }
       //see if noun has an honourific, like 'jr.'
     l = honourifics.length;
     for (i = 0; i < l; i++) {
-      if (the.word.match(new RegExp("\\b" + honourifics[i] + "\\.?\\b", 'i'))) {
-        return true
-      }
+      if (the.word.match(new RegExp('\\b' + honourifics[i] + '\\.?\\b', 'i'))) {return true}
     }
     //see if noun has a first-name
     var names = Object.keys(firstnames)
     l = names.length
     var firstname=the.word.split(' ')[0].toLowerCase()
     for (i = 0; i < l; i++) {
-      if (names[i]===firstname) {
-        return true
-      }
+      if (names[i]===firstname) {return true}
     }
     //if it has an initial between two words
-    if(the.word.match(/[a-z]{3,20} [a-z]\.? [a-z]{3,20}/i)){
-      return true
-    }
-    return false
+    if(the.word.match(/[a-z]{3,20} [a-z]\.? [a-z]{3,20}/i)) {return true}
+    return false;
   }
 
-  //specifically which pos it is
-  the.which = (function() {
-    //posessive
-    if (the.word.match(/'s$/)) {
-      return parts_of_speech['NNO']
+  // decides if it deserves a he, she, they, or it
+  the.pronoun = function(){
+    //if it's a person try to classify male/female
+    if(the.is_person()){
+			var nameType = function(t) { return (firstnames[names[0]]===t || firstnames[names[1]]==t); }
+      var names=the.word.split(' ').map(function(a){
+        return a.toLowerCase();
+      })
+      if (nameType('f')) {return 'she'}
+      if (nameType('m')) {return 'he'}
+      //test some honourifics
+      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
+      if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}
+      //if it's a known unisex name, don't try guess it. be safe.
+      if(nameType('a')) {return 'they'}
+      //if we think it's a person, but still don't know the gender, do a little guessing
+			//if it ends in a 'ee or ah', female
+      if (names[0].match(/[aeiy]$/)) {return 'she'}
+			//if it ends in a 'oh or uh', male
+      if (names[0].match(/[ou]$/)) {return 'he'}
+      //if it has double-consonants, female
+      if(names[0].match(/(nn|ll|tt)/)){
+        return 'she';
+      }
+      //fallback to 'singular-they'
+      return 'they';
     }
-    //plural
+
+    //not a person
+    if(the.is_plural()){
+      return 'they';
+    }
+
+    return 'it';
+  }
+
+  //list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
+  the.referenced_by = function() {
+    //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
+    if(token && token.pos.tag!=="PRP" && token.pos.tag!=="PP"){
+      var prp=the.pronoun();
+      //look at rest of sentence
+      var interested=sentence.tokens.slice(word_i+1, sentence.tokens.length);
+      //add next sentence too, could go further..
+      if(sentence.next){
+        interested=interested.concat(sentence.next.tokens);
+      }
+      //find the matching pronouns, and break if another noun overwrites it
+      var matches=[];
+      for(var i=0; i<interested.length; i++){
+        if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)){
+          //this pronoun points at our noun
+          matches.push(interested[i]);
+        }else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp){
+          //this posessive pronoun ('his/her') points at our noun
+          matches.push(interested[i]);
+        }else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp){
+          //this noun stops our further pursuit
+          break;
+        }
+      }
+      return matches;
+    }
+    return [];
+  }
+
+  // a pronoun that points at a noun mentioned previously '[he] is nice'
+  the.reference_to = function() {
+    //if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
+    if(token && token.pos.tag==="PRP"){
+      var prp=token.normalised
+      //look at starting of this sentence
+      var interested=sentence.tokens.slice(0, word_i)
+      //add previous sentence, if applicable
+      if(sentence.last){
+        interested=sentence.last.tokens.concat(interested)
+      }
+      //reverse the terms to loop through backward..
+      interested=interested.reverse()
+      for(var i=0; i<interested.length; i++){
+        //it's a match
+        if(interested[i].pos.parent==="noun" && interested[i].pos.tag!=="PRP" && interested[i].analysis.pronoun()===prp){
+          return interested[i]
+        }
+      }
+    }
+  }
+
+  // specifically which pos it is
+  the.which = (function() {
+    // posessive
+    if (the.word.match(/'s$/)) {return schema['NNO']}
+    // plural
     // if (the.is_plural) {
-    //   return parts_of_speech['NNS']
+    //   return schema['NNS']
     // }
-    //generic
-    return parts_of_speech['NN']
-  })()
+    // generic
+    return schema['NN'];
+  })();
 
   return the;
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Noun;
-}
+
+
 
 // console.log(new Noun('farmhouse').is_entity())
-// console.log(new Noun("FBI").is_acronym())
-// console.log(new Noun("Tony Danza").is_person())
+// console.log(new Noun('FBI').is_acronym())
+// console.log(new Noun('Tony Danza').is_person())
 // console.time('h')
-// console.log(new Noun("Tonys h. Danza").is_person())
+// console.log(new Noun('Tonys h. Danza').is_person())
 // console.timeEnd('h')
 
-//turns 'quickly' into 'quick'
+// turns 'quickly' into 'quick'
 var to_adjective = (function() {
-  var main = function(str) {
-    var irregulars = {
-      "idly": "idle",
-      "sporadically": "sporadic",
-      "basically": "basic",
-      "grammatically": "grammatical",
-      "alphabetically": "alphabetical",
-      "economically": "economical",
-      "conically": "conical",
-      "politically": "political",
-      "vertically": "vertical",
-      "practically": "practical",
-      "theoretically": "theoretical",
-      "critically": "critical",
-      "fantastically": "fantastic",
-      "mystically": "mystical",
-      "pornographically": "pornographic",
-      "fully": "full",
-      "jolly": "jolly",
-      "wholly": "whole"
-    }
+
+  var main = function(str, lang) {
+
     var transforms = [{
-      "reg": /bly$/i,
-      "repl": 'ble'
+      'reg': /bly$/i,
+      'repl': 'ble'
     }, {
-      "reg": /gically$/i,
-      "repl": 'gical'
+      'reg': /gically$/i,
+      'repl': 'gical'
     }, {
-      "reg": /([rsdh])ically$/i,
-      "repl": '$1ical'
+      'reg': /([rsdh])ically$/i,
+      'repl': '$1ical'
     }, {
-      "reg": /ically$/i,
-      "repl": 'ic'
+      'reg': /ically$/i,
+      'repl': 'ic'
     }, {
-      "reg": /uly$/i,
-      "repl": 'ue'
+      'reg': /uly$/i,
+      'repl': 'ue'
     }, {
-      "reg": /ily$/i,
-      "repl": 'y'
+      'reg': /ily$/i,
+      'repl': 'y'
     }, {
-      "reg": /(.{3})ly$/i,
-      "repl": '$1'
-    }]
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
+      'reg': /(.{3})ly$/i,
+      'repl': '$1'
+    }];
+    if (adverbs_decline.hasOwnProperty(str)) {
+      return adverbs_decline[str];
     }
     for (var i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str
+    return str;
   }
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main;
+
+	return main;
 })();
 
 // console.log(to_adjective('quickly') === 'quick')
 // console.log(to_adjective('marvelously') === 'marvelous')
-
 //wrapper for Adverb's methods
 var Adverb = function(str, next, last, token) {
-  var the = this
-  the.word = str || '';
-  the.next = next
-  the.last = last
 
-  if (typeof module !== "undefined" && module.exports) {
-    to_adjective = require("./conjugate/to_adjective")
-    parts_of_speech = require("../../data/parts_of_speech")
-  }
+  var the = this;
+  the.word = str || '';
+  the.next = next;
+  the.last = last;
 
   the.conjugate = function() {
     return {
@@ -6230,646 +4979,49 @@ var Adverb = function(str, next, last, token) {
   }
 
   the.which = (function() {
-    if (the.word.match(/..est$/)) {
-      return parts_of_speech['RBS']
-    }
-    if (the.word.match(/..er$/)) {
-      return parts_of_speech['RBR']
-    }
-    return parts_of_speech['RB']
+    if (the.word.match(/..est$/)) {return schema['RBS']}
+    if (the.word.match(/..er$/)) {return schema['RBR']}
+    return schema['RB'];
   })()
 
   return the;
 }
 
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Adverb;
-}
-
 // console.log(new Adverb("suddenly").conjugate())
 // console.log(adverbs.conjugate('powerfully'))
-
-    //generated from test data
- var suffix_rules = (function() {
-
-    var compact = {
-      "gerund":[
-        "ing"
-      ],
-      "infinitive":[
-        "ate",
-        "ize",
-        "tion",
-        "rify",
-        "ress",
-        "ify",
-        "age",
-        "nce",
-        "ect",
-        "ise",
-        "ine",
-        "ish",
-        "ace",
-        "ash",
-        "ure",
-        "tch",
-        "end",
-        "ack",
-        "and",
-        "ute",
-        "ade",
-        "ock",
-        "ite",
-        "ase",
-        "ose",
-        "use",
-        "ive",
-        "int",
-        "nge",
-        "lay",
-        "est",
-        "ain",
-        "ant",
-        "eed",
-        "er",
-        "le"
-      ],
-      "past":[
-        "ed",
-        "lt",
-        "nt",
-        "pt",
-        "ew",
-        "ld"
-      ],
-      "present":[
-        "rks",
-        "cks",
-        "nks",
-        "ngs",
-        "mps",
-        "tes",
-        "zes",
-        "ers",
-        "les",
-        "acks",
-        "ends",
-        "ands",
-        "ocks",
-        "lays",
-        "eads",
-        "lls",
-        "els",
-        "ils",
-        "ows",
-        "nds",
-        "ays",
-        "ams",
-        "ars",
-        "ops",
-        "ffs",
-        "als",
-        "urs",
-        "lds",
-        "ews",
-        "ips",
-        "es",
-        "ts",
-        "ns",
-        "s"
-        ]
-    }
-    var suffix_rules = {}
-    var keys = Object.keys(compact)
-    var l = keys.length;
-    var l2, i;
-    for (i = 0; i < l; i++) {
-      l2 = compact[keys[i]].length
-      for (var o = 0; o < l2; o++) {
-        suffix_rules[compact[keys[i]][o]] = keys[i]
-      }
-    }
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = suffix_rules;
-  }
-  return suffix_rules;
-})();
-
-// regex rules for each part of speech that convert it to all other parts of speech.
-// used in combination with the generic 'fallback' method
-var verb_rules = {
-  "infinitive": [
-    [
-      "(eed)$",
-      {
-        "pr": "$1s",
-        "g": "$1ing",
-        "pa": "$1ed",
-        "do": "$1er"
-      }
-    ],
-    [
-      "(e)(ep)$",
-      {
-        "pr": "$1$2s",
-        "g": "$1$2ing",
-        "pa": "$1pt",
-        "do": "$1$2er"
-      }
-    ],
-    [
-      "(a[tg]|i[zn]|ur|nc|gl|is)e$",
-      {
-        "pr": "$1es",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "([i|f|rr])y$",
-      {
-        "pr": "$1ies",
-        "g": "$1ying",
-        "pa": "$1ied"
-      }
-    ],
-    [
-      "([td]er)$",
-      {
-        "pr": "$1s",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "([bd]l)e$",
-      {
-        "pr": "$1es",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(ish|tch|ess)$",
-      {
-        "pr": "$1es",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(ion|end|e[nc]t)$",
-      {
-        "pr": "$1s",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(om)e$",
-      {
-        "pr": "$1es",
-        "g": "$1ing",
-        "pa": "ame"
-      }
-    ],
-    [
-      "([aeiu])([pt])$",
-      {
-        "pr": "$1$2s",
-        "g": "$1$2$2ing",
-        "pa": "$1$2"
-      }
-    ],
-    [
-      "(er)$",
-      {
-        "pr": "$1s",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(en)$",
-      {
-        "pr": "$1s",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ]
-  ],
-  "present": [
-    [
-      "(ies)$",
-      {
-        "in": "y",
-        "g": "ying",
-        "pa": "ied"
-      }
-    ],
-    [
-      "(tch|sh)es$",
-      {
-        "in": "$1",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(ss)es$",
-      {
-        "in": "$1",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "([tzlshicgrvdnkmu])es$",
-      {
-        "in": "$1e",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(n[dtk]|c[kt]|[eo]n|i[nl]|er|a[ytrl])s$",
-      {
-        "in": "$1",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(ow)s$",
-      {
-        "in": "$1",
-        "g": "$1ing",
-        "pa": "ew"
-      }
-    ],
-    [
-      "(op)s$",
-      {
-        "in": "$1",
-        "g": "$1ping",
-        "pa": "$1ped"
-      }
-    ],
-    [
-      "([eirs])ts$",
-      {
-        "in": "$1t",
-        "g": "$1tting",
-        "pa": "$1tted"
-      }
-    ],
-    [
-      "(ll)s$",
-      {
-        "in": "$1",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(el)s$",
-      {
-        "in": "$1",
-        "g": "$1ling",
-        "pa": "$1led"
-      }
-    ],
-    [
-      "(ip)es$",
-      {
-        "in": "$1e",
-        "g": "$1ing",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "ss$",
-      {
-        "in": "ss",
-        "g": "ssing",
-        "pa": "ssed"
-      }
-    ],
-    [
-      "s$",
-      {
-        "in": "",
-        "g": "ing",
-        "pa": "ed"
-      }
-    ]
-  ],
-  "gerund": [
-    [
-      "pping$",
-      {
-        "in": "p",
-        "pr": "ps",
-        "pa": "pped"
-      }
-    ],
-    [
-      "lling$",
-      {
-        "in": "ll",
-        "pr": "lls",
-        "pa": "lled"
-      }
-    ],
-    [
-      "tting$",
-      {
-        "in": "t",
-        "pr": "ts",
-        "pa": "t"
-      }
-    ],
-    [
-      "ssing$",
-      {
-        "in": "ss",
-        "pr": "sses",
-        "pa": "ssed"
-      }
-    ],
-    [
-      "gging$",
-      {
-        "in": "g",
-        "pr": "gs",
-        "pa": "gged"
-      }
-    ],
-    [
-      "([^aeiou])ying$",
-      {
-        "in": "$1y",
-        "pr": "$1ies",
-        "pa": "$1ied",
-        "do": "$1ier"
-      }
-    ],
-    [
-      "(i.)ing$",
-      {
-        "in": "$1e",
-        "pr": "$1es",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(u[rtcb]|[bdtpkg]l|n[cg]|a[gdkvtc]|[ua]s|[dr]g|yz|o[rlsp]|cre)ing$",
-      {
-        "in": "$1e",
-        "pr": "$1es",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(ch|sh)ing$",
-      {
-        "in": "$1",
-        "pr": "$1es",
-        "pa": "$1ed"
-      }
-    ],
-    [
-      "(..)ing$",
-      {
-        "in": "$1",
-        "pr": "$1s",
-        "pa": "$1ed"
-      }
-    ]
-  ],
-  "past": [
-    [
-      "(ued)$",
-      {
-        "pr": "ues",
-        "g": "uing",
-        "pa": "ued",
-        "do": "uer"
-      }
-    ],
-    [
-      "(e|i)lled$",
-      {
-        "pr": "$1lls",
-        "g": "$1lling",
-        "pa": "$1lled",
-        "do": "$1ller"
-      }
-    ],
-    [
-      "(sh|ch)ed$",
-      {
-        "in": "$1",
-        "pr": "$1es",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "(tl|gl)ed$",
-      {
-        "in": "$1e",
-        "pr": "$1es",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "(ss)ed$",
-      {
-        "in": "$1",
-        "pr": "$1es",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "pped$",
-      {
-        "in": "p",
-        "pr": "ps",
-        "g": "pping",
-        "do": "pper"
-      }
-    ],
-    [
-      "tted$",
-      {
-        "in": "t",
-        "pr": "ts",
-        "g": "tting",
-        "do": "tter"
-      }
-    ],
-    [
-      "gged$",
-      {
-        "in": "g",
-        "pr": "gs",
-        "g": "gging",
-        "do": "gger"
-      }
-    ],
-    [
-      "(h|ion|n[dt]|ai.|[cs]t|pp|all|ss|tt|int|ail|ld|en|oo.|er|k|pp|w|ou.|rt|ght|rm)ed$",
-      {
-        "in": "$1",
-        "pr": "$1s",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "(..[^aeiou])ed$",
-      {
-        "in": "$1e",
-        "pr": "$1es",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "ied$",
-      {
-        "in": "y",
-        "pr": "ies",
-        "g": "ying",
-        "do": "ier"
-      }
-    ],
-    [
-      "(.o)ed$",
-      {
-        "in": "$1o",
-        "pr": "$1os",
-        "g": "$1oing",
-        "do": "$1oer"
-      }
-    ],
-    [
-      "(.i)ed$",
-      {
-        "in": "$1",
-        "pr": "$1s",
-        "g": "$1ing",
-        "do": "$1er"
-      }
-    ],
-    [
-      "([rl])ew$",
-      {
-        "in": "$1ow",
-        "pr": "$1ows",
-        "g": "$1owing"
-      }
-    ],
-    [
-      "([pl])t$",
-      {
-        "in": "$1t",
-        "pr": "$1ts",
-        "g": "$1ting"
-      }
-    ]
-  ]
-}
-//unpack compressed form
-verb_rules=Object.keys(verb_rules).reduce(function(h,k){
-  h[k]=verb_rules[k].map(function(a){
-    var obj={
-      reg:new RegExp(a[0],"i"),
-      repl:{
-        infinitive:a[1]["in"],
-        present:a[1]["pr"],
-        past:a[1]["pa"],
-        gerund:a[1]["g"]
-      }
-    }
-    if(a[1]["do"]){
-      obj.repl.doer=a[1]["do"]
-    }
-    return obj
-  })
-  return h
-},{})
-
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = verb_rules;
-}
-// console.log(JSON.stringify(verb_rules, null, 2));
 
 //somone who does this present-tense verb
 //turn 'walk' into 'walker'
 var verb_to_doer = (function() {
   var main = function(str) {
-    str = str || ''
-    var irregulars = {
-      "tie": "tier",
-      "dream": "dreamer",
-      "sail": "sailer",
-      "run": "runner",
-      "rub": "rubber",
-      "begin": "beginner",
-      "win": "winner",
-      "claim": "claimant",
-      "deal": "dealer",
-      "spin": "spinner"
-    }
-    var dont = {
-      "aid": 1,
-      "fail": 1,
-      "appear": 1,
-      "happen": 1,
-      "seem": 1,
-      "try": 1,
-      "say": 1,
-      "marry": 1,
-      "be": 1,
-      "forbid": 1,
-      "understand": 1,
-      "bet": 1
-    }
+
+    str = str || '';
     var transforms = [{
-      "reg": /e$/i,
-      "repl": 'er'
+      'reg': /e$/i,
+      'repl': 'er'
     }, {
-      "reg": /([aeiou])([mlgp])$/i,
-      "repl": '$1$2$2er'
+      'reg': /([aeiou])([mlgp])$/i,
+      'repl': '$1$2$2er'
     }, {
-      "reg": /([rlf])y$/i,
-      "repl": '$1ier'
+      'reg': /([rlf])y$/i,
+      'repl': '$1ier'
     }, {
-      "reg": /^(.?.[aeiou])t$/i,
-      "repl": '$1tter'
+      'reg': /^(.?.[aeiou])t$/i,
+      'repl': '$1tter'
     }]
 
-    if (dont.hasOwnProperty(str)) {
-      return null
-    }
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
+    if (verbs_conjugate.noDoers.hasOwnProperty(str)) {return null}
+    if (verbs_conjugate.irregularDoers.hasOwnProperty(str)) {
+      return verbs_conjugate.irregularDoers[str];
     }
     for (var i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str + "er"
+    return str + 'er';
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main;
 })();
 
@@ -6880,25 +5032,16 @@ var verb_to_doer = (function() {
 //turn a verb into its other grammatical forms.
 var verb_conjugate = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    verb_to_doer = require("./to_doer")
-    verb_irregulars = require("./verb_irregulars")
-    verb_rules = require("./verb_rules")
-    suffix_rules = require("./suffix_rules")
-  }
-
   //this method is the slowest in the whole library, basically TODO:whaaa
   var predict = function(w) {
     var endsWith = function(str, suffix) {
       return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
-    var arr = Object.keys(suffix_rules);
+    var arr = Object.keys(suffixes.verbs);
     for (i = 0; i < arr.length; i++) {
-      if (endsWith(w, arr[i])) {
-        return suffix_rules[arr[i]]
-      }
+      if (endsWith(w, arr[i])) {return suffixes.verbs[arr[i]];}
     }
-    return "infinitive"
+    return 'infinitive';
   }
 
   //fallback to this transformation if it has an unknown prefix
@@ -6911,19 +5054,19 @@ var verb_conjugate = (function() {
     }
     var present, past, gerund, doer;
     if (w.match(/[^aeiou]$/)) {
-      gerund = w + "ing"
-      past = w + "ed"
+      gerund = w + 'ing';
+      past = w + 'ed';
       if (w.match(/ss$/)) {
-        present = w + "es" //'passes'
+        present = w + 'es'; //'passes'
       } else {
-        present = w + "s"
+        present = w + 's';
       }
-      doer = verb_to_doer(infinitive)
+      doer = to_doer(infinitive);
     } else {
-      gerund = w.replace(/[aeiou]$/, 'ing')
-      past = w.replace(/[aeiou]$/, 'ed')
-      present = w.replace(/[aeiou]$/, 'es')
-      doer = verb_to_doer(infinitive)
+      gerund = w.replace(/[aeiou]$/, 'ing');
+      past = w.replace(/[aeiou]$/, 'ed');
+      present = w.replace(/[aeiou]$/, 'es');
+      doer = to_doer(infinitive);
     }
     return {
       infinitive: infinitive,
@@ -6931,105 +5074,99 @@ var verb_conjugate = (function() {
       past: past,
       gerund: gerund,
       doer: doer,
-      future: "will " + infinitive
+      future: 'will ' + infinitive
     }
   }
 
   //make sure object has all forms
   var fufill = function(obj, prefix) {
     if (!obj.infinitive) {
-      return obj
-    }
+			return obj
+		}
     if (!obj.gerund) {
-      obj.gerund = obj.infinitive + 'ing'
-    }
+			obj.gerund = obj.infinitive + 'ing'
+		}
     if (!obj.doer) {
-      obj.doer = verb_to_doer(obj.infinitive)
-    }
+			obj.doer = to_doer(obj.infinitive)
+		}
     if (!obj.present) {
-      obj.present = obj.infinitive + 's'
-    }
+			obj.present = obj.infinitive + 's'
+		}
     if (!obj.past) {
-      obj.past = obj.infinitive + 'ed'
-    }
-    //add the prefix to all forms, if it exists
+			obj.past = obj.infinitive + 'ed'
+		}
+    // add the prefix to all forms, if it exists
     if (prefix) {
       Object.keys(obj).forEach(function(k) {
-        obj[k] = prefix + obj[k]
+        obj[k] = prefix + obj[k];
       })
     }
-    //future is 'will'+infinitive
+    // future is 'will'+infinitive
     if (!obj.future) {
-      obj.future = "will " + obj.infinitive
-    }
-    //perfect is 'have'+past-tense
+			obj.future = 'will ' + obj.infinitive
+		}
+    // perfect is 'have'+past-tense
     if (!obj.perfect) {
-      obj.perfect = "have " + obj.past
-    }
-    //pluperfect is 'had'+past-tense
+			obj.perfect = 'have ' + obj.past
+		}
+    // pluperfect is 'had'+past-tense
     if (!obj.pluperfect) {
-      obj.pluperfect = "had " + obj.past
-    }
-    //future perfect is 'will have'+past-tense
+			obj.pluperfect = 'had ' + obj.past
+		}
+    // future perfect is 'will have'+past-tense
     if (!obj.future_perfect) {
-      obj.future_perfect = "will have " + obj.past
-    }
-    return obj
+			obj.future_perfect = 'will have ' + obj.past;
+		}
+    return obj;
   }
 
   var main = function(w) {
-    if (w===undefined) {
-      return {}
-    }
-
+    if (typeof w === 'undefined') {
+			return {}
+		}
     //for phrasal verbs ('look out'), conjugate look, then append 'out'
-    var phrasal_reg=new RegExp("^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$",'i')
+    var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
+		// TODO - when IN is done (see issue 40) we can build this regex
+
     if(w.match(' ') && w.match(phrasal_reg)){
       var split=w.match(phrasal_reg,'')
       var phrasal_verb=split[1]
       var particle=split[2]
       var result=main(phrasal_verb)//recursive
-      delete result["doer"]
+      delete result['doer']
       Object.keys(result).forEach(function(k){
         if(result[k]){
-          result[k]+=" "+particle
+          result[k]+=' '+particle
         }
       })
       return result
     }
 
     //for pluperfect ('had tried') remove 'had' and call it past-tense
-    if(w.match(/^had [a-z]/i)){
-      w=w.replace(/^had /i,'')
-    }
+    if(w.match(/^had [a-z]/i)) {w = w.replace(/^had /i,'')}
     //for perfect ('have tried') remove 'have' and call it past-tense
-    if(w.match(/^have [a-z]/i)){
-      w=w.replace(/^have /i,'')
-    }
-
+    if(w.match(/^have [a-z]/i)) {w = w.replace(/^have /i,'')}
     //for future perfect ('will have tried') remove 'will have' and call it past-tense
-    if(w.match(/^will have [a-z]/i)){
-      w=w.replace(/^will have /i,'')
-    }
+    if(w.match(/^will have [a-z]/i)) {w = w.replace(/^will have /i,'')}
 
     //chop it if it's future-tense
-    w = w.replace(/^will /i, '')
+    w = w.replace(/^will /i, '');
     //un-prefix the verb, and add it in later
-    var prefix = (w.match(/^(over|under|re|anti|full)\-?/i) || [])[0]
-    var verb = w.replace(/^(over|under|re|anti|full)\-?/i, '')
+    var prefix = (w.match(/^(over|under|re|anti|full)\-?/i) || [])[0];
+    var verb = w.replace(/^(over|under|re|anti|full)\-?/i, '');
     //check irregulars
     var obj = {};
-    var l = verb_irregulars.length
+    var l = verbs_conjugate.irregulars.length;
     var x, i;
     for (i = 0; i < l; i++) {
-      x = verb_irregulars[i]
+      x = verbs_conjugate.irregulars[i];
       if (verb === x.present || verb === x.gerund || verb === x.past || verb === x.infinitive) {
-        obj = JSON.parse(JSON.stringify(verb_irregulars[i])); // object 'clone' hack, to avoid mem leak
+        obj = JSON.parse(JSON.stringify(verbs_conjugate.irregulars[i])); // object 'clone' hack, to avoid mem leak
         return fufill(obj, prefix)
       }
     }
     //guess the tense, so we know which transormation to make
-    var predicted = predict(w) || 'infinitive'
+    var predicted = predict(w) || 'infinitive';
 
     //check against suffix rules
     l = verb_rules[predicted].length
@@ -7040,9 +5177,9 @@ var verb_conjugate = (function() {
         obj[predicted] = w;
         Object.keys(r.repl).forEach(function(k) {
           if (k === predicted) {
-            obj[k] = w
+            obj[k] = w;
           } else {
-            obj[k] = w.replace(r.reg, r.repl[k])
+            obj[k] = (r.repl[k]) ? w.replace(r.reg, r.repl[k]) : 0;
           }
         });
         return fufill(obj);
@@ -7050,235 +5187,158 @@ var verb_conjugate = (function() {
     }
 
     //produce a generic transformation
-    return fallback(w)
+    return fallback(w);
   };
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
+  return main;
 })()
 
-// console.log(verb_conjugate("walking"))
-// console.log(verb_conjugate("overtook"))
-// console.log(verb_conjugate("watch out"))
-// console.log(verb_conjugate("watch"))
-// console.log(verb_conjugate("smash"))
-// console.log(verb_conjugate("word"))
+// console.log(verb_conjugate('walking'))
+// console.log(verb_conjugate('overtook'))
+// console.log(verb_conjugate('watch out'))
+// console.log(verb_conjugate('watch'))
+// console.log(verb_conjugate('smash'))
+// console.log(verb_conjugate('word'))
 //broken
-// console.log(verb_conjugate("read"))
-// console.log(verb_conjugate("free"))
-// console.log(verb_conjugate("flesh"))
-// console.log(verb_conjugate("branch"))
-// console.log(verb_conjugate("spred"))
-// console.log(verb_conjugate("bog"))
-// console.log(verb_conjugate("nod"))
-// console.log(verb_conjugate("had tried"))
-// console.log(verb_conjugate("have tried"))
+// console.log(verb_conjugate('read'))
+// console.log(verb_conjugate('free'))
+// console.log(verb_conjugate('flesh'))
+// console.log(verb_conjugate('branch'))
+// console.log(verb_conjugate('spred'))
+// console.log(verb_conjugate('bog'))
+// console.log(verb_conjugate('nod'))
+// console.log(verb_conjugate('had tried'))
+// console.log(verb_conjugate('have tried'))
 
 //wrapper for verb's methods
 var Verb = function(str, next, last, token) {
-  var the = this
+
+  var the = this;
   the.word = str || '';
-  the.next = next
-  the.last = last
+  the.next = next;
+  the.last = last;
 
-  if (typeof module !== "undefined" && module.exports) {
-    verb_conjugate = require("./conjugate/conjugate")
-    parts_of_speech = require("../../data/parts_of_speech")
-  }
-
-  var copulas = {
-    "is": "CP",
-    "will be": "CP",
-    "will": "CP",
-    "are": "CP",
-    "was": "CP",
-    "were": "CP"
-  }
-  var modals = {
-    "can": "MD",
-    "may": "MD",
-    "could": "MD",
-    "might": "MD",
-    "will": "MD",
-    "ought to": "MD",
-    "would": "MD",
-    "must": "MD",
-    "shall": "MD",
-    "should": "MD"
-  }
   var tenses = {
-    past: "VBD",
-    participle: "VBN",
-    infinitive: "VBP",
-    present: "VBZ",
-    gerund: "VBG"
+    past: 'VBD',
+    participle: 'VBN',
+    infinitive: 'VBP',
+    present: 'VBZ',
+    gerund: 'VBG'
   }
 
   the.conjugate = function() {
-    return verb_conjugate(the.word)
+    return verb_conjugate.irregulars(the.word);
   }
 
   the.to_past = function() {
-    if (the.form === "gerund") {
-      return the.word
+    if (the.form === 'gerund') {
+      return the.word;
     }
-    return verb_conjugate(the.word).past
+    return verb_conjugate.irregulars(the.word).past;
   }
 
   the.to_present = function() {
-    return verb_conjugate(the.word).present
+    return verb_conjugate.irregulars(the.word).present;
   }
 
   the.to_future = function() {
-    return "will " + verb_conjugate(the.word).infinitive
+    return 'will ' + verb_conjugate.irregulars(the.word).infinitive;
   }
 
   //which conjugation
   the.form = (function() {
     //don't choose infinitive if infinitive==present
     var order = [
-      "past",
-      "present",
-      "gerund",
-      "infinitive"
-    ]
-    var forms = verb_conjugate(the.word)
+      'past',
+      'present',
+      'gerund',
+      'infinitive'
+    ];
+    var forms = verb_conjugate.irregulars(the.word);
     for (var i = 0; i < order.length; i++) {
       if (forms[order[i]] === the.word) {
-        return order[i]
-      }
+				return order[i]
+			}
     }
   })()
 
   //past/present/future   //wahh?!
   the.tense = (function() {
-    if (the.word.match(/\bwill\b/)) {
-      return "future"
-    }
-    if (the.form === "present") {
-      return "present"
-    }
-    if (the.form === "past") {
-      return "past"
-    }
-    return "present"
+    if (the.word.match(/\bwill\b/)) {return 'future'}
+    if (the.form === 'present') {return 'present'}
+    if (the.form === 'past') {return 'past'}
+    return 'present';
   })()
 
   //the most accurate part_of_speech
   the.which = (function() {
-    if (copulas[the.word]) {
-      return parts_of_speech['CP']
-    }
-    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) {
-      return parts_of_speech['VBG']
-    }
-    var form = the.form
-    return parts_of_speech[tenses[form]]
+    if (verbs_special.cps[the.word]) {return schema['CP']}
+    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) {return schema['VBG']}
+    var form = the.form;
+    return schema[tenses[form]];
   })()
 
   //is this verb negative already?
   the.negative = function() {
-    if (the.word.match(/n't$/)) {
-      return true
+    if (the.word.match(/n't$/)) {return true}
+    if ((verbs_special.mds[the.word] || verbs_special.cps[the.word]) && the.next && the.next.normalised === 'not') {
+      return true;
     }
-    if ((modals[the.word] || copulas[the.word]) && the.next && the.next.normalised === "not") {
-      return true
-    }
-    return false
+    return false;
   }
 
   return the;
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Verb;
-}
 
-// console.log(new Verb("will"))
-// console.log(new Verb("stalking").tense)
+// console.log(new Verb('will'))
+// console.log(new Verb('stalking').tense)
 
-//convert cute to cuteness
+// convert cute to cuteness
 var adj_to_noun = (function() {
 
-  var main = function(w) {
-    var irregulars = {
-      "clean": "cleanliness",
-      "naivety": "naivety"
-    };
-    if (!w) {
-      return "";
-    }
-    if (irregulars.hasOwnProperty(w)) {
-      return irregulars[w];
-    }
-    if (w.match(" ")) {
-      return w;
-    }
-    if (w.match(/w$/)) {
-      return w;
-    }
+  var main = function(w, lang) {
+
+    if (!w) {return ''}
+    if (adjectives_decline.to_noun.hasOwnProperty(w)) {
+			return adjectives_decline.to_noun[w];
+		}
+		if (w.match(' ')) {return w}
+    if (w.match(/w$/)){return w}
+
     var transforms=[
-      {"reg":/y$/, "repl":'iness'},
-      {"reg":/le$/, "repl":'ility'},
-      {"reg":/ial$/, "repl":'y'},
-      {"reg":/al$/, "repl":'ality'},
-      {"reg":/ting$/, "repl":'ting'},
-      {"reg":/ring$/, "repl":'ring'},
-      {"reg":/bing$/, "repl":'bingness'},
-      {"reg":/sing$/, "repl":'se'},
-      {"reg":/ing$/, "repl":'ment'},
-      {"reg":/ess$/, "repl":'essness'},
-      {"reg":/ous$/, "repl":'ousness'},
-    ]
+      {reg:/y$/, repl:'iness'},
+      {reg:/le$/, repl:'ility'},
+      {reg:/ial$/, repl:'y'},
+      {reg:/al$/, repl:'ality'},
+      {reg:/ting$/, repl:'ting'},
+      {reg:/ring$/, repl:'ring'},
+      {reg:/bing$/, repl:'bingness'},
+      {reg:/sing$/, repl:'se'},
+      {reg:/ing$/, repl:'ment'},
+      {reg:/ess$/, repl:'essness'},
+      {reg:/ous$/, repl:'ousness'},
+    ];
 
     for(var i=0; i<transforms.length; i++){
       if(w.match(transforms[i].reg)){
-        return w.replace(transforms[i].reg, transforms[i].repl);
+        return w.replace(transforms[i].reg, transforms[i].repl)
       }
     }
 
     if (w.match(/s$/)) {
-      return w;
-    }
-    return w + "ness";
+			return w;
+		}
+		return w + 'ness';
   };
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
+
+  return main;
 })()
 
 // console.log(adj_to_noun('mysterious'));
-
-//turn 'quick' into 'quickly'
+// turn 'quick' into 'quicker'
 var to_comparative = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    convertables = require("./convertables")
-  }
-  var main = function(str) {
-    var irregulars = {
-      "grey": "greyer",
-      "gray": "grayer",
-      "green": "greener",
-      "yellow": "yellower",
-      "red": "redder",
-      "good": "better",
-      "well": "better",
-      "bad": "worse",
-      "sad": "sadder"
-    }
-
-    var dont = {
-      "overweight": 1,
-      "main": 1,
-      "nearby": 1,
-      "asleep": 1,
-      "weekly": 1,
-      "secret": 1,
-      "certain": 1
-    }
+  var main = function(str, lang) {
 
     var transforms = [{
       reg: /y$/i,
@@ -7292,7 +5352,7 @@ var to_comparative = (function() {
     }, {
       reg: /nge$/i,
       repl: 'nger'
-    }]
+    }];
 
     var matches = [
       /ght$/,
@@ -7305,99 +5365,68 @@ var to_comparative = (function() {
       /old$/,
       /oud$/,
       /e[ae]p$/
-    ]
+    ];
 
     var not_matches = [
       /ary$/,
       /ous$/
-    ]
+    ];
 
-    if (dont.hasOwnProperty(str)) {
-      return null
-    }
-
+    if (!(adjectives_decline.to_comparative[str])) {
+			return null
+		}
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
         return str.replace(transforms[i].reg, transforms[i].repl)
       }
     }
 
-    if (convertables.hasOwnProperty(str)) {
-      if (str.match(/e$/)) {
-        return str + "r"
-      } else {
-        return str + "er"
-      }
+    if (adjectives_decline.convertables.hasOwnProperty(str)) {
+      return (str.match(/e$/)) ? str + 'r' : str + 'er'
     }
 
-
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
+    if (adjectives_decline.to_comparative.hasOwnProperty(str)) {
+      return adjectives_decline.to_comparative[str]
     }
 
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return "more " + str
+        return 'more ' + str
       }
     }
-
 
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
-        return str + "er"
+        return str + 'er'
       }
     }
-    return "more " + str
+    return 'more ' + str;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main;
 })();
 
 // console.log(to_comparative('dry'))
 // console.log(to_comparative('cruel'))
-
-//turn 'quick' into 'quickest'
+// turn 'quick' into 'quickest'
 var to_superlative = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    convertables = require("./convertables")
-  }
-
-  var main = function(str) {
-    var irregulars = {
-      "nice": "nicest",
-      "late": "latest",
-      "hard": "hardest",
-      "inner": "innermost",
-      "outer": "outermost",
-      "far": "furthest",
-      "worse": "worst",
-      "bad": "worst",
-      "good": "best"
-    }
-
-    var dont = {
-      "overweight": 1,
-      "ready": 1
-    }
+  var main = function(str, lang) {
 
     var transforms = [{
-      "reg": /y$/i,
-      "repl": 'iest'
+      reg: /y$/i,
+      repl: 'iest'
     }, {
-      "reg": /([aeiou])t$/i,
-      "repl": '$1ttest'
+      reg: /([aeiou])t$/i,
+      repl: '$1ttest'
     }, {
-      "reg": /([aeou])de$/i,
-      "repl": '$1dest'
+      reg: /([aeou])de$/i,
+      repl: '$1dest'
     }, {
-      "reg": /nge$/i,
-      "repl": 'ngest'
-    }]
+      reg: /nge$/i,
+      repl: 'ngest'
+    }];
 
     var matches = [
       /ght$/,
@@ -7409,17 +5438,17 @@ var to_superlative = (function() {
       /ow$/,
       /oud$/,
       /...p$/
-    ]
+    ];
 
     var not_matches = [
       /ary$/
-    ]
+    ];
 
     var generic_transformation = function(str) {
       if (str.match(/e$/)) {
-        return str + "st"
+        return str + 'st'
       } else {
-        return str + "est"
+        return str + 'est'
       }
     }
 
@@ -7429,113 +5458,39 @@ var to_superlative = (function() {
       }
     }
 
-    if (convertables.hasOwnProperty(str)) {
-      return generic_transformation(str)
-    }
-
-    if (dont.hasOwnProperty(str)) {
-      return "most " + str
-    }
-
-    if (irregulars.hasOwnProperty(str)) {
-      return irregulars[str]
-    }
+    if (adjectives_decline.convertables.hasOwnProperty(str)) {
+			return generic_transformation(str)
+		}
+		if (!(adjectives_decline.to_superlative[str])) {
+			return 'most '.concat(str)
+		}
+		if (adjectives_decline.to_superlative.hasOwnProperty(str)) {
+			return adjectives_decline.to_superlative[str]
+		}
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return "most " + str
+        return 'most ' + str;
       }
     }
 
     for (i = 0; i < matches.length; i++) {
       if (str.match(matches[i])) {
-        return generic_transformation(str)
+        return generic_transformation(str);
       }
     }
-    return "most " + str
+    return 'most ' + str;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main;
+	return main;
 })();
 
 // console.log(to_superlative('dry'))
 // console.log(to_superlative('rich'))
-
-//turn 'quick' into 'quickly'
+// turn 'quick' into 'quickly'
 var adj_to_adv = (function() {
 
-  var main = function(str) {
-    var irregulars = {
-      "idle": "idly",
-      "public": "publicly",
-      "vague": "vaguely",
-      "day": "daily",
-      "icy": "icily",
-      "single": "singly",
-      "female": "womanly",
-      "male": "manly",
-      "simple": "simply",
-      "whole": "wholly",
-      "special": "especially",
-      "straight": "straight",
-      "wrong": "wrong",
-      "fast": "fast",
-      "hard": "hard",
-      "late": "late",
-      "early": "early",
-      "well": "well",
-      "best": "best",
-      "latter": "latter",
-      "bad": "badly"
-    }
-
-    var dont = {
-      "foreign": 1,
-      "black": 1,
-      "modern": 1,
-      "next": 1,
-      "difficult": 1,
-      "degenerate": 1,
-      "young": 1,
-      "awake": 1,
-      "back": 1,
-      "blue": 1,
-      "brown": 1,
-      "orange": 1,
-      "complex": 1,
-      "cool": 1,
-      "dirty": 1,
-      "done": 1,
-      "empty": 1,
-      "fat": 1,
-      "fertile": 1,
-      "frozen": 1,
-      "gold": 1,
-      "grey": 1,
-      "gray": 1,
-      "green": 1,
-      "medium": 1,
-      "parallel": 1,
-      "outdoor": 1,
-      "unknown": 1,
-      "undersized": 1,
-      "used": 1,
-      "welcome": 1,
-      "yellow": 1,
-      "white": 1,
-      "fixed": 1,
-      "mixed": 1,
-      "super": 1,
-      "guilty": 1,
-      "tiny": 1,
-      "able": 1,
-      "unable": 1,
-      "same": 1,
-      "adult": 1
-    }
+  var main = function(str, lang) {
 
     var transforms = [{
       reg: /al$/i,
@@ -7561,129 +5516,75 @@ var adj_to_adv = (function() {
     }, {
       reg: /l$/i,
       repl: 'ly'
-    }]
+    }];
 
     var not_matches = [
       /airs$/,
       /ll$/,
       /ee.$/,
       /ile$/
-    ]
+    ];
 
-    if (dont[str]) {
-      return null
-    }
-    if (irregulars[str]) {
-      return irregulars[str]
-    }
+    if (adjectives_decline.adv_donts[str]) {
+			return null
+		}
+		if (adjectives_decline.adj_to_advs[str]) {
+			return adjectives_decline.adj_to_advs[str]
+		}
     if (str.length <= 3) {
-      return null
-    }
+			return null;
+		}
     var i;
     for (i = 0; i < not_matches.length; i++) {
       if (str.match(not_matches[i])) {
-        return null
-      }
+				return null
+			}
     }
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
-        return str.replace(transforms[i].reg, transforms[i].repl)
+        return str.replace(transforms[i].reg, transforms[i].repl);
       }
     }
-    return str + 'ly'
+    return str + 'ly';
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
   return main;
 })();
 
 // console.log(adj_to_adv('direct'))
-
 //wrapper for Adjective's methods
 var Adjective = function(str, next, last, token) {
-  var the = this
+  var the = this;
   the.word = str || '';
-  the.next = next
-  the.last = last
-
-  if (typeof module !== "undefined" && module.exports) {
-    to_comparative = require("./conjugate/to_comparative")
-    to_superlative = require("./conjugate/to_superlative")
-    adj_to_adv = require("./conjugate/to_adverb")
-    adj_to_noun = require("./conjugate/to_noun")
-    parts_of_speech = require("../../data/parts_of_speech")
-  }
+  the.next = next;
+  the.last = last;
 
   the.conjugate = function() {
     return {
       comparative: to_comparative(the.word),
       superlative: to_superlative(the.word),
-      adverb: adj_to_adv(the.word),
-      noun: adj_to_noun(the.word)
-    }
+      adverb: to_adverb(the.word),
+      noun: to_noun(the.word)
+    };
   }
 
   the.which = (function() {
-    if (the.word.match(/..est$/)) {
-      return parts_of_speech['JJS']
-    }
-    if (the.word.match(/..er$/)) {
-      return parts_of_speech['JJR']
-    }
-    return parts_of_speech['JJ']
+    if (the.word.match(/..est$/)) {return schema['JJS']}
+    if (the.word.match(/..er$/))  {return schema['JJR']}
+    return schema['JJ'];
   })()
 
   return the;
 };
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Adjective;
-}
-// console.log(new Adjective("crazy"))
 
-//Parents are classes for each main part of speech, with appropriate methods
-//load files if server-side, otherwise assume these are prepended already
-if (typeof module !== "undefined" && module.exports) {
-  Adjective = require("./adjective/index");
-  Noun = require("./noun/index");
-  Adverb = require("./adverb/index");
-  Verb = require("./verb/index");
-  Value = require("./value/index");
-}
-var parents = {
-  adjective: function(str, next, last, token) {
-    return new Adjective(str, next, last, token)
-  },
-  noun: function(str, next, last, token) {
-    return new Noun(str, next, last, token)
-  },
-  adverb: function(str, next, last, token) {
-    return new Adverb(str, next, last, token)
-  },
-  verb: function(str, next, last, token) {
-    return new Verb(str, next, last, token)
-  },
-  value: function(str, next, last, token) {
-    return new Value(str, next, last, token)
-  },
-  glue: function(str, next, last, token) {
-    return {}
-  }
-}
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = parents;
-}
+// console.log(new Adjective('crazy'))
 
-//phrasal verbs are two words that really mean one verb.
-//'beef up' is one verb, and not some direction of beefing.
-//by @spencermountain, 2015 mit
-//many credits to http://www.allmyphrasalverbs.com/
+// phrasal verbs are two words that really mean one verb.
+// 'beef up' is one verb, and not some direction of beefing.
+// by @spencermountain, 2015 mit
+// many credits to http://www.allmyphrasalverbs.com/
 var phrasal_verbs = (function () {
 
-  if (typeof module !== "undefined" && module.exports) {
-    verb_conjugate = require("../../parents/verb/conjugate/conjugate")
-  }
   //start the list with some randoms
   var main = [
     "be onto",
@@ -7794,565 +5695,504 @@ var phrasal_verbs = (function () {
     })
   })
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-
   return main
 })()
 // console.log(JSON.stringify(phrasal_verbs, null, 2))
 
-//the lexicon is a large hash of words and their predicted part-of-speech.
-// it plays a bootstrap-role in pos tagging in this library.
-// to save space, most of the list is derived from conjugation methods,
-// and other forms are stored in a compact way
+//Parents are classes for each main part of speech, with appropriate methods
+
+var parents = {
+  adjective: function(str, next, last, token) {
+    return new Adjective(str, next, last, token);
+  },
+  noun: function(str, next, last, token) {
+    return new Noun(str, next, last, token);
+  },
+  adverb: function(str, next, last, token) {
+    return new Adverb(str, next, last, token);
+  },
+  verb: function(str, next, last, token) {
+    return new Verb(str, next, last, token);
+  },
+  value: function(str, next, last, token) {
+    return new Value(str, next, last, token);
+  },
+  glue: function(str, next, last, token) {
+    return {};
+  }
+}
+
+
+
 var lexicon = (function() {
-    if (typeof module !== "undefined" && module.exports) {
-      multiples = require("./lexicon/multiples")
-      values = require("./lexicon/values")
-      demonyms = require("./lexicon/demonyms")
-      abbreviations = require("./lexicon/abbreviations")
-      honourifics = require("./lexicon/honourifics")
-      uncountables = require("./lexicon/uncountables")
-      firstnames = require("./lexicon/firstnames")
+  var lang = 'en';
 
-      //verbs
-      verbs = require("./lexicon/verbs")
-      verb_conjugate = require("../parents/verb/conjugate/conjugate")
-      verb_to_doer = require("../parents/verb/conjugate/to_doer")
-      verb_irregulars = require("../parents/verb/conjugate/verb_irregulars")
-      phrasal_verbs = require("./lexicon/phrasal_verbs")
 
-      adjectives = require("./lexicon/adjectives")
-      adj_to_adv = require("../parents/adjective/conjugate/to_adverb")
-      to_superlative = require("../parents/adjective/conjugate/to_superlative")
-      to_comparative = require("../parents/adjective/conjugate/to_comparative")
-      convertables = require("../parents/adjective/conjugate/convertables")
-    }
-    var main = {
+  var main = {};
+  var zip = { EX: [ 'there' ],
+  NN:
+   [ 'cleanliness',
+     'naivety',
+     'thing',
+     'stuff',
+     'fact',
+     'west',
+     'western',
+     'east',
+     'eastern',
+     'north',
+     'northern',
+     'south',
+     'southern',
+     'today',
+     'yesterday',
+     'tomorrow',
+     'era',
+     'century',
+     'center',
+     'house',
+     'park',
+     'square',
+     'centre',
+     'memorial',
+     'school',
+     'bridge',
+     'university',
+     'college',
+     'foundation',
+     'institute',
+     'club',
+     'museum',
+     'hall',
+     'arena',
+     'stadium',
+     'president',
+     'dollar',
+     'student',
+     'patent',
+     'funding',
+     'morning',
+     'banking',
+     'ceiling',
+     'energy',
+     'secretary',
+     'purpose',
+     'event' ],
+  NNS:
+   [ 'leaves',
+     'quizzes',
+     'geese',
+     'indices',
+     'appendices',
+     'cactuses',
+     'echoes',
+     'embargoes',
+     'loaves',
+     'matrices',
+     'mosquitoes',
+     'radiuses',
+     'theses',
+     'thieves',
+     'these',
+     'friends' ],
+  CC:
+   [ 'how',
+     'or',
+     'while',
+     'nor',
+     'though',
+     'because',
+     'but',
+     'for',
+     'and',
+     'if',
+     'however',
+     'before',
+     'although',
+     'not',
+     'whether',
+     'yet',
+     'therefore',
+     'plus',
+     'versus' ],
+  VBD: [ 'had', 'walked', 'where\'d', 'when\'d', 'how\'d', 'what\'d' ],
+  VBN: [ 'born' ],
+  VBG:
+   [ 'am',
+     'having',
+     'giving',
+     'leaving',
+     'driving',
+     'forgiving',
+     'proving',
+     'striving',
+     'weaving',
+     'according',
+     'resulting',
+     'staining' ],
+  DT:
+   [ 'this',
+     'that',
+     'these',
+     'those',
+     'such',
+     'neither',
+     'which',
+     'what',
+     'the',
+     'no',
+     'any',
+     'each',
+     'whatever',
+     'whichever',
+     'whenever',
+     'whoever',
+     'wherever',
+     'an',
+     'a',
+     'own',
+     'few',
+     'both',
+     'much',
+     'some',
+     'enough',
+     'every',
+     'another',
+     'plenty',
+     'least',
+     'various',
+     'either',
+     'else',
+     'la',
+     'le',
+     'les',
+     'des',
+     'de',
+     'du',
+     'el' ],
+  IN:
+   [ 'in',
+     'out',
+     'on',
+     'off',
+     'of',
+     'with',
+     'over',
+     'under',
+     'up',
+     'down',
+     'about',
+     'before',
+     'after',
+     'to',
+     'round',
+     'through',
+     'onto',
+     'around',
+     'behind',
+     'above',
+     'away',
+     'across',
+     'ahead',
+     'upon',
+     'aback',
+     'back',
+     'forth',
+     'along',
+     'apart',
+     'way',
+     'until',
+     'into',
+     'against',
+     'except',
+     'by',
+     'between',
+     'at',
+     'as',
+     'from',
+     'among',
+     'amid',
+     'since',
+     'within',
+     'during',
+     'per',
+     'without',
+     'throughout',
+     'than',
+     'via',
+     '\'o',
+     'despite',
+     'above',
+     'below',
+     'unless',
+     'whereas',
+     'unlike',
+     'towards',
+     'besides' ],
+  PP:
+   [ 'mine',
+     'my',
+     'myself',
+     'yours',
+     'your',
+     'yourself',
+     'yourselves',
+     'his',
+     'himself',
+     'her',
+     'hers',
+     'herself',
+     'its',
+     'itself',
+     'our',
+     'ours',
+     'ourselves',
+     'theirs',
+     'their',
+     'them',
+     'themself',
+     'themselves',
+     'none',
+     'whose',
+     'something',
+     'anything',
+     'anyone',
+     'lot',
+     'nothing',
+     'everything',
+     'who',
+     'whom' ],
+  UH:
+   [ 'uhh',
+     'uh-oh',
+     'ugh',
+     'sheesh',
+     'eww',
+     'pff',
+     'voila',
+     'oy',
+     'eep',
+     'hurrah',
+     'yuck',
+     'ow',
+     'duh',
+     'oh',
+     'hmm',
+     'yeah',
+     'whoa',
+     'ooh',
+     'whee',
+     'ah',
+     'bah',
+     'gah',
+     'yaa',
+     'phew',
+     'gee',
+     'ahem',
+     'eek',
+     'meh',
+     'yahoo',
+     'oops',
+     'd\'oh',
+     'psst',
+     'argh',
+     'grr',
+     'nah',
+     'shhh',
+     'whew',
+     'mmm',
+     'yay',
+     'uh-huh',
+     'boo',
+     'wow',
+     'nope' ],
+  FW: [ 'etc' ],
+  RB:
+   [ 'when',
+     'whence',
+     'where',
+     'why',
+     'now',
+     'again',
+     'here',
+     'so',
+     'very',
+     'just',
+     'too',
+     'quite',
+     'then',
+     'once',
+     'maybe',
+     'rather',
+     'anyway',
+     'hence',
+     'further',
+     'already',
+     'soon',
+     'directly',
+     'toward',
+     'forever',
+     'apart',
+     'instead',
+     'yes',
+     'alone',
+     'ago',
+     'indeed',
+     'ever',
+     'perhaps',
+     'thus',
+     'often',
+     'never',
+     'always',
+     'sometimes',
+     'also',
+     'several',
+     'randomly',
+     'abroad',
+     'almost',
+     'twice',
+     'somewhat',
+     'somehow',
+     'meanwhile',
+     'furthermore',
+     'aside',
+     'moreover',
+     'anymore',
+     'newly',
+     'damn',
+     'absolutely',
+     'actually',
+     'apparently',
+     'approximately',
+     'certainly',
+     'clearly',
+     'completely',
+     'definitely',
+     'easily',
+     'effectively',
+     'entirely',
+     'essentially',
+     'exactly',
+     'extremely',
+     'fairly',
+     'frankly',
+     'frequently',
+     'generally',
+     'hardly',
+     'heavily',
+     'highly',
+     'hopefully',
+     'largely',
+     'literally',
+     'mostly',
+     'necessarily',
+     'nicely',
+     'obviously',
+     'particularly',
+     'possibly',
+     'primarily',
+     'probably',
+     'precisely',
+     'really',
+     'relatively',
+     'seriously',
+     'significantly',
+     'slightly',
+     'specifically',
+     'strongly',
+     'surely',
+     'totally',
+     'truly',
+     'typically',
+     'ultimately',
+     'usually',
+     'virtually',
+     'widely' ],
+  RBR: [ 'more' ],
+  RBS: [ 'most' ] }
+  var unzip = function (cat){
+			var did = {
+				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
+				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }),
+				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
+				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
+				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
+			}
+			if (!cat) {
+				var lexiZip = {
+					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
+					NNAB: m.honorifics.concat(m.abbreviations),
+					PRP: Object.keys(m.nouns.prps),
+					CP: m.verbs_special.cps,
+					MD: m.verbs_special.mds,
+					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
+					VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
+					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),
+					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }),
+					JJ: m.adjectives_demonym.concat(
+							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs),
+							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
+							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
+					),
+					//CD
+					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
+					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
+				}
 
-      "etc": "FW", //foreign words
-      "ie": "FW",
+				var toMain = function(key, o) {
+					o[key].forEach(function(w) { if (!main[w]) {main[w] = key} });
+				}
+				// irregulars to main
+				for (var key in did) { toMain(key, did) }
+				for (var key in lexiZip) { toMain(key, lexiZip) }
+				// zip to main
+				for (var key in zip) { toMain(key, zip) }
 
-      "there": "EX",
+				// conjugate all verbs. (~8ms, triples the lexicon size)
+				m.verbs.forEach(function(v) {
+					var c = pm.conjugate(v);
+					var d = pm.to_doer(v);
+					var map = {'infinitive': 'VBP', 'past': 'VBD', 'gerund': 'VBG', 'present': 'VBZ', 'participle': 'VBN'};
+					for (var type in map) {
+						if (c[type] && !main[c[type]]) { main[c[type]] = map[type] }
+						if (d && !main[d]) { main[d] = 'NNA' }
+					}
+				});
+				// decline all adjectives to their adverbs. (13ms)
+				// 'to_adverb','to_superlative','to_comparative'
+				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
+					main[j] = 'JJ';
+					var adv = pm.to_adverb(j);
+					if (adv && adv !== j && !main[adv]) {
+						main[adv] = main[adv] || 'RB'
+					}
+					var c = pm.to_comparative(j);
+					if (c && !c.match(/^more ./) && c !== j && !main[c]) {
+						main[c] = main[c] || 'JJR'
+					}
+					var s = pm.to_superlative(j);
+					if (s && !s.match(/^most ./) && s !== j && !main[s]) {
+						main[s] = main[s] || 'JJS'
+					}
+				});
 
-      "better": "JJR",
-      "earlier": "JJR",
 
-      "has": "VB",
-      "more": "RBR",
 
-      "sounds": "VBZ"
-    }
+				return main;
+			}
+			if (cat in did) { return did[cat] }
+			return [];
+		}
+  unzip();
 
-    var compact = {
-        //conjunctions
-        "CC": [
-          "yet",
-          "therefore",
-          "or",
-          "while",
-          "nor",
-          "whether",
-          "though",
-          "because",
-          "but",
-          "for",
-          "and",
-          "if",
-          "however",
-          "before",
-          "although",
-          "how",
-          "plus",
-          "versus",
-          "not"
-        ],
 
-        "VBD": [
-          "where'd",
-          "when'd",
-          "how'd",
-          "what'd",
-          "said",
-          "had",
-          "been",
-          "began",
-          "came",
-          "did",
-          "meant",
-          "went"
-        ],
-
-        "VBN": [
-          "given",
-          "known",
-          "shown",
-          "seen",
-          "born",
-        ],
-
-        "VBG": [
-          "going",
-          "being",
-          "according",
-          "resulting",
-          "developing",
-          "staining"
-        ],
-
-        //copula
-        "CP": [
-          "is",
-          "will be",
-          "are",
-          "was",
-          "were",
-          "am",
-          "isn't",
-          "ain't",
-          "aren't"
-        ],
-
-        //determiners
-        "DT": [
-          "this",
-          "any",
-          "enough",
-          "each",
-          "whatever",
-          "every",
-          "which",
-          "these",
-          "another",
-          "plenty",
-          "whichever",
-          "neither",
-          "an",
-          "a",
-          "least",
-          "own",
-          "few",
-          "both",
-          "those",
-          "the",
-          "that",
-          "various",
-          "what",
-          "either",
-          "much",
-          "some",
-          "else",
-          "no",
-          //some other languages (what could go wrong?)
-          "la",
-          "le",
-          "les",
-          "des",
-          "de",
-          "du",
-          "el"
-        ],
-
-        //prepositions
-        "IN": [
-          "until",
-          "onto",
-          "of",
-          "into",
-          "out",
-          "except",
-          "across",
-          "by",
-          "between",
-          "at",
-          "down",
-          "as",
-          "from",
-          "around",
-          "with",
-          "among",
-          "upon",
-          "amid",
-          "to",
-          "along",
-          "since",
-          "about",
-          "off",
-          "on",
-          "within",
-          "in",
-          "during",
-          "per",
-          "without",
-          "throughout",
-          "through",
-          "than",
-          "via",
-          "up",
-          "unlike",
-          "despite",
-          "below",
-          "unless",
-          "towards",
-          "besides",
-          "after",
-          "whereas",
-          "'o"
-        ],
-
-        //modal verbs
-        "MD": [
-          "can",
-          "may",
-          "could",
-          "might",
-          "will",
-          "ought to",
-          "would",
-          "must",
-          "shall",
-          "should",
-          "ought",
-          "shouldn't",
-          "wouldn't",
-          "couldn't",
-          "mustn't",
-          "shan't",
-          "shant",
-          "lets", //arguable
-          "who'd",
-          "let's"
-        ],
-
-        //posessive pronouns
-        "PP": [
-          "mine",
-          "something",
-          "none",
-          "anything",
-          "anyone",
-          "lot",
-          "theirs",
-          "himself",
-          "ours",
-          "his",
-          "my",
-          "their",
-          "yours",
-          "your",
-          "our",
-          "its",
-          "nothing",
-          "herself",
-          "hers",
-          "themselves",
-          "everything",
-          "myself",
-          "itself",
-          "who",
-          "her", //this one is pretty ambiguous
-          "whom",
-          "whose"
-        ],
-
-        //personal pronouns (nouns)
-        "PRP": [
-          "it",
-          "they",
-          "i",
-          "them",
-          "you",
-          "she",
-          "me",
-          "he",
-          "him",
-          "ourselves",
-          "us",
-          "we",
-          "thou",
-          "il",
-          "elle",
-          "yourself",
-          "'em"
-        ],
-
-        //some manual adverbs (the rest are generated)
-        "RB": [
-          "now",
-          "again",
-          "already",
-          "soon",
-          "directly",
-          "toward",
-          "forever",
-          "apart",
-          "instead",
-          "yes",
-          "alone",
-          "ago",
-          "indeed",
-          "ever",
-          "quite",
-          "perhaps",
-          "where",
-          "then",
-          "here",
-          "thus",
-          "very",
-          "often",
-          "once",
-          "never",
-          "why",
-          "when",
-          "away",
-          "always",
-          "sometimes",
-          "also",
-          "maybe",
-          "so",
-          "just",
-          "well",
-          "several",
-          "such",
-          "randomly",
-          "too",
-          "rather",
-          "abroad",
-          "almost",
-          "anyway",
-          "twice",
-          "aside",
-          "moreover",
-          "anymore",
-          "newly",
-          "damn",
-          "somewhat",
-          "somehow",
-          "meanwhile",
-          "hence",
-          "further",
-          "furthermore"
-        ],
-
-        //interjections
-        "UH": [
-          "uhh",
-          "uh-oh",
-          "ugh",
-          "sheesh",
-          "eww",
-          "pff",
-          "voila",
-          "oy",
-          "eep",
-          "hurrah",
-          "yuck",
-          "ow",
-          "duh",
-          "oh",
-          "hmm",
-          "yeah",
-          "whoa",
-          "ooh",
-          "whee",
-          "ah",
-          "bah",
-          "gah",
-          "yaa",
-          "phew",
-          "gee",
-          "ahem",
-          "eek",
-          "meh",
-          "yahoo",
-          "oops",
-          "d'oh",
-          "psst",
-          "argh",
-          "grr",
-          "nah",
-          "shhh",
-          "whew",
-          "mmm",
-          "yay",
-          "uh-huh",
-          "boo",
-          "wow",
-          "nope"
-        ],
-
-        //nouns that shouldnt be seen as a verb
-        "NN": [
-          "president",
-          "dollar",
-          "student",
-          "patent",
-          "funding",
-          "morning",
-          "banking",
-          "ceiling",
-          "energy",
-          "secretary",
-          "purpose",
-          "friends",
-          "event"
-        ]
-      }
-      //unpack the compact terms into the main lexicon..
-    var i, arr;
-    var keys = Object.keys(compact)
-    var l = keys.length
-    for (i = 0; i < l; i++) {
-      arr = compact[keys[i]]
-      for (i2 = 0; i2 < arr.length; i2++) {
-        main[arr[i2]] = keys[i];
-      }
-    }
-
-    //add values
-    keys = Object.keys(values)
-    l = keys.length
-    for (i = 0; i < l; i++) {
-      main[keys[i]] = "CD"
-    }
-
-    //add demonyms
-    l = demonyms.length
-    for (i = 0; i < l; i++) {
-      main[demonyms[i]] = "JJ"
-    }
-
-    //add abbreviations
-    l = abbreviations.length
-    for (i = 0; i < l; i++) {
-      main[abbreviations[i]] = "NNAB"
-    }
-
-    //add honourifics
-    l = honourifics.length
-    for (i = 0; i < l; i++) {
-      main[honourifics[i]] = "NNAB"
-    }
-
-    //add uncountable nouns
-    l = uncountables.length
-    for (i = 0; i < l; i++) {
-      main[uncountables[i]] = "NN"
-    }
-
-    //add firstnames
-    Object.keys(firstnames).forEach(function(k) {
-      main[k] = "NNP"
-    })
-
-    //add multiple-word terms
-    Object.keys(multiples).forEach(function(k) {
-      main[k] = multiples[k]
-    })
-
-    //add phrasal verbs
-    Object.keys(phrasal_verbs).forEach(function(k) {
-      main[k] = phrasal_verbs[k]
-    })
-
-    //add verbs
-    //conjugate all verbs. takes ~8ms. triples the lexicon size.
-    var c;
-    l = verbs.length;
-    for (i = 0; i < l; i++) {
-      //add conjugations
-      c = verb_conjugate(verbs[i])
-      main[c.infinitive] = main[c.infinitive] || "VBP"
-      main[c.past] = main[c.past] || "VBD"
-      main[c.gerund] = main[c.gerund] || "VBG"
-      main[c.present] = main[c.present] || "VBZ"
-      if (c.doer) {
-        main[c.doer] = main[c.doer] || "NNA"
-      }
-      if (c.participle) {
-        main[c.participle] = main[c.participle] || "VBN"
-      }
-    }
-    //add irregular verbs
-    l = verb_irregulars.length;
-    for (i = 0; i < l; i++) {
-      c = verb_irregulars[i]
-      main[c.infinitive] = main[c.infinitive] || "VBP"
-      main[c.gerund] = main[c.gerund] || "VBG"
-      main[c.past] = main[c.past] || "VBD"
-      main[c.present] = main[c.present] || "VBZ"
-      if (c.doer) {
-        main[c.doer] = main[c.doer] || "NNA"
-      }
-      if (c.participle) {
-        main[c.future] = main[c.future] || "VB"
-      }
-    }
-
-    //add adjectives
-    //conjugate all of these adjectives to their adverbs. (13ms)
-    var tmp, j;
-    l = adjectives.length;
-    for (i = 0; i < l; i++) {
-      main[adjectives[i]] = "JJ"
-    }
-    keys = Object.keys(convertables)
-    l = keys.length;
-    for (i = 0; i < l; i++) {
-      j = keys[i]
-      main[j] = "JJ"
-      //add adverb form
-      tmp = adj_to_adv(j)
-      if (tmp && tmp !== j && !main[tmp]) {
-        main[tmp] = main[tmp] || "RB"
-      }
-      //add comparative form
-      tmp = to_comparative(j)
-      if (tmp && !tmp.match(/^more ./) && tmp !== j && !main[tmp]) {
-        main[tmp] = main[tmp] || "JJR"
-      }
-      //add superlative form
-      tmp = to_superlative(j)
-      if (tmp && !tmp.match(/^most ./) && tmp !== j && !main[tmp]) {
-        main[tmp] = main[tmp] || "JJS"
-      }
-    }
-
-    if (typeof module !== "undefined" && module.exports) {
-      module.exports = main;
-    }
-    return main
-  })()
-  // console.log(lexicon['once again']=="RB")
-  // console.log(lexicon['seven']=="CD")
-  // console.log(lexicon['sleep']=="VBP")
-  // console.log(lexicon['slept']=="VBD")
-  // console.log(lexicon['sleeping']=="VBG")
-  // // console.log(lexicon['completely'])
-  // console.log(lexicon['pretty']=="JJ")
-  // console.log(lexicon['canadian']=="JJ")
-  // console.log(lexicon['july']=="CD")
-  // console.log(lexicon[null]===undefined)
-  // console.log(lexicon["dr"]==="NNAB")
-  // console.log(lexicon["hope"]==="NN")
-  // console.log(lexicon["higher"]==="JJR")
-  // console.log(lexicon["earlier"]==="JJR")
-  // console.log(lexicon["larger"]==="JJR")
-  // console.log(lexicon["says"]==="VBZ")
-  // console.log(lexicon["sounds"]==="VBZ")
-  // console.log(lexicon["means"]==="VBZ")
-  // console.log(lexicon["look after"]==="VBP")
-
-// console.log(Object.keys(lexicon).length)
-// console.log(lexicon['prettier']=="JJR")
-// console.log(lexicon['prettiest']=="JJS")
-// console.log(lexicon['tony']=="NNP")
-
+  return main;
+})();
 // methods that hang on a parsed set of words
 // accepts parsed tokens
 var Sentence = function(tokens) {
-  var the = this
+
+	var the = this;
   the.tokens = tokens || [];
 
   var capitalise = function(s) {
@@ -8361,247 +6201,212 @@ var Sentence = function(tokens) {
 
   the.tense = function() {
     var verbs = the.tokens.filter(function(token) {
-      return token.pos.parent === "verb"
+      return token.pos.parent === 'verb';
     })
     return verbs.map(function(v) {
-      return v.analysis.tense
+      return v.analysis.tense;
     })
   }
 
   the.to_past = function() {
     the.tokens = the.tokens.map(function(token) {
-      if (token.pos.parent === "verb") {
-        token.text = token.analysis.to_past()
-        token.normalised = token.text
+      if (token.pos.parent === 'verb') {
+        token.text = token.analysis.to_past();
+        token.normalised = token.text;
       }
-      return token
+      return token;
     })
-    return the
+    return the;
   }
 
   the.to_present = function() {
     the.tokens = the.tokens.map(function(token) {
-      if (token.pos.parent === "verb") {
-        token.text = token.analysis.to_present()
-        token.normalised = token.text
+      if (token.pos.parent === 'verb') {
+        token.text = token.analysis.to_present();
+        token.normalised = token.text;
       }
-      return token
+      return token;
     })
-    return the
+    return the;
   }
 
   the.to_future = function() {
     the.tokens = the.tokens.map(function(token) {
-      if (token.pos.parent === "verb") {
-        token.text = token.analysis.to_future()
-        token.normalised = token.text
+      if (token.pos.parent === 'verb') {
+        token.text = token.analysis.to_future();
+        token.normalised = token.text;
       }
-      return token
+      return token;
     })
-    return the
+    return the;
   }
 
   the.insert = function(token, i) {
     if (i && token) {
-      the.tokens.splice(i, 0, token);
-    }
+			the.tokens.splice(i, 0, token);
+		}
   }
 
-  //negate makes the sentence mean the opposite thing.
+  // negate makes the sentence mean the opposite thing.
   the.negate = function() {
-    //these are cheap ways to negate the meaning
+    // these are cheap ways to negate the meaning
     // ('none' is ambiguous because it could mean (all or some) )
-    var logic_negate = {
-        //some logical ones work
-        "everyone": "no one",
-        "everybody": "nobody",
-        "someone": "no one",
-        "somebody": "nobody",
-        // everything:"nothing",
-        "always": "never",
-        //copulas
-        "is": "isn't",
-        "are": "aren't",
-        "was": "wasn't",
-        "will": "won't",
-        //modals
-        "didn't": "did",
-        "wouldn't": "would",
-        "couldn't": "could",
-        "shouldn't": "should",
-        "can't": "can",
-        "won't": "will",
-        "mustn't": "must",
-        "shan't": "shall",
-        "shant": "shall",
-
-        "did": "didn't",
-        "would": "wouldn't",
-        "could": "couldn't",
-        "should": "shouldn't",
-        "can": "can't",
-        "must": "mustn't"
-      }
-      //loop through each term..
+    // loop through each term..
     for (var i = 0; i < the.tokens.length; i++) {
-      var tok = the.tokens[i]
-
+      var tok = the.tokens[i];
       //turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
-      if (logic_negate[tok.normalised] && (!the.tokens[i + 1] || the.tokens[i + 1].normalised != "not")) {
-        tok.text = logic_negate[tok.normalised]
-        tok.normalised = logic_negate[tok.normalised]
+      if (negate_data[tok.normalised] && (!the.tokens[i + 1] || the.tokens[i + 1].normalised != 'not')) {
+        tok.text = negate_data[tok.normalised];
+        tok.normalised = negate_data[tok.normalised];
         if (tok.capitalised) {
-          tok.text = capitalise(tok.text)
+          tok.text = capitalise(tok.text);
         }
-        return the
+        return the;
       }
 
       // find the first verb..
-      if (tok.pos.parent == "verb") {
+      if (tok.pos.parent == 'verb') {
         // if verb is already negative, make it not negative
         if (tok.analysis.negative()) {
-          if (the.tokens[i + 1] && the.tokens[i + 1].normalised == "not") {
-            the.tokens.splice(i + 1, 1)
+          if (the.tokens[i + 1] && the.tokens[i + 1].normalised == 'not') {
+            the.tokens.splice(i + 1, 1);
           }
-          return the
+          return the;
         }
-        //turn future-tense 'will go' into "won't go"
+        // turn future-tense 'will go' into 'won't go'
         if (tok.normalised.match(/^will /i)) {
           tok.text = tok.text.replace(/^will /i, "won't ")
-          tok.normalised = tok.text
-          if (tok.capitalised) {
-            tok.text = capitalise(tok.text)
-          }
-          return the
-        }
-        // - INFINITIVE-
-        // 'i walk' -> "i don't walk"
-        if (tok.analysis.form == "infinitive" && tok.analysis.form != "future") {
-          tok.text = "don't " + (tok.analysis.conjugate().infinitive || tok.text)
-          tok.normalised = tok.text.toLowerCase()
-          return the
-        }
-        // - GERUND-
-        // if verb is gerund, 'walking' -> "not walking"
-        if (tok.analysis.form == "gerund") {
-          tok.text = "not " + tok.text
-          tok.normalised = tok.text.toLowerCase()
-          return the
-        }
-        // - PAST-
-        // if verb is past-tense, 'he walked' -> "he did't walk"
-        if (tok.analysis.tense == "past") {
-          tok.text = "didn't " + (tok.analysis.conjugate().infinitive || tok.text)
-          tok.normalised = tok.text.toLowerCase()
-          return the
-        }
-        // - PRESENT-
-        // if verb is present-tense, 'he walks' -> "he doesn't walk"
-        if (tok.analysis.tense == "present") {
-          tok.text = "doesn't " + (tok.analysis.conjugate().infinitive || tok.text)
-          tok.normalised = tok.text.toLowerCase()
-          return the
-        }
-        // - FUTURE-
-        // if verb is future-tense, 'will go' -> won't go. easy-peasy
-        if (tok.analysis.tense == "future") {
-          if (tok.normalised == "will") {
-            tok.normalised = "won't"
-            tok.text = "won't"
-          } else {
-            tok.text = tok.text.replace(/^will /i, "won't ")
-            tok.normalised = tok.normalised.replace(/^will /i, "won't ")
-          }
+          tok.normalised = tok.text;
           if (tok.capitalised) {
             tok.text = capitalise(tok.text);
           }
-          return the
+          return the;
+        }
+        // - INFINITIVE-
+        // 'i walk' -> 'i don't walk'
+        if (tok.analysis.form == 'infinitive' && tok.analysis.form != 'future') {
+          tok.text = "don't " + (tok.analysis.conjugate().infinitive || tok.text);
+          tok.normalised = tok.text.toLowerCase();
+          return the;
+        }
+        // - GERUND-
+        // if verb is gerund, 'walking' -> 'not walking'
+        if (tok.analysis.form == 'gerund') {
+          tok.text = 'not ' + tok.text;
+          tok.normalised = tok.text.toLowerCase();
+          return the;
+        }
+        // - PAST-
+        // if verb is past-tense, 'he walked' -> 'he did't walk'
+        if (tok.analysis.tense == 'past') {
+          tok.text = "didn't " + (tok.analysis.conjugate().infinitive || tok.text);
+          tok.normalised = tok.text.toLowerCase();
+          return the;
+        }
+        // - PRESENT-
+        // if verb is present-tense, 'he walks' -> 'he doesn't walk'
+        if (tok.analysis.tense == 'present') {
+          tok.text = "doesn't " + (tok.analysis.conjugate().infinitive || tok.text);
+          tok.normalised = tok.text.toLowerCase();
+          return the;
+        }
+        // - FUTURE-
+        // if verb is future-tense, 'will go' -> won't go. easy-peasy
+        if (tok.analysis.tense == 'future') {
+          if (tok.normalised == 'will') {
+            tok.normalised = "won't";
+            tok.text = "won't";
+          } else {
+            tok.text = tok.text.replace(/^will /i, "won't ");
+            tok.normalised = tok.normalised.replace(/^will /i, "won't ");
+          }
+          if (tok.capitalised) {
+						tok.text = capitalise(tok.text);
+					}
+					return the;
         }
 
-        return the
+        return the;
       }
     }
 
-    return the
+    return the;
   }
 
   the.entities = function(options) {
-    var spots = []
-    options = options || {}
+    var spots = [];
+    options = options || {};
     the.tokens.forEach(function(token) {
-      if (token.pos.parent === "noun" && token.analysis.is_entity()) {
-        spots.push(token)
+      if (token.pos.parent === 'noun' && token.analysis.is_entity()) {
+        spots.push(token);
       }
     })
     if (options.ignore_gerund) {
       spots = spots.filter(function(t) {
-        return t.pos.tag !== "VBG"
+        return t.pos.tag !== 'VBG';
       })
     }
-    return spots
+    return spots;
   }
 
   //noun-entities that look like person names..
   the.people = function(){
     return the.entities({}).filter(function(o){
-      return o.analysis.is_person()
+      return o.analysis.is_person();
     })
   }
 
   the.text = function() {
     return the.tokens.map(function(s) {
-      return s.text
-    }).join(' ')
+      return s.text;
+    }).join(' ');
   }
 
   //sugar 'grab' methods
   the.verbs = function() {
     return the.tokens.filter(function(t) {
-      return t.pos.parent == "verb"
+      return t.pos.parent == 'verb';
     })
   }
 
   the.adverbs = function() {
     return the.tokens.filter(function(t) {
-      return t.pos.parent == "adverb"
+      return t.pos.parent == 'adverb';
     })
   }
 
   the.nouns = function() {
     return the.tokens.filter(function(t) {
-      return t.pos.parent == "noun"
+      return t.pos.parent == 'noun';
     })
   }
 
   the.adjectives = function() {
     return the.tokens.filter(function(t) {
-      return t.pos.parent == "adjective"
+      return t.pos.parent == 'adjective';
     })
   }
 
   the.values = function() {
     return the.tokens.filter(function(t) {
-      return t.pos.parent == "value"
+      return t.pos.parent == 'value';
     })
   }
 
   the.tags = function() {
     return the.tokens.map(function(t) {
-      return t.pos.tag
+      return t.pos.tag;
     })
   }
 
-  return the
+  return the;
 }
 
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Sentence;
-}
 
 //a section is a block of text, with an arbitrary number of sentences
 //these methods are just wrappers around the ones in sentence.js
 var Section = function(sentences) {
-  var the = this
+  var the = this;
   the.sentences = sentences || [];
 
   the.text = function() {
@@ -8706,543 +6511,465 @@ var Section = function(sentences) {
   }
 
 }
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = Section;
-}
+
 
 var pos = (function() {
-  // "use strict";
+	// 'use strict';
 
-  if (typeof module !== "undefined" && module.exports) {
-    lexicon = require("./data/lexicon")
-    values = require("./data/lexicon/values")
-    firstnames = require("./data/lexicon/firstnames")
+	var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
+	for (var k in numbers) {
+		vs = vs.concat(Object.keys(numbers[k]))
+	}
+	var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
-    tokenize = require("./methods/tokenization/tokenize").tokenize;
-    parts_of_speech = require("./data/parts_of_speech")
-    word_rules = require("./data/word_rules")
-    wordnet_suffixes = require("./data/unambiguous_suffixes")
-    Sentence = require("./sentence")
-    Section = require("./section")
-    parents = require("./parents/parents")
-  }
+	var merge_tokens = function(a, b) {
+		a.text += ' ' + b.text;
+		a.normalised += ' ' + b.normalised;
+		a.pos_reason += '|' + b.pos_reason;
+		a.start = a.start || b.start;
+		a.noun_capital = (a.noun_capital && b.noun_capital);
+		a.punctuated = a.punctuated || b.punctuated;
+		a.end = a.end || b.end;
+		return a;
+	}
 
-  //possible 2nd part in a phrasal verb
-  var particles=["in", "out", "on", "off", "behind", "way", "with", "of", "do", "away", "across", "ahead", "back", "over", "under", "together", "apart", "up", "upon", "aback", "down", "about", "before", "after", "around", "to", "forth", "round", "through", "along", "onto"]
-  particles=particles.reduce(function(h,s){
-    h[s]=true
-    return h
-  }, {})
-
-  var merge_tokens = function(a, b) {
-    a.text += " " + b.text
-    a.normalised += " " + b.normalised
-    a.pos_reason += "|" + b.pos_reason
-    a.start = a.start || b.start
-    a.noun_capital = (a.noun_capital && b.noun_capital)
-    a.punctuated = a.punctuated || b.punctuated
-    a.end = a.end || b.end
-    return a
-  }
-
-  //combine adjacent neighbours, and special cases
-  var combine_tags = function(sentence) {
-    var arr = sentence.tokens || []
-    for (var i = 0; i <= arr.length; i++) {
-      var next = arr[i + 1]
-
-      if (arr[i] && next) {
-        var tag=arr[i].pos.tag
-        //'joe smith' are both NN, for example
-        if (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ) {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-        }
-        //merge NNP and NN, like firstname, lastname
-        else if ((tag === "NNP" && next.pos.tag ==="NN") || (tag==="NN" && next.pos.tag==="NNP")) {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-          arr[i + 1].pos= parts_of_speech['NNP']
-        }
-        //merge dates manually, which often have punctuation
-        else if (tag === "CD" && next.pos.tag ==="CD") {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-        }
-        //merge abbreviations with nouns manually, eg. "Joe jr."
-        else if ( (tag === "NNAB" && next.pos.parent ==="noun") || (arr[i].pos.parent==="noun" && next.pos.tag==="NNAB")) {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-        }
-        //'will walk' -> future-tense verb
-        else if (arr[i].normalised === "will" && next.pos.parent === "verb") {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-        }
-        //'hundred and fifty', 'march the 5th'
-        else if (tag === "CD" && (next.normalised === "and" || next.normalised === "the") && arr[i + 2] && arr[i + 2].pos.tag === "CD") {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-        }
-        //capitals surrounding a preposition  'United States of America'
-        else if (tag=="NN" && arr[i].noun_capital && (next.normalised == "of" || next.normalised == "and") && arr[i + 2] && arr[i + 2].noun_capital) {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2])
-          arr[i + 1] = null
-        }
-        //capitals surrounding two prepositions  'Phantom of the Opera'
-        else if (arr[i].noun_capital && next.normalised == "of" && arr[i + 2] && arr[i + 2].pos.tag == "DT" && arr[i + 3] && arr[i + 3].noun_capital) {
-          arr[i + 1] = merge_tokens(arr[i], arr[i + 1])
-          arr[i] = null
-          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2])
-          arr[i + 1] = null
-          arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3])
-          arr[i + 2] = null
-        }
-      }
-    }
-    sentence.tokens = arr.filter(function(r) {
-      return r
-    })
-    return sentence
-  }
+	//combine adjacent neighbours, and special cases
+	var combine_tags = function(sentence) {
+		var arr = sentence.tokens || [];
+		for (var i = 0; i <= arr.length; i++) {
+			var next = arr[i + 1];
+			if (arr[i] && next) {
+				var q = {
+					// 'joe smith' are both NN, for example
+					NN: (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ),
+					// merge NNP and NN, like firstname, lastname
+					NNP_NN: ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')),
+					// merge dates manually, which often have punctuation
+					CD: (tag === 'CD' && next.pos.tag ==='CD'),
+					//'hundred and fifty', 'march the 5th'
+					CDn: (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD'),
+					// merge abbreviations with nouns manually, eg. 'Joe jr.'
+					NNAB: ((tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')),
+					//'will walk' -> future-tense verb
+					future: (arr[i].normalised === 'will' && next.pos.parent === 'verb'),
+					// capitals surrounding a preposition	'United States of America'
+					NNc: (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital),
+					//capitals surrounding two prepositions	'Phantom of the Opera'
+					NNc2: (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital)
+				};
+				if (q._NN || q._NNP_NN || q.CD || q.CDn || q.NNAB || q.future || q.NNc || q.NNc2) {
+					arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
+					arr[i] = null;
+					if (q._NNP_NN) {
+						arr[i + 1].pos = schema['NNP'];
+					} else if (q.NNc || q.NNc2) {
+						arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+						arr[i + 1] = null;
+						if (q.NNc2) {
+							arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
+							arr[i + 2] = null;
+						}
+					}
+				}
+			}
+		}
+		sentence.tokens = arr.filter(function(r) {
+			return r;
+		})
+		return sentence;
+	}
 
 
-  //some prepositions are clumped onto the back of a verb "looked for", "looks at"
-  //they should be combined with the verb, sometimes.
-  //does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
-  var combine_phrasal_verbs = function(sentence) {
-    var arr = sentence.tokens || []
-    for (var i = 1; i < arr.length; i++) {
-      if(particles[arr[i].normalised]){
-        //it matches a known phrasal-verb
-        if(lexicon[arr[i-1].normalised + " " + arr[i].normalised]){
-          // console.log(arr[i-1].normalised + " " + arr[i].normalised)
-          arr[i] = merge_tokens(arr[i-1], arr[i])
-          arr[i-1] = null
-        }
-      }
-    }
-    sentence.tokens = arr.filter(function(r) {
-      return r
-    })
-    return sentence
-  }
+	//some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
+	//they should be combined with the verb, sometimes.
+	//does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
+	var combine_phrasal_verbs = function(sentence) {
+		var arr = sentence.tokens || [];
+		for (var i = 1; i < arr.length; i++) {
+			if(pos_data.particles[arr[i].normalised]){
+				//it matches a known phrasal-verb
+				if(lexicon[arr[i-1].normalised + ' ' + arr[i].normalised]){
+					// console.log(arr[i-1].normalised + ' ' + arr[i].normalised)
+					arr[i] = merge_tokens(arr[i-1], arr[i]);
+					arr[i-1] = null;
+				}
+			}
+		}
+		sentence.tokens = arr.filter(function(r) {
+			return r;
+		})
+		return sentence;
+	}
 
 
-  var lexicon_pass = function(w) {
-    if (lexicon.hasOwnProperty(w)) {
-      return parts_of_speech[lexicon[w]]
-    }
-    //try to match it without a prefix - eg. outworked -> worked
-    if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
-      var attempt = w.replace(/^(over|under|out|.*?-|un|re|en)/, '')
-      return parts_of_speech[lexicon[attempt]]
-    }
-  }
+	var lexicon_pass = function(w) {
+		if (lexicon.hasOwnProperty(w)) {
+			return schema[lexicon[w]]
+		}
+		//try to match it without a prefix - eg. outworked -> worked
+		if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
+			var attempt = w.replace(/^(over|under|out|.*?-|un|re|en)/, '');
+			return schema[lexicon[attempt]];
+		}
+	}
 
-  var rules_pass = function(w) {
-    for (var i = 0; i < word_rules.length; i++) {
-      if (w.length> 4 && w.match(word_rules[i].reg)) {
-        return parts_of_speech[word_rules[i].pos]
-      }
-    }
-  }
+	var rules_pass = function(w) {
+		for (var i = 0; i < word_rules.length; i++) {
+			if (w.length> 4 && w.match(word_rules[i].reg)) {
+				return schema[word_rules[i].pos];
+			}
+		}
+	}
 
-  var fourth_pass = function(token, i, sentence) {
-    var last = sentence.tokens[i - 1]
-    var next = sentence.tokens[i + 1]
-    var strong_determiners = {
-        "the": 1,
-        "a": 1,
-        "an": 1
-      }
-    //resolve ambiguous 'march','april','may' with dates
-    if((token.normalised=="march"||token.normalised=="april"||token.normalised=="may") && ( (next && next.pos.tag=="CD") || (last && last.pos.tag=="CD") ) ){
-      token.pos = parts_of_speech['CD']
-      token.pos_reason = "may_is_date"
-    }
-      //if it's before a modal verb, it's a noun -> lkjsdf would
-    if (next && token.pos.parent !== "noun" && token.pos.parent !== "glue" && next.pos.tag === "MD") {
-      token.pos = parts_of_speech['NN']
-      token.pos_reason = "before_modal"
-    }
-    //if it's after the word 'will' its probably a verb/adverb
-    if (last && last.normalised == "will" && !last.punctuated && token.pos.parent == "noun" && token.pos.tag !== "PRP") {
-      token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_will"
-    }
-    //if it's after the word 'i' its probably a verb/adverb
-    if (last && last.normalised == "i" && !last.punctuated && token.pos.parent == "noun") {
-      token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_i"
-    }
-    //if it's after an adverb, it's not a noun -> quickly acked
-    //support form 'atleast he is..'
-    if (last && token.pos.parent === "noun" && token.pos.tag !== "PRP" && last.pos.tag === "RB" && !last.start) {
-      token.pos = parts_of_speech['VB']
-      token.pos_reason = "after_adverb"
-    }
-    //no consecutive, unpunctuated adjectives -> real good
-    if (next && token.pos.parent === "adjective" && next.pos.parent === "adjective" && !token.punctuated) {
-      token.pos = parts_of_speech['RB']
-      token.pos_reason = "consecutive_adjectives"
-    }
-    //if it's after a determiner, it's not a verb -> the walk
-    if (last && token.pos.parent === "verb" && strong_determiners[last.pos.normalised] && token.pos.tag != "CP") {
-      token.pos = parts_of_speech['NN']
-      token.pos_reason = "determiner-verb"
-    }
-    //copulas are followed by a determiner ("are a .."), or an adjective ("are good")
-    if (last && last.pos.tag === "CP" && token.pos.tag !== "DT" && token.pos.tag !== "RB" && token.pos.parent !== "adjective" && token.pos.parent !== "value") {
-      token.pos = parts_of_speech['JJ']
-      token.pos_reason = "copula-adjective"
-    }
-    //copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
-    if (last && next && last.pos.tag === "CP" && token.pos.tag === "RB" && next.pos.parent === "verb") {
-      sentence.tokens[i + 1].pos = parts_of_speech['JJ']
-      sentence.tokens[i + 1].pos_reason = "copula-adverb-adjective"
-    }
-    // the city [verb] him.
-    if (next && next.pos.tag == "PRP" && token.pos.parent == "noun" && !token.punctuated) {
-      token.pos = parts_of_speech['VB']
-      token.pos_reason = "before_[him|her|it]"
-    }
-    //the misled worker -> misled is an adjective, not vb
-    if (last && next && last.pos.tag === "DT" && next.pos.parent === "noun" && token.pos.parent === "verb") {
-      token.pos = parts_of_speech['JJ']
-      token.pos_reason = "determiner-adjective-noun"
-    }
+	var fourth_pass = function(token, i, sentence) {
+		var last = sentence.tokens[i - 1];
+		var next = sentence.tokens[i + 1];
+		var strong_determiners = { // TODO
+			'the': 1,
+			'a': 1,
+			'an': 1
+		};
+		var setPos = function(p, pr) {
+			token.pos = schema[p];
+			token.pos_reason = pr;
+		}
+		//resolve ambiguous 'march','april','may' with dates
+		if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
+			setPos('CD', 'may_is_date');
+		}
+			//if it's before a modal verb, it's a noun -> lkjsdf would
+		if (next && token.pos.parent !== 'noun' && token.pos.parent !== 'glue' && next.pos.tag === 'MD') {
+			setPos('NN', 'before_modal');
+		}
+		//if it's after the word 'will' its probably a verb/adverb
+		if (last && last.normalised == 'will' && !last.punctuated && token.pos.parent == 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP') {
+			setPos('VB', 'after_will');
+		}
+		//if it's after the word 'i' its probably a verb/adverb
+		if (last && last.normalised == 'i' && !last.punctuated && token.pos.parent == 'noun') {
+			setPos('VB', 'after_i');
+		}
+		//if it's after an adverb, it's not a noun -> quickly acked
+		//support form 'atleast he is..'
+		if (last && token.pos.parent === 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP' && last.pos.tag === 'RB' && !last.start) {
+			setPos('VB', 'after_adverb');
+		}
+		//no consecutive, unpunctuated adjectives -> real good
+		if (next && token.pos.parent === 'adjective' && next.pos.parent === 'adjective' && !token.punctuated) {
+			setPos('RB', 'consecutive_adjectives');
+		}
+		//if it's after a determiner, it's not a verb -> the walk
+		if (last && token.pos.parent === 'verb' && strong_determiners[last.pos.normalised] && token.pos.tag != 'CP') {
+			setPos('NN', 'determiner-verb');
+		}
+		//copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
+		if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
+			setPos('JJ', 'copula-adjective');
+		}
+		//copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
+		if (last && next && last.pos.tag === 'CP' && token.pos.tag === 'RB' && next.pos.parent === 'verb') {
+			sentence.tokens[i + 1].pos = schema['JJ'];
+			sentence.tokens[i + 1].pos_reason = 'copula-adverb-adjective';
+		}
+		// the city [verb] him.
+		if (next && next.pos.tag == 'PRP' && token.pos.tag !== 'PP' && token.pos.parent == 'noun' && !token.punctuated) {
+			setPos('VB', 'before_[him|her|it]');
+		}
+		//the misled worker -> misled is an adjective, not vb
+		if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
+			setPos('JJ', 'determiner-adjective-noun');
+		}
 
-    return token
-  }
+		return token;
+	}
 
-  //add a 'quiet' token for contractions so we can represent their grammar
-  var handle_contractions = function(arr) {
-    var contractions = {
-      "i'd": ["i", "would"],
-      "she'd": ["she", "would"],
-      "he'd": ["he", "would"],
-      "they'd": ["they", "would"],
-      "we'd": ["we", "would"],
-      "i'll": ["i", "will"],
-      "she'll": ["she", "will"],
-      "he'll": ["he", "will"],
-      "they'll": ["they", "will"],
-      "we'll": ["we", "will"],
-      "i've": ["i", "have"],
-      "they've": ["they", "have"],
-      "we've": ["we", "have"],
-      "should've": ["should", "have"],
-      "would've": ["would", "have"],
-      "could've": ["could", "have"],
-      "must've": ["must", "have"],
-      "i'm": ["i", "am"],
-      "he's": ["he", "is"],
-      "she's": ["she", "is"],
-      "we're": ["we", "are"],
-      "they're": ["they", "are"],
-      "cannot": ["can", "not"]
-    }
-    var before, after, fix;
-    for (var i = 0; i < arr.length; i++) {
-      if (contractions.hasOwnProperty(arr[i].normalised)) {
-        before = arr.slice(0, i)
-        after = arr.slice(i + 1, arr.length)
-        fix = [{
-          text: "",
-          normalised: contractions[arr[i].normalised][0],
-          start: arr[i].start
-        }, {
-          text: arr[i].text,
-          normalised: contractions[arr[i].normalised][1],
-          start: undefined
-        }]
-        arr = before.concat(fix)
-        arr = arr.concat(after)
-        return handle_contractions(arr)
-      }
-    }
-    return arr
-  }
+	//add a 'quiet' token for contractions so we can represent their grammar
+	var handle_contractions = function(arr) {
+		var before, after, fix;
+		for (var i = 0; i < arr.length; i++) {
+			if (pos_data.contractions.hasOwnProperty(arr[i].normalised)) {
+				before = arr.slice(0, i);
+				after = arr.slice(i + 1, arr.length);
+				fix = [{
+					text: '',
+					normalised: pos_data.contractions[arr[i].normalised][0],
+					start: arr[i].start
+				}, {
+					text: arr[i].text,
+					normalised: pos_data.contractions[arr[i].normalised][1],
+					start: undefined
+				}];
+				arr = before.concat(fix);
+				arr = arr.concat(after);
+				return handle_contractions(arr);
+			}
+		}
+		return arr;
+	}
 
-  ////////////////
-  ///party-time//
-  var main = function(text, options) {
-    options = options || {}
-    if (!text || !text.match(/[a-z0-9]/i)) {
-      return new Section([])
-    }
-    var sentences = tokenize(text);
+	////////////////
+	///party-time//
+	var main = function(text, options) {
+		options = options || {};
+		if (!text || !text.match(/[a-z0-9]/i)) {
+			return new Section([]);
+		}
+		var sentences = tokenize(text);
 
-    sentences.forEach(function(sentence) {
+		var setPos = function(token, p, pr) {
+			token.pos = schema[p];
+			token.pos_reason = pr;
+			return token;
+		}
 
-      //first, let's handle the capitalisation-of-the-first-word issue
-      var first=sentence.tokens[0]
-      if(first){
-        //if second word is a noun-capital, give more sympathy to this capital
-        if(sentence.tokens[1] && sentence.tokens[1].noun_capital && !lexicon_pass(first.normalised)){
-          sentence.tokens[0].noun_capital=true;
-        }
-      }
-      //smart handling of contractions
-      sentence.tokens = handle_contractions(sentence.tokens)
+		sentences.forEach(function(sentence) {
 
-      //first pass, word-level clues
-      sentence.tokens = sentence.tokens.map(function(token) {
-        //it has a capital and isn't a month, etc.
-        if (token.noun_capital && !values[token.normalised]) {
-          token.pos = parts_of_speech['NN']
-          token.pos_reason = "noun_capitalised"
-          return token
-        }
-        //known words list
-        var lex = lexicon_pass(token.normalised)
-        if (lex) {
-          token.pos = lex;
-          token.pos_reason = "lexicon"
-          //if it's an abbreviation, forgive the punctuation (eg. 'dr.')
-          if(token.pos.tag==="NNAB"){
-            token.punctuated=false
-          }
-          return token
-        }
+			// first, let's handle the capitalisation-of-the-first-word issue
+			var first = sentence.tokens[0];
+			if (first) {
+				// if second word is a noun-capital, give more sympathy to this capital
+				if(sentence.tokens[1] && sentence.tokens[1].noun_capital && !lexicon_pass(first.normalised)){
+					sentence.tokens[0].noun_capital = true;
+				}
+			}
+			// smart handling of contractions
+			sentence.tokens = handle_contractions(sentence.tokens);
 
-        //handle punctuation like ' -- '
-        if (!token.normalised) {
-          token.pos = parts_of_speech['UH']
-          token.pos_reason = "wordless_string"
-          return token
-        }
+			// first pass, word-level clues
+			sentence.tokens = sentence.tokens.map(function(token) {
+				// it has a capital and isn't a month, etc.
+				if (token.noun_capital && !values[token.normalised]) {
+					return setPos(token, 'NN', 'noun_capitalised');
+				}
+				// known words list
+				var lex = lexicon_pass(token.normalised);
+				if (lex) {
+					token.pos = lex;
+					token.pos_reason = 'lexicon';
+					// if it's an abbreviation, forgive the punctuation (eg. 'dr.')
+					if(token.pos.tag === 'NNAB'){
+						token.punctuated = false;
+					}
+					return token;
+				}
 
-        // suffix pos signals from wordnet
-        var len = token.normalised.length
-        if (len > 4) {
-          var suffix = token.normalised.substr(len - 4, len - 1)
-          if (wordnet_suffixes.hasOwnProperty(suffix)) {
-            token.pos = parts_of_speech[wordnet_suffixes[suffix]]
-            token.pos_reason = "wordnet suffix"
-            return token
-          }
-        }
+				// handle punctuation like ' -- '
+				if (!token.normalised) {
+					return setPos(token, 'UH', 'wordless_string');
+				}
+				// suffix pos signals from wordnet
+				var len = token.normalised.length;
+				if (len > 4) {
+					var suffix = token.normalised.substr(len - 4, len - 1)
+					if (suffixes.wordnet.hasOwnProperty(suffix)) {
+						return setPos(token, suffixes.wordnet[suffix], 'wordnet suffix');
+					}
+				}
 
-        // suffix regexes for words
-        var r = rules_pass(token.normalised);
-        if (r) {
-          token.pos = r;
-          token.pos_reason = "regex suffix"
-          return token
-        }
+				// suffix regexes for words
+				var r = rules_pass(token.normalised);
+				if (r) {
+					token.pos = r;
+					token.pos_reason = 'regex suffix'
+					return token
+				}
 
-        //see if it's a number
-        if (parseFloat(token.normalised)) {
-          token.pos = parts_of_speech['CD']
-          token.pos_reason = "parsefloat"
-          return token
-        }
+				// see if it's a number
+				if (parseFloat(token.normalised)) {
+					return setPos(token, 'CD', 'parsefloat')
+				}
+				return token;
+			})
 
-        return token
-      })
+			// second pass, wrangle results a bit
+			sentence.tokens = sentence.tokens.map(function(token, i) {
+				// set ambiguous 'ed' endings as either verb/adjective
+				if ( token.pos_reason!=='lexicon' && token.normalised.match(/.ed$/)) {
+					token.pos = schema['VB'];
+					token.pos_reason = 'ed';
+				}
+				return token;
+			})
 
-      //second pass, wrangle results a bit
-      sentence.tokens = sentence.tokens.map(function(token, i) {
-        //set ambiguous 'ed' endings as either verb/adjective
-        if ( token.pos_reason!=="lexicon" && token.normalised.match(/.ed$/)) {
-          token.pos = parts_of_speech['VB']
-          token.pos_reason = "ed"
-        }
-        return token
-      })
+			// third pass, seek verb or noun phrases after their signals
+			var need = null;
+			var reason = '';
+			sentence.tokens = sentence.tokens.map(function(token, i) {
+				var next = sentence.tokens[i + 1];
+				if (token.pos) {
+					// suggest noun after some determiners (a|the), posessive pronouns (her|my|its)
+					if (token.normalised == 'the' || token.normalised == 'a' || token.normalised == 'an' || token.pos.tag === 'PP') {
+						need = 'noun';
+						reason = token.pos.name;
+						return token; // proceed
+					}
+					// suggest verb after personal pronouns (he|she|they), modal verbs (would|could|should)
+					if (token.pos.tag === 'PRP' && token.pos.tag !== 'PP' || token.pos.tag === 'MD') {
+						need = 'verb';
+						reason = token.pos.name;
+						return token; // proceed
+					}
 
-      //third pass, seek verb or noun phrases after their signals
-      var need = null
-      var reason = ''
-      sentence.tokens = sentence.tokens.map(function(token, i) {
-        var next = sentence.tokens[i + 1]
-        if (token.pos) {
-          //suggest noun after some determiners (a|the), posessive pronouns (her|my|its)
-          if (token.normalised == "the" || token.normalised == "a" || token.normalised == "an" || token.pos.tag === "PP") {
-            need = 'noun'
-            reason = token.pos.name
-            return token //proceed
-          }
-          //suggest verb after personal pronouns (he|she|they), modal verbs (would|could|should)
-          if (token.pos.tag === "PRP" || token.pos.tag === "MD") {
-            need = 'verb'
-            reason = token.pos.name
-            return token //proceed
-          }
+				}
+				// satisfy need on a conflict, and fix a likely error
+				if (token.pos) {
+					if (need == 'verb' && token.pos.parent == 'noun' && (!next || (next.pos && next.pos.parent != 'noun'))) {
+						if (!next || !next.pos || next.pos.parent != need) { // ensure need not satisfied on the next one
+							token = setPos(token, 'VB', 'signal from '+reason);
+							need = null;
+						}
+					}
+					if (need == 'noun' && token.pos.parent == 'verb' && (!next || (next.pos && next.pos.parent != 'verb'))) {
+						if (!next || !next.pos || next.pos.parent != need) { // ensure need not satisfied on the next one
+							token = setPos(token, 'NN', 'signal from '+reason);
+							need = null;
+						}
+					}
+				}
+				// satisfy need with an unknown pos
+				if (need && !token.pos) {
+					if (!next || !next.pos || next.pos.parent != need) { // ensure need not satisfied on the next one
+						token = setPos(token, need, 'signal from '+reason);
+						need = null;
+					}
+				}
+				// set them back as satisfied..
+				if (need === 'verb' && token.pos && token.pos.parent === 'verb') {
+					need = null;
+				}
+				if (need === 'noun' && token.pos && token.pos.parent === 'noun') {
+					need = null;
+				}
+				return token;
+			})
 
-        }
-        //satisfy need on a conflict, and fix a likely error
-        if (token.pos) {
-          if (need == "verb" && token.pos.parent == "noun" && (!next || (next.pos && next.pos.parent != "noun"))) {
-            if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-              token.pos = parts_of_speech['VB']
-              token.pos_reason = "signal from " + reason
-              need = null
-            }
-          }
-          if (need == "noun" && token.pos.parent == "verb" && (!next || (next.pos && next.pos.parent != "verb"))) {
-            if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-              token.pos = parts_of_speech["NN"]
-              token.pos_reason = "signal from " + reason
-              need = null
-            }
-          }
-        }
-        //satisfy need with an unknown pos
-        if (need && !token.pos) {
-          if (!next || !next.pos || next.pos.parent != need) { //ensure need not satisfied on the next one
-            token.pos = parts_of_speech[need]
-            token.pos_reason = "signal from " + reason
-            need = null
-          }
-        }
-        //set them back as satisfied..
-        if (need === 'verb' && token.pos && token.pos.parent === 'verb') {
-          need = null
-        }
-        if (need === 'noun' && token.pos && token.pos.parent === 'noun') {
-          need = null
-        }
-        return token
-      })
+			// third pass, identify missing clauses, fallback to noun
+			var has = {};
+			sentence.tokens.forEach(function(token) {
+				if (token.pos) {
+					has[token.pos.parent] = true;
+				}
+			})
+			sentence.tokens = sentence.tokens.map(function(token, i) {
+				if (!token.pos) {
+					// if there is no verb in the sentence, and there needs to be.
+					if (has['adjective'] && has['noun'] && !has['verb']) {
+						has['verb'] = true;
+						return setPos(token, 'VB', 'need one verb');
+					}
 
-      //third pass, identify missing clauses, fallback to noun
-      var has = {}
-      sentence.tokens.forEach(function(token) {
-        if (token.pos) {
-          has[token.pos.parent] = true
-        }
-      })
-      sentence.tokens = sentence.tokens.map(function(token, i) {
-        if (!token.pos) {
-          //if there is no verb in the sentence, and there needs to be.
-          if (has['adjective'] && has['noun'] && !has['verb']) {
-            token.pos = parts_of_speech['VB']
-            token.pos_reason = "need one verb"
-            has['verb'] = true
-            return token
-          }
+					// fallback to a noun
+					token = setPos(token, 'NN', 'noun fallback');
+				}
+				return token;
+			})
 
-          //fallback to a noun
-          token.pos = parts_of_speech['NN']
-          token.pos_reason = "noun fallback"
-        }
-        return token
-      })
+			// fourth pass, error correction
+			sentence.tokens = sentence.tokens.map(function(token, i) {
+				return fourth_pass(token, i, sentence);
+			})
+			// run the fourth-pass again!
+			sentence.tokens = sentence.tokens.map(function(token, i) {
+				return fourth_pass(token, i, sentence);
+			})
+		})
 
-      //fourth pass, error correction
-      sentence.tokens = sentence.tokens.map(function(token, i) {
-        return fourth_pass(token, i, sentence)
-      })
-      //run the fourth-pass again!
-      sentence.tokens = sentence.tokens.map(function(token, i) {
-        return fourth_pass(token, i, sentence)
-      })
-    })
+		// combine neighbours
+		if (!options.dont_combine) {
+			sentences = sentences.map(function(s) {
+				return combine_tags(s);
+			})
+			sentences = sentences.map(function(s){
+				return combine_phrasal_verbs(s);
+			})
+		}
 
-    //combine neighbours
-    if (!options.dont_combine) {
-      sentences = sentences.map(function(s) {
-        return combine_tags(s)
-      })
-      sentences= sentences.map(function(s){
-        return combine_phrasal_verbs(s)
-      })
-    }
+		// make them Sentence objects
+		sentences = sentences.map(function(s) {
+			var sentence = new Sentence(s.tokens);
+			sentence.type = s.type;
+			return sentence;
+		})
+		// add analysis on each token
+		sentences = sentences.map(function(s) {
+			s.tokens = s.tokens.map(function(token, i) {
+				token.analysis = parents[token.pos.parent](token.normalised, s, i);
+				return token;
+			})
+			return s;
+		})
 
-    //add analysis on each token
-    sentences = sentences.map(function(s) {
-      s.tokens = s.tokens.map(function(token, i) {
-        var last_token = s.tokens[i - 1] || null
-        var next_token = s.tokens[i + 1] || null
-        token.analysis = parents[token.pos.parent](token.normalised, next_token, last_token, token)
-        return token
-      })
-      return s
-    })
+		// add next-last references
+		sentences = sentences.map(function(sentence,i) {
+			sentence.last=sentences[i-1];
+			sentence.next=sentences[i+1];
+			return sentence;
+		})
+		// return a Section object, with its methods
+		return new Section(sentences);
+	}
 
-    //make them Sentence objects
-    sentences = sentences.map(function(s) {
-      var sentence = new Sentence(s.tokens)
-      sentence.type = s.type
-      return sentence
-    })
-    //return a Section object, with its methods
-    return new Section(sentences)
-  }
-
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
+	return main;
 })()
 
-// console.log( pos("Geroge Clooney walked, quietly into a bank. It was cold.") )
-// console.log( pos("it is a three-hundred and one").tags() )
-// console.log( pos("funny funny funny funny").sentences[0].tokens )
-// pos("In March 2009, while Secretary of State for Energy and Climate Change, Miliband attended the UK premiere of climate-change film The Age of Stupid, where he was ambushed").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("the Energy and Climate Change, Miliband").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// console.log(pos("Energy and Climate Change, Miliband").sentences[0].tokens)
-// console.log(pos("http://google.com").sentences[0].tokens)
-// console.log(pos("may live").tags())
-// console.log(pos("may 7th live").tags())
-// console.log(pos("She and Marc Emery married on July 23, 2006.").tags())
-// console.log(pos("spencer quickly acked").sentences[0].tokens)
-// console.log(pos("a hundred").sentences[0].tokens)
-// console.log(pos("Tony Reagan skates").sentences[0].tokens)
-// console.log(pos("She and Marc Emery married on July 23, 2006").sentences[0].tokens)
-// console.log(pos("Tony Hawk walked quickly to the store.").sentences[0].tokens)
-// console.log(pos("jahn j. jacobheimer").sentences[0].tokens[0].analysis.is_person())
-// pos("Dr. Conrad Murray recieved a guilty verdict").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("the Phantom of the Opera").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("Tony Hawk is nice").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// pos("tony hawk is nice").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text)})
-// console.log(pos("look after a kid").sentences[0].tags())
-// pos("Sather tried to stop the deal, but when he found out that Gretzky").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text+"  "+t.pos_reason)})
-// pos("Gretzky had tried skating").sentences[0].tokens.map(function(t){console.log(t.pos.tag + "  "+t.text+"  "+t.pos_reason)})
+// console.log( pos('Geroge Clooney walked, quietly into a bank. It was cold.') )
+// console.log( pos('it is a three-hundred and one').tags() )
+// console.log( pos('funny funny funny funny').sentences[0].tokens )
+// pos('In March 2009, while Secretary of State for Energy and Climate Change, Miliband attended the UK premiere of climate-change film The Age of Stupid, where he was ambushed').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// pos('the Energy and Climate Change, Miliband').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// console.log(pos('Energy and Climate Change, Miliband').sentences[0].tokens)
+// console.log(pos('http://google.com').sentences[0].tokens)
+// console.log(pos('may live').tags())
+// console.log(pos('may 7th live').tags())
+// console.log(pos('She and Marc Emery married on July 23, 2006.').tags())
+// console.log(pos('Toronto is fun. Spencer and heather quickly walked. it was cool').sentences[0].referables())
+// console.log(pos('a hundred').sentences[0].tokens)
+// console.log(pos('Tony Reagan skates').sentences[0].tokens)
+// console.log(pos('She and Marc Emery married on July 23, 2006').sentences[0].tokens)
+// console.log(pos('Tony Hawk walked quickly to the store.').sentences[0].tokens)
+// console.log(pos('jahn j. jacobheimer').sentences[0].tokens[0].analysis.is_person())
+// pos('Dr. Conrad Murray recieved a guilty verdict').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// pos('the Phantom of the Opera').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// pos('Tony Hawk is nice').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// pos('tony hawk is nice').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text)})
+// console.log(pos('look after a kid').sentences[0].tags())
+// pos('Sather tried to stop the deal, but when he found out that Gretzky').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text+'	'+t.pos_reason)})
+// pos('Gretzky had tried skating').sentences[0].tokens.map(function(t){console.log(t.pos.tag + '	'+t.text+'	'+t.pos_reason)})
 
-
+// console.log(pos('i think Tony Danza is cool. He rocks and he is golden.').sentences[0].tokens[2].analysis.referenced_by())
+// console.log(pos('i think Tony Danza is cool and he is golden.').sentences[0].tokens[6].analysis.reference_to())
+// console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
+// console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
 //just a wrapper for text -> entities
 //most of this logic is in ./parents/noun
 var spot = (function() {
 
-  if (typeof module !== "undefined" && module.exports) {
-    pos = require("./pos");
-  }
-
   var main = function(text, options) {
-    options = options || {}
+    options = options || {};
     //collect 'entities' from all nouns
-    var sentences = pos(text, options).sentences
-    var arr=sentences.reduce(function(arr, s) {
-      return arr.concat(s.entities(options))
-    }, [])
+    var sentences = pos(text, options).sentences;
+    var arr = sentences.reduce(function(arr, s) {
+      return arr.concat(s.entities(options));
+    }, []);
     //for people, remove instances of 'george', and 'bush' after 'george bush'.
-    var ignore={}
-    arr=arr.filter(function(o){
+    var ignore = {};
+    arr = arr.filter(function(o){
       //add tokens to blacklist
       if(o.analysis.is_person()){
         o.normalised.split(' ').forEach(function(s){
-          ignore[s]=true
+          ignore[s]=true;
         })
       }
       if(ignore[o.normalised]){
-        return false
+        return false;
       }
-      return true
+      return true;
     })
 
-    return arr
+    return arr;
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = main;
-  }
-  return main
+  return main;
 })()
 
 // console.log(spot("Tony Hawk is cool. Tony eats all day.").map(function(s){return s}))
@@ -9254,27 +6981,8 @@ var spot = (function() {
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
 // console.time('nlp_boot')
-if (typeof module !== "undefined" && module.exports) {
 
-  var parents = require("./src/parents/parents")
 
-  var sentence_parser = require('./src/methods/tokenization/sentence').sentences;
-  var tokenize = require('./src/methods/tokenization/tokenize').tokenize;
-  var ngram = require('./src/methods/tokenization/ngram').ngram;
-  //tokenize
-  var normalize = require('./src/methods/transliteration/unicode_normalisation')
-  var syllables = require('./src/methods/syllables/syllable');
-  //localization
-  var local = require('./src/methods/localization/britishize')
-  var americanize = local.americanize;
-  var britishize = local.britishize;
-  //part of speech tagging
-  var pos = require('./src/pos');
-  //named_entity_recognition
-  var spot = require('./src/spot');
-}
-
-///
 // api
 var nlp = {
   noun: parents.noun,
@@ -9295,10 +7003,6 @@ var nlp = {
   spot: spot
 }
 
-//export it for server-side
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = nlp;
-}
 // console.timeEnd('nlp_boot')
 // console.log( nlp.pos('she sells seashells by the seashore').sentences[0].negate().text() )
 // console.log( nlp.pos('i will slouch'));

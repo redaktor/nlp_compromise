@@ -5,7 +5,9 @@
 var lang = 'en';
 var adjectives_decline = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = [ [ 'wrong', '=' ],
   [ 'public', '=ly' ],
   [ 'vague', '=ly', 1 ],
@@ -268,16 +270,20 @@ var zip = [ [ 'wrong', '=' ],
 					} else {
 						var a = _a.map(function(w){ return repJJ(w); });
 						if (a.length > 1) {
-							if (a[1] === 0) res.adv_donts.push(a[0]);
-							if (typeof a[1] === 'string') res.adj_to_advs[a[0]] = expand(a[1], a[0]);
+							if (a[1] === 0) { res.adv_donts.push(a[0]); }
+							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = expand(a[1], a[0]); }
 						}
 						if (a[2] && a[2] === 1) {
-							res.convertables.push(a[0]);
+							res.convertables.push(a[0])
 						} else if (a.length>2) {
-							res.to_comparative[a[0]] = expand(a[2], a[0]);
+							res.to_comparative[a[0]] = expand(a[2], a[0])
 						}
-						if (a.length>3 && a[3]!=1) res.to_superlative[a[0]] = expand(a[3], a[0]);
-						if (a.length>4 && a[4]!=1) res.to_noun[a[0]] = expand(a[4], a[0]);
+						if (a.length>3 && a[3]!=1) {
+							res.to_superlative[a[0]] = expand(a[3], a[0])
+						}
+						if (a.length>4 && a[4]!=1) {
+							res.to_noun[a[0]] = expand(a[4], a[0])
+						}
 					}
 				});
 				res.convertables = res.convertables.reduce(helpFns.toObj, {});
@@ -285,7 +291,9 @@ var zip = [ [ 'wrong', '=' ],
 				return res;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

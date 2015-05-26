@@ -2,11 +2,12 @@
 var adj_to_adv = (function() {
 	
   var main = function(str, lang) {
-		if (typeof lang != 'string') lang = 'en';
+		//::NODE::
 		if (typeof module !== 'undefined' && module.exports) {
+			if (typeof lang != 'string') lang = 'en';
 			var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 		}
-
+		//::
     var transforms = [{
       reg: /al$/i,
       repl: 'ally'
@@ -40,13 +41,20 @@ var adj_to_adv = (function() {
       /ile$/
     ];
 
-    if (adjectives_decline.adv_donts[str]) return null;
-    if (adjectives_decline.adj_to_advs[str]) return adjectives_decline.adj_to_advs[str];
-    if (str.length <= 3) return null;
-		
+    if (adjectives_decline.adv_donts[str]) {
+			return null
+		}
+		if (adjectives_decline.adj_to_advs[str]) {
+			return adjectives_decline.adj_to_advs[str]
+		}
+    if (str.length <= 3) {
+			return null;
+		}
     var i;
     for (i = 0; i < not_matches.length; i++) {
-      if (str.match(not_matches[i])) return null;
+      if (str.match(not_matches[i])) {
+				return null
+			}
     }
     for (i = 0; i < transforms.length; i++) {
       if (str.match(transforms[i].reg)) {
@@ -55,8 +63,9 @@ var adj_to_adv = (function() {
     }
     return str + 'ly';
   }
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })();
 

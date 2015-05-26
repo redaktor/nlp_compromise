@@ -1,6 +1,6 @@
 //turn a verb into its other grammatical forms.
 var verb_conjugate = (function() {
-	
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		var dPath = '../../../data/'+lang+'/';
@@ -9,7 +9,7 @@ var verb_conjugate = (function() {
     verb_rules = require(dPath+'verb_rules');
     to_doer = require('./to_doer');
   }
-
+	//::
   //this method is the slowest in the whole library, basically TODO:whaaa
   var predict = function(w) {
     var endsWith = function(str, suffix) {
@@ -17,7 +17,7 @@ var verb_conjugate = (function() {
     }
     var arr = Object.keys(suffixes.verbs);
     for (i = 0; i < arr.length; i++) {
-      if (endsWith(w, arr[i])) return suffixes.verbs[arr[i]];
+      if (endsWith(w, arr[i])) {return suffixes.verbs[arr[i]];}
     }
     return 'infinitive';
   }
@@ -58,31 +58,50 @@ var verb_conjugate = (function() {
 
   //make sure object has all forms
   var fufill = function(obj, prefix) {
-    if (!obj.infinitive) return obj; 
-    if (!obj.gerund) obj.gerund = obj.infinitive + 'ing';
-    if (!obj.doer) obj.doer = to_doer(obj.infinitive);
-    if (!obj.present) obj.present = obj.infinitive + 's';
-    if (!obj.past) obj.past = obj.infinitive + 'ed';
-    //add the prefix to all forms, if it exists
+    if (!obj.infinitive) {
+			return obj
+		}
+    if (!obj.gerund) {
+			obj.gerund = obj.infinitive + 'ing'
+		}
+    if (!obj.doer) {
+			obj.doer = to_doer(obj.infinitive)
+		}
+    if (!obj.present) {
+			obj.present = obj.infinitive + 's'
+		}
+    if (!obj.past) {
+			obj.past = obj.infinitive + 'ed'
+		}
+    // add the prefix to all forms, if it exists
     if (prefix) {
       Object.keys(obj).forEach(function(k) {
         obj[k] = prefix + obj[k];
       })
     }
-    //future is 'will'+infinitive
-    if (!obj.future) obj.future = 'will ' + obj.infinitive;
-    //perfect is 'have'+past-tense
-    if (!obj.perfect) obj.perfect = 'have ' + obj.past;
-    //pluperfect is 'had'+past-tense
-    if (!obj.pluperfect) obj.pluperfect = 'had ' + obj.past;
-    //future perfect is 'will have'+past-tense
-    if (!obj.future_perfect) obj.future_perfect = 'will have ' + obj.past;
+    // future is 'will'+infinitive
+    if (!obj.future) {
+			obj.future = 'will ' + obj.infinitive
+		}
+    // perfect is 'have'+past-tense
+    if (!obj.perfect) {
+			obj.perfect = 'have ' + obj.past
+		}
+    // pluperfect is 'had'+past-tense
+    if (!obj.pluperfect) {
+			obj.pluperfect = 'had ' + obj.past
+		}
+    // future perfect is 'will have'+past-tense
+    if (!obj.future_perfect) {
+			obj.future_perfect = 'will have ' + obj.past;
+		}
     return obj;
   }
 
   var main = function(w) {
-    if (w===undefined) return {};
-
+    if (typeof w === 'undefined') {
+			return {}
+		}
     //for phrasal verbs ('look out'), conjugate look, then append 'out'
     var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
 		// TODO - when IN is done (see issue 40) we can build this regex
@@ -102,11 +121,11 @@ var verb_conjugate = (function() {
     }
 
     //for pluperfect ('had tried') remove 'had' and call it past-tense
-    if(w.match(/^had [a-z]/i)) w = w.replace(/^had /i,'');
+    if(w.match(/^had [a-z]/i)) {w = w.replace(/^had /i,'')}
     //for perfect ('have tried') remove 'have' and call it past-tense
-    if(w.match(/^have [a-z]/i)) w = w.replace(/^have /i,'');
+    if(w.match(/^have [a-z]/i)) {w = w.replace(/^have /i,'')}
     //for future perfect ('will have tried') remove 'will have' and call it past-tense
-    if(w.match(/^will have [a-z]/i)) w = w.replace(/^will have /i,'');
+    if(w.match(/^will have [a-z]/i)) {w = w.replace(/^will have /i,'')}
 
     //chop it if it's future-tense
     w = w.replace(/^will /i, '');
@@ -148,8 +167,9 @@ var verb_conjugate = (function() {
     //produce a generic transformation
     return fallback(w);
   };
-
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) module.exports = main;
+	//::
   return main;
 })()
 

@@ -4,8 +4,10 @@
 // TODO - the regexes are valid for many languages - localize only 'linking words'
 
 var date_extractor = (function() {
+	//::NODE::
 	if (typeof module !== 'undefined' && module.exports) dates = require('../../data/'+lang+'/dates');
-  var days = '([0-9]{1,2}),?';
+  //::
+	var days = '([0-9]{1,2}),?';
   var years = '([12][0-9]{3})';
 
   var to_obj = function(arr, places) {
@@ -20,7 +22,7 @@ var date_extractor = (function() {
     //example: 'March 7th-11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -35,7 +37,7 @@ var date_extractor = (function() {
     //example: '28th of September to 5th of October 2008',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -51,7 +53,7 @@ var date_extractor = (function() {
     //example: 'March 7th to june 11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -68,7 +70,7 @@ var date_extractor = (function() {
     //example: 'between 13 February and 15 February 1945',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -85,7 +87,7 @@ var date_extractor = (function() {
     //example: 'between March 7th and june 11th 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -102,7 +104,7 @@ var date_extractor = (function() {
     //example: 'March 1st 1987',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -116,7 +118,7 @@ var date_extractor = (function() {
     //example: '3rd - 5th of March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -131,7 +133,7 @@ var date_extractor = (function() {
     //example: '3rd of March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         day: 1,
@@ -145,7 +147,7 @@ var date_extractor = (function() {
     //example: 'September 1939 to April 1945',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -160,7 +162,7 @@ var date_extractor = (function() {
     //example: 'March 1969',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -173,7 +175,7 @@ var date_extractor = (function() {
     //example: 'March 18th',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 1,
@@ -186,7 +188,7 @@ var date_extractor = (function() {
     //example: '18th of March',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         month: 2,
@@ -199,7 +201,7 @@ var date_extractor = (function() {
     //example: '1997-1998',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         year: 1,
@@ -212,7 +214,7 @@ var date_extractor = (function() {
     //example: '1998',
     process: function(arr) {
       if (!arr) {
-        arr = [];
+        arr = []
       }
       var places = {
         year: 1
@@ -246,24 +248,24 @@ var date_extractor = (function() {
     obj.to_month = dates.months[obj.to_month];
     //swap to_month and month
     if (obj.to_month !== undefined && obj.month === undefined) {
-      obj.month = obj.to_month;
+      obj.month = obj.to_month
     }
     if (obj.to_month === undefined && obj.month !== undefined) {
-      obj.to_month = obj.month;
+      obj.to_month = obj.month
     }
     //swap to_year and year
     if (obj.to_year && !obj.year) {
-      obj.year = obj.to_year;
+      obj.year = obj.to_year
     }
     if (!obj.to_year && obj.year && obj.to_month !== undefined) {
-      obj.to_year = obj.year;
+      obj.to_year = obj.year
     }
     if (options.assume_year && !obj.year) {
-      obj.year = d.getFullYear();
+      obj.year = d.getFullYear()
     }
     //make sure date is in that month..
     if (obj.day !== undefined && (obj.day > 31 || (obj.month !== undefined && obj.day > last_dates[obj.month]))) {
-      obj.day = undefined;
+      obj.day = undefined
     }
     //make sure to date is after from date. fail everything if so...
     //todo: do this smarter
@@ -329,9 +331,9 @@ var date_extractor = (function() {
   };
 
   //export modules
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = main;
-  }
+	//::NODE::
+  if (typeof module !== 'undefined' && module.exports) module.exports = main;
+  //::
   return main;
 
 })();

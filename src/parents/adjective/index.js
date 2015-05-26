@@ -1,10 +1,10 @@
 //wrapper for Adjective's methods
 var Adjective = function(str, next, last, token) {
-  var the = this
+  var the = this;
   the.word = str || '';
-  the.next = next
-  the.last = last
-
+  the.next = next;
+  the.last = last;
+	//::NODE::
   if (typeof module !== 'undefined' && module.exports) {
 		schema = require('../../data/'+lang+'/schema');
     to_comparative = require('./conjugate/to_comparative');
@@ -12,7 +12,7 @@ var Adjective = function(str, next, last, token) {
     to_adverb = require('./conjugate/to_adverb');
     to_noun = require('./conjugate/to_noun');
   }
-
+	//::
   the.conjugate = function() {
     return {
       comparative: to_comparative(the.word),
@@ -23,12 +23,14 @@ var Adjective = function(str, next, last, token) {
   }
 
   the.which = (function() {
-    if (the.word.match(/..est$/)) return schema['JJS'];
-    if (the.word.match(/..er$/))  return schema['JJR'];
+    if (the.word.match(/..est$/)) {return schema['JJS']}
+    if (the.word.match(/..er$/))  {return schema['JJR']}
     return schema['JJ'];
   })()
 
   return the;
 };
+//::NODE::
 if (typeof module !== 'undefined' && module.exports) module.exports = Adjective;
+//::
 // console.log(new Adjective('crazy'))

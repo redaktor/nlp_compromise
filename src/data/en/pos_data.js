@@ -2,7 +2,9 @@
 var lang = 'en';
 var pos_data = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = { particles: 
    [ 'do',
      'together',
@@ -56,7 +58,9 @@ var zip = { particles:
 				return zip;
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

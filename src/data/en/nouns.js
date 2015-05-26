@@ -2,7 +2,9 @@
 var lang = 'en';
 var nouns = (function() {
   
+//::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
+//::
 var zip = { entityBlacklist: 
    [ 'west',
      'western',
@@ -83,7 +85,9 @@ var zip = { entityBlacklist:
 				}
 			})();
 
+//::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
+//::
 
   return main;
 })();

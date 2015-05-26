@@ -1,5 +1,5 @@
 //Parents are classes for each main part of speech, with appropriate methods
-//load files if server-side, otherwise assume these are prepended already
+//::NODE::
 if (typeof module !== 'undefined' && module.exports) {
   Adjective = require('./adjective/index');
   Noun = require('./noun/index');
@@ -7,6 +7,7 @@ if (typeof module !== 'undefined' && module.exports) {
   Verb = require('./verb/index');
   Value = require('./value/index');
 }
+//::
 var parents = {
   adjective: function(str, next, last, token) {
     return new Adjective(str, next, last, token);
@@ -27,4 +28,6 @@ var parents = {
     return {};
   }
 }
+//::NODE::
 if (typeof module !== 'undefined' && module.exports) module.exports = parents;
+//::
