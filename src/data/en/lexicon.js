@@ -5,7 +5,7 @@ var lexicon = (function() {
   var m = {};
   var pm = {};
   function reqDmodule(n) { m[n] = require('./' + n.concat('.js')); }
-  function reqPmodules() { 
+  function reqPmodules() {
 			['conjugate','to_doer'].forEach(function(n) {
 				pm[n] = require('../../parents/verb/conjugate/' + n);
 			});
@@ -67,23 +67,7 @@ var lexicon = (function() {
      'secretary',
      'purpose',
      'event' ],
-  NNS: 
-   [ 'leaves',
-     'quizzes',
-     'geese',
-     'indices',
-     'appendices',
-     'cactuses',
-     'echoes',
-     'embargoes',
-     'loaves',
-     'matrices',
-     'mosquitoes',
-     'radiuses',
-     'theses',
-     'thieves',
-     'these',
-     'friends' ],
+  NNS: [ 'friends' ],
   CC: 
    [ 'how',
      'or',
@@ -401,33 +385,33 @@ var lexicon = (function() {
   RBS: [ 'most' ] }
   var unzip = function (cat){
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)), 
-				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }), 
-				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }), 
-				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }), 
+				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
+				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }),
+				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
+				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
 				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
 			}
 			if (!cat) {
 				var lexiZip = {
-					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }), 
-					NNAB: m.honorifics.concat(m.abbreviations), 
-					PRP: Object.keys(m.nouns.prps), 
-					CP: m.verbs_special.cps, 
-					MD: m.verbs_special.mds, 
-					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }), 
-					VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }), 
-					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }), 
-					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }), 
+					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
+					NNAB: m.honorifics.concat(m.abbreviations),
+					PRP: Object.keys(m.nouns.prps),
+					CP: m.verbs_special.cps,
+					MD: m.verbs_special.mds,
+					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
+					VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
+					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),
+					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }),
 					JJ: m.adjectives_demonym.concat(
-							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs), 
-							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative), 
+							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs),
+							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
 							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
-					), 
+					),
 					//CD
 					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
 					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
 				}
-				
+
 				var toMain = function(key, o) {
 					o[key].forEach(function(w) { if (!main[w]) {main[w] = key} });
 				}
@@ -436,7 +420,7 @@ var lexicon = (function() {
 				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
 				for (var key in zip) { toMain(key, zip) }
-				
+
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
 					var c = pm.conjugate(v);
@@ -448,7 +432,7 @@ var lexicon = (function() {
 					}
 				});
 				// decline all adjectives to their adverbs. (13ms)
-				// 'to_adverb','to_superlative','to_comparative' 
+				// 'to_adverb','to_superlative','to_comparative'
 				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
 					main[j] = 'JJ';
 					var adv = pm.to_adverb(j);
@@ -464,9 +448,9 @@ var lexicon = (function() {
 						main[s] = main[s] || 'JJS'
 					}
 				});
-				
-				
-				
+
+
+
 				return main;
 			}
 			if (cat in did) { return did[cat] }

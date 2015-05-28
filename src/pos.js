@@ -44,6 +44,7 @@ var pos = (function() {
 		for (var i = 0; i <= arr.length; i++) {
 			var next = arr[i + 1];
 			if (arr[i] && next) {
+        var tag = arr[i].pos.tag;
 				var q = {
 					// 'joe smith' are both NN, for example
 					NN: (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ),

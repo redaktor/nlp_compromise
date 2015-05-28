@@ -266,7 +266,7 @@ var zip = [ [ 'wrong', '=' ],
 				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
 				zip.forEach(function(_a) {
 					if (typeof _a === 'string') {
-						res.convertables.push(repJJ(_a)); 
+						res.convertables.push(repJJ(_a));
 					} else {
 						var a = _a.map(function(w){ return repJJ(w); });
 						if (a.length > 1) {

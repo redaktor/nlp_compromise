@@ -24,7 +24,7 @@ var helpFns = (function() {
 					return w;
 				}
 				return (a instanceof Array) ? a.map(_r) : _r(a);
-			},			
+			},
 			replBase: function(a,s,r){
 				if (typeof a === 'undefined') {return null}
 				var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));

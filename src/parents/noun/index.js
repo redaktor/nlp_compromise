@@ -5,12 +5,12 @@ var Noun = function(str, sentence, word_i) {
   if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
 		var dPath = '../../data/'+lang+'/';
+		inflect = require("./conjugate/inflect");
 		indefinite_article = require('./indefinite_article');
 		schema = require(dPath+'schema');
     firstnames = require(dPath+'firstnames');
-		honourifics = require(dPath+'honorifics');
+		honorifics = require(dPath+'honorifics');
 		nouns = require(dPath+'nouns');
-		nouns_inflect = require(dPath+'nouns_inflect');
   }
 	//::
 	
@@ -65,11 +65,11 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.conjugate = function() {
-    return nouns_inflect.inflect(the.word);
+    return inflect.inflect(the.word);
   },
 
   the.is_plural = function() {
-    return nouns_inflect.is_plural(the.word);
+    return inflect.is_plural(the.word);
   }
 
   the.article = function() {
@@ -77,14 +77,14 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.pluralize = function() {
-    return nouns_inflect.pluralize(the.word);
+    return inflect.pluralize(the.word);
   }
 
   the.singularize = function() {
-    return nouns_inflect.singularize(the.word);
+    return inflect.singularize(the.word);
   }
 
-  // uses common first-name list + honourifics to guess if this noun is the name of a person
+  // uses common first-name list + honorifics to guess if this noun is the name of a person
   the.is_person = function() {
     var i;
     //remove things that are often named after people
@@ -93,9 +93,9 @@ var Noun = function(str, sentence, word_i) {
       if(the.word.match(new RegExp('\\b' + nouns.personBlacklist[i] + '\\b','i'))) {return false}
     }
       //see if noun has an honourific, like 'jr.'
-    l = honourifics.length;
+    l = honorifics.length;
     for (i = 0; i < l; i++) {
-      if (the.word.match(new RegExp('\\b' + honourifics[i] + '\\.?\\b', 'i'))) {return true}
+      if (the.word.match(new RegExp('\\b' + honorifics[i] + '\\.?\\b', 'i'))) {return true}
     }
     //see if noun has a first-name
     var names = Object.keys(firstnames)
@@ -119,7 +119,7 @@ var Noun = function(str, sentence, word_i) {
       })
       if (nameType('f')) {return 'she'}
       if (nameType('m')) {return 'he'}
-      //test some honourifics
+      //test some honorifics
       if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
       if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}
       //if it's a known unisex name, don't try guess it. be safe.

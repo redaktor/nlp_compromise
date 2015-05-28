@@ -122,142 +122,145 @@ var inflect = (function() {
 		/.sis$/i,
 		/^(?!talis|.*hu)(.*)man$/i
 	];
-
-	var lang = 0;
-	var nouns_inflect = {};
-	var methods = {
-		pluralize: function(str, l) {
-			var low = str.toLowerCase()
-				//uncountable
-			if (uncountable_nouns[low]) {
-				return str
-			}
-			//is it already plural?
-			if(is_plural(low)===true) {
-				return str
-			}
-			//irregular
-			var found = irregulars.filter(function(r) {
-				return r[0] === low;
-			})
-			if (found[0]) {
-				if (titlecase(low) === str) { //handle capitalisation properly
-					return titlecase(found[0][1]);
-				} else {
-					return found[0][1];
-				}
-			}
-			//inflect first word of preposition-phrase
-			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-				var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
-				if (first) {
-					var better_first = pluralize(first);
-					return better_first + str.replace(first, '');
-				}
-			}
-			//regular
-			for (var i = 0; i < pluralize_rules.length; i++) {
-				if (str.match(pluralize_rules[i].reg)) {
-					return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
-				}
-			}
-		},
-		
-		singularize: function(str, l) {
-			var low = str.toLowerCase();
-				//uncountable
-			if (uncountable_nouns[low]) {
-				return str;
-			}
-			//is it already singular?
-			if(is_plural(low) === false) {
-				return str;
-			}
-			//irregular
-			var found = irregulars.filter(function(r) {
-				return r[1] === low;
-			})
-			if (found[0]) {
-				if (titlecase(low) === str) { //handle capitalisation properly
-					return titlecase(found[0][0]);
-				} else {
-					return found[0][0];
-				}
-			}
-			//inflect first word of preposition-phrase
-			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-				var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
-				if (first && first[1]) {
-					var better_first = singularize(first[1]);
-					return better_first + str.replace(first[1], '');
-				}
-			}
-			//regular
-			for (var i = 0; i < singularize_rules.length; i++) {
-				if (str.match(singularize_rules[i].reg)) {
-					return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
-				}
-			}
-			return str;
-		},
-		
-		is_plural: function(str, l) {
-			str=(str||'').toLowerCase()
-			//handle 'mayors of chicago'
-			var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
-			if (preposition && preposition[1]) {
-				str = preposition[1];
-			}
-			// if it's a known irregular case
-			for (var i = 0; i < irregulars.length; i++) {
-				if (irregulars[i][1] === str) {
-					return true;
-				}
-				if (irregulars[i][0] === str) {
-					return false;
-				}
-			}
-			for (var i = 0; i < plural_indicators.length; i++) {
-				if (str.match(plural_indicators[i])) {
-					return true;
-				}
-			}
-			for (var i = 0; i < singular_indicators.length; i++) {
-				if (str.match(singular_indicators[i])) {
-					return false;
-				}
-			}
-			// 'looks pretty plural' rules
-			if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+	
+	var is_plural = function(str, l) {
+		str=(str||'').toLowerCase()
+		//handle 'mayors of chicago'
+		var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
+		if (preposition && preposition[1]) {
+			str = preposition[1];
+		}
+		// if it's a known irregular case
+		for (var i = 0; i < nouns_inflect.irregulars.length; i++) {
+			if (nouns_inflect.irregulars[i][1] === str) {
 				return true;
 			}
-			return false;
-		},
-		
-		inflect: function(str, l) {
-			if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
-				return {
-					plural: str,
-					singular: str
-				};
-			}
-			if (is_plural(str)) {
-				return {
-					plural: str,
-					singular: singularize(str)
-				};
-			} else {
-				return {
-					singular: str,
-					plural: pluralize(str)
-				};
+			if (nouns_inflect.irregulars[i][0] === str) {
+				return false;
 			}
 		}
+		for (var i = 0; i < plural_indicators.length; i++) {
+			if (str.match(plural_indicators[i])) {
+				return true;
+			}
+		}
+		for (var i = 0; i < singular_indicators.length; i++) {
+			if (str.match(singular_indicators[i])) {
+				return false;
+			}
+		}
+		// 'looks pretty plural' rules
+		if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+			return true;
+		}
+		return false;
 	}
+
+	var pluralize = function(str, l) {
+		var low = str.toLowerCase()
+			//uncountable
+		if (nouns_inflect.uncountables[low]) {
+			return str
+		}
+		//is it already plural?
+		if(is_plural(low)===true) {
+			return str
+		}
+		//irregular
+		var found = nouns_inflect.irregulars.filter(function(r) {
+			return r[0] === low;
+		})
+		if (found[0]) {
+			if (titlecase(low) === str) { //handle capitalisation properly
+				return titlecase(found[0][1]);
+			} else {
+				return found[0][1];
+			}
+		}
+		//inflect first word of preposition-phrase
+		if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+			var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
+			if (first) {
+				var better_first = pluralize(first);
+				return better_first + str.replace(first, '');
+			}
+		}
+		//regular
+		for (var i = 0; i < pluralize_rules.length; i++) {
+			if (str.match(pluralize_rules[i].reg)) {
+				return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
+			}
+		}
+	};
+	
+	var singularize = function(str, l) {
+		var low = str.toLowerCase();
+			//uncountable
+		if (nouns_inflect.uncountables[low]) {
+			return str;
+		}
+		//is it already singular?
+		if(is_plural(low) === false) {
+			return str;
+		}
+		//irregular
+		var found = nouns_inflect.irregulars.filter(function(r) {
+			return r[1] === low;
+		})
+		if (found[0]) {
+			if (titlecase(low) === str) { //handle capitalisation properly
+				return titlecase(found[0][0]);
+			} else {
+				return found[0][0];
+			}
+		}
+		//inflect first word of preposition-phrase
+		if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+			var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
+			if (first && first[1]) {
+				var better_first = singularize(first[1]);
+				return better_first + str.replace(first[1], '');
+			}
+		}
+		//regular
+		for (var i = 0; i < singularize_rules.length; i++) {
+			if (str.match(singularize_rules[i].reg)) {
+				return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
+			}
+		}
+		return str;
+	};
+	
+	var inflect = function(str, l) {
+		if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
+			return {
+				plural: str,
+				singular: str
+			};
+		}
+		if (is_plural(str)) {
+			return {
+				plural: str,
+				singular: singularize(str)
+			};
+		} else {
+			return {
+				singular: str,
+				plural: pluralize(str)
+			};
+		}
+	}
+	
+	var main  = {
+    inflect: inflect,
+    is_plural: is_plural,
+    singularize: singularize,
+    pluralize: pluralize
+  }
 	//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = methods;
+  if (typeof module !== "undefined" && module.exports) module.exports = main;
   //::
-	return methods;
+	return main;
 })();
 
 // console.log(inflect.singularize('kisses')=="kiss")

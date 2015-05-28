@@ -12,7 +12,7 @@ var to_number = (function() {
   // [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so are ignored
   // var decimal_multiple={'tenth':0.1, 'hundredth':0.01, 'thousandth':0.001, 'millionth':0.000001,'billionth':0.000000001};
 	//::NODE::
-  if (typeof module !== 'undefined' && module.exports) numbers = require('../../data'+lang+'/numbers');
+  if (typeof module !== 'undefined' && module.exports) numbers = require('../../data/'+lang+'/numbers');
 	//::
   var main = function(s) {
     var ones = numbers.ones;

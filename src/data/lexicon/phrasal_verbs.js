@@ -101,7 +101,7 @@ var phrasal_verbs = (function () {
     past:"VBD",
     future:"VBF",
     gerund:"VBG",
-    infinitive:"VBP",
+    infinitive:"VBP"
   }
   var cache={}//cache individual verbs to speed it up
   var split, verb, particle, phrasal;

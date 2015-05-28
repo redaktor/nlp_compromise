@@ -6,7 +6,7 @@ var Verb = function(str, next, last, token) {
 		var dPath = '../../data/'+lang+'/';
 		schema = require(dPath+'schema');
 		verbs_special = require(dPath+'verbs_special');
-    verb_conjugate = require(dPath+'verbs_conjugate');
+    verb_conjugate = require('./conjugate/conjugate');
   }
 	//::
   var the = this;
@@ -23,22 +23,22 @@ var Verb = function(str, next, last, token) {
   }
 
   the.conjugate = function() {
-    return verb_conjugate.irregulars(the.word);
+    return verb_conjugate(the.word);
   }
 
   the.to_past = function() {
     if (the.form === 'gerund') {
       return the.word;
     }
-    return verb_conjugate.irregulars(the.word).past;
+    return verb_conjugate(the.word).past;
   }
 
   the.to_present = function() {
-    return verb_conjugate.irregulars(the.word).present;
+    return verb_conjugate(the.word).present;
   }
 
   the.to_future = function() {
-    return 'will ' + verb_conjugate.irregulars(the.word).infinitive;
+    return 'will ' + verb_conjugate(the.word).infinitive;
   }
 
   //which conjugation
@@ -50,7 +50,7 @@ var Verb = function(str, next, last, token) {
       'gerund',
       'infinitive'
     ];
-    var forms = verb_conjugate.irregulars(the.word);
+    var forms = verb_conjugate(the.word);
     for (var i = 0; i < order.length; i++) {
       if (forms[order[i]] === the.word) {
 				return order[i]

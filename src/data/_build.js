@@ -181,10 +181,11 @@ function generateLanguage(lang) {
 		return false;
 	};
 	var val = function(o) { return o[lang]; }
-	var baseRepl = function(w, iStr) {
-		var w = w.replace(iStr, '=');
+	var baseRepl = function(w, iStr, s) {
+		w = w.replace(iStr, '=');
 		var iSl = iStr.slice(0,-2);
-		return (iSl === '') ? w : w.replace(iSl, '<');
+		w = (iSl === '') ? w : w.replace(iSl, '<');
+		return (s) ? helpFns.repl(w, s, 0) : w;
 	}
 
 	var allPossible = function() {
@@ -214,7 +215,7 @@ function generateLanguage(lang) {
 					a[0].filter(possibleOrig).forEach(function(o) {
 						a[((a[1]) ? 1 : 0)].filter(possibleRef).forEach(function(op) {
 							if (isRef(op, o)) {
-								_irregulars.push([o[lang], baseRepl(op[lang], o[lang]).replace(/es/g, '_')]);
+								_irregulars.push([o[lang], baseRepl(op[lang], o[lang], ['es'])]);
 							}
 						});
 					});
@@ -277,7 +278,7 @@ function generateLanguage(lang) {
 					dict[type].words.filter(possibleOrig).forEach(function(o) {
 						dict[type].words.filter(possibleRef).forEach(function(ov) {
 							if (isRef(ov, o)) {
-								res[type.toLowerCase()+'s'].push([o[lang], baseRepl(ov[lang], o[lang]).replace('\'t','_') ]);
+								res[type.toLowerCase()+'s'].push([o[lang], baseRepl(ov[lang], o[lang], ['\'t']) ]);
 							}
 						});
 					});
@@ -322,7 +323,7 @@ function generateLanguage(lang) {
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
-							if (isRef(oc, o)) conjugated = helpFns.repl(baseRepl(oc[lang], o[lang]), ['ing', 'er', 've'], 0);
+							if (isRef(oc, o)) conjugated = baseRepl(oc[lang], o[lang], ['ing', 'er', 've']);
 							did(o[lang]);
 						});
 						conjugateds.push( (conjugated) ? conjugated : 0 );
@@ -633,7 +634,16 @@ function generateLanguage(lang) {
 			id: 'abbreviations',
 			description: '',
 			// build
-			zip: function(lang) { return did(dict.NNAB.words.filter(possibleRest).map(val)); }
+			zip: function(lang) { 
+				return did(dict.NNAB.words.filter(possibleRest).map(val)); 
+			},
+			// concat honorifics
+			unzip: function() {
+				//::NODE::
+				if (typeof module !== "undefined" && module.exports) honorifics = require("./honorifics");
+				//::
+				return zip.concat(honorifics);
+			}
 		},
 
 		{ // 13

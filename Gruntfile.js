@@ -7,8 +7,8 @@ module.exports = function(grunt) {
 	var pPath = './src/parents/';
 	var mPath = './src/methods/';
   var files = [
-		// helpers
-		dPath+'helpFns.js',
+    // helpers
+    dPath+'helpFns.js',
     // lexicon data
     dPath+'multiples.js',
     dPath+'verbs_conjugate.js',
@@ -27,8 +27,8 @@ module.exports = function(grunt) {
     dPath+'firstnames.js',
     // rules and schema
     dPath+'pos_data.js',
-		dPath+'negate_data.js',
-		dPath+'word_rules.js',
+    dPath+'negate_data.js',
+    dPath+'word_rules.js',
     dPath+'verb_rules.js',
     dPath+'normalisations.js',
     dPath+'suffixes.js',

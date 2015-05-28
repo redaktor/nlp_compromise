@@ -5,7 +5,7 @@ var normalize = (function() {
 	//::NODE::
 	if (typeof module !== 'undefined' && module.exports) {
 		if (typeof lang != 'string') lang = 'en';
-		normalizations = require('../../data/'+lang+'/'+'normalizations');
+		normalisations = require('../../data/'+lang+'/'+'normalisations');
 	}
 	//::
   var normalize = function(str, options) {
@@ -13,8 +13,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normalizations.normaler[s] && r < options.percentage) {
-        return normalizations.normaler[s] || s
+      if (normalisations.normaler[s] && r < options.percentage) {
+        return normalisations.normaler[s] || s
       } else {
         return s
       }
@@ -27,8 +27,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normalizations.greek[s] && r < options.percentage) {
-        return normalizations.greek[s] || s
+      if (normalisations.greek[s] && r < options.percentage) {
+        return normalisations.greek[s] || s
       } else {
         return s
       }
