@@ -7,7 +7,9 @@ var numbers = (function() {
      nil: 0,
      a: 1,
      one: 1,
+     first: 1,
      two: 2,
+     second: 2,
      three: 3,
      third: 3,
      four: 4,
@@ -62,6 +64,7 @@ var numbers = (function() {
      ninetieth: 90 },
   multiple: 
    { hundred: 100,
+     grand: 1000,
      thousand: 1000,
      million: 1000000,
      billion: 1000000000,

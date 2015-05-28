@@ -48,7 +48,8 @@ var Noun = function(str, sentence, word_i) {
       if (token.pos.tag == 'NNA') {return false}
       if (token.pos.tag == 'NNO') {return false}
       if (token.pos.tag == 'NNG') {return false}
-      if (token.pos.tag=='NNP') {return false}
+			
+      if (token.pos.tag=='NNP') {return true}
     }
     // distinct capital is very good signal
     if (token.noun_capital) {return true}

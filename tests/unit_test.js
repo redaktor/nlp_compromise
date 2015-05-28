@@ -147,7 +147,7 @@ exports["phrasal verbs"] = function(test) {
   //he blew up the bomb
   //he blew up the balloon
 
-  // test.deepEqual(pos("The bomb blew up").tags(), [["DT","NN", "VBP"]]) //issue
+  // test.deepEqual(pos("The bomb blew up").tags(), [["DT","NN", "VBP"]]) //issue TODO
   test.deepEqual(nlp.pos("The pen blew up").tags(), [["DT","NN", "VBD"]])
   // test.deepEqual(pos("The clown blew up the balloon").tags(), [["DT","NN","VBP","DT","NN"]])
   test.deepEqual(nlp.pos("he turns on the tv").tags(), [["PRP","VBZ","DT","NN"]])

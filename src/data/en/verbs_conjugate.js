@@ -142,7 +142,6 @@ var zip = { irregulars:
      [ 'grind', '=&', 'ground', '=s' ],
      [ 'melt', '=&', '=ed', '=s' ],
      [ 'mow', '=&', '=ed', '=s' ],
-     [ 'pen', '=&', '=t', '=s' ],
      [ 'pro#', '<v&', '=d', '=s' ],
      [ 'rid', '=&', '=', '=es' ],
      [ 'shine', '<n&', 'shone', '=s' ],
@@ -160,10 +159,10 @@ var zip = { irregulars:
      [ 'wea#', '<v&', 'wo#', '=s' ],
      [ 'wed', '=d&', '=', '=s' ],
      [ 'win', '=n&', '<on', '=s' ],
-     [ 'dream', '=&', '=t', '=s', '=_' ],
-     [ 'sail', '=&', '=ed', '=s', '=_' ],
-     [ 'rub', '=b&', '=bed', '=s', '=be<' ],
-     [ 'claim', '=&', '=ed', '=s', '=ant' ] ],
+     [ 'dream', '=&', '=t', '=s' ],
+     [ 'sail', '=&', '=ed', '=s', 'dream_' ],
+     [ 'rub', '=b&', '=bed', '=s', 'saile<' ],
+     [ 'claim', '=&', '=ed', '=s', 'rubb_' ] ],
   noDoers: { appear: 1, happen: 1, seem: 1, try: 1, aid: 1, fail: 1, marry: 1 },
   irregularDoers: {} }; 
 

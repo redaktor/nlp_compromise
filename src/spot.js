@@ -16,7 +16,6 @@ var spot = (function() {
     arr = arr.filter(function(o){
       //add tokens to blacklist
       if(o.analysis.is_person()){
-				console.log( o, o.normalised );
         o.normalised.split(' ').forEach(function(s){
           ignore[s]=true;
         })

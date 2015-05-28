@@ -6,7 +6,7 @@ var nouns_inflect = (function() {
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
-var zip = { irregulars: 
+var zip = { NN: 
    [ [ 'child', '=ren' ],
      [ 'person', 'people' ],
      [ 'leaf', '<av&' ],
@@ -54,15 +54,13 @@ var zip = { irregulars:
      [ 'referendum', '<a' ],
      [ 'tableau', '=x' ],
      [ 'that', '<ose' ],
-     [ 'that', '<&&' ],
      [ 'thief', '<ev&' ],
      [ 'this', '<&e' ],
      [ 'tooth', 'teeth' ],
-     [ 'vita', '=e' ],
-     [ 'i', 'we' ],
-     [ 'he', 't=y' ],
-     [ 'she', 'they' ],
-     [ 'mine', 'ours' ],
+     [ 'vita', '=e' ] ],
+  PRP: [ [ 'i', 'we' ], [ 'he', 't=y' ], [ 'she', 'they' ] ],
+  PP: 
+   [ [ 'mine', 'ours' ],
      [ 'myself', 'yourselv&' ],
      [ 'myself', 'ourselv&' ],
      [ 'yourself', 'themselv&' ],
@@ -228,10 +226,13 @@ var zip = { irregulars:
      'hertz' ] }; 
 
   var main = (function () {
-				return {
-					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
-					uncountables: zip.uc.reduce(helpFns.toObj,{})
-				};
+				var repl = function(a) { return helpFns.replBase(a,0,['es']); }
+				zip.NN = zip.NN.map(repl);
+				zip.PRP = zip.PRP.map(repl);
+				zip.PP = zip.PP.map(repl);
+				zip.irregulars = zip.NN.concat(zip.PRP, zip.PP);
+				zip.uncountables = zip.uc.reduce(helpFns.toObj,{});
+				return zip;
 			})();
 
 //::NODE::

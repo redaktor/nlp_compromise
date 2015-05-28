@@ -208,29 +208,37 @@ function generateLanguage(lang) {
 			// zip
 			zip: function(lang) {
 				var _irregulars = newRes();
-				var _uncountables = dict.NN.words.filter(function(o) {
-					return meta(o, 'uncountable');
-				}).map(val);
-				[[dict.NN.words, dict.NNS.words], [dict.PRP.words], [dict.PP.words]].forEach(function(a) {
+				var res = {
+					NN: [],
+					PRP: [],
+					PP: [],
+					uc: []
+				};
+				[[dict.NN.words, dict.NNS.words], [dict.PRP.words], [dict.PP.words]].forEach(function(a, i) {
 					a[0].filter(possibleOrig).forEach(function(o) {
 						a[((a[1]) ? 1 : 0)].filter(possibleRef).forEach(function(op) {
 							if (isRef(op, o)) {
-								_irregulars.push([o[lang], baseRepl(op[lang], o[lang], ['es'])]);
+								var nA = [o[lang], baseRepl(op[lang], o[lang], ['es'])];
+								res[Object.keys(res)[i]].push(nA);
+								_irregulars.push(nA);
 							}
 						});
 					});
 				});
-				return {
-					irregulars: _irregulars,
-					uc: _uncountables
-				};
+				res.uc = dict.NN.words.filter(function(o) {
+					return meta(o, 'uncountable');
+				}).map(val);
+				return res;
 			},
 			// expand
 			unzip: function() {
-				return {
-					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
-					uncountables: zip.uc.reduce(helpFns.toObj,{})
-				};
+				var repl = function(a) { return helpFns.replBase(a,0,['es']); }
+				zip.NN = zip.NN.map(repl);
+				zip.PRP = zip.PRP.map(repl);
+				zip.PP = zip.PP.map(repl);
+				zip.irregulars = zip.NN.concat(zip.PRP, zip.PP);
+				zip.uncountables = zip.uc.reduce(helpFns.toObj,{});
+				return zip;
 			}
 		},
 
@@ -257,8 +265,8 @@ function generateLanguage(lang) {
 				var _pps = {};
 				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return {
-					pps: _pps,
 					prps: zip.prps.reduce(helpFns.toObj, {}),
+					pps: _pps,
 					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}),
 					personBlacklist: zip.personBlacklist,
 				}
@@ -580,7 +588,7 @@ function generateLanguage(lang) {
 						if (cat[i].hasOwnProperty(lang)) {
 							var words = (cat[i][lang] instanceof Array) ? cat[i][lang] : [cat[i][lang]];
 							words.forEach(function(w) {
-								if (!handled(w)) nrs[_var][did(w)] = (_var==='multiple') ? Math.pow(10, parseInt(i)) : parseInt(i);
+								nrs[_var][did(w)] = (_var==='multiple') ? Math.pow(10, parseInt(i)) : parseInt(i);
 							});
 						}
 					}
@@ -614,7 +622,7 @@ function generateLanguage(lang) {
 				for (var w in zip.monthAbbrevs) { zip.months[w] = zip.monthAbbrevs[w] }
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthSearch + ',?';
+				res.monthsS = res.monthS + ',?';
 				return res;
 			}
 		},
@@ -899,6 +907,7 @@ function generateLanguage(lang) {
 		function reqModule(n) { m[n] = require('./' + lang + '/' + n.concat('.js')); }
 		function reqDmodule(n) { m[n] = require('./' + n.concat('.js')); }
 		function reqPmodules() {
+			pm.phrasal_verbs = require('../lexicon/phrasal_verbs'); // TODO - FIXME becomes data module
 			['conjugate','to_doer'].forEach(function(n) {
 				pm[n] = require('../../parents/verb/conjugate/' + n);
 			});
@@ -920,15 +929,35 @@ function generateLanguage(lang) {
 		convertables = require("../parents/adjective/conjugate/convertables")
 		*/
 		var lStr = langStr.concat('\n//::NODE::\n  var m = {};\n  var pm = {};\n  ', reqDmodule.toString(), '\n  ', reqPmodules.toString(), '\n  ', nStr, '.forEach(reqDmodule);\n  reqPmodules();\n//::\n');
+		
 		// TODO - rest of VBN should be in lexicon.js already - also for sl "TODO adjectives_regular"
 		var __VBN = dict.VBN.words.filter(function(o) { return (possible(o) && o.hasOwnProperty('ref')); }).map(val);
 
 		// put words which are NOT yet in other modules in the lexicon now
 		// the same function (without arguments) is used in the lexicon to add words which ARE in other modules ...
+		/*
+		
+    //add firstnames
+    Object.keys(firstnames).forEach(function(k) {
+      main[k] = "NNP"
+    })
+
+    //add multiple-word terms
+    Object.keys(multiples).forEach(function(k) {
+      main[k] = multiples[k]
+    })
+
+    //add phrasal verbs
+    Object.keys(phrasal_verbs).forEach(function(k) {
+      main[k] = phrasal_verbs[k]
+    })
+		*/
+		// TODO 'a' MUST not be a NU
 		var gen = function (cat){
+			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' }) 
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
-				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }),
+				NN: m.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
+				NNS: m.nouns_inflect.NN.map(function(a){ return a[1]; }),
 				VBN: __VBN,
 				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
@@ -937,8 +966,10 @@ function generateLanguage(lang) {
 			if (!cat) {
 				var lexiZip = {
 					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-					NNAB: m.honorifics.concat(m.abbreviations),
+					NNAB: m.abbreviations,
+					NNP: Object.keys(m.firstnames),
 					PRP: Object.keys(m.nouns.prps),
+					PP: Object.keys(m.nouns.pps),
 					CP: m.verbs_special.cps,
 					MD: m.verbs_special.mds,
 					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
@@ -951,7 +982,7 @@ function generateLanguage(lang) {
 							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 					),
 					//CD
-					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
+					NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
 					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
 				}
 
@@ -963,7 +994,11 @@ function generateLanguage(lang) {
 				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
 				for (var key in zip) { toMain(key, zip) }
-
+				
+				//add phrasal verbs - TODO FIXME
+				Object.keys(pm.phrasal_verbs).forEach(function(s) {
+					main[s] = pm.phrasal_verbs[s]
+				});
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
 					var c = pm.conjugate(v);

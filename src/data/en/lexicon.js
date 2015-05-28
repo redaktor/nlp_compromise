@@ -6,6 +6,7 @@ var lexicon = (function() {
   var pm = {};
   function reqDmodule(n) { m[n] = require('./' + n.concat('.js')); }
   function reqPmodules() {
+			pm.phrasal_verbs = require('../lexicon/phrasal_verbs'); // TODO - FIXME becomes data module
 			['conjugate','to_doer'].forEach(function(n) {
 				pm[n] = require('../../parents/verb/conjugate/' + n);
 			});
@@ -384,9 +385,10 @@ var lexicon = (function() {
   RBR: [ 'more' ],
   RBS: [ 'most' ] }
   var unzip = function (cat){
+			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' }) 
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
-				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }),
+				NN: m.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
+				NNS: m.nouns_inflect.NN.map(function(a){ return a[1]; }),
 				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
 				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
@@ -394,8 +396,10 @@ var lexicon = (function() {
 			if (!cat) {
 				var lexiZip = {
 					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-					NNAB: m.honorifics.concat(m.abbreviations),
+					NNAB: m.abbreviations,
+					NNP: Object.keys(m.firstnames),
 					PRP: Object.keys(m.nouns.prps),
+					PP: Object.keys(m.nouns.pps),
 					CP: m.verbs_special.cps,
 					MD: m.verbs_special.mds,
 					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
@@ -408,7 +412,7 @@ var lexicon = (function() {
 							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 					),
 					//CD
-					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
+					NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
 					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
 				}
 
@@ -420,7 +424,11 @@ var lexicon = (function() {
 				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
 				for (var key in zip) { toMain(key, zip) }
-
+				
+				//add phrasal verbs - TODO FIXME
+				Object.keys(pm.phrasal_verbs).forEach(function(s) {
+					main[s] = pm.phrasal_verbs[s]
+				});
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
 					var c = pm.conjugate(v);

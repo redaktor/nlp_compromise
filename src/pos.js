@@ -37,55 +37,65 @@ var pos = (function() {
 		a.end = a.end || b.end;
 		return a;
 	}
-
+	
 	//combine adjacent neighbours, and special cases
-	var combine_tags = function(sentence) {
-		var arr = sentence.tokens || [];
-		for (var i = 0; i <= arr.length; i++) {
-			var next = arr[i + 1];
-			if (arr[i] && next) {
-        var tag = arr[i].pos.tag;
-				var q = {
-					// 'joe smith' are both NN, for example
-					NN: (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ),
-					// merge NNP and NN, like firstname, lastname
-					NNP_NN: ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')),
-					// merge dates manually, which often have punctuation
-					CD: (tag === 'CD' && next.pos.tag ==='CD'),
-					//'hundred and fifty', 'march the 5th'
-					CDn: (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD'),
-					// merge abbreviations with nouns manually, eg. 'Joe jr.'
-					NNAB: ((tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')),
-					//'will walk' -> future-tense verb
-					future: (arr[i].normalised === 'will' && next.pos.parent === 'verb'),
-					// capitals surrounding a preposition	'United States of America'
-					NNc: (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital),
-					//capitals surrounding two prepositions	'Phantom of the Opera'
-					NNc2: (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital)
-				};
-				if (q._NN || q._NNP_NN || q.CD || q.CDn || q.NNAB || q.future || q.NNc || q.NNc2) {
-					arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
-					arr[i] = null;
-					if (q._NNP_NN) {
-						arr[i + 1].pos = schema['NNP'];
-					} else if (q.NNc || q.NNc2) {
-						arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
-						arr[i + 1] = null;
-						if (q.NNc2) {
-							arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
-							arr[i + 2] = null;
-						}
-					}
-				}
+  var combine_tags = function(sentence) {
+    var arr = sentence.tokens || [];
+    for (var i = 0; i <= arr.length; i++) {
+      var next = arr[i + 1];
+			var merge = function() {
+				arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
+        arr[i] = null;
 			}
-		}
-		sentence.tokens = arr.filter(function(r) {
-			return r;
-		})
-		return sentence;
-	}
-
-
+      if (arr[i] && next) {
+        var tag = arr[i].pos.tag;
+        //'joe smith' are both NN, for example
+        if (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ) {
+          merge();
+        }
+        //merge NNP and NN, like firstname, lastname
+        else if ((tag === "NNP" && next.pos.tag ==="NN") || (tag==="NN" && next.pos.tag==="NNP")) {
+          merge();
+          arr[i + 1].pos = schema['NNP'];
+        }
+        //merge dates manually, which often have punctuation
+        else if (tag === "CD" && next.pos.tag ==="CD") {
+          merge();
+        }
+        //merge abbreviations with nouns manually, eg. "Joe jr."
+        else if ( (tag === "NNAB" && next.pos.parent ==="noun") || (arr[i].pos.parent==="noun" && next.pos.tag==="NNAB")) {
+          merge();
+        }
+        //'will walk' -> future-tense verb
+        else if (arr[i].normalised === "will" && next.pos.parent === "verb") {
+          merge();
+        }
+        //'hundred and fifty', 'march the 5th'
+        else if (tag === "CD" && (next.normalised === "and" || next.normalised === "the") && arr[i + 2] && arr[i + 2].pos.tag === "CD") {
+          merge();
+        }
+        //capitals surrounding a preposition  'United States of America'
+        else if (tag=="NN" && arr[i].noun_capital && (next.normalised == "of" || next.normalised == "and") && arr[i + 2] && arr[i + 2].noun_capital) {
+          merge();
+          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+          arr[i + 1] = null;
+        }
+        //capitals surrounding two prepositions  'Phantom of the Opera'
+        else if (arr[i].noun_capital && next.normalised == "of" && arr[i + 2] && arr[i + 2].pos.tag == "DT" && arr[i + 3] && arr[i + 3].noun_capital) {
+          merge();
+          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+          arr[i + 1] = null;
+          arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
+          arr[i + 2] = null;
+        }
+      }
+    }
+    sentence.tokens = arr.filter(function(r) {
+      return r
+    })
+    return sentence
+  }
+	
 	//some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
 	//they should be combined with the verb, sometimes.
 	//does not handle seperated phrasal verbs ('take the coat off' -> 'take off')

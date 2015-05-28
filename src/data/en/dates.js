@@ -41,7 +41,7 @@ var dates = (function() {
 				for (var w in zip.monthAbbrevs) { zip.months[w] = zip.monthAbbrevs[w] }
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthSearch + ',?';
+				res.monthsS = res.monthS + ',?';
 				return res;
 			})();
 

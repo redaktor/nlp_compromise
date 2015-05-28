@@ -95,7 +95,12 @@ var abbreviations = (function() {
   'joomla',
   'jeopardy' ]; 
 
-  var main = zip;
+  var main = (function () {
+				//::NODE::
+				if (typeof module !== "undefined" && module.exports) honorifics = require("./honorifics");
+				//::
+				return zip.concat(honorifics);
+			})();
 
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;

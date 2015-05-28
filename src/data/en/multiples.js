@@ -2,6 +2,16 @@
 var lang = 'en';
 var multiples = (function() {
   var zip = { 'ad hominem': 'NN',
+  'new york': 'NN',
+  'new england': 'NN',
+  'new hampshire': 'NN',
+  'new delhi': 'NN',
+  'new jersey': 'NN',
+  'new mexico': 'NN',
+  'united states': 'NN',
+  'united kingdom': 'NN',
+  'great britain': 'NN',
+  'head start': 'NN',
   'will be': 'CP',
   'ought to': 'MD',
   'a la': 'IN',

@@ -78,8 +78,8 @@ var zip = { entityBlacklist:
 				var _pps = {};
 				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return {
-					pps: _pps,
 					prps: zip.prps.reduce(helpFns.toObj, {}),
+					pps: _pps,
 					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}),
 					personBlacklist: zip.personBlacklist,
 				}
