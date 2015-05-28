@@ -40,7 +40,7 @@ var to_comparative = (function() {
       /ous$/
     ];
 		
-    if (!(adjectives_decline.to_comparative[str])) {
+    if (adjectives_decline.to_comparative[str]===0) {
 			return null
 		}
     for (i = 0; i < transforms.length; i++) {

@@ -210,8 +210,25 @@ var Sentence = function(tokens) {
       return t.pos.tag;
     })
   }
+	
+	//find the 'it', 'he', 'she', and 'they' of this sentence
+  //these are the words that get 'exported' to be used in other sentences
+  the.referables=function(){
+    var pronouns={
+      he:undefined,
+      she:undefined,
+      they:undefined,
+      it:undefined
+    }
+    the.tokens.forEach(function(t){
+      if(t.pos.parent=="noun" && t.pos.tag!="PRP"){
+        pronouns[t.analysis.pronoun()]=t
+      }
+    })
+    return pronouns
+  }
 
-  return the;
+  return the
 }
 //::NODE::
 if (typeof module !== 'undefined' && module.exports) module.exports = Sentence;

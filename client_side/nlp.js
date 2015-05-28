@@ -4838,8 +4838,8 @@ var Noun = function(str, sentence, word_i) {
       var names=the.word.split(' ').map(function(a){
         return a.toLowerCase();
       })
-      if (nameType('f')) {return 'she'}
       if (nameType('m')) {return 'he'}
+      if (nameType('f')) {return 'she'}
       //test some honorifics
       if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
       if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}
@@ -5393,7 +5393,7 @@ var to_comparative = (function() {
       /ous$/
     ];
 
-    if (!(adjectives_decline.to_comparative[str])) {
+    if (adjectives_decline.to_comparative[str]===0) {
 			return null
 		}
     for (i = 0; i < transforms.length; i++) {
@@ -6411,7 +6411,24 @@ var Sentence = function(tokens) {
     })
   }
 
-  return the;
+	//find the 'it', 'he', 'she', and 'they' of this sentence
+  //these are the words that get 'exported' to be used in other sentences
+  the.referables=function(){
+    var pronouns={
+      he:undefined,
+      she:undefined,
+      they:undefined,
+      it:undefined
+    }
+    the.tokens.forEach(function(t){
+      if(t.pos.parent=="noun" && t.pos.tag!="PRP"){
+        pronouns[t.analysis.pronoun()]=t
+      }
+    })
+    return pronouns
+  }
+
+  return the
 }
 
 

@@ -118,8 +118,8 @@ var Noun = function(str, sentence, word_i) {
       var names=the.word.split(' ').map(function(a){
         return a.toLowerCase();
       })
-      if (nameType('f')) {return 'she'}
       if (nameType('m')) {return 'he'}
+      if (nameType('f')) {return 'she'}
       //test some honorifics
       if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
       if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}

@@ -40,6 +40,13 @@ exports["noun.referenced_by"] = function(test) {
   refs=nlp.pos("The books are dusty. I need to dust them.").sentences[0].tokens[1].analysis.referenced_by()
   test.deepEqual(refs.length, 1)
   test.deepEqual(refs[0].normalised, "them")
+	refs=nlp.pos("Carrots are gross. Their skin makes make cry.").sentences[0].tokens[0].analysis.referenced_by()
+  test.deepEqual(refs.length, 1)
+  test.deepEqual(refs[0].normalised, "their")
+  // refs=nlp.pos("Sally and Tom fight a lot. She thinks he is her friend.").sentences[0].tokens[0].analysis.referenced_by()
+  // test.deepEqual(refs.length, 2)
+  // test.deepEqual(refs[0].normalised, "she")
+  // test.deepEqual(refs[0].normalised, "her")
   test.done()
 }
 exports["noun.reference_to"] = function(test) {
@@ -494,6 +501,7 @@ exports["negation"] = function(test) {
 }
 
 exports["adjective.to_comparative"] = function(test) {
+	console.log( nlp.adjective("quick").conjugate() );
   test.deepEqual(nlp.adjective("quick").conjugate().comparative, "quicker")
   test.deepEqual(nlp.adjective("friendly").conjugate().comparative, "friendlier")
   test.deepEqual(nlp.adjective("stinky").conjugate().comparative, "stinkier")
