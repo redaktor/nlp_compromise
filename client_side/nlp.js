@@ -1,4 +1,4 @@
-/*! nlp_compromise  0.5.2  by @spencermountain 2015-05-26  MIT */
+/*! nlp_compromise  0.5.2  by @spencermountain 2015-05-28  MIT */
 var nlp = (function() {
 
 var helpFns = (function() {
@@ -42,6 +42,16 @@ var helpFns = (function() {
 var lang = 'en';
 var multiples = (function() {
   var zip = { 'ad hominem': 'NN',
+  'new york': 'NN',
+  'new england': 'NN',
+  'new hampshire': 'NN',
+  'new delhi': 'NN',
+  'new jersey': 'NN',
+  'new mexico': 'NN',
+  'united states': 'NN',
+  'united kingdom': 'NN',
+  'great britain': 'NN',
+  'head start': 'NN',
   'will be': 'CP',
   'ought to': 'MD',
   'a la': 'IN',
@@ -253,7 +263,6 @@ var zip = { irregulars:
      [ 'grind', '=&', 'ground', '=s' ],
      [ 'melt', '=&', '=ed', '=s' ],
      [ 'mow', '=&', '=ed', '=s' ],
-     [ 'pen', '=&', '=t', '=s' ],
      [ 'pro#', '<v&', '=d', '=s' ],
      [ 'rid', '=&', '=', '=es' ],
      [ 'shine', '<n&', 'shone', '=s' ],
@@ -271,10 +280,10 @@ var zip = { irregulars:
      [ 'wea#', '<v&', 'wo#', '=s' ],
      [ 'wed', '=d&', '=', '=s' ],
      [ 'win', '=n&', '<on', '=s' ],
-     [ 'dream', '=&', '=t', '=s', '=_' ],
-     [ 'sail', '=&', '=ed', '=s', '=_' ],
-     [ 'rub', '=b&', '=bed', '=s', '=be<' ],
-     [ 'claim', '=&', '=ed', '=s', '=ant' ] ],
+     [ 'dream', '=&', '=t', '=s' ],
+     [ 'sail', '=&', '=ed', '=s', 'dream_' ],
+     [ 'rub', '=b&', '=bed', '=s', 'saile<' ],
+     [ 'claim', '=&', '=ed', '=s', 'rubb_' ] ],
   noDoers: { appear: 1, happen: 1, seem: 1, try: 1, aid: 1, fail: 1, marry: 1 },
   irregularDoers: {} };
 
@@ -311,22 +320,22 @@ var verbs_special = (function() {
 
 
 var zip = { cps:
-   [ [ 'is', '=n_' ],
-     [ 'am', 'ain_' ],
-     [ 'are', '=n_' ],
-     [ 'was', '=n_' ],
-     [ 'were', '=n_' ],
-     [ 'will be', 'won_ be' ] ],
+   [ [ 'is', '=n&' ],
+     [ 'am', 'ain&' ],
+     [ 'are', '=n&' ],
+     [ 'was', '=n&' ],
+     [ 'were', '=n&' ],
+     [ 'will be', 'won& be' ] ],
   mds:
-   [ [ 'did', '=n_' ],
-     [ 'would', '=n_' ],
-     [ 'could', '=n_' ],
-     [ 'should', '=n_' ],
-     [ 'can', '=_' ],
-     [ 'will', 'won_' ],
-     [ 'must', '=n_' ],
+   [ [ 'did', '=n&' ],
+     [ 'would', '=n&' ],
+     [ 'could', '=n&' ],
+     [ 'should', '=n&' ],
+     [ 'can', '=&' ],
+     [ 'will', 'won&' ],
+     [ 'must', '=n&' ],
      [ 'shall', '<nt' ],
-     [ 'shall', '<n_' ] ] };
+     [ 'shall', '<n&' ] ] };
 
   var main = (function () {
 				var res = {};
@@ -908,19 +917,19 @@ var lang = 'en';
 var nouns_inflect = (function() {
 
 
-var zip = { irregulars:
+var zip = { NN:
    [ [ 'child', '=ren' ],
      [ 'person', 'people' ],
-     [ 'leaf', '<av_' ],
+     [ 'leaf', '<av&' ],
      [ 'database', '=s' ],
-     [ 'quiz', '=z_' ],
-     [ 'goose', 'ge_e' ],
+     [ 'quiz', '=z&' ],
+     [ 'goose', 'ge&e' ],
      [ 'phenomenon', '<a' ],
      [ 'barracks', '=' ],
      [ 'deer', '=' ],
      [ 'syllabus', '<i' ],
-     [ 'index', '<ic_' ],
-     [ 'appendix', '<ic_' ],
+     [ 'index', '<ic&' ],
+     [ 'appendix', '<ic&' ],
      [ 'criterion', '<a' ],
      [ 'man', '<en' ],
      [ 'sex', '=e<' ],
@@ -931,13 +940,13 @@ var zip = { irregulars:
      [ 'alumnus', '<i' ],
      [ 'bacillus', '<i' ],
      [ 'beau', '=x' ],
-     [ 'cactus', '=_' ],
+     [ 'cactus', '=&' ],
      [ 'château', '=x' ],
      [ 'corpus', '<ora' ],
      [ 'curriculum', '<a' ],
      [ 'die', '<ice' ],
-     [ 'echo', '=_' ],
-     [ 'embargo', '=_' ],
+     [ 'echo', '=&' ],
+     [ 'embargo', '=&' ],
      [ 'foot', 'feet' ],
      [ 'formula', '=s' ],
      [ 'genus', '<era' ],
@@ -945,37 +954,35 @@ var zip = { irregulars:
      [ 'hippopotamus', '<i' ],
      [ 'larva', '=e' ],
      [ 'libretto', '<ti' ],
-     [ 'loaf', '<av_' ],
-     [ 'matrix', '<ic_' ],
+     [ 'loaf', '<av&' ],
+     [ 'matrix', '<ic&' ],
      [ 'memorandum', '<a' ],
-     [ 'mosquito', '=_' ],
+     [ 'mosquito', '=&' ],
      [ 'opus', '<era' ],
      [ 'ovum', '<a' ],
      [ 'ox', '=en' ],
-     [ 'radius', '=_' ],
+     [ 'radius', '=&' ],
      [ 'referendum', '<a' ],
      [ 'tableau', '=x' ],
      [ 'that', '<ose' ],
-     [ 'that', '<__' ],
-     [ 'thief', '<ev_' ],
-     [ 'this', '<_e' ],
+     [ 'thief', '<ev&' ],
+     [ 'this', '<&e' ],
      [ 'tooth', 'teeth' ],
-     [ 'vita', '=e' ],
-     [ 'i', 'we' ],
-     [ 'he', 't=y' ],
-     [ 'she', 'they' ],
-     [ 'mine', 'ours' ],
-     [ 'myself', 'yourselv_' ],
-     [ 'myself', 'ourselv_' ],
-     [ 'yourself', 'themselv_' ],
+     [ 'vita', '=e' ] ],
+  PRP: [ [ 'i', 'we' ], [ 'he', 't=y' ], [ 'she', 'they' ] ],
+  PP:
+   [ [ 'mine', 'ours' ],
+     [ 'myself', 'yourselv&' ],
+     [ 'myself', 'ourselv&' ],
+     [ 'yourself', 'themselv&' ],
      [ 'his', 't<eirs' ],
-     [ 'himself', 'themselv_' ],
+     [ 'himself', 'themselv&' ],
      [ 'her', 't<eirs' ],
      [ 'hers', 't<irs' ],
-     [ 'herself', 'themselv_' ],
+     [ 'herself', 'themselv&' ],
      [ 'its', 'the<rs' ],
      [ 'theirs', '=' ],
-     [ 'themself', '<lv_' ] ],
+     [ 'themself', '<lv&' ] ],
   uc:
    [ 'oxen',
      'grammar',
@@ -1130,10 +1137,13 @@ var zip = { irregulars:
      'hertz' ] };
 
   var main = (function () {
-				return {
-					irregulars: zip.irregulars.map(function(a) { return helpFns.replBase(a,0,['es']); }),
-					uncountables: zip.uc.reduce(helpFns.toObj,{})
-				};
+				var repl = function(a) { return helpFns.replBase(a,0,['es']); }
+				zip.NN = zip.NN.map(repl);
+				zip.PRP = zip.PRP.map(repl);
+				zip.PP = zip.PP.map(repl);
+				zip.irregulars = zip.NN.concat(zip.PRP, zip.PP);
+				zip.uncountables = zip.uc.reduce(helpFns.toObj,{});
+				return zip;
 			})();
 
 
@@ -1218,8 +1228,8 @@ var zip = { entityBlacklist:
 				var _pps = {};
 				zip.pps.forEach(function(a) { _pps[a[0]] = zip.prps[a[1]]; });
 				return {
-					pps: _pps,
 					prps: zip.prps.reduce(helpFns.toObj, {}),
+					pps: _pps,
 					entityBlacklist: zip.entityBlacklist.reduce(helpFns.toObj, {}),
 					personBlacklist: zip.personBlacklist,
 				}
@@ -2459,7 +2469,10 @@ var abbreviations = (function() {
   'joomla',
   'jeopardy' ];
 
-  var main = zip;
+  var main = (function () {
+
+				return zip.concat(honorifics);
+			})();
 
 
 
@@ -2568,7 +2581,7 @@ var dates = (function() {
 				for (var w in zip.monthAbbrevs) { zip.months[w] = zip.monthAbbrevs[w] }
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthSearch + ',?';
+				res.monthsS = res.monthS + ',?';
 				return res;
 			})();
 
@@ -2585,7 +2598,9 @@ var numbers = (function() {
      nil: 0,
      a: 1,
      one: 1,
+     first: 1,
      two: 2,
+     second: 2,
      three: 3,
      third: 3,
      four: 4,
@@ -2640,6 +2655,7 @@ var numbers = (function() {
      ninetieth: 90 },
   multiple:
    { hundred: 100,
+     grand: 1000,
      thousand: 1000,
      million: 1000000,
      billion: 1000000000,
@@ -3534,8 +3550,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normalizations.normaler[s] && r < options.percentage) {
-        return normalizations.normaler[s] || s
+      if (normalisations.normaler[s] && r < options.percentage) {
+        return normalisations.normaler[s] || s
       } else {
         return s
       }
@@ -3548,8 +3564,8 @@ var normalize = (function() {
     options.percentage = options.percentage || 50
     var arr = str.split('').map(function(s) {
       var r = Math.random() * 100
-      if (normalizations.greek[s] && r < options.percentage) {
-        return normalizations.greek[s] || s
+      if (normalisations.greek[s] && r < options.percentage) {
+        return normalisations.greek[s] || s
       } else {
         return s
       }
@@ -4449,12 +4465,13 @@ var inflect = (function() {
     [/([rl])f$/i, '$1ves'],
     [/(alias|status)$/i, '$1es'],
     [/(bu)s$/i, '$1ses'],
+		[/(zer|avocad|hal|tornad|tuxed)o$/i, '$1os'],
     [/(al|ad|at|er|et|ed|ad)o$/i, '$1oes'],
     [/([ti])um$/i, '$1a'],
     [/([ti])a$/i, '$1a'],
     [/sis$/i, 'ses'],
     [/(?:([^f])fe|([lr])f)$/i, '$1ves'],
-    [/(hive)$/i, '$1s'],
+    [/(hive|stomach|epoch)$/i, '$1s'],
     [/([^aeiouy]|qu)y$/i, '$1ies'],
     [/(x|ch|ss|sh|s|z)$/i, '$1es'],
     [/(matr|vert|ind|cort)(ix|ex)$/i, '$1ices'],
@@ -4551,139 +4568,142 @@ var inflect = (function() {
 		/^(?!talis|.*hu)(.*)man$/i
 	];
 
-	var lang = 0;
-	var nouns_inflect = {};
-	var methods = {
-		pluralize: function(str, l) {
-			var low = str.toLowerCase()
-				//uncountable
-			if (uncountable_nouns[low]) {
-				return str
-			}
-			//is it already plural?
-			if(is_plural(low)===true) {
-				return str
-			}
-			//irregular
-			var found = irregulars.filter(function(r) {
-				return r[0] === low;
-			})
-			if (found[0]) {
-				if (titlecase(low) === str) { //handle capitalisation properly
-					return titlecase(found[0][1]);
-				} else {
-					return found[0][1];
-				}
-			}
-			//inflect first word of preposition-phrase
-			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-				var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
-				if (first) {
-					var better_first = pluralize(first);
-					return better_first + str.replace(first, '');
-				}
-			}
-			//regular
-			for (var i = 0; i < pluralize_rules.length; i++) {
-				if (str.match(pluralize_rules[i].reg)) {
-					return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
-				}
-			}
-		},
-
-		singularize: function(str, l) {
-			var low = str.toLowerCase();
-				//uncountable
-			if (uncountable_nouns[low]) {
-				return str;
-			}
-			//is it already singular?
-			if(is_plural(low) === false) {
-				return str;
-			}
-			//irregular
-			var found = irregulars.filter(function(r) {
-				return r[1] === low;
-			})
-			if (found[0]) {
-				if (titlecase(low) === str) { //handle capitalisation properly
-					return titlecase(found[0][0]);
-				} else {
-					return found[0][0];
-				}
-			}
-			//inflect first word of preposition-phrase
-			if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
-				var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
-				if (first && first[1]) {
-					var better_first = singularize(first[1]);
-					return better_first + str.replace(first[1], '');
-				}
-			}
-			//regular
-			for (var i = 0; i < singularize_rules.length; i++) {
-				if (str.match(singularize_rules[i].reg)) {
-					return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
-				}
-			}
-			return str;
-		},
-
-		is_plural: function(str, l) {
-			str=(str||'').toLowerCase()
-			//handle 'mayors of chicago'
-			var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
-			if (preposition && preposition[1]) {
-				str = preposition[1];
-			}
-			// if it's a known irregular case
-			for (var i = 0; i < irregulars.length; i++) {
-				if (irregulars[i][1] === str) {
-					return true;
-				}
-				if (irregulars[i][0] === str) {
-					return false;
-				}
-			}
-			for (var i = 0; i < plural_indicators.length; i++) {
-				if (str.match(plural_indicators[i])) {
-					return true;
-				}
-			}
-			for (var i = 0; i < singular_indicators.length; i++) {
-				if (str.match(singular_indicators[i])) {
-					return false;
-				}
-			}
-			// 'looks pretty plural' rules
-			if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+	var is_plural = function(str, l) {
+		str=(str||'').toLowerCase()
+		//handle 'mayors of chicago'
+		var preposition= str.match(/([a-z]*) (of|in|by|for) [a-z]/)
+		if (preposition && preposition[1]) {
+			str = preposition[1];
+		}
+		// if it's a known irregular case
+		for (var i = 0; i < nouns_inflect.irregulars.length; i++) {
+			if (nouns_inflect.irregulars[i][1] === str) {
 				return true;
 			}
-			return false;
-		},
+			if (nouns_inflect.irregulars[i][0] === str) {
+				return false;
+			}
+		}
+		for (var i = 0; i < plural_indicators.length; i++) {
+			if (str.match(plural_indicators[i])) {
+				return true;
+			}
+		}
+		for (var i = 0; i < singular_indicators.length; i++) {
+			if (str.match(singular_indicators[i])) {
+				return false;
+			}
+		}
+		// 'looks pretty plural' rules
+		if (str.match(/s$/) && !str.match(/ss$/) && str.length > 3) { //needs some lovin'
+			return true;
+		}
+		return false;
+	}
 
-		inflect: function(str, l) {
-			if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
-				return {
-					plural: str,
-					singular: str
-				};
-			}
-			if (is_plural(str)) {
-				return {
-					plural: str,
-					singular: singularize(str)
-				};
+	var pluralize = function(str, l) {
+		var low = str.toLowerCase()
+			//uncountable
+		if (nouns_inflect.uncountables[low]) {
+			return str
+		}
+		//is it already plural?
+		if(is_plural(low)===true) {
+			return str
+		}
+		//irregular
+		var found = nouns_inflect.irregulars.filter(function(r) {
+			return r[0] === low;
+		})
+		if (found[0]) {
+			if (titlecase(low) === str) { //handle capitalisation properly
+				return titlecase(found[0][1]);
 			} else {
-				return {
-					singular: str,
-					plural: pluralize(str)
-				};
+				return found[0][1];
 			}
+		}
+		//inflect first word of preposition-phrase
+		if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+			var first = (str.match(/^([a-z]*) (of|in|by|for) [a-z]/) || [])[1];
+			if (first) {
+				var better_first = pluralize(first);
+				return better_first + str.replace(first, '');
+			}
+		}
+		//regular
+		for (var i = 0; i < pluralize_rules.length; i++) {
+			if (str.match(pluralize_rules[i].reg)) {
+				return str.replace(pluralize_rules[i].reg, pluralize_rules[i].repl);
+			}
+		}
+	};
+
+	var singularize = function(str, l) {
+		var low = str.toLowerCase();
+			//uncountable
+		if (nouns_inflect.uncountables[low]) {
+			return str;
+		}
+		//is it already singular?
+		if(is_plural(low) === false) {
+			return str;
+		}
+		//irregular
+		var found = nouns_inflect.irregulars.filter(function(r) {
+			return r[1] === low;
+		})
+		if (found[0]) {
+			if (titlecase(low) === str) { //handle capitalisation properly
+				return titlecase(found[0][0]);
+			} else {
+				return found[0][0];
+			}
+		}
+		//inflect first word of preposition-phrase
+		if (str.match(/([a-z]*) (of|in|by|for) [a-z]/)) {
+			var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
+			if (first && first[1]) {
+				var better_first = singularize(first[1]);
+				return better_first + str.replace(first[1], '');
+			}
+		}
+		//regular
+		for (var i = 0; i < singularize_rules.length; i++) {
+			if (str.match(singularize_rules[i].reg)) {
+				return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
+			}
+		}
+		return str;
+	};
+
+	var inflect = function(str, l) {
+		if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
+			return {
+				plural: str,
+				singular: str
+			};
+		}
+		if (is_plural(str)) {
+			return {
+				plural: str,
+				singular: singularize(str)
+			};
+		} else {
+			return {
+				singular: str,
+				plural: pluralize(str)
+			};
 		}
 	}
 
-	return methods;
+	var main  = {
+    inflect: inflect,
+    is_plural: is_plural,
+    singularize: singularize,
+    pluralize: pluralize
+  }
+
+	return main;
 })();
 
 // console.log(inflect.singularize('kisses')=="kiss")
@@ -4748,7 +4768,8 @@ var Noun = function(str, sentence, word_i) {
       if (token.pos.tag == 'NNA') {return false}
       if (token.pos.tag == 'NNO') {return false}
       if (token.pos.tag == 'NNG') {return false}
-      if (token.pos.tag=='NNP') {return false}
+
+      if (token.pos.tag=='NNP') {return true}
     }
     // distinct capital is very good signal
     if (token.noun_capital) {return true}
@@ -4765,11 +4786,11 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.conjugate = function() {
-    return nouns_inflect.inflect(the.word);
+    return inflect.inflect(the.word);
   },
 
   the.is_plural = function() {
-    return nouns_inflect.is_plural(the.word);
+    return inflect.is_plural(the.word);
   }
 
   the.article = function() {
@@ -4777,14 +4798,14 @@ var Noun = function(str, sentence, word_i) {
   }
 
   the.pluralize = function() {
-    return nouns_inflect.pluralize(the.word);
+    return inflect.pluralize(the.word);
   }
 
   the.singularize = function() {
-    return nouns_inflect.singularize(the.word);
+    return inflect.singularize(the.word);
   }
 
-  // uses common first-name list + honourifics to guess if this noun is the name of a person
+  // uses common first-name list + honorifics to guess if this noun is the name of a person
   the.is_person = function() {
     var i;
     //remove things that are often named after people
@@ -4793,9 +4814,9 @@ var Noun = function(str, sentence, word_i) {
       if(the.word.match(new RegExp('\\b' + nouns.personBlacklist[i] + '\\b','i'))) {return false}
     }
       //see if noun has an honourific, like 'jr.'
-    l = honourifics.length;
+    l = honorifics.length;
     for (i = 0; i < l; i++) {
-      if (the.word.match(new RegExp('\\b' + honourifics[i] + '\\.?\\b', 'i'))) {return true}
+      if (the.word.match(new RegExp('\\b' + honorifics[i] + '\\.?\\b', 'i'))) {return true}
     }
     //see if noun has a first-name
     var names = Object.keys(firstnames)
@@ -4819,7 +4840,7 @@ var Noun = function(str, sentence, word_i) {
       })
       if (nameType('f')) {return 'she'}
       if (nameType('m')) {return 'he'}
-      //test some honourifics
+      //test some honorifics
       if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
       if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}
       //if it's a known unisex name, don't try guess it. be safe.
@@ -5227,22 +5248,22 @@ var Verb = function(str, next, last, token) {
   }
 
   the.conjugate = function() {
-    return verb_conjugate.irregulars(the.word);
+    return verb_conjugate(the.word);
   }
 
   the.to_past = function() {
     if (the.form === 'gerund') {
       return the.word;
     }
-    return verb_conjugate.irregulars(the.word).past;
+    return verb_conjugate(the.word).past;
   }
 
   the.to_present = function() {
-    return verb_conjugate.irregulars(the.word).present;
+    return verb_conjugate(the.word).present;
   }
 
   the.to_future = function() {
-    return 'will ' + verb_conjugate.irregulars(the.word).infinitive;
+    return 'will ' + verb_conjugate(the.word).infinitive;
   }
 
   //which conjugation
@@ -5254,7 +5275,7 @@ var Verb = function(str, next, last, token) {
       'gerund',
       'infinitive'
     ];
-    var forms = verb_conjugate.irregulars(the.word);
+    var forms = verb_conjugate(the.word);
     for (var i = 0; i < order.length; i++) {
       if (forms[order[i]] === the.word) {
 				return order[i]
@@ -5678,7 +5699,7 @@ var phrasal_verbs = (function () {
     past:"VBD",
     future:"VBF",
     gerund:"VBG",
-    infinitive:"VBP",
+    infinitive:"VBP"
   }
   var cache={}//cache individual verbs to speed it up
   var split, verb, particle, phrasal;
@@ -5778,23 +5799,7 @@ var lexicon = (function() {
      'secretary',
      'purpose',
      'event' ],
-  NNS:
-   [ 'leaves',
-     'quizzes',
-     'geese',
-     'indices',
-     'appendices',
-     'cactuses',
-     'echoes',
-     'embargoes',
-     'loaves',
-     'matrices',
-     'mosquitoes',
-     'radiuses',
-     'theses',
-     'thieves',
-     'these',
-     'friends' ],
+  NNS: [ 'friends' ],
   CC:
    [ 'how',
      'or',
@@ -6111,9 +6116,10 @@ var lexicon = (function() {
   RBR: [ 'more' ],
   RBS: [ 'most' ] }
   var unzip = function (cat){
+			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' })
 			var did = {
-				NN: m.nouns_inflect.irregulars.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
-				NNS: m.nouns_inflect.irregulars.map(function(a){ return a[1]; }),
+				NN: m.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
+				NNS: m.nouns_inflect.NN.map(function(a){ return a[1]; }),
 				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
 				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
@@ -6121,8 +6127,10 @@ var lexicon = (function() {
 			if (!cat) {
 				var lexiZip = {
 					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-					NNAB: m.honorifics.concat(m.abbreviations),
+					NNAB: m.abbreviations,
+					NNP: Object.keys(m.firstnames),
 					PRP: Object.keys(m.nouns.prps),
+					PP: Object.keys(m.nouns.pps),
 					CP: m.verbs_special.cps,
 					MD: m.verbs_special.mds,
 					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
@@ -6135,7 +6143,7 @@ var lexicon = (function() {
 							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 					),
 					//CD
-					NU: Object.keys(m.numbers.ones).concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
+					NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
 					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
 				}
 
@@ -6148,6 +6156,10 @@ var lexicon = (function() {
 				// zip to main
 				for (var key in zip) { toMain(key, zip) }
 
+				//add phrasal verbs - TODO FIXME
+				Object.keys(pm.phrasal_verbs).forEach(function(s) {
+					main[s] = pm.phrasal_verbs[s]
+				});
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
 					var c = pm.conjugate(v);
@@ -6534,51 +6546,62 @@ var pos = (function() {
 	}
 
 	//combine adjacent neighbours, and special cases
-	var combine_tags = function(sentence) {
-		var arr = sentence.tokens || [];
-		for (var i = 0; i <= arr.length; i++) {
-			var next = arr[i + 1];
-			if (arr[i] && next) {
-				var q = {
-					// 'joe smith' are both NN, for example
-					NN: (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ),
-					// merge NNP and NN, like firstname, lastname
-					NNP_NN: ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')),
-					// merge dates manually, which often have punctuation
-					CD: (tag === 'CD' && next.pos.tag ==='CD'),
-					//'hundred and fifty', 'march the 5th'
-					CDn: (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD'),
-					// merge abbreviations with nouns manually, eg. 'Joe jr.'
-					NNAB: ((tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')),
-					//'will walk' -> future-tense verb
-					future: (arr[i].normalised === 'will' && next.pos.parent === 'verb'),
-					// capitals surrounding a preposition	'United States of America'
-					NNc: (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital),
-					//capitals surrounding two prepositions	'Phantom of the Opera'
-					NNc2: (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital)
-				};
-				if (q._NN || q._NNP_NN || q.CD || q.CDn || q.NNAB || q.future || q.NNc || q.NNc2) {
-					arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
-					arr[i] = null;
-					if (q._NNP_NN) {
-						arr[i + 1].pos = schema['NNP'];
-					} else if (q.NNc || q.NNc2) {
-						arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
-						arr[i + 1] = null;
-						if (q.NNc2) {
-							arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
-							arr[i + 2] = null;
-						}
-					}
-				}
+  var combine_tags = function(sentence) {
+    var arr = sentence.tokens || [];
+    for (var i = 0; i <= arr.length; i++) {
+      var next = arr[i + 1];
+			var merge = function() {
+				arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
+        arr[i] = null;
 			}
-		}
-		sentence.tokens = arr.filter(function(r) {
-			return r;
-		})
-		return sentence;
-	}
-
+      if (arr[i] && next) {
+        var tag = arr[i].pos.tag;
+        //'joe smith' are both NN, for example
+        if (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ) {
+          merge();
+        }
+        //merge NNP and NN, like firstname, lastname
+        else if ((tag === "NNP" && next.pos.tag ==="NN") || (tag==="NN" && next.pos.tag==="NNP")) {
+          merge();
+          arr[i + 1].pos = schema['NNP'];
+        }
+        //merge dates manually, which often have punctuation
+        else if (tag === "CD" && next.pos.tag ==="CD") {
+          merge();
+        }
+        //merge abbreviations with nouns manually, eg. "Joe jr."
+        else if ( (tag === "NNAB" && next.pos.parent ==="noun") || (arr[i].pos.parent==="noun" && next.pos.tag==="NNAB")) {
+          merge();
+        }
+        //'will walk' -> future-tense verb
+        else if (arr[i].normalised === "will" && next.pos.parent === "verb") {
+          merge();
+        }
+        //'hundred and fifty', 'march the 5th'
+        else if (tag === "CD" && (next.normalised === "and" || next.normalised === "the") && arr[i + 2] && arr[i + 2].pos.tag === "CD") {
+          merge();
+        }
+        //capitals surrounding a preposition  'United States of America'
+        else if (tag=="NN" && arr[i].noun_capital && (next.normalised == "of" || next.normalised == "and") && arr[i + 2] && arr[i + 2].noun_capital) {
+          merge();
+          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+          arr[i + 1] = null;
+        }
+        //capitals surrounding two prepositions  'Phantom of the Opera'
+        else if (arr[i].noun_capital && next.normalised == "of" && arr[i + 2] && arr[i + 2].pos.tag == "DT" && arr[i + 3] && arr[i + 3].noun_capital) {
+          merge();
+          arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+          arr[i + 1] = null;
+          arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
+          arr[i + 2] = null;
+        }
+      }
+    }
+    sentence.tokens = arr.filter(function(r) {
+      return r
+    })
+    return sentence
+  }
 
 	//some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
 	//they should be combined with the verb, sometimes.
