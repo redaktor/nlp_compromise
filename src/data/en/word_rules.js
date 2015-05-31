@@ -122,7 +122,7 @@ var word_rules = (function() {
 				for (var k in zip) {
 					zip[k].forEach(function(r){
 						a.push({
-							reg: new RegExp(r, "i"),
+							reg: new RegExp(r, 'i'),
 							pos: k
 						});
 					});

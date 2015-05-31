@@ -6,8 +6,7 @@ var pos_data = (function() {
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
 var zip = { particles: 
-   [ 'do',
-     'together',
+   [ 'together',
      'in',
      'out',
      'on',
@@ -32,6 +31,7 @@ var zip = { particles:
      'ahead',
      'upon',
      'aback',
+     'back',
      'forth',
      'along',
      'apart',

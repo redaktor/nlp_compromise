@@ -95,7 +95,7 @@ exports["noun.pronoun"] = function(test) {
   test.deepEqual(nlp.noun("Tony Danza").pronoun(),"he")
   test.deepEqual(nlp.noun("Tanya Danza").pronoun(),"she")
   test.deepEqual(nlp.noun("mrs. Taya Danza").pronoun(),"she")
-  test.deepEqual(nlp.noun("Gool Tanya Danza").pronoun(),"she")
+  test.deepEqual(nlp.noun("Gool Tanya Danza").pronoun(),"she") // TODO FIXME
   test.deepEqual(nlp.noun("Illi G. Danza").pronoun(),"she")
   test.deepEqual(nlp.noun("Jill").pronoun(),"she")
   // test.deepEqual(nlp.noun("John Fisher & sons").pronoun(),"it")
@@ -236,8 +236,8 @@ exports["conjugate_future"] = function(test) {
   test.deepEqual(convert("he went to the store"), "he will go to the store")
   test.deepEqual(convert("she walked backwards"), "she will walk backwards")
   // test.deepEqual(convert("everyone said he was cool"), "everyone will say he is cool") //hard
-  test.deepEqual(convert("he crawls to the back door"), "he will crawl to the back door")
-  test.deepEqual(convert("i am slouching forward"), "i will be slouching forward")
+  test.deepEqual(convert("he crawls to the back door"), "he will crawl to the back door") // TODO FIXME
+  test.deepEqual(convert("i am slouching forward"), "i will be slouching forward") // TODO FIXME
   test.deepEqual(convert("i will slouch forward"), "i will slouch forward") //future-future //FIX
   test.done()
 }
@@ -265,7 +265,7 @@ exports["conjugate_past"] = function(test) {
   test.deepEqual(convert("she will walk backwards"), "she walked backwards")
   test.deepEqual(convert("everyone says he is cool"), "everyone said he was cool")
   test.deepEqual(convert("he will crawl to the back door"), "he crawled to the back door")
-  test.deepEqual(convert("i am slouching forward"), "i was slouching forward")
+  test.deepEqual(convert("i am slouching forward"), "i was slouching forward") // TODO FIXME
   test.deepEqual(convert("he went to the store"), "he went to the store") //past-past
   test.done()
 }
@@ -280,6 +280,7 @@ exports["verb_conjugate"] = function(test) {
   ]
 
   function isequal(o1, o2) {
+		console.log( o2 );
     tenses.forEach(function(t) {
       test.deepEqual(o1[t], o2[t])
     })
@@ -455,8 +456,8 @@ exports["negation"] = function(test) {
   test.deepEqual(negate("he will always be a fool"), "he won't always be a fool")
   test.deepEqual(negate("he always will be a fool"), "he never will be a fool")
   test.deepEqual(negate("he will john"), "he won't john")
-  test.deepEqual(negate("he won't john"), "he will john")
-  test.deepEqual(negate("the groom will"), "the groom won't")
+  test.deepEqual(negate("he won't john"), "he will john") // TODO FIXME
+  test.deepEqual(negate("the groom will"), "the groom won't") 
   // [infinitive verb] - walk -> don't walk
   test.deepEqual(negate("i say"), "i don't say")
   test.deepEqual(negate("i think everything will be ok"), "i don't think everything will be ok")
@@ -464,7 +465,7 @@ exports["negation"] = function(test) {
   test.deepEqual(negate("he will go to the store"), "he won't go to the store")
   test.deepEqual(negate("she will watch the movie"), "she won't watch the movie")
   //[present-tense verb] - add 'didn't', conjugate verb
-  test.deepEqual(negate("she walks"), "she doesn't walk")
+  test.deepEqual(negate("she walks"), "she doesn't walk") // TODO FIXME
   test.deepEqual(negate("he goes to the store"), "he doesn't go to the store")
   test.deepEqual(negate("she watches the movie"), "she doesn't watch the movie")
   test.deepEqual(negate("she clutches the wheel"), "she doesn't clutch the wheel")
@@ -481,9 +482,9 @@ exports["negation"] = function(test) {
   test.deepEqual(negate("tom was a goofball"), "tom wasn't a goofball")
   test.deepEqual(negate("he will be a lion"), "he won't be a lion")
   // already negative
-  test.deepEqual(negate("he didn't go to the store"), "he did go to the store")
-  test.deepEqual(negate("she didn't watch the movie"), "she did watch the movie")
-  test.deepEqual(negate("he will not be a lion"), "he will be a lion")
+  test.deepEqual(negate("he didn't go to the store"), "he did go to the store") // TODO FIXME
+  test.deepEqual(negate("she didn't watch the movie"), "she did watch the movie") // TODO FIXME
+  test.deepEqual(negate("he will not be a lion"), "he will be a lion") // TODO FIXME
   // other stuff
   test.deepEqual(negate("he will be the best"), "he won't be the best")
   test.deepEqual(negate("he is the best"), "he isn't the best")

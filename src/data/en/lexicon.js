@@ -20,43 +20,8 @@ var lexicon = (function() {
 
   var main = {};
   var zip = { EX: [ 'there' ],
-  NN: 
-   [ 'cleanliness',
-     'naivety',
-     'thing',
-     'stuff',
-     'fact',
-     'west',
-     'western',
-     'east',
-     'eastern',
-     'north',
-     'northern',
-     'south',
-     'southern',
-     'today',
-     'yesterday',
-     'tomorrow',
-     'era',
-     'century',
-     'center',
-     'house',
-     'park',
-     'square',
-     'centre',
-     'memorial',
-     'school',
-     'bridge',
-     'university',
-     'college',
-     'foundation',
-     'institute',
-     'club',
-     'museum',
-     'hall',
-     'arena',
-     'stadium',
-     'president',
+  NN:
+   [ 'president',
      'dollar',
      'student',
      'patent',
@@ -69,7 +34,7 @@ var lexicon = (function() {
      'purpose',
      'event' ],
   NNS: [ 'friends' ],
-  CC: 
+  CC:
    [ 'how',
      'or',
      'while',
@@ -89,22 +54,10 @@ var lexicon = (function() {
      'therefore',
      'plus',
      'versus' ],
-  VBD: [ 'had', 'walked', 'where\'d', 'when\'d', 'how\'d', 'what\'d' ],
+  VBD: [ 'walked', 'where\'d', 'when\'d', 'how\'d', 'what\'d' ],
   VBN: [ 'born' ],
-  VBG: 
-   [ 'am',
-     'having',
-     'giving',
-     'leaving',
-     'driving',
-     'forgiving',
-     'proving',
-     'striving',
-     'weaving',
-     'according',
-     'resulting',
-     'staining' ],
-  DT: 
+  VBG: [ 'am', 'according', 'resulting', 'staining' ],
+  DT:
    [ 'this',
      'that',
      'these',
@@ -144,7 +97,7 @@ var lexicon = (function() {
      'de',
      'du',
      'el' ],
-  IN: 
+  IN:
    [ 'in',
      'out',
      'on',
@@ -203,27 +156,19 @@ var lexicon = (function() {
      'unlike',
      'towards',
      'besides' ],
-  PP: 
-   [ 'mine',
-     'my',
+  PP:
+   [ 'my',
      'myself',
-     'yours',
      'your',
      'yourself',
      'yourselves',
-     'his',
      'himself',
-     'her',
      'hers',
      'herself',
-     'its',
      'itself',
-     'our',
      'ours',
      'ourselves',
      'theirs',
-     'their',
-     'them',
      'themself',
      'themselves',
      'none',
@@ -236,7 +181,7 @@ var lexicon = (function() {
      'everything',
      'who',
      'whom' ],
-  UH: 
+  UH:
    [ 'uhh',
      'uh-oh',
      'ugh',
@@ -281,7 +226,7 @@ var lexicon = (function() {
      'wow',
      'nope' ],
   FW: [ 'etc' ],
-  RB: 
+  RB:
    [ 'when',
      'whence',
      'where',
@@ -385,7 +330,8 @@ var lexicon = (function() {
   RBR: [ 'more' ],
   RBS: [ 'most' ] }
   var unzip = function (cat){
-			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' }) 
+			if (typeof window != 'undefined' && window.hasOwnProperty('nlp')) { m = window; pm = window; }
+			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' })
 			var did = {
 				NN: m.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
 				NNS: m.nouns_inflect.NN.map(function(a){ return a[1]; }),
@@ -393,38 +339,43 @@ var lexicon = (function() {
 				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
 				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
 			}
+			var lexiZip = {
+				NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
+				NNAB: m.abbreviations,
+				NNP: Object.keys(m.firstnames),
+				PRP: Object.keys(m.nouns.prps),
+				PP: Object.keys(m.nouns.pps),
+				CP: m.verbs_special.cps,
+				MD: m.verbs_special.mds,
+				VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
+				VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
+				JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),
+				JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }),
+				JJ: m.adjectives_demonym.concat(
+						Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs),
+						Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
+						Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
+				),
+				//CD
+				NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
+				DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
+			}
+			//::NODE::
+			if (cat===1) {return [did,lexiZip]}
+			//::
 			if (!cat) {
-				var lexiZip = {
-					NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-					NNAB: m.abbreviations,
-					NNP: Object.keys(m.firstnames),
-					PRP: Object.keys(m.nouns.prps),
-					PP: Object.keys(m.nouns.pps),
-					CP: m.verbs_special.cps,
-					MD: m.verbs_special.mds,
-					VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
-					VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
-					JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),
-					JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }),
-					JJ: m.adjectives_demonym.concat(
-							Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs),
-							Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
-							Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
-					),
-					//CD
-					NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
-					DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
-				}
-
 				var toMain = function(key, o) {
-					o[key].forEach(function(w) { if (!main[w]) {main[w] = key} });
+					o[key].forEach(function(w) { if (w && !main[w]) {main[w] = key} });
 				}
 				// irregulars to main
 				for (var key in did) { toMain(key, did) }
 				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
-				for (var key in zip) { toMain(key, zip) }
-				
+				for (var key in zip) {
+
+					toMain(key, zip);
+				}
+
 				//add phrasal verbs - TODO FIXME
 				Object.keys(pm.phrasal_verbs).forEach(function(s) {
 					main[s] = pm.phrasal_verbs[s]
@@ -456,8 +407,6 @@ var lexicon = (function() {
 						main[s] = main[s] || 'JJS'
 					}
 				});
-
-
 
 				return main;
 			}

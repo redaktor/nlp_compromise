@@ -1971,18 +1971,18 @@ var main = {
 			{ en: 'arena', meta: {personBlacklist: ['en']} },
 			{ en: 'stadium', meta: {personBlacklist: ['en']} },
 			// nouns that shouldnt be seen as a verb
-			{ en: 'president' },
-			{ en: 'dollar' },
-			{ en: 'student' },
-			{ en: 'patent' },
-			{ en: 'funding' },
-			{ en: 'morning' },
-			{ en: 'banking' },
-			{ en: 'ceiling' },
-			{ en: 'energy' },
-			{ en: 'secretary' },
-			{ en: 'purpose' },
-			{ en: 'event' }
+			{ en: 'president', meta: {noVerb: ['en']} },
+			{ en: 'dollar', meta: {noVerb: ['en']} },
+			{ en: 'student', meta: {noVerb: ['en']} },
+			{ en: 'patent', meta: {noVerb: ['en']} },
+			{ en: 'funding', meta: {noVerb: ['en']} },
+			{ en: 'morning', meta: {noVerb: ['en']} },
+			{ en: 'banking', meta: {noVerb: ['en']} },
+			{ en: 'ceiling', meta: {noVerb: ['en']} },
+			{ en: 'energy', meta: {noVerb: ['en']} },
+			{ en: 'secretary', meta: {noVerb: ['en']} },
+			{ en: 'purpose', meta: {noVerb: ['en']} },
+			{ en: 'event', meta: {noVerb: ['en']} }
 		]
 	},
 	

@@ -25,7 +25,6 @@ var honorifics = (function() {
   'sgt',
   'cpl',
   'maj',
-  'miss',
   'misses',
   'mister',
   'sir',

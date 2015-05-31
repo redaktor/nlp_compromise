@@ -2,6 +2,7 @@
 
 // TODO - LOCALIZATION NOT DONE YET! [redaktor fork changes]
 module.exports = function(grunt) {
+	var fs = require('fs');
 	var lang = 'en';
 	var dPath = './src/data/'+lang+'/';
 	var pPath = './src/parents/';
@@ -73,11 +74,18 @@ module.exports = function(grunt) {
     './src/spot.js',
     //pull it all together..
     './index.js'
-  ]
-
+  ];
+	
+	var filesCompressed = files.map(function(p) {
+		var zippedP = p.replace('.js', '.min.js');
+		return (grunt.file.exists(zippedP)) ? zippedP : p;
+	});
+	
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('./package.json'),
+		
+		// TODO BUILD all languages' data modules
     concat: {
       options: {
         banner: '/*! <%= pkg.name %>  <%= pkg.version %>  by @spencermountain <%= grunt.template.today("yyyy-mm-dd") %>  <%= pkg.license%> */\nvar nlp = (function() {\n',
@@ -91,18 +99,23 @@ module.exports = function(grunt) {
         src: files,
         dest: './client_side/nlp.js',
         nonull: true
+      },
+			zipped: {
+        src: filesCompressed,
+        dest: './client_side/nlpCompressed.js',
+        nonull: true
       }
     },
-
+		
     uglify: {
       do :{
-        src: ['./client_side/nlp.js'],
+        src: ['./client_side/nlpCompressed.js'],
         dest: './client_side/nlp.min.js'
       },
       options: {
         preserveComments: false,
         mangle: true,
-        banner: " /*nlp_comprimise by @spencermountain in 2015*/\n",
+        banner: ' /*nlp_comprimise by @spencermountain in 2015*/\n',
         compress: {
           drop_console: true,
           dead_code: true,
@@ -124,7 +137,7 @@ module.exports = function(grunt) {
         disallowMixedSpacesAndTabs: true,
         disallowEmptyBlocks: true,
         disallowFunctionDeclarations: true,
-        disallowImplicitTypeConversion: ["numeric", "boolean", "binary", "string"],
+        disallowImplicitTypeConversion: ['numeric', 'boolean', 'binary', 'string'],
         requireAnonymousFunctions: true,
         requireOperatorBeforeLineBreak: true,
         disallowTrailingWhitespace: true
@@ -148,10 +161,10 @@ module.exports = function(grunt) {
     }
 
   });
-  // Load the plugin that provides the "uglify" task.
+  // Load the plugins
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks("grunt-jscs");
-  grunt.registerTask('default', ['concat', 'jscs', /*'jshint',*/ 'uglify']);
+  grunt.loadNpmTasks('grunt-jscs');
+  grunt.registerTask('default', ['concat'/*, 'concatClientCompressed'*/, 'jscs', /*'jshint',*/ 'uglify']);
 };
