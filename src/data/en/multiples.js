@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var multiples = (function() {
   var zip = { 'ad hominem': 'NN',
   'new york': 'NN',

@@ -1,6 +1,9 @@
 /* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var normalisations = (function() {
   var zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',

@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var numbers = (function() {
   var zip = { ones: 
    { zero: 0,

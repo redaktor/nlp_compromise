@@ -1,6 +1,9 @@
 
 var lexicon = (function() {
+  
+//::NODE::
   var lang = 'en';
+//::
 //::NODE::
   var m = {};
   var pm = {};
@@ -147,7 +150,6 @@ var lexicon = (function() {
      'throughout',
      'than',
      'via',
-     '\'o',
      'despite',
      'above',
      'below',
@@ -155,7 +157,27 @@ var lexicon = (function() {
      'whereas',
      'unlike',
      'towards',
-     'besides' ],
+     'besides',
+     'amidst',
+     'amongst',
+     'apropos',
+     'atop',
+     'barring',
+     'chez',
+     'circa',
+     'mid',
+     'midst',
+     'notwithstanding',
+     'qua',
+     'sans',
+     'vis-a-vis',
+     'thru',
+     'till',
+     'versus',
+     'w/o',
+     '\'o',
+     'o\'',
+     'a\'' ],
   PP:
    [ 'my',
      'myself',

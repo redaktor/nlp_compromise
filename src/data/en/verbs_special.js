@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var verbs_special = (function() {
   
 //::NODE::

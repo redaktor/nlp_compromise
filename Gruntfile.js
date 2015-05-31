@@ -184,7 +184,8 @@ module.exports = function(grunt) {
     	if (p.indexOf(C.path.nls) > -1 && (p.length-minStr.length) === p.indexOf(minStr)) grunt.file.delete(p);
 		});
 		// delete "zipped" concat file (minimized now)
-		grunt.file.delete(C.path.zip);
+		//grunt.file.delete(C.path.zip);
+		grunt.log.writeln('File'['white'], './client_side/nlp.min.js'['cyan'], 'was created before. Now tidy. '['white']).ok();
 	});
 	
   grunt.registerTask('default', ['concat', 'jscs', /*'jshint',*/ 'uglify', 'cleanup']);

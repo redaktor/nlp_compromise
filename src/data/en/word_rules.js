@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var word_rules = (function() {
   var zip = { JJ: 
    [ '.[cts]hy$',

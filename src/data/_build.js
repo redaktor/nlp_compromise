@@ -205,7 +205,7 @@ function generateLanguage(lang) {
 	};
 	var allPossibles = allPossible();
 
-	var langStr = "var lang = '".concat(lang, "';");
+	var langStr = "\n//::NODE::\n  var lang = '".concat(lang, "';\n//::");
 	// generate the DATA
 	var generators = [
 

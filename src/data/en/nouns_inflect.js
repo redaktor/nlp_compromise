@@ -1,6 +1,9 @@
 /* singular nouns having irregular plurals */
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var nouns_inflect = (function() {
   
 //::NODE::

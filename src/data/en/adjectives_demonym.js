@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var adjectives_demonym = (function() {
   var zip = [ 'afghan',
   'albanian',

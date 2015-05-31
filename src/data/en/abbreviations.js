@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var abbreviations = (function() {
   var zip = [ 'ave',
   'blvd',

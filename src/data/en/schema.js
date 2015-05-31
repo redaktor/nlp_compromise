@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var schema = (function() {
   var zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
   tags: 

@@ -1,6 +1,9 @@
 // types: infinitive, gerund, past, present, doer, future 
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var verbs_conjugate = (function() {
   
 //::NODE::

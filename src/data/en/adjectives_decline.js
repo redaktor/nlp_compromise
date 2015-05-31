@@ -2,7 +2,10 @@
 // 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
 // 1 means 'default behavior'
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var adjectives_decline = (function() {
   
 //::NODE::

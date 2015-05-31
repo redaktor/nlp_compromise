@@ -179,7 +179,7 @@ var pos = (function() {
 			setPos('NN', 'determiner-verb');
 		}
 		//copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
-		if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
+		if (last && last.pos.tag === "CP" && token.pos.tag !== "DT" && token.pos.tag !== "RB" && token.pos.tag !== "PRP" && token.pos.parent !== "adjective" && token.pos.parent !== "value") {
 			setPos('JJ', 'copula-adjective');
 		}
 		//copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
@@ -195,6 +195,11 @@ var pos = (function() {
 		if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
 			setPos('JJ', 'determiner-adjective-noun');
 		}
+		
+		//where's he gone -> gone=VB, not JJ
+    if (last && last.pos.tag==="PRP" && token.pos.tag==="JJ" ) {
+			setPos('VB', 'adjective-after-pronoun');
+    }
 
 		return token;
 	}
@@ -207,21 +212,69 @@ var pos = (function() {
 				before = arr.slice(0, i);
 				after = arr.slice(i + 1, arr.length);
 				fix = [{
-					text: '',
+					text: arr[i].text,
 					normalised: pos_data.contractions[arr[i].normalised][0],
 					start: arr[i].start
 				}, {
-					text: arr[i].text,
+					text: '',
 					normalised: pos_data.contractions[arr[i].normalised][1],
 					start: undefined
 				}];
 				arr = before.concat(fix);
 				arr = arr.concat(after);
-				return handle_contractions(arr);
+				return handle_contractions(arr); // recursive
 			}
 		}
 		return arr;
 	}
+	
+	//these contractions require (some) grammatical knowledge to disambig properly (e.g "he's"=> ['he is', 'he was']
+  var handle_ambiguous_contractions = function(arr) {
+    var ambiguous_contractions={
+      "he's":"he",
+      "she's":"she",
+      "it's":"it",
+      "who's":"who",
+      "what's":"what",
+      "where's":"where",
+      "when's":"when",
+      "why's":"why",
+      "how's":"how",
+    }
+    var before, after, fix;
+    for (var i = 0; i < arr.length; i++) {
+      if (ambiguous_contractions.hasOwnProperty(arr[i].normalised)) {
+        before = arr.slice(0, i);
+        after = arr.slice(i + 1, arr.length);
+        // choose which verb this contraction should have..
+        var chosen= "is";
+        // look for the next verb, and if it's past-tense (he's walked -> he has walked)
+        for(var o=i+1; o<arr.length; o++){
+          if(arr[o] && arr[o].pos && arr[o].pos.tag=="VBD"){ // past tense
+            chosen="has";
+            break;
+          }
+        }
+        fix = [{
+          text: arr[i].text,
+          normalised: ambiguous_contractions[arr[i].normalised], // the "he" part
+          start: arr[i].start,
+          pos: parts_of_speech[lexicon[ambiguous_contractions[arr[i].normalised]]],
+          pos_reason:"ambiguous_contraction"
+        }, {
+          text: "",
+          normalised: chosen, //is,was,or have
+          start: undefined,
+          pos: parts_of_speech[lexicon[chosen]],
+          pos_reason:"silent_contraction"
+        }];
+        arr = before.concat(fix);
+        arr = arr.concat(after);
+        return handle_ambiguous_contractions(arr); // recursive
+      }
+    }
+    return arr
+  }
 
 	////////////////
 	///party-time//
@@ -306,7 +359,11 @@ var pos = (function() {
 				}
 				return token;
 			})
-
+			
+			//split-out more difficult contractions, like "he's"->["he is", "he was"]
+			// (now that we have enough pos data to do this)
+			sentence.tokens = handle_ambiguous_contractions(sentence.tokens);
+			
 			// third pass, seek verb or noun phrases after their signals
 			var need = null;
 			var reason = '';
@@ -458,3 +515,17 @@ var pos = (function() {
 // console.log(pos('i think Tony Danza is cool and he is golden.').sentences[0].tokens[6].analysis.reference_to())
 // console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
 // console.log(pos('Tina grabbed her shoes. She is lovely.').sentences[0].tokens[0].analysis.referenced_by())
+
+// console.log(pos("it's gotten the best features").sentences[0].tokens[1].normalised=="has") //bug
+
+// console.log(pos("he's fun").sentences[0].tokens[1].normalised=="is")
+// console.log(pos("she's walking").sentences[0].tokens[1].normalised=="is")
+// console.log(pos("he's walked").sentences[0].tokens[1].normalised=="has")
+// console.log(pos("it's got the best features").sentences[0].tokens[1].normalised=="has")
+// console.log(pos("it's achieved each goal").sentences[0].tokens[1].normalised=="has")
+// console.log(pos("where's waldo").sentences[0].tokens[1].normalised=="is")
+
+// console.log(pos("where's he going?").sentences[0].tokens[1].normalised=="is")
+// console.log(pos("where's the pencil?").sentences[0].tokens[1].normalised=="is")
+// console.log(pos("where's he disappeared to?").sentences[0].tokens[1].normalised=="has")
+// console.log(pos("where's the pencil disappeared to?").sentences[0].tokens[1].normalised=="has")

@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var negate_data = (function() {
   var zip = { everyone: 'no one',
   everybody: 'nobody',

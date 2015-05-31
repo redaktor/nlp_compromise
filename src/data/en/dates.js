@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var dates = (function() {
   var zip = { months: 
    { january: 0,

@@ -1,7 +1,10 @@
 /* regex rules for verb conjugation
 used in combination with the generic "fallback" method */
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var verb_rules = (function() {
   
 //::NODE::

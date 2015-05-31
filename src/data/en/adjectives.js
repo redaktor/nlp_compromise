@@ -1,5 +1,8 @@
 
-var lang = 'en';
+
+//::NODE::
+  var lang = 'en';
+//::
 var adjectives = (function() {
   var zip = [ 'wrong',
   'public',
