@@ -1,76 +1,83 @@
 // build script for the client-side file
-// TODO - LOCALIZATION NOT DONE YET! [redaktor fork changes]
 module.exports = function(grunt) {
+	// TODO - LOCALIZATION NOT DONE YET! [redaktor fork changes]
 	var lang = 'en';
-	var cMainPath = './client_side/nlp.js';
-	var cZipPath = './client_side/nlp.zip.js';
-	var cMinPath = './client_side/nlp.min.js';
-	
-	var dSrcPath = './src/data/';
-	var dPath = dSrcPath+lang+'/';
-	var pPath = './src/parents/';
-	var mPath = './src/methods/';
+	var C = {
+		banner: {
+			max: '/*! <%= pkg.name %>  <%= pkg.version %>  by @spencermountain <%= grunt.template.today("yyyy-mm-dd") %>  <%= pkg.license%> */\n',
+			min: 	' /*nlp_comprimise by @spencermountain in 2015*/\n'
+		},
+		path: {
+			data: './src/data/',
+			parents: './src/parents/',
+			methods: './src/methods/',
+			main: './client_side/nlp.js',
+			zip: './client_side/nlp.zip.js',
+			min: './client_side/nlp.min.js'
+		}
+	};
+	C.path.nls = C.path.data+lang+'/';
 	
   var files = [
     // helpers
-    dPath+'helpFns.js',
+    C.path.nls+'helpFns.js',
     // lexicon data
-    dPath+'multiples.js',
-    dPath+'verbs_conjugate.js',
-    dPath+'verbs_special.js',
-    dPath+'verbs.js',
-    dPath+'nouns_inflect.js',
-    dPath+'nouns.js',
-    dPath+'adjectives_decline.js',
-    dPath+'adjectives_demonym.js',
-    dPath+'adjectives.js',
-		dPath+'adverbs_decline.js',
-    dPath+'abbreviations.js',
-    dPath+'honorifics.js',
-    dPath+'dates.js',
-    dPath+'numbers.js',
-    dPath+'firstnames.js',
+    C.path.nls+'multiples.js',
+    C.path.nls+'verbs_conjugate.js',
+    C.path.nls+'verbs_special.js',
+    C.path.nls+'verbs.js',
+    C.path.nls+'nouns_inflect.js',
+    C.path.nls+'nouns.js',
+    C.path.nls+'adjectives_decline.js',
+    C.path.nls+'adjectives_demonym.js',
+    C.path.nls+'adjectives.js',
+		C.path.nls+'adverbs_decline.js',
+    C.path.nls+'abbreviations.js',
+    C.path.nls+'honorifics.js',
+    C.path.nls+'dates.js',
+    C.path.nls+'numbers.js',
+    C.path.nls+'firstnames.js',
     // rules and schema
-    dPath+'pos_data.js',
-    dPath+'negate_data.js',
-    dPath+'word_rules.js',
-    dPath+'verb_rules.js',
-    dPath+'normalisations.js',
-    dPath+'suffixes.js',
+    C.path.nls+'pos_data.js',
+    C.path.nls+'negate_data.js',
+    C.path.nls+'word_rules.js',
+    C.path.nls+'verb_rules.js',
+    C.path.nls+'normalisations.js',
+    C.path.nls+'suffixes.js',
 		
-    dPath+'schema.js',
+    C.path.nls+'schema.js',
     // methods
-    mPath+'tokenization/sentence.js',
-    mPath+'tokenization/ngram.js',
-    mPath+'tokenization/tokenize.js',
-    mPath+'transliteration/unicode_normalisation.js',
-    mPath+'syllables/syllable.js',
-    mPath+'localization/britishize.js',
+    C.path.methods+'tokenization/sentence.js',
+    C.path.methods+'tokenization/ngram.js',
+    C.path.methods+'tokenization/tokenize.js',
+    C.path.methods+'transliteration/unicode_normalisation.js',
+    C.path.methods+'syllables/syllable.js',
+    C.path.methods+'localization/britishize.js',
     // values
-    pPath+'value/to_number.js',
-    pPath+'value/date_extractor.js',
-    pPath+'value/index.js',
+    C.path.parents+'value/to_number.js',
+    C.path.parents+'value/date_extractor.js',
+    C.path.parents+'value/index.js',
     // nouns
-    pPath+'noun/indefinite_article.js',
-    pPath+'noun/conjugate/inflect.js',
-    pPath+'noun/index.js',
+    C.path.parents+'noun/indefinite_article.js',
+    C.path.parents+'noun/conjugate/inflect.js',
+    C.path.parents+'noun/index.js',
     // adverbs
-    pPath+'adverb/conjugate/to_adjective.js',
-    pPath+'adverb/index.js',
+    C.path.parents+'adverb/conjugate/to_adjective.js',
+    C.path.parents+'adverb/index.js',
     // verbs
-    pPath+'verb/conjugate/to_doer.js',
-    pPath+'verb/conjugate/conjugate.js',
-    pPath+'verb/index.js',
+    C.path.parents+'verb/conjugate/to_doer.js',
+    C.path.parents+'verb/conjugate/conjugate.js',
+    C.path.parents+'verb/index.js',
     // adjectives
-    pPath+'adjective/conjugate/to_noun.js',
-    pPath+'adjective/conjugate/to_comparative.js',
-    pPath+'adjective/conjugate/to_superlative.js',
-    pPath+'adjective/conjugate/to_adverb.js',
-    pPath+'adjective/index.js',
+    C.path.parents+'adjective/conjugate/to_noun.js',
+    C.path.parents+'adjective/conjugate/to_comparative.js',
+    C.path.parents+'adjective/conjugate/to_superlative.js',
+    C.path.parents+'adjective/conjugate/to_adverb.js',
+    C.path.parents+'adjective/index.js',
 		
-    './src/data/lexicon/phrasal_verbs.js', // TODO
-    pPath+'parents.js',
-    dPath+'lexicon.js',
+    './src/data/lexicon/phrasal_verbs.js', // TODO FIXME
+    C.path.parents+'parents.js',
+    C.path.nls+'lexicon.js',
 		
     './src/sentence.js',
     './src/section.js',
@@ -81,7 +88,7 @@ module.exports = function(grunt) {
   ];
 	
 	// generate all language dependent data modules first ...
-	require(dSrcPath+'_build')();
+	require(C.path.data+'_build')();
 	
 	// use minimized files for uglify
 	var filesCompressed = files.map(function(p) {
@@ -95,7 +102,7 @@ module.exports = function(grunt) {
 			
     concat: {
       options: {
-        banner: '/*! <%= pkg.name %>  <%= pkg.version %>  by @spencermountain <%= grunt.template.today("yyyy-mm-dd") %>  <%= pkg.license%> */\nvar nlp = (function() {\n',
+        banner: (C.banner.max + 'var nlp = (function() {\n'),
 				process: function(src, filepath) {
 					// remove node.js only and trailing whitespace
           return src.replace(/^.*\/\/::NODE::[\s\S]*?.*[\s\S]*?\/\/::.*?$/gm, '').replace(/[ \t]+$/gm, '');
@@ -104,25 +111,25 @@ module.exports = function(grunt) {
       },
       dist: {
         src: files,
-        dest: cMainPath,
+        dest: C.path.main,
         nonull: true
       },
 			zip: {
         src: filesCompressed,
-        dest: cZipPath,
+        dest: C.path.zip,
         nonull: true
       }
     },
 		
     uglify: {
       do :{
-        src: [cZipPath],
-        dest: cMinPath
+        src: [C.path.zip],
+        dest: C.path.min
       },
       options: {
         preserveComments: false,
         mangle: true,
-        banner: ' /*nlp_comprimise by @spencermountain in 2015*/\n',
+        banner: C.banner.min,
         compress: {
           drop_console: true,
           dead_code: true,
@@ -134,7 +141,7 @@ module.exports = function(grunt) {
     },
 
     jscs: {
-      all: [cMainPath],
+      all: [C.path.main],
       options: {
         requireCurlyBraces: true,
         disallowMixedSpacesAndTabs: true,
@@ -160,7 +167,7 @@ module.exports = function(grunt) {
         sub: true, //dot notation
         devel: true //console.log
       },
-      afterconcat: [cMainPath]
+      afterconcat: [C.path.main]
     }
 
   });
@@ -170,11 +177,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
 	
-	grunt.registerTask('cleanup', 'Remove compressed files. They were concat to nlp.min.js', function() {
+	grunt.registerTask('cleanup', 'Remove compressed files. They were concat and minimized in nlp.min.js', function() {
+		var minStr = '.min.js';
 		filesCompressed.forEach(function(p){
-    	if (p.indexOf(dPath) > -1 && p.indexOf('.min.js') > 1) grunt.file.delete(p);
+			// delete "zipped" data modules (concated for now)
+    	if (p.indexOf(C.path.nls) > -1 && (p.length-minStr.length) === p.indexOf(minStr)) grunt.file.delete(p);
 		});
-		grunt.file.delete(cZipPath);
+		// delete "zipped" concat file (minimized now)
+		grunt.file.delete(C.path.zip);
 	});
 	
   grunt.registerTask('default', ['concat', 'jscs', /*'jshint',*/ 'uglify', 'cleanup']);
