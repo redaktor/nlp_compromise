@@ -97,7 +97,7 @@ var abbreviations = (function() {
 
   var main = (function () {
 				//::NODE::
-				if (typeof module !== "undefined" && module.exports) honorifics = require("./honorifics");
+				if (typeof module !== "undefined" && module.exports) honorifics = require('./honorifics');
 				//::
 				return zip.concat(honorifics);
 			})();

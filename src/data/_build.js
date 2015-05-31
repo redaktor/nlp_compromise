@@ -39,6 +39,7 @@ var fs = require('fs');
 var path = require('path');
 var util = require('util');
 
+var MYPATH = '.'; // changes to absolute path if used as module
 var schema = require('./_dictionarySchema');
 var dict = require('./_dictionary');
 var name = require('./_dictionaryNames');
@@ -136,8 +137,8 @@ function generateLanguage(lang) {
 	var helpFns = _fns();
 	var helpersStr = prefixFn(id).concat('var main = (', _fns.toString(), ')();', nodeExportStr, endFnStr);
 
-	try { fs.mkdirSync(path.join('./', lang)); } catch (e) {};
-	fs.writeFileSync(	path.join('./', lang, '/', id+'.js'), helpersStr	);
+	try { fs.mkdirSync(path.join(MYPATH, lang)); } catch (e) {};
+	fs.writeFileSync(	path.join(MYPATH, lang, '/', id+'.js'), helpersStr	);
 	var helpersImportStr = '//::NODE::\nif (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");\n//::\n';
 
 	var results = {main:[[]], zip:[[]]}; //TODO minor - has first el. only for DEBUG - SHOULD be empty
@@ -696,7 +697,7 @@ function generateLanguage(lang) {
 			// concat honorifics
 			unzip: function() {
 				//::NODE::
-				if (typeof module !== "undefined" && module.exports) honorifics = require("./honorifics");
+				if (typeof module !== "undefined" && module.exports) honorifics = require('./honorifics');
 				//::
 				return zip.concat(honorifics);
 			}
@@ -1126,7 +1127,7 @@ function generateLanguage(lang) {
 		var logStr = "var util = require('util'); \nvar names = " + names + ";".concat(
 				"\nnames.forEach(function(n, i) { console.log( n ); console.log( util.inspect(require('./'+n), {depth: null}) ); });"
 		);
-		fs.writeFileSync(	path.join('./', lang, '/', 'logExpandedModules.js'), logStr	);
+		fs.writeFileSync(	path.join(MYPATH, lang, '/', 'logExpandedModules.js'), logStr	);
 		return lStr;
 	}
 
@@ -1193,8 +1194,8 @@ function generateLanguage(lang) {
 		prefixZip = clean(prefixZip, true);
 		var resultMain = prefixMain.concat('var zip = ', main, _lMain, clean(mainStr), suffixMain);
 		var resultZip = prefixZip.concat('var zip = ', zip, _lMain, clean(unzipStr, true), suffixZip);
-		fs.writeFileSync( path.join('./', lang, '/', g.id.concat('.js')), resultMain);
-		fs.writeFileSync( path.join('./', lang, '/', g.id.concat('.min.js')), resultZip);
+		fs.writeFileSync( path.join(MYPATH, lang, '/', g.id.concat('.js')), resultMain);
+		fs.writeFileSync( path.join(MYPATH, lang, '/', g.id.concat('.min.js')), resultZip);
 		i++;
 		var colors = ['',''];
 		if (i === generators.length) {
@@ -1205,11 +1206,11 @@ function generateLanguage(lang) {
 			var lexiZip = _generateLexi(lang, true);
 			var lMainStr = lexiPrefix.concat(clean(lexiMain), suffixMain);
 			var lZipStr = lexiPrefix.concat(clean(lexiZip, true), suffixZip);
-			fs.writeFileSync(	path.join('./', lang, '/', 'lexicon.js'), lMainStr);
-			fs.writeFileSync(	path.join('./', lang, '/', 'lexicon.min.js'), lZipStr);
+			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.js'), lMainStr);
+			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.min.js'), lZipStr);
 		}
 		console.log( 'wrote module for language', '"'+lang+'"', colors[0], i+' of '+generators.length, colors[1], '('+g.id+')' );
-	
+		if (i === generators.length) { console.log( ' ' ); }
 	}
 
 
@@ -1223,11 +1224,37 @@ function generateLanguage(lang) {
 
 
 // usage of the module ...
-
 var main = function (langOrLangs) {
+	console.log( '\033[4minfo\033[0m' );
+	var stack = function () {
+		var orig = Error.prepareStackTrace;
+		Error.prepareStackTrace = function(_, stack){ return stack; };
+		var err = new Error;
+		Error.captureStackTrace(err, arguments.callee);
+		var stack = err.stack;
+		Error.prepareStackTrace = orig;
+		return stack;
+	}
+	stack().forEach(function(site){
+		var fnName = site.getFunctionName() || '?';
+		var fName = site.getFileName();
+		var lNr = site.getLineNumber();
+		// log only us and grunt
+		if (fnName != '?' && fnName.indexOf('Module.') != 0) {
+	    console.log('  \033[36m%s\033[90m in %s:%d\033[0m', fnName, fName, lNr);
+		}
+		// determine our PATH
+		if (fnName === 'main') {
+			MYPATH = path.dirname(fName);
+			console.log( '\033[90m  [data path: %s]\033[0m', MYPATH );
+		}
+  });
+	console.log( ' ' );
+	console.log( '\033[4mRunning build\033[0m' );
+	
 	if (!langOrLangs) {
 		// all languages in the dictionary ...
-		var langs = possibleLanguages;
+		langOrLangs = possibleLanguages;
 	} else if (!(langOrLangs instanceof Array)) {
 		langOrLangs = [langOrLangs];
 	}

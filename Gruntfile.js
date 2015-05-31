@@ -1,12 +1,16 @@
-//build script for the client-side file
-
+// build script for the client-side file
 // TODO - LOCALIZATION NOT DONE YET! [redaktor fork changes]
 module.exports = function(grunt) {
-	var fs = require('fs');
 	var lang = 'en';
-	var dPath = './src/data/'+lang+'/';
+	var cMainPath = './client_side/nlp.js';
+	var cZipPath = './client_side/nlp.zip.js';
+	var cMinPath = './client_side/nlp.min.js';
+	
+	var dSrcPath = './src/data/';
+	var dPath = dSrcPath+lang+'/';
 	var pPath = './src/parents/';
 	var mPath = './src/methods/';
+	
   var files = [
     // helpers
     dPath+'helpFns.js',
@@ -76,16 +80,19 @@ module.exports = function(grunt) {
     './index.js'
   ];
 	
+	// generate all language dependent data modules first ...
+	require(dSrcPath+'_build')();
+	
+	// use minimized files for uglify
 	var filesCompressed = files.map(function(p) {
-		var zippedP = p.replace('.js', '.min.js');
-		return (grunt.file.exists(zippedP)) ? zippedP : p;
+		var zipP = p.replace('.js', '.min.js');
+		return (grunt.file.exists(zipP)) ? zipP : p;
 	});
 	
-  // Project configuration.
+  // project configuration ...
   grunt.initConfig({
     pkg: grunt.file.readJSON('./package.json'),
-		
-		// TODO BUILD all languages' data modules
+			
     concat: {
       options: {
         banner: '/*! <%= pkg.name %>  <%= pkg.version %>  by @spencermountain <%= grunt.template.today("yyyy-mm-dd") %>  <%= pkg.license%> */\nvar nlp = (function() {\n',
@@ -97,20 +104,20 @@ module.exports = function(grunt) {
       },
       dist: {
         src: files,
-        dest: './client_side/nlp.js',
+        dest: cMainPath,
         nonull: true
       },
-			zipped: {
+			zip: {
         src: filesCompressed,
-        dest: './client_side/nlpCompressed.js',
+        dest: cZipPath,
         nonull: true
       }
     },
 		
     uglify: {
       do :{
-        src: ['./client_side/nlpCompressed.js'],
-        dest: './client_side/nlp.min.js'
+        src: [cZipPath],
+        dest: cMinPath
       },
       options: {
         preserveComments: false,
@@ -126,12 +133,8 @@ module.exports = function(grunt) {
       }
     },
 
-// deprecated
-// NOTE: the files for "coding" DO PASS
-// this will produce errors for generated modules strictly optimized for COMPRESSION !
-
     jscs: {
-      all: ['./client_side/nlp.js'],
+      all: [cMainPath],
       options: {
         requireCurlyBraces: true,
         disallowMixedSpacesAndTabs: true,
@@ -157,7 +160,7 @@ module.exports = function(grunt) {
         sub: true, //dot notation
         devel: true //console.log
       },
-      afterconcat: ['./client_side/nlp.js']
+      afterconcat: [cMainPath]
     }
 
   });
@@ -166,5 +169,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
-  grunt.registerTask('default', ['concat'/*, 'concatClientCompressed'*/, 'jscs', /*'jshint',*/ 'uglify']);
+	
+	grunt.registerTask('cleanup', 'Remove compressed files. They were concat to nlp.min.js', function() {
+		filesCompressed.forEach(function(p){
+    	if (p.indexOf(dPath) > -1 && p.indexOf('.min.js') > 1) grunt.file.delete(p);
+		});
+		grunt.file.delete(cZipPath);
+	});
+	
+  grunt.registerTask('default', ['concat', 'jscs', /*'jshint',*/ 'uglify', 'cleanup']);
 };
