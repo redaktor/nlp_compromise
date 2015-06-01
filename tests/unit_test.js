@@ -1,4 +1,4 @@
-var TIME=false;
+var TIME=false
 
 //load in methods if using node, otherwise assume
 if (typeof module !== "undefined" && module.exports) {
@@ -11,7 +11,7 @@ var t;
 // Dummy method for testing under prototype pollution
 Object.prototype.dummy = function () {};
 
-t = "ambiguous contractions";
+t = "ambiguous contractions"
 exports[t] = function (test) {
   if(TIME){console.time(t)}
   test.strictEqual(nlp.pos("he's fun").sentences[0].tokens[1].normalised, "is")
@@ -87,8 +87,8 @@ exports[t] = function (test) {
   test.strictEqual(ref.text, "Tanya G")
   ref = nlp.pos("Tara says they suck and she quit her job").sentences[0].tokens[5].analysis.reference_to()
   test.strictEqual(ref.text, "Tara")
-	
-	ref = nlp.pos("Tony Danza is great. His bank is on the ball.").sentences[1].tokens[0].analysis.reference_to()
+
+  ref = nlp.pos("Tony Danza is great. His bank is on the ball.").sentences[1].tokens[0].analysis.reference_to()
   test.strictEqual(ref.text, "Tony Danza")
   ref = nlp.pos("the banks were hacked. He took their money.").sentences[1].tokens[2].analysis.reference_to()
   test.strictEqual(ref.text, "banks")
@@ -1433,4 +1433,4 @@ exports[t] = function (test) {
   test.done()
 };
 
-t="";
+t=""
