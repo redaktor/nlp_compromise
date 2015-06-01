@@ -178,21 +178,24 @@ var Noun = function(str, sentence, word_i) {
 
   // a pronoun that points at a noun mentioned previously '[he] is nice'
   the.reference_to = function() {
-    //if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
-    if(token && token.pos.tag==="PRP"){
-      var prp=token.normalised
+    // if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
+    if (token && (token.pos.tag === "PRP" || token.pos.tag === "PP")) {
+      var prp = token.normalised;
+			if(nouns.pps[prp]!==undefined){ //support possessives
+				prp = nouns.pps[prp];
+			}
       //look at starting of this sentence
-      var interested=sentence.tokens.slice(0, word_i)
+      var interested = sentence.tokens.slice(0, word_i)
       //add previous sentence, if applicable
       if(sentence.last){
-        interested=sentence.last.tokens.concat(interested)
+        interested = sentence.last.tokens.concat(interested);
       }
       //reverse the terms to loop through backward..
       interested=interested.reverse()
       for(var i=0; i<interested.length; i++){
         //it's a match
         if(interested[i].pos.parent==="noun" && interested[i].pos.tag!=="PRP" && interested[i].analysis.pronoun()===prp){
-          return interested[i]
+          return interested[i];
         }
       }
     }
