@@ -228,22 +228,12 @@ var pos = (function() {
 		return arr;
 	}
 	
-	//these contractions require (some) grammatical knowledge to disambig properly (e.g "he's"=> ['he is', 'he was']
+	// these contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was']
   var handle_ambiguous_contractions = function(arr) {
-    var ambiguous_contractions={
-      "he's":"he",
-      "she's":"she",
-      "it's":"it",
-      "who's":"who",
-      "what's":"what",
-      "where's":"where",
-      "when's":"when",
-      "why's":"why",
-      "how's":"how",
-    }
+		// TODO been forces has
     var before, after, fix;
     for (var i = 0; i < arr.length; i++) {
-      if (ambiguous_contractions.hasOwnProperty(arr[i].normalised)) {
+      if (pos_data.ambiguousContractions.hasOwnProperty(arr[i].normalised)) {
         before = arr.slice(0, i);
         after = arr.slice(i + 1, arr.length);
         // choose which verb this contraction should have..
@@ -257,9 +247,9 @@ var pos = (function() {
         }
         fix = [{
           text: arr[i].text,
-          normalised: ambiguous_contractions[arr[i].normalised], // the "he" part
+          normalised: pos_data.ambiguousContractions[arr[i].normalised], // the "he" part
           start: arr[i].start,
-          pos: parts_of_speech[lexicon[ambiguous_contractions[arr[i].normalised]]],
+          pos: parts_of_speech[lexicon[pos_data.ambiguousContractions[arr[i].normalised]]],
           pos_reason:"ambiguous_contraction"
         }, {
           text: "",

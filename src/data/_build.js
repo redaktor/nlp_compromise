@@ -236,7 +236,7 @@ function generateLanguage(lang) {
 				res.uc = dict.NN.words.filter(function(o) {
 					return meta(o, 'uncountable', isZip);
 				}).map(val);
-				return res;
+				return res; // Note: the returned value becomes variable 'zip'
 			},
 			// expand
 			unzip: function() {
@@ -347,9 +347,6 @@ function generateLanguage(lang) {
 							did(o[lang], isZip);
 						});
 						conjugateds.push( (conjugated) ? conjugated : 0 );
-						/*
-						TODO - CHECK participle / future error in last change of original repo !
-						*/
 					}
 					// check noDoer
 					if (!conjugateds[4] && (!o.hasOwnProperty('meta') || !o.meta.noDoer || o.meta.noDoer.indexOf(lang) < 0)) {
@@ -727,19 +724,31 @@ function generateLanguage(lang) {
 			description: '',
 			// build
 			zip: function(lang, isZip) {
-				var res = { particles: [], cs: [], contractions: {} };
+				var res = { particles: [], cs: [], contractions: {}, ambiguousContractions: {} };
 				var possibleParticle = function(o) { return meta(o, 'particle'); }
 				res.particles = allPossibles.filter(possibleParticle).map(val);
 				var possibleContraction = function(o) { return meta(o, 'contractions'); }
 				if (dict.contractions.hasOwnProperty(lang)) {
 					res.cs = dict.contractions[lang];
-					var cs = res.cs.map(function(w){ return w.replace('|', ''); });
+					var cs = res.cs.map(function(w){ 
+						return w.replace('|', ''); 
+					});
+					var csAs = res.cs.map(function(w){ 
+						var a = w.split('|'); return ((a[1]) ? '\''.concat(a[1]) : a[0]);
+					});
 					allPossibles.filter(possibleContraction).forEach(function(o){
-						o.meta.contractions[lang].forEach(function(cw) {
-							var pos = cs.indexOf(cw);
+						o.meta.contractions[lang].forEach(function(w) {
+							var pos = cs.indexOf(w);
 							if (pos > -1) {
-								if (!(res.contractions.hasOwnProperty(o[lang]))) res.contractions[o[lang]] = [];
-								res.contractions[o[lang]].push(pos);
+								var key = o[lang]+csAs[pos];
+								// ambiguous are the ones having multiple meanings for same extension
+								// e.g. for 's, so
+								if (res.contractions.hasOwnProperty(key)) {
+									res.ambiguousContractions[key] = res.contractions[key][0]; 
+									delete res.contractions[key];
+								} else {
+									res.contractions[key] = [o[lang], w];
+								}
 							}
 						});
 					});
@@ -749,10 +758,6 @@ function generateLanguage(lang) {
 			// convert it to an easier format
 			unzip: function() {
 				zip.particles = zip.particles.reduce(helpFns.toObj, {});
-				var c = zip.contractions;
-				var _cs = [];
-				for (var k in c) { c[k].forEach(function(i){ var a = zip.cs[i].split('|'); _cs[k+((a[1]) ? "'"+a[1] : a[0])] = [k,a.join('')]; }) }
-				zip.contractions = _cs;
 				return zip;
 			}
 		},
@@ -1246,7 +1251,7 @@ var main = function (langOrLangs) {
 		// determine our PATH
 		if (fnName === 'main') {
 			MYPATH = path.dirname(fName);
-			console.log( '\033[90m  [data path: %s]\033[0m', MYPATH );
+			console.log( '\033[90m  [\033[0m\033[32mdata path:\033[90m %s]\033[0m', MYPATH );
 		}
   });
 	console.log( ' ' );

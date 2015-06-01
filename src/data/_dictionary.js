@@ -136,7 +136,7 @@ var main = {
 	// if it is a ' contraction, seperate the word by |
 	// reference contractions later by meta.contractions (e.g. for 'he': {en: ['would', 'will', 'is']} )
 	contractions: {
-		en: ['woul|d','wi|ll','ha|ve','a|m','i|s','a|re','not']
+		en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not']
 	},
 	// multiple words (except phrasal verbs) are handled seperately for now
 	multiples: {  
@@ -271,7 +271,9 @@ var main = {
 	
 	//: MD modal-verbs
 	// ref references positive counterpart
-  MD: { 
+	// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
+	MD: { 
 		title: 'modal verb',
 		example: 'can, should',
 		parent: 'verb',
@@ -2240,6 +2242,8 @@ var main = {
 			
 	//: PRP personal-pronouns
 	// uid/ref for singular/plural
+	// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
   PRP: { 
 		title: 'personal pronoun',
 		example: 'I, you, she',
@@ -2248,9 +2252,9 @@ var main = {
 		words: [
 			{ uid: 0, en: 'i', meta: {contractions: {en: ['would', 'will', 'have', 'am']}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 1, en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 5, ref: 0, en: 'we', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
 			{ uid: 6, ref: [2,3], en: 'they', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
@@ -2274,8 +2278,10 @@ var main = {
 		// uid/ref for singular/plural
 		// !
 		// meta.parent MUST reference according personal pronoun PRP
+		// contractions must be defined on top, e.g. 
+		// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
 		title: 'possessive pronoun',
-		example: 'my, one\'s',
+		example: "my, one's",
 		parent: 'glue',
 		tag: 'PP',
 		words: [
@@ -2303,15 +2309,15 @@ var main = {
 			{ uid: 21, ref: [5, 8, 11, 20], en: 'themselves', meta: {stopword: ['en']} },
 			
 			{ en: 'none', meta: {demonstrative: ['en']} },
+			{ en: 'who', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en']} },
+			{ en: 'whom', meta: {stopword: ['en']} },
 			{ en: 'whose', meta: {wh: ['en']} },
 			{ en: 'something' },
 			{ en: 'anything' },
 			{ en: 'anyone' },
 			{ en: 'lot' },
 			{ en: 'nothing' },
-			{ en: 'everything' },
-			{ en: 'who', meta: {stopword: ['en']} },
-			{ en: 'whom', meta: {stopword: ['en']} }
+			{ en: 'everything' }
 		]
 	},
 		
@@ -3439,7 +3445,8 @@ var main = {
 	//: RB - some manual adverbs (the rest are generated)
 	//  note: 
 	//  uid: has an irregular corresponding adjective
-	//  ref: references irregular adjective
+	//  ref: references irregular adjective// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
   RB: { 
 		title: 'adverb',
 		example: 'quickly, softly',
@@ -3484,10 +3491,10 @@ var main = {
 			{ ref: 18, en: 'badly' },
 			{ ref: 66, en: 'well' },
 			// other adverbs
-			{ en: 'when', meta: {stopword: ['en'], wh: ['en']} },
+			{ en: 'when', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
 			{ en: 'whence', meta: {stopword: ['en'], wh: ['en']} },
-			{ en: 'where', meta: {stopword: ['en'], wh: ['en']} },
-			{ en: 'why', meta: {stopword: ['en'], wh: ['en']} },
+			{ en: 'where', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
+			{ en: 'why', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
 			{ en: 'now', meta: {stopword: ['en']} },
 			{ en: 'again', meta: {stopword: ['en']} },
 			{ en: 'here', meta: {stopword: ['en'], entitySubstitution: ['en']} },
@@ -3593,13 +3600,15 @@ var main = {
 
 	//: glue
 	//: CC conjunctions
+	// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
 	CC: { 
 		title: 'co-ordating conjunction',
 		example: 'and, but, or',
 		parent: 'glue',
 		tag: 'CC',
 		words: [
-			{ en: 'how', meta: {stopword: ['en'], wh: ['en']} },
+			{ en: 'how', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
 			{ en: 'or', meta: {stopword: ['en']} },
 			{ en: 'while', meta: {stopword: ['en']} },
 			{ en: 'nor', meta: {stopword: ['en']} },
@@ -3622,20 +3631,24 @@ var main = {
 	},
 	
 	//: DT determiners
+	// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
   DT: { 
 		title: 'determiner',
 		example: 'the, some',
 		parent: 'glue',
 		tag: 'DT',
 		words: [
+			{ en: 'that', meta: {contractions: {en: ['is']}, stopword: ['en'], entitySubstitution: ['en'], entitySubstitutionCheck: ['en'], demonstrative: ['en']} },
 			{ en: 'this', meta: {stopword: ['en'], entitySubstitution: ['en'], entitySubstitutionCheck: ['en'], demonstrative: ['en']} },
-			{ en: 'that', meta: {stopword: ['en'], entitySubstitution: ['en'], entitySubstitutionCheck: ['en'], demonstrative: ['en']} },
 			{ en: 'these', meta: {stopword: ['en'], demonstrative: ['en']} },
 			{ en: 'those', meta: {stopword: ['en'], demonstrative: ['en']} },
 			{ en: 'such', meta: {stopword: ['en'], demonstrative: ['en']} },
 			{ en: 'neither', meta: {demonstrative: ['en']} },
 			{ en: 'which', meta: {stopword: ['en'], wh: ['en']} },
-			{ en: 'what', meta: {stopword: ['en'], wh: ['en']} },
+			
+			{ en: 'what', meta: {contractions: {en: ['is']}, stopword: ['en'], wh: ['en']} },
+			
 			{ en: 'the', meta: {stopword: ['en'], entityBlacklist: ['en'], personBlacklist: ['en']} },
 			{ en: 'no', meta: {stopword: ['en']} },
 			{ en: 'any', meta: {stopword: ['en']} },

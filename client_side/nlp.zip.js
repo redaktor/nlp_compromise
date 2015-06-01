@@ -1821,25 +1821,60 @@ var zip = { particles:
      'along',
      'apart',
      'way' ],
-  cs: [ 'woul|d', 'wi|ll', 'ha|ve', 'a|m', 'i|s', 'a|re', 'not' ],
+  cs:
+   [ 'woul|d',
+     'wi|ll',
+     'ha|ve',
+     'a|m',
+     'i|s',
+     'wa|s',
+     'ha|s',
+     'a|re',
+     'not' ],
   contractions:
-   { would: [ 2 ],
-     could: [ 2 ],
-     should: [ 2 ],
-     can: [ 6 ],
-     i: [ 0, 1, 2, 3 ],
-     he: [ 0, 1, 4 ],
-     she: [ 0, 1, 4 ],
-     it: [ 1, 4 ],
-     we: [ 0, 1, 2, 5 ],
-     they: [ 0, 1, 2, 5 ] } };
+   { 'would\'ve': [ 'would', 'have' ],
+     'could\'ve': [ 'could', 'have' ],
+     'should\'ve': [ 'should', 'have' ],
+     cannot: [ 'can', 'not' ],
+     'i\'d': [ 'i', 'would' ],
+     'i\'ll': [ 'i', 'will' ],
+     'i\'ve': [ 'i', 'have' ],
+     'i\'m': [ 'i', 'am' ],
+     'he\'d': [ 'he', 'would' ],
+     'he\'ll': [ 'he', 'will' ],
+     'he\'s': [ 'he', 'was' ],
+     'she\'d': [ 'she', 'would' ],
+     'she\'ll': [ 'she', 'will' ],
+     'she\'s': [ 'she', 'was' ],
+     'it\'ll': [ 'it', 'will' ],
+     'it\'s': [ 'it', 'was' ],
+     'we\'d': [ 'we', 'would' ],
+     'we\'ll': [ 'we', 'will' ],
+     'we\'ve': [ 'we', 'have' ],
+     'we\'re': [ 'we', 'are' ],
+     'they\'d': [ 'they', 'would' ],
+     'they\'ll': [ 'they', 'will' ],
+     'they\'ve': [ 'they', 'have' ],
+     'they\'re': [ 'they', 'are' ],
+     'who\'s': [ 'who', 'was' ],
+     'when\'s': [ 'when', 'was' ],
+     'where\'s': [ 'where', 'was' ],
+     'why\'s': [ 'why', 'was' ],
+     'how\'s': [ 'how', 'was' ],
+     'that\'s': [ 'that', 'is' ],
+     'what\'s': [ 'what', 'is' ] },
+  ambiguousContractions:
+   { 'he\'s': 'he',
+     'she\'s': 'she',
+     'it\'s': 'it',
+     'who\'s': 'who',
+     'when\'s': 'when',
+     'where\'s': 'where',
+     'why\'s': 'why',
+     'how\'s': 'how' } };
 
   var main = (function () {
 				zip.particles = zip.particles.reduce(helpFns.toObj, {});
-				var c = zip.contractions;
-				var _cs = [];
-				for (var k in c) { c[k].forEach(function(i){ var a = zip.cs[i].split('|'); _cs[k+((a[1]) ? "'"+a[1] : a[0])] = [k,a.join('')]; }) }
-				zip.contractions = _cs;
 				return zip;
 			})();
 
@@ -4604,8 +4639,8 @@ var lexicon = (function() {
   VBN: [ 'born' ],
   VBG: [ 'am', 'accord%', 'r4ult%', 'stain%' ],
   DT:
-   [ 'this',
-     'that',
+   [ 'that',
+     'this',
      'th4e',
      'those',
      'such',
@@ -4737,15 +4772,15 @@ var lexicon = (function() {
      'them_',
      'them&',
      'none',
+     'who',
+     'whom',
      'whose',
      'some#',
      'any#',
      'anyone',
      'lot',
      'no#',
-     '1y#',
-     'who',
-     'whom' ],
+     '1y#' ],
   UH:
    [ 'uhh',
      'uh-oh',
@@ -5536,20 +5571,10 @@ var pos = (function() {
 
 	//these contractions require (some) grammatical knowledge to disambig properly (e.g "he's"=> ['he is', 'he was']
   var handle_ambiguous_contractions = function(arr) {
-    var ambiguous_contractions={
-      "he's":"he",
-      "she's":"she",
-      "it's":"it",
-      "who's":"who",
-      "what's":"what",
-      "where's":"where",
-      "when's":"when",
-      "why's":"why",
-      "how's":"how",
-    }
+		// TODO been forces has
     var before, after, fix;
     for (var i = 0; i < arr.length; i++) {
-      if (ambiguous_contractions.hasOwnProperty(arr[i].normalised)) {
+      if (pos_data.ambiguousContractions.hasOwnProperty(arr[i].normalised)) {
         before = arr.slice(0, i);
         after = arr.slice(i + 1, arr.length);
         // choose which verb this contraction should have..
@@ -5563,9 +5588,9 @@ var pos = (function() {
         }
         fix = [{
           text: arr[i].text,
-          normalised: ambiguous_contractions[arr[i].normalised], // the "he" part
+          normalised: pos_data.ambiguousContractions[arr[i].normalised], // the "he" part
           start: arr[i].start,
-          pos: parts_of_speech[lexicon[ambiguous_contractions[arr[i].normalised]]],
+          pos: parts_of_speech[lexicon[pos_data.ambiguousContractions[arr[i].normalised]]],
           pos_reason:"ambiguous_contraction"
         }, {
           text: "",
