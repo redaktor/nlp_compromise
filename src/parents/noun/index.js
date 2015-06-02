@@ -16,9 +16,9 @@ var Noun = function(str, sentence, word_i) {
 	
   var the = this;
   var token, next;
-  if(sentence!==undefined && word_i!==undefined){
-    token=sentence.tokens[word_i];
-    next=sentence.tokens[word_i+i];
+  if(sentence !== undefined && word_i !== undefined){
+    token = sentence.tokens[word_i];
+    next = sentence.tokens[word_i+i];
   }
   the.word = str || '';
 
@@ -150,23 +150,23 @@ var Noun = function(str, sentence, word_i) {
   the.referenced_by = function() {
     //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
     if(token && token.pos.tag!=="PRP" && token.pos.tag!=="PP"){
-      var prp=the.pronoun();
+      var prp = the.pronoun();
       //look at rest of sentence
-      var interested=sentence.tokens.slice(word_i+1, sentence.tokens.length);
+      var interested = sentence.tokens.slice(word_i+1, sentence.tokens.length);
       //add next sentence too, could go further..
       if(sentence.next){
-        interested=interested.concat(sentence.next.tokens);
+        interested = interested.concat(sentence.next.tokens);
       }
       //find the matching pronouns, and break if another noun overwrites it
-      var matches=[];
+      var matches = [];
       for(var i=0; i<interested.length; i++){
-        if(interested[i].pos.tag==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)){
+        if(interested[i].pos.tag ==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)) {
           //this pronoun points at our noun
           matches.push(interested[i]);
-        }else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp){
+        } else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp) {
           //this posessive pronoun ('his/her') points at our noun
           matches.push(interested[i]);
-        }else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp){
+        } else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp) {
           //this noun stops our further pursuit
           break;
         }
@@ -191,7 +191,7 @@ var Noun = function(str, sentence, word_i) {
         interested = sentence.last.tokens.concat(interested);
       }
       //reverse the terms to loop through backward..
-      interested=interested.reverse()
+      interested = interested.reverse()
       for(var i=0; i<interested.length; i++){
         //it's a match
         if(interested[i].pos.parent==="noun" && interested[i].pos.tag!=="PRP" && interested[i].analysis.pronoun()===prp){
