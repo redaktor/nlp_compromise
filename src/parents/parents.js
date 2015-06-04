@@ -1,14 +1,11 @@
-//Parents are classes for each main part of speech, with appropriate methods
-//::NODE::
-if (typeof module !== 'undefined' && module.exports) {
-  Adjective = require('./adjective/index');
-  Noun = require('./noun/index');
-  Adverb = require('./adverb/index');
-  Verb = require('./verb/index');
-  Value = require('./value/index');
-}
-//::
-var parents = {
+// Parents are classes for each main part of speech, with appropriate methods
+var Adjective = require('./adjective');
+var Noun = require('./noun');
+var Adverb = require('./adverb');
+var Verb = require('./verb');
+var Value = require('./value');
+
+module.exports = {
   adjective: function(str, next, last, token) {
     return new Adjective(str, next, last, token);
   },
@@ -28,6 +25,3 @@ var parents = {
     return {};
   }
 }
-//::NODE::
-if (typeof module !== 'undefined' && module.exports) module.exports = parents;
-//::

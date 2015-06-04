@@ -1972,6 +1972,7 @@ var main = {
 			{ en: 'hall', meta: {personBlacklist: ['en']} },
 			{ en: 'arena', meta: {personBlacklist: ['en']} },
 			{ en: 'stadium', meta: {personBlacklist: ['en']} },
+			{ en: 'partner', meta: {personBlacklist: ['en']} },
 			// nouns that shouldnt be seen as a verb
 			{ en: 'president', meta: {noVerb: ['en']} },
 			{ en: 'dollar', meta: {noVerb: ['en']} },
@@ -2051,7 +2052,9 @@ var main = {
 			{ ref: 48, en: 'these' },
 			{ ref: 49, en: 'teeth' },
 			{ ref: 50, en: 'vitae' },
-			{ en: 'friends' }
+			{ en: 'friends', meta: {personBlacklist: ['en']} },
+			{ en: 'sons', meta: {personBlacklist: ['en']} },
+			{ en: 'partners', meta: {personBlacklist: ['en']} }
 		]
 	},
 	
@@ -2252,9 +2255,9 @@ var main = {
 		words: [
 			{ uid: 0, en: 'i', meta: {contractions: {en: ['would', 'will', 'have', 'am']}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 1, en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is', 'has', 'was']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 5, ref: 0, en: 'we', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
 			{ uid: 6, ref: [2,3], en: 'they', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
@@ -2309,7 +2312,7 @@ var main = {
 			{ uid: 21, ref: [5, 8, 11, 20], en: 'themselves', meta: {stopword: ['en']} },
 			
 			{ en: 'none', meta: {demonstrative: ['en']} },
-			{ en: 'who', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en']} },
+			{ en: 'who', meta: {contractions: {en: ['is', 'has'/*, 'was'*/]}, stopword: ['en']} },
 			{ en: 'whom', meta: {stopword: ['en']} },
 			{ en: 'whose', meta: {wh: ['en']} },
 			{ en: 'something' },
@@ -3491,10 +3494,10 @@ var main = {
 			{ ref: 18, en: 'badly' },
 			{ ref: 66, en: 'well' },
 			// other adverbs
-			{ en: 'when', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
+			{ en: 'when', meta: {contractions: {en: ['is', 'has'/*, 'was'*/]}, stopword: ['en'], wh: ['en']} },
 			{ en: 'whence', meta: {stopword: ['en'], wh: ['en']} },
-			{ en: 'where', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
-			{ en: 'why', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
+			{ en: 'where', meta: {contractions: {en: ['is', 'has'/*, 'was'*/]}, stopword: ['en'], wh: ['en']} },
+			{ en: 'why', meta: {contractions: {en: ['is', 'has'/*, 'was'*/]}, stopword: ['en'], wh: ['en']} },
 			{ en: 'now', meta: {stopword: ['en']} },
 			{ en: 'again', meta: {stopword: ['en']} },
 			{ en: 'here', meta: {stopword: ['en'], entitySubstitution: ['en']} },
@@ -3608,7 +3611,7 @@ var main = {
 		parent: 'glue',
 		tag: 'CC',
 		words: [
-			{ en: 'how', meta: {contractions: {en: ['is', 'has', 'was']}, stopword: ['en'], wh: ['en']} },
+			{ en: 'how', meta: {contractions: {en: ['is', 'has'/*, 'was'*/]}, stopword: ['en'], wh: ['en']} },
 			{ en: 'or', meta: {stopword: ['en']} },
 			{ en: 'while', meta: {stopword: ['en']} },
 			{ en: 'nor', meta: {stopword: ['en']} },
@@ -3616,7 +3619,7 @@ var main = {
 			{ en: 'because', meta: {stopword: ['en']} },
 			{ en: 'but', meta: {stopword: ['en']} },
 			{ en: 'for', meta: {stopword: ['en'], personBlacklist: ['en']} },
-			{ en: 'and', meta: {stopword: ['en']} },
+			{ en: 'and', meta: {stopword: ['en'], personBlacklist: ['en']} },
 			{ en: 'if', meta: {stopword: ['en']} },
 			{ en: 'however', meta: {stopword: ['en'], filler: ['en']} },
 			{ en: 'before', meta: {stopword: ['en']} },
@@ -3774,7 +3777,7 @@ var main = {
 			{ en: 'out', meta: {particle: ['en'], stopword: ['en']} },
 			{ en: 'on', meta: {particle: ['en'], stopword: ['en']} },
 			{ en: 'off', meta: {particle: ['en'], stopword: ['en']} },
-			{ en: 'of', meta: {particle: ['en'], stopword: ['en'], } },
+			{ en: 'of', meta: {particle: ['en'], stopword: ['en'], personBlacklist: ['en']} },
 			{ en: 'with', meta: {particle: ['en'], stopword: ['en']} },
 			{ en: 'over', meta: {particle: ['en'], stopword: ['en']} },
 			{ en: 'under', meta: {particle: ['en'], stopword: ['en']} },

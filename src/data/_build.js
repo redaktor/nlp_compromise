@@ -263,9 +263,14 @@ function generateLanguage(lang) {
 				var _pps = dict.PP.words.filter(function(o) { return o.hasOwnProperty('meta') && o.meta.hasOwnProperty('parent') }).map(function(o) {
 					return [o[lang], o.meta.parent];
 				});
+				var _black = function(type) {
+					var b = _all.filter(function(o) { return meta(o, type+'Blacklist', isZip); }).map(val);
+					b.push('&');
+					return b;
+				}
 				return {
-					entityBlacklist: _all.filter(function(o) { return meta(o, 'entityBlacklist', isZip); }).map(val),
-					personBlacklist: _all.filter(function(o) { return meta(o, 'personBlacklist', isZip); }).map(val),
+					personBlacklist: _black('person'), 
+					entityBlacklist: _black('entity'),
 					prps: _prps,
 					pps: _pps
 				};
@@ -285,18 +290,18 @@ function generateLanguage(lang) {
 
 
 		// VERB :
-		{ // 2 cps, mds, negate
+		{ // 2 CP, MD, negate
 			id: 'verbs_special',
 			description: '',
 			// compress
 			zip: function(lang, isZip) {
 				// TODO: 'it', 'one'
-				var res = {cps:[], mds:[]};
+				var res = {CP:[], MD:[]};
 				['CP', 'MD'].forEach(function(type) {
 					dict[type].words.filter(possibleOrig).forEach(function(o) {
 						dict[type].words.filter(possibleRef).forEach(function(ov) {
 							if (isRef(ov, o)) {
-								res[type.toLowerCase()+'s'].push((isZip) ? [o[lang], baseRepl(ov[lang], o[lang], ['\'t']) ] : [o[lang], ov[lang]]);
+								res[type].push((isZip) ? [o[lang], baseRepl(ov[lang], o[lang], ['\'t']) ] : [o[lang], ov[lang]]);
 							}
 						});
 					});
@@ -306,18 +311,18 @@ function generateLanguage(lang) {
 			// expand
 			unzip: function () {
 				var res = {};
-				var negate = {};
-				['cps', 'mds'].forEach(function(type) {
-					res[type] = [];
-					res[type] = res[type].concat.apply(res[type], zip[type].map(function(a) {
+				res.negate = {};
+				['CP', 'MD'].forEach(function(type) {
+					res[type] = {};
+					zip[type].forEach(function(a) {
 						//::BROWSER::
 						a = helpFns.replBase(a,0,['\'t']);
 						//::
-						negate[a[0]] = a[1];
-						return a;
-					}));
+						res[type][a[0]] = type;
+						res[type][a[1]] = type;
+						res.negate[a[0]] = a[1];
+					});
 				});
-				res.negate = negate;
 				return res;
 			}
 		},
@@ -776,6 +781,7 @@ function generateLanguage(lang) {
 				//::
 				var negate = verbs_special.negate || {};
 				for (var k in zip) { negate[k] = zip[k]; }
+				for (var k in negate) { negate[negate[k]] = k; }
 				return negate;
 			}
 		},
@@ -1018,8 +1024,8 @@ function generateLanguage(lang) {
 				NNP: Object.keys(m.firstnames),
 				PRP: Object.keys(m.nouns.prps),
 				PP: Object.keys(m.nouns.pps),
-				CP: m.verbs_special.cps,
-				MD: m.verbs_special.mds,
+				CP: Object.keys(m.verbs_special.CP),
+				MD: Object.keys(m.verbs_special.MD),
 				VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
 				VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
 				JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),

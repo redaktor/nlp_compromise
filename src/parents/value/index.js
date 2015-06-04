@@ -1,15 +1,12 @@
 //wrapper for value's methods
-var Value = function(str, next, last, token) {
+module.exports = function(str, next, last, token) {
   var the = this
   the.word = str || '';
-	//::NODE::
-  if (typeof module !== 'undefined' && module.exports) {
-		schema = require('../../data/'+lang+'/schema');
-		dates = require('../../data/'+lang+'/dates');
-    to_number = require('./to_number');
-    date_extractor = require('./date_extractor');
-  }
-	//::
+	var schema = require('../../data/'+lang+'/schema');
+	var dates = require('../../data/'+lang+'/dates');
+  var to_number = require('./to_number');
+  var date_extractor = require('./date_extractor');
+  
   the.date = function(options) {
     options = options || {};
     return date_extractor(the.word, options);
@@ -35,10 +32,7 @@ var Value = function(str, next, last, token) {
   })()
 
   return the;
-};
-//::NODE::
-if (typeof module !== "undefined" && module.exports) module.exports = Value;
-//::
+}
 
 // console.log(new Value("fifty five").number())
 // console.log(new Value("june 5th 1998").date())

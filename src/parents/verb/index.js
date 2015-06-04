@@ -1,14 +1,11 @@
-//wrapper for verb's methods
-var Verb = function(str, next, last, token) {
-	//::NODE::
-  if (typeof module !== 'undefined' && module.exports) {
-		if (typeof lang != 'string') lang = 'en';
-		var dPath = '../../data/'+lang+'/';
-		schema = require(dPath+'schema');
-		verbs_special = require(dPath+'verbs_special');
-    verb_conjugate = require('./conjugate/conjugate');
-  }
-	//::
+// wrapper for verb's methods
+module.exports = function(str, next, last, token) {
+	if (typeof lang != 'string') lang = 'en';
+	var dPath = '../../data/'+lang+'/';
+	var schema = require(dPath+'schema');
+	var verbs_special = require(dPath+'verbs_special');
+	var verb_conjugate = require('./conjugate/conjugate');
+	
   var the = this;
   the.word = str || '';
   the.next = next;
@@ -41,9 +38,9 @@ var Verb = function(str, next, last, token) {
     return 'will ' + verb_conjugate(the.word).infinitive;
   }
 
-  //which conjugation
+  // which conjugation
   the.form = (function() {
-    //don't choose infinitive if infinitive==present
+    // don't choose infinitive if infinitive == present
     var order = [
       'past',
       'present',
@@ -58,7 +55,7 @@ var Verb = function(str, next, last, token) {
     }
   })()
 
-  //past/present/future   //wahh?!
+  // past/present/future   //wahh?!
   the.tense = (function() {
     if (the.word.match(/\bwill\b/)) {return 'future'}
     if (the.form === 'present') {return 'present'}
@@ -66,27 +63,26 @@ var Verb = function(str, next, last, token) {
     return 'present';
   })()
 
-  //the most accurate part_of_speech
+  // the most accurate part_of_speech
   the.which = (function() {
-    if (verbs_special.cps[the.word]) {return schema['CP']}
+    if (verbs_special.CP[the.word]) {return schema['CP']}
     if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) {return schema['VBG']}
     var form = the.form;
     return schema[tenses[form]];
   })()
 
-  //is this verb negative already?
+  // is this verb negative already?
   the.negative = function() {
-    if (the.word.match(/n't$/)) {return true}
-    if ((verbs_special.mds[the.word] || verbs_special.cps[the.word]) && the.next && the.next.normalised === 'not') {
-      return true;
+    if (the.word.match(/n't$/)) {
+					console.log( 'is neg.1', the.word );return true}
+    if ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && the.next && the.next.normalised === 'not') {
+					console.log( 'is neg.2', the.word );return true;
     }
     return false;
   }
 
   return the;
 }
-//::NODE::
-if (typeof module !== 'undefined' && module.exports) module.exports = Verb;
-//::
+
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)

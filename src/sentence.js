@@ -1,9 +1,7 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
-var Sentence = function(tokens) {
-	//::NODE::
-	if (typeof module !== 'undefined' && module.exports) negate_data = require('./data/'+lang+'/negate_data');
-  //::
+module.exports = function(tokens) {
+	var negate_data = require('./data/'+lang+'/negate_data');
 	var the = this;
   the.tokens = tokens || [];
 
@@ -64,6 +62,7 @@ var Sentence = function(tokens) {
     // these are cheap ways to negate the meaning
     // ('none' is ambiguous because it could mean (all or some) )
     // loop through each term..
+		console.log(  '___', negate_data);
     for (var i = 0; i < the.tokens.length; i++) {
       var tok = the.tokens[i];
       //turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
@@ -73,6 +72,7 @@ var Sentence = function(tokens) {
         if (tok.capitalised) {
           tok.text = capitalise(tok.text);
         }
+				console.log( 'tok', tok );
         return the;
       }
 
@@ -230,6 +230,4 @@ var Sentence = function(tokens) {
 
   return the
 }
-//::NODE::
-if (typeof module !== 'undefined' && module.exports) module.exports = Sentence;
-//::
+

@@ -16,6 +16,7 @@ var negate_data = (function() {
 				//::
 				var negate = verbs_special.negate || {};
 				for (var k in zip) { negate[k] = zip[k]; }
+				for (var k in negate) { negate[negate[k]] = k; }
 				return negate;
 			})();
 

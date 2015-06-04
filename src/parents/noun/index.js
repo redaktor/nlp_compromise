@@ -1,18 +1,14 @@
 // wrapper for noun's methods
-var Noun = function(str, sentence, word_i) {
+module.exports = function(str, sentence, word_i) {
 	
-	//::NODE::
-  if (typeof module !== 'undefined' && module.exports) {
-		if (typeof lang != 'string') lang = 'en';
-		var dPath = '../../data/'+lang+'/';
-		inflect = require("./conjugate/inflect");
-		indefinite_article = require('./indefinite_article');
-		schema = require(dPath+'schema');
-    firstnames = require(dPath+'firstnames');
-		honorifics = require(dPath+'honorifics');
-		nouns = require(dPath+'nouns');
-  }
-	//::
+	if (typeof lang != 'string') lang = 'en';
+	var dPath = '../../data/'+lang+'/';
+	var inflect = require("./conjugate/inflect");
+	var indefinite_article = require('./indefinite_article');
+	var schema = require(dPath+'schema');
+	var firstnames = require(dPath+'firstnames');
+	var honorifics = require(dPath+'honorifics');
+	var nouns = require(dPath+'nouns');
 	
   var the = this;
   var token, next;
@@ -45,11 +41,11 @@ var Noun = function(str, sentence, word_i) {
     if (nouns.entityBlacklist[token.normalised]) {return false}
     // discredit specific nouns forms
     if (token.pos) {
-      if (token.pos.tag == 'NNA') {return false}
-      if (token.pos.tag == 'NNO') {return false}
-      if (token.pos.tag == 'NNG') {return false}
+      if (token.pos.tag == 'NNA') {return false} //eg. 'singer'
+      if (token.pos.tag == 'NNO') {return false} //eg. "spencer's"
+      if (token.pos.tag == 'NNG') {return false} //eg. 'walking'
 			
-      if (token.pos.tag=='NNP') {return true}
+      if (token.pos.tag=='NNP') {return true} //yes! eg. 'Edinburough'
     }
     // distinct capital is very good signal
     if (token.noun_capital) {return true}
@@ -61,7 +57,7 @@ var Noun = function(str, sentence, word_i) {
     if (token.normalised.length < 5 && token.text.match(/^[A-Z]*$/)) {return true}
     // acronyms are a-ok
     if (the.is_acronym()) {return true}
-    //else, be conservative
+    // else, be conservative
     return false;
   }
 
@@ -88,25 +84,35 @@ var Noun = function(str, sentence, word_i) {
   // uses common first-name list + honorifics to guess if this noun is the name of a person
   the.is_person = function() {
     var i;
-    //remove things that are often named after people
+    // remove things that are often named after people
     var l = nouns.personBlacklist.length;
     for (i = 0; i < l; i++) {
-      if(the.word.match(new RegExp('\\b' + nouns.personBlacklist[i] + '\\b','i'))) {return false}
+      if(the.word.match(new RegExp('\\b' + nouns.personBlacklist[i] + '\\b','i'))) {
+				return false
+			}
     }
-      //see if noun has an honourific, like 'jr.'
+    // see if noun has an honourific, like 'jr.'
     l = honorifics.length;
     for (i = 0; i < l; i++) {
-      if (the.word.match(new RegExp('\\b' + honorifics[i] + '\\.?\\b', 'i'))) {return true}
+      if (the.word.match(new RegExp('\\b' + honorifics[i] + '\\.?\\b', 'i'))) {
+				return true
+			}
     }
-    //see if noun has a first-name
-    var names = Object.keys(firstnames)
-    l = names.length
-    var firstname=the.word.split(' ')[0].toLowerCase()
-    for (i = 0; i < l; i++) {
-      if (names[i]===firstname) {return true}
+    // see if noun has a first-name
+    var names = the.word.split(' ').map(function (a) {
+      return a.toLowerCase()
+    })
+    if (firstnames[names[0]]) {
+      return true
     }
-    //if it has an initial between two words
-    if(the.word.match(/[a-z]{3,20} [a-z]\.? [a-z]{3,20}/i)) {return true}
+    // (test middle name too, if there's one)
+    if (names.length > 2 && firstnames[names[1]]) {
+      return true
+    }
+    // if it has an initial between two words
+    if(the.word.match(/[a-z]{3,20} [a-z]\.? [a-z]{3,20}/i)) {
+			return true
+		}
     return false;
   }
 
@@ -114,8 +120,10 @@ var Noun = function(str, sentence, word_i) {
   the.pronoun = function(){
     //if it's a person try to classify male/female
     if(the.is_person()){
-			var nameType = function(t) { return (firstnames[names[0]]===t || firstnames[names[1]]==t); }
-      var names=the.word.split(' ').map(function(a){
+			var nameType = function(t) { 
+				return (firstnames[names[0]]===t || firstnames[names[1]]==t); 
+			}
+      var names = the.word.split(' ').map(function(a){
         return a.toLowerCase();
       })
       if (nameType('m')) {return 'he'}
@@ -160,7 +168,7 @@ var Noun = function(str, sentence, word_i) {
       //find the matching pronouns, and break if another noun overwrites it
       var matches = [];
       for(var i=0; i<interested.length; i++){
-        if(interested[i].pos.tag ==="PRP" && (interested[i].normalised===prp || nouns.pps[interested[i].normalised]===prp)) {
+        if(interested[i].pos.tag ==="PRP" && (interested[i].normalised === prp || nouns.pps[interested[i].normalised] === prp)) {
           //this pronoun points at our noun
           matches.push(interested[i]);
         } else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp) {
@@ -181,7 +189,7 @@ var Noun = function(str, sentence, word_i) {
     // if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
     if (token && (token.pos.tag === "PRP" || token.pos.tag === "PP")) {
       var prp = token.normalised;
-			if(nouns.pps[prp]!==undefined){ //support possessives
+			if(nouns.pps[prp]!==undefined){ // support possessives
 				prp = nouns.pps[prp];
 			}
       //look at starting of this sentence
@@ -194,7 +202,7 @@ var Noun = function(str, sentence, word_i) {
       interested = interested.reverse()
       for(var i=0; i<interested.length; i++){
         //it's a match
-        if(interested[i].pos.parent==="noun" && interested[i].pos.tag!=="PRP" && interested[i].analysis.pronoun()===prp){
+        if(interested[i].pos.parent === "noun" && interested[i].pos.tag !== "PRP" && interested[i].analysis.pronoun() === prp){
           return interested[i];
         }
       }
@@ -204,7 +212,9 @@ var Noun = function(str, sentence, word_i) {
   // specifically which pos it is
   the.which = (function() {
     // posessive
-    if (the.word.match(/'s$/)) {return schema['NNO']}
+    if (the.word.match(/'s$/)) {
+			return schema['NNO'];
+		}
     // plural
     // if (the.is_plural) {
     //   return schema['NNS']
@@ -215,10 +225,6 @@ var Noun = function(str, sentence, word_i) {
 
   return the;
 }
-
-//::NODE::
-if (typeof module !== 'undefined' && module.exports) module.exports = Noun;
-//::
 
 // console.log(new Noun('farmhouse').is_entity())
 // console.log(new Noun('FBI').is_acronym())

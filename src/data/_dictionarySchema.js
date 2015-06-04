@@ -8,7 +8,7 @@
 // see ./build.js for generating the lexica
 
 var main = {
-	//verbs
+	// verbs
 	VB: {
 		en: 'verb, generic',
 		parent: 'verb'
@@ -47,7 +47,7 @@ var main = {
 		parent: 'verb'
 	},
 
-	//adjectives
+	// adjectives
 	JJ: {
 		en: 'adjective, generic',
 		parent: 'adjective'
@@ -61,7 +61,7 @@ var main = {
 		parent: 'adjective'
 	},
 
-	//adverbs
+	// adverbs
 	RB: {
 		en: 'adverb',
 		parent: 'adverb'
@@ -75,7 +75,7 @@ var main = {
 		parent: 'adverb'
 	},
 
-	//nouns
+	// nouns
 	NN: {
 		en: 'noun, generic',
 		parent: 'noun'
@@ -113,11 +113,15 @@ var main = {
 		parent: 'noun'
 	},
 
-	//glue
 	PP: {
 		en: 'possessive pronoun',
-		parent: 'glue'
+		parent: 'noun'
 	},
+	PRP: {
+		en: 'personal pronoun',
+		parent: 'noun'
+	},
+	// value and glue
 	FW: {
 		en: 'foreign word',
 		parent: 'glue'
@@ -145,10 +149,6 @@ var main = {
 	CC: {
 		en: 'co-ordating conjunction',
 		parent: 'glue'
-	},
-	PRP: {
-		en: 'personal pronoun',
-		parent: 'noun'
 	},
 	DT: {
 		en: 'determiner',

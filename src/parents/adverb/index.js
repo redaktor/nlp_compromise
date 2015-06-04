@@ -1,12 +1,9 @@
-//wrapper for Adverb's methods
-var Adverb = function(str, next, last, token) {
-	//::NODE::
-  if (typeof module !== "undefined" && module.exports) {
-		if (typeof lang != 'string') lang = 'en';
-    to_adjective = require("./conjugate/to_adjective");
-		schema = require('../../data/'+lang+'/schema');
-  }
-	//::
+// wrapper for Adverb's methods
+module.exports = function(str, next, last, token) {
+	if (typeof lang != 'string') lang = 'en';
+	var to_adjective = require("./conjugate/to_adjective");
+	var schema = require('../../data/'+lang+'/schema');
+		
   var the = this;
   the.word = str || '';
   the.next = next;
@@ -26,8 +23,6 @@ var Adverb = function(str, next, last, token) {
 
   return the;
 }
-//::NODE::
-if (typeof module !== "undefined" && module.exports) module.exports = Adverb;
-//::
+
 // console.log(new Adverb("suddenly").conjugate())
 // console.log(adverbs.conjugate('powerfully'))
