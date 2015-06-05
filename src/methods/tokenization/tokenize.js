@@ -55,9 +55,7 @@ module.exports = function(str) {
 	return sentences.map(function(sentence) {
 		var arr = sentence.split(' ');
 		arr = combine_multiples(arr);
-		//console.log( '!', arr );
 		var tokens = arr.map(function(w, i) {
-			//console.log( normalise(w) );
 			return {
 				text: w,
 				normalised: normalise(w),
@@ -67,7 +65,7 @@ module.exports = function(str) {
 				end: (i === (arr.length - 1)) || undefined,
 				start: (i === 0) || undefined
 			}
-		})
+		});
 		return {
 			sentence: sentence,
 			tokens: tokens,

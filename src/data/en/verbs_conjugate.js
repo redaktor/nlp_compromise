@@ -11,6 +11,7 @@ if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFn
 //::
 var zip = { irregulars: 
    [ [ 'be', 'being', 'was', 'is', 0 ],
+     [ 'be', 'am', 'was', 'am', 0 ],
      [ 'have', 'having', 'had', 'has', 0 ],
      [ 'do', 'doing', 'did', 'does' ],
      [ 'begin', 'beginning', 'began', 'begins', 'beginner' ],

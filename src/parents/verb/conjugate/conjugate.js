@@ -1,9 +1,9 @@
 //turn a verb into its other grammatical forms.
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../../data/'+lang+'/';
-var suffixes = {verbs: require('./suffix_rules')}; //require(dPath+'suffixes');
-var verbs_conjugate = require(dPath+'verbs_conjugate'); //require(dPath+'verbs_conjugate'); //{irregulars: require('./verb_irregulars')};
-var verb_rules = require('./verb_rules'); //require(dPath+'verb_rules');
+var suffixes = require(dPath+'suffixes');
+var verbs_conjugate = require(dPath+'verbs_conjugate');
+var verb_rules = require(dPath+'verb_rules');
 var to_doer = require('./to_doer');
 
 //this method is the slowest in the whole library, basically TODO:whaaa
@@ -136,14 +136,13 @@ module.exports = function(w) {
 		x = verbs_conjugate.irregulars[i];
 		if (verb === x.present || verb === x.gerund || verb === x.past || verb === x.infinitive) {
 			obj = JSON.parse(JSON.stringify(verbs_conjugate.irregulars[i])); // object 'clone' hack ('shallow copy'), to avoid mem leak
-			//console.log( '!o', obj );
 			return fufill(obj, prefix)
 		}
 	}
 	// guess the tense, so we know which transformation to make
 	var predicted = predict(w) || 'infinitive';
 
-	// check against suffix rules
+	// check against verb rules
 	l = verb_rules[predicted].length
 	var r;
 	for (i = 0; i < l; i++) {
@@ -157,7 +156,6 @@ module.exports = function(w) {
 					obj[k] = w.replace(r.reg, r.repl[k]);
 				}
 			});
-			console.log( '!', w, predicted, obj );
 			return fufill(obj);
 		}
 	}

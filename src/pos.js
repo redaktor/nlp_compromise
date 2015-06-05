@@ -33,9 +33,8 @@ var merge_tokens = function(a, b) {
 }
 
 //combine adjacent neighbours, and special cases
-var combine_tags = function(sentence) {
+function combine_tags(sentence) {
 	var arr = sentence.tokens || [];
-	//console.log( 'pos', arr );
 	for (var i = 0; i <= arr.length; i++) {
 		var next = arr[i + 1];
 		if (arr[i] && next) {
@@ -49,34 +48,34 @@ var combine_tags = function(sentence) {
 				merge();
 			}
 			//merge NNP and NN, like firstname, lastname
-			else if ((tag === "NNP" && next.pos.tag ==="NN") || (tag==="NN" && next.pos.tag==="NNP")) {
+			else if ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')) {
 				merge();
 				arr[i + 1].pos = schema['NNP'];
 			}
 			//merge dates manually, which often have punctuation
-			else if (tag === "CD" && next.pos.tag ==="CD") {
+			else if (tag === 'CD' && next.pos.tag ==='CD') {
 				merge();
 			}
-			//merge abbreviations with nouns manually, eg. "Joe jr."
-			else if ( (tag === "NNAB" && next.pos.parent ==="noun") || (arr[i].pos.parent==="noun" && next.pos.tag==="NNAB")) {
+			//merge abbreviations with nouns manually, eg. 'Joe jr.'
+			else if ( (tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')) {
 				merge();
 			}
 			//'will walk' -> future-tense verb
-			else if (arr[i].normalised === "will" && next.pos.parent === "verb") {
+			else if (arr[i].normalised === 'will' && next.pos.parent === 'verb') {
 				merge();
 			}
 			//'hundred and fifty', 'march the 5th'
-			else if (tag === "CD" && (next.normalised === "and" || next.normalised === "the") && arr[i + 2] && arr[i + 2].pos.tag === "CD") {
+			else if (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD') {
 				merge();
 			}
 			//capitals surrounding a preposition  'United States of America'
-			else if (tag=="NN" && arr[i].noun_capital && (next.normalised == "of" || next.normalised == "and") && arr[i + 2] && arr[i + 2].noun_capital) {
+			else if (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital) {
 				merge();
 				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
 				arr[i + 1] = null;
 			}
 			//capitals surrounding two prepositions  'Phantom of the Opera'
-			else if (arr[i].noun_capital && next.normalised == "of" && arr[i + 2] && arr[i + 2].pos.tag == "DT" && arr[i + 3] && arr[i + 3].noun_capital) {
+			else if (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital) {
 				merge();
 				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
 				arr[i + 1] = null;
@@ -88,7 +87,6 @@ var combine_tags = function(sentence) {
 	sentence.tokens = arr.filter(function(r) {
 		return r
 	})
-	//console.log( 's.t. ', sentence.tokens );
 	return sentence
 }
 
@@ -101,7 +99,6 @@ var combine_phrasal_verbs = function(sentence) {
 		if(pos_data.particles[arr[i].normalised]){
 			//it matches a known phrasal-verb
 			if(lexicon[arr[i-1].normalised + ' ' + arr[i].normalised]){
-				// console.log(arr[i-1].normalised + ' ' + arr[i].normalised)
 				arr[i] = merge_tokens(arr[i-1], arr[i]);
 				arr[i-1] = null;
 			}
@@ -114,7 +111,7 @@ var combine_phrasal_verbs = function(sentence) {
 }
 
 
-var lexicon_pass = function(w) {
+function lexicon_pass(w) {
 	if (lexicon.hasOwnProperty(w)) {
 		return schema[lexicon[w]]
 	}
@@ -175,7 +172,7 @@ var fourth_pass = function(token, i, sentence) {
 		setPos('NN', 'determiner-verb');
 	}
 	//copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
-	if (last && last.pos.tag === "CP" && token.pos.tag !== "DT" && token.pos.tag !== "RB" && token.pos.tag !== "PRP" && token.pos.parent !== "adjective" && token.pos.parent !== "value") {
+	if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.tag !== 'PRP' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
 		setPos('JJ', 'copula-adjective');
 	}
 	//copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
@@ -193,7 +190,7 @@ var fourth_pass = function(token, i, sentence) {
 	}
 	
 	//where's he gone -> gone=VB, not JJ
-	if (last && last.pos.tag==="PRP" && token.pos.tag==="JJ" ) {
+	if (last && last.pos.tag==='PRP' && token.pos.tag==='JJ' ) {
 		setPos('VB', 'adjective-after-pronoun');
 	}
 
@@ -228,17 +225,16 @@ var handle_contractions = function(arr) {
 var handle_ambiguous_contractions = function(arr) {
 	// TODO been forces has
 	var before, after, fix;
-	console.log( ': ', arr[0].normalised );
 	for (var i = 0; i < arr.length; i++) {
 		if (pos_data.ambiguousContractions.hasOwnProperty(arr[i].normalised)) {
 			before = arr.slice(0, i);
 			after = arr.slice(i + 1, arr.length);
 			// choose which verb this contraction should have..
-			var chosen = "is";
+			var chosen = 'is';
 			// look for the next verb, and if it's past-tense (he's walked -> he has walked)
 			for(var o=i+1; o<arr.length; o++){
-				if(arr[o] && arr[o].pos && arr[o].pos.tag=="VBD"){ // past tense
-					chosen = "has";
+				if(arr[o] && arr[o].pos && arr[o].pos.tag=='VBD'){ // past tense
+					chosen = 'has';
 					break;
 				}
 			}
@@ -247,20 +243,19 @@ var handle_ambiguous_contractions = function(arr) {
 				normalised: pos_data.ambiguousContractions[arr[i].normalised], // the "he" part
 				start: arr[i].start,
 				pos: schema[lexicon[pos_data.ambiguousContractions[arr[i].normalised]]],
-				pos_reason:"ambiguous_contraction"
+				pos_reason:'ambiguous_contraction'
 			}, {
-				text: "",
+				text: '',
 				normalised: chosen, //is,was,or have
 				start: undefined,
 				pos: schema[lexicon[chosen]],
-				pos_reason:"silent_contraction"
+				pos_reason:'silent_contraction'
 			}];
 			arr = before.concat(fix);
 			arr = arr.concat(after);
 			return handle_ambiguous_contractions(arr); // recursive
 		}
 	}
-	// console.log( 'l!', arr );
 	return arr;
 }
 

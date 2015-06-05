@@ -1,5 +1,5 @@
 //wrapper for value's methods
-module.exports = function(str, next, last, token) {
+module.exports = function(str, sentence, word_i) {
   var the = this
   the.word = str || '';
 	var schema = require('../../data/'+lang+'/schema');
@@ -14,20 +14,20 @@ module.exports = function(str, next, last, token) {
 
   the.is_date = function() {
     var times = /1?[0-9]:[0-9]{2}/;
-    if (the.word.match(new RegExp(dates.dayS)) || the.word.match(new RegExp(dates.monthS)) || the.word.match(times)) {
+    if (the.word.match(new RegExp(dates.dayS, 'i')) || the.word.match(new RegExp(dates.monthS, 'i')) || the.word.match(times)) {
       return true;
     }
     return false;
   }
 
   the.number = function() {
-    if (the.is_date()) {return null}
+    if (the.is_date()) { return null; }
     return to_number(the.word);
   }
 
   the.which = (function() {
-    if (the.date()) { return schema['DA']}
-    if (the.number()){return schema['NU']}
+    if (the.date()) { return schema['DA']; }
+    if (the.number()){ return schema['NU']; }
     return schema['CD'];
   })()
 

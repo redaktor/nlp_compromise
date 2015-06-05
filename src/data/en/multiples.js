@@ -16,6 +16,7 @@ var multiples = (function() {
   'great britain': 'NN',
   'head start': 'NN',
   'will be': 'CP',
+  'won\'t be': 'CP',
   'ought to': 'MD',
   'a la': 'IN',
   'a priori': 'FW',

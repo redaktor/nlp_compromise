@@ -14,7 +14,13 @@ var zip = { CP:
      [ 'are', 'aren\'t' ],
      [ 'was', 'wasn\'t' ],
      [ 'were', 'weren\'t' ],
-     [ 'will be', 'won\'t be' ] ],
+     [ 'will be', 'won\'t be' ],
+     [ 'isn\'t', 'isn\'t not' ],
+     [ 'ain\'t', 'ain\'t not' ],
+     [ 'aren\'t', 'aren\'t not' ],
+     [ 'wasn\'t', 'wasn\'t not' ],
+     [ 'weren\'t', 'weren\'t not' ],
+     [ 'won\'t be', 'won\'t be not' ] ],
   MD: 
    [ [ 'did', 'didn\'t' ],
      [ 'would', 'wouldn\'t' ],
@@ -24,7 +30,22 @@ var zip = { CP:
      [ 'will', 'won\'t' ],
      [ 'must', 'mustn\'t' ],
      [ 'shall', 'shant' ],
-     [ 'shall', 'shan\'t' ] ] }; 
+     [ 'shall', 'shan\'t' ],
+     [ 'didn\'t', 'didn\'t not' ],
+     [ 'wouldn\'t', 'wouldn\'t not' ],
+     [ 'couldn\'t', 'couldn\'t not' ],
+     [ 'shouldn\'t', 'shouldn\'t not' ],
+     [ 'can\'t', 'can\'t not' ],
+     [ 'won\'t', 'won\'t not' ],
+     [ 'mustn\'t', 'mustn\'t not' ],
+     [ 'shant', 'shant not' ],
+     [ 'shan\'t', 'shan\'t not' ],
+     [ 'might', 'might not' ],
+     [ 'may', 'may not' ],
+     [ 'lets', 'lets not' ],
+     [ 'let\'s', 'let\'s not' ],
+     [ 'who\'d', 'who\'d not' ],
+     [ 'ought', 'ought not' ] ] }; 
 
   var main = (function () {
 				var res = {};

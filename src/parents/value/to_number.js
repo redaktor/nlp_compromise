@@ -64,7 +64,9 @@ module.exports = function(s) {
 		w = words[i];
 
 		//skip 'and' eg. five hundred and twelve
-		if (w == 'and') {continue}
+		if (w === 'and') {
+			continue;
+		}
 
 		//..we're doing decimals now
 		if (w == 'point' || w == 'decimal') {

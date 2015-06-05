@@ -139,6 +139,7 @@ var main = {
 		en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not']
 	},
 	// multiple words (except phrasal verbs) are handled seperately for now
+	// FIXME : this should be written from generators and NOT be handled seperately
 	multiples: {  
     NN: [  
         { en:'ad hominem' },
@@ -154,7 +155,8 @@ var main = {
         { en:'head start' }
     ],
     CP: [  
-        { en:'will be', meta:{stopword: ['en']} }
+        { en:'will be', meta:{stopword: ['en']} },
+        { en:'won\'t be', meta:{stopword: ['en']} }
     ],
     MD: [  
         { en:'ought to' }
@@ -260,12 +262,12 @@ var main = {
 			{ uid: 3, en: 'was', meta: {aux: ['en'], passive: ['en'], stopword: ['en'], weak: ['en']} },
 			{ uid: 4, en: 'were', meta: {aux: ['en'], passive: ['en'], stopword: ['en'], weak: ['en']} },
 			{ uid: 5, en: 'will be', meta: {aux: ['en'], passive: ['en'], stopword: ['en'], weak: ['en']} },
-			{ ref: 0, en: 'isn\'t', meta: {stopword: ['en']} },
-			{ ref: 1, en: 'ain\'t', meta: {stopword: ['en']} },
-			{ ref: 2, en: 'aren\'t', meta: {stopword: ['en']} },
-			{ ref: 3, en: 'wasn\'t', meta: {stopword: ['en']} },
-			{ ref: 4, en: 'weren\'t', meta: {stopword: ['en']} },
-			{ ref: 5, en: 'won\'t be', meta: {stopword: ['en']} }
+			{ ref: 0, en: "isn't", meta: {stopword: ['en']} },
+			{ ref: 1, en: "ain't", meta: {stopword: ['en']} },
+			{ ref: 2, en: "aren't", meta: {stopword: ['en']} },
+			{ ref: 3, en: "wasn't", meta: {stopword: ['en']} },
+			{ ref: 4, en: "weren't", meta: {stopword: ['en']} },
+			{ ref: 5, en: "won't be", meta: {stopword: ['en']} }
 		]
 	},
 	
@@ -332,6 +334,19 @@ var main = {
 	//: VBZ present-verbs
 	//  note: 
 	//  ref: references irregular infinitive verb
+	/*
+	"CP": [
+      "is",
+      "will be",
+      "are",
+      "was",
+      "were",
+      "am",
+      "isn't",
+      "ain't",
+      "aren't"
+    ],
+	*/
   VBZ: { 
 		title: 'present-tense verb',
 		example: 'eats, swims',
@@ -339,7 +354,7 @@ var main = {
 		tag: 'VBZ',
 		words: [ 
 			{ ref: 0, en: 'am' },
-			{ ref: 0, en: 'is' },
+			//{ ref: 0, en: 'is' }, // TODO FIXME - in original conjugation of be is listed twice - is has being as gerund
 			{ ref: 1, en: 'has' },
 			{ ref: 2, en: 'does' },
 			{ ref: 3, en: 'begins' },
@@ -685,7 +700,7 @@ var main = {
 		parent: 'verb',
 		tag: 'VBN',
 		words: [
-			{ ref: 0, en: 'been' },
+			//{ ref: 0, en: 'been' },
 			{ ref: 1, en: 'had' },
 			{ ref: 2, en: 'done' },
 			{ ref: 3, en: 'begun' },
@@ -837,8 +852,8 @@ var main = {
 		parent: 'verb',
 		tag: 'VBG',
 		words: [	
-			{ ref: 0, en: 'am' },
-			{ ref: 0, en: 'being', meta: {aux: ['en'], passive: ['en'], stopword: ['en']} },
+			{ ref: 0, en: 'am' }, // TODO FIXME - in original conjugation of be is listed twice - 'being' is gerund of 'is' conjug.
+			//{ ref: 0, en: 'being', meta: {aux: ['en'], passive: ['en'], stopword: ['en']} },
 			{ ref: 1, en: 'having', meta: {aux: ['en'], stopword: ['en'], weak: ['en']} },
 			{ ref: 2, en: 'doing', meta: {aux: ['en'], stopword: ['en'], weak: ['en']} },
 			{ ref: 3, en: 'beginning' },
@@ -1779,7 +1794,7 @@ var main = {
 			{ uid: 45, en: 'tableau' },
 			{ uid: 46, en: 'that' },
 			{ uid: 47, en: 'thief' },
-			{ uid: 48, en: 'this' },
+			//{ uid: 48, en: 'this' },
 			{ uid: 49, en: 'tooth' },
 			{ uid: 50, en: 'vita' },
 			{ ref: 80, en: 'cleanliness' },
@@ -2049,7 +2064,7 @@ var main = {
 			{ ref: 46, en: 'those' },
 			//{ ref: 46, en: 'theses' }, // TODO FIXME - can be plural of NN thesis OR NN that - questionable - thesis is covered by RULES ... 
 			{ ref: 47, en: 'thieves' },
-			{ ref: 48, en: 'these' },
+			//{ ref: 48, en: 'these' }, // TODO FIXME - this is a DT (and was not covered by plural yet)
 			{ ref: 49, en: 'teeth' },
 			{ ref: 50, en: 'vitae' },
 			{ en: 'friends', meta: {personBlacklist: ['en']} },

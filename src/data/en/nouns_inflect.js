@@ -58,7 +58,6 @@ var zip = { NN:
      [ 'tableau', 'tableaux' ],
      [ 'that', 'those' ],
      [ 'thief', 'thieves' ],
-     [ 'this', 'these' ],
      [ 'tooth', 'teeth' ],
      [ 'vita', 'vitae' ] ],
   PRP: [ [ 'i', 'we' ], [ 'he', 'they' ], [ 'she', 'they' ] ],

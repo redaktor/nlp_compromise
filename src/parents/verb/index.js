@@ -1,5 +1,5 @@
 // wrapper for verb's methods
-module.exports = function(str, next, last, token) {
+module.exports = function(str, sentence, word_i) {
 	if (typeof lang != 'string') lang = 'en';
 	var dPath = '../../data/'+lang+'/';
 	var schema = require(dPath+'schema');
@@ -7,9 +7,12 @@ module.exports = function(str, next, last, token) {
 	var verb_conjugate = require('./conjugate/conjugate');
 	
   var the = this;
+  var token, next;
+  if (sentence !== undefined && word_i !== undefined) {
+    token = sentence.tokens[word_i];
+    next = sentence.tokens[word_i + i];
+  }
   the.word = str || '';
-  the.next = next;
-  the.last = last;
 	
   var tenses = {
     past: 'VBD',
@@ -22,7 +25,7 @@ module.exports = function(str, next, last, token) {
   the.conjugate = function() {
     return verb_conjugate(the.word);
   }
-
+	
   the.to_past = function() {
     if (the.form === 'gerund') {
       return the.word;
@@ -50,7 +53,7 @@ module.exports = function(str, next, last, token) {
     var forms = verb_conjugate(the.word);
     for (var i = 0; i < order.length; i++) {
       if (forms[order[i]] === the.word) {
-				return order[i]
+				return order[i];
 			}
     }
   })()
@@ -74,13 +77,13 @@ module.exports = function(str, next, last, token) {
   // is this verb negative already?
   the.negative = function() {
     if (the.word.match(/n't$/)) {
-					console.log( 'is neg.1', the.word );return true}
-    if ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && the.next && the.next.normalised === 'not') {
-					console.log( 'is neg.2', the.word );return true;
+			return true
+		}
+    if ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && next && next.normalised === 'not') {
+			return true;
     }
     return false;
   }
-
   return the;
 }
 

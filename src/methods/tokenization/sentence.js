@@ -39,7 +39,7 @@ module.exports = function(text) {
   if (sentences.length === 0) {
     return [text]
   }
-
+	
   return sentences;
 }
 

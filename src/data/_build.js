@@ -298,12 +298,17 @@ function generateLanguage(lang) {
 				// TODO: 'it', 'one'
 				var res = {CP:[], MD:[]};
 				['CP', 'MD'].forEach(function(type) {
-					dict[type].words.filter(possibleOrig).forEach(function(o) {
+					dict[type].words.filter(possible).forEach(function(o) {
+						var hasRef = 0;
 						dict[type].words.filter(possibleRef).forEach(function(ov) {
 							if (isRef(ov, o)) {
+								hasRef = 1;
 								res[type].push((isZip) ? [o[lang], baseRepl(ov[lang], o[lang], ['\'t']) ] : [o[lang], ov[lang]]);
 							}
 						});
+						if (!hasRef) {
+							res[type].push([o[lang], o[lang]+' not']); // TODO
+						}
 					});
 				});
 				return res;
@@ -341,6 +346,9 @@ function generateLanguage(lang) {
 					NNA: 'doer'
 				};
 				var _irregulars = newRes(isZip);
+				_irregulars = [
+					[ 'be', 'being', 'was', 'is', 0 ]
+				]; // TODO - FIXME : 'be' is listed twice in _irregulars, this one should be first ! FIXME goes to dictionary
 				var _noDoers = {};
 				//var irregularFlags = [];
 				dict.VBP.words.filter(possibleOrig).forEach(function(o) {
@@ -348,7 +356,9 @@ function generateLanguage(lang) {
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
-							if (isRef(oc, o)) conjugated = (isZip) ? baseRepl(oc[lang], o[lang], ['ing', 'er', 've']) : oc[lang];
+							if (isRef(oc, o)) {
+								conjugated = (isZip) ? baseRepl(oc[lang], o[lang], ['ing', 'er', 've']) : oc[lang];
+							}
 							did(o[lang], isZip);
 						});
 						conjugateds.push( (conjugated) ? conjugated : 0 );
@@ -892,7 +902,10 @@ function generateLanguage(lang) {
 				if(!isZip) {
 					for (var cat in rs) {
 						rs[cat] = rs[cat].map(function(o){
-							return [o.regex, o.infinitive||0, o.present||0, o.gerund||0, o.past||0, o.doer||0];
+							for (var key in o) { 
+								if (typeof o[key] != 'string') { o[key] = 0; } 
+							}
+							return [o.regex, o.infinitive, o.present, o.gerund, o.past, o.doer];
 						});
 					}
 				}
@@ -1006,7 +1019,7 @@ function generateLanguage(lang) {
 		// put words which are NOT yet in other modules in the lexicon now
 		// the same function (without arguments) is used in the lexicon to add words which ARE in other modules ...
 		
-		// TODO 'a' MUST not be a NU
+		// TODO FIXME 'a' MUST not be a NU
 		var gen = function (cat){
 			if (typeof window != 'undefined' && window.hasOwnProperty('nlp')) { m = window; pm = window; }
 			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' }) 
@@ -1022,8 +1035,8 @@ function generateLanguage(lang) {
 				NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
 				NNAB: m.abbreviations,
 				NNP: Object.keys(m.firstnames),
-				PRP: Object.keys(m.nouns.prps),
 				PP: Object.keys(m.nouns.pps),
+				PRP: Object.keys(m.nouns.prps),
 				CP: Object.keys(m.verbs_special.CP),
 				MD: Object.keys(m.verbs_special.MD),
 				VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
@@ -1035,9 +1048,13 @@ function generateLanguage(lang) {
 						Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
 						Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 				),
-				//CD
-				NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
-				DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
+				CD: nrOnes.concat( 
+					Object.keys(m.numbers.teens), 
+					Object.keys(m.numbers.tens), 
+					Object.keys(m.numbers.multiple),
+					Object.keys(m.dates.months),
+					Object.keys(m.dates.days)
+				)
 			}
 			//::NODE::
 			if (cat===1) {return [did,lexiZip]}
@@ -1088,7 +1105,12 @@ function generateLanguage(lang) {
 						main[s] = main[s] || 'JJS'
 					}
 				});
-
+				// Make sure CP are CP and not conjugated verb type
+				// TODO FIXME
+				lexiZip.CP.forEach(function(w) {
+					main[w] = 'CP';
+				});
+				
 				return main;
 			}
 			if (cat in did) { return did[cat] }
@@ -1219,6 +1241,7 @@ function generateLanguage(lang) {
 			var lZipStr = lexiPrefix.concat(clean(lexiZip, true), suffixZip);
 			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.js'), lMainStr);
 			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.min.js'), lZipStr);
+			console.log( 'wrote module lexicon for language', '"'+lang);
 		}
 		console.log( 'wrote module for language', '"'+lang+'"', colors[0], i+' of '+generators.length, colors[1], '('+g.id+')' );
 		if (i === generators.length) { console.log( ' ' ); }

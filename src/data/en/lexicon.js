@@ -59,7 +59,7 @@ var lexicon = (function() {
      'versus' ],
   VBD: [ 'walked', 'where\'d', 'when\'d', 'how\'d', 'what\'d' ],
   VBN: [ 'born' ],
-  VBG: [ 'am', 'according', 'resulting', 'staining' ],
+  VBG: [ 'according', 'resulting', 'staining' ],
   DT:
    [ 'that',
      'this',
@@ -365,8 +365,8 @@ var lexicon = (function() {
 				NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
 				NNAB: m.abbreviations,
 				NNP: Object.keys(m.firstnames),
-				PRP: Object.keys(m.nouns.prps),
 				PP: Object.keys(m.nouns.pps),
+				PRP: Object.keys(m.nouns.prps),
 				CP: Object.keys(m.verbs_special.CP),
 				MD: Object.keys(m.verbs_special.MD),
 				VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
@@ -378,9 +378,13 @@ var lexicon = (function() {
 						Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
 						Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
 				),
-				//CD
-				NU: nrOnes.concat( Object.keys(m.numbers.teens), Object.keys(m.numbers.tens), Object.keys(m.numbers.multiple) ),
-				DA: Object.keys(m.dates.months).concat( Object.keys(m.dates.days) )
+				CD: nrOnes.concat(
+					Object.keys(m.numbers.teens),
+					Object.keys(m.numbers.tens),
+					Object.keys(m.numbers.multiple),
+					Object.keys(m.dates.months),
+					Object.keys(m.dates.days)
+				)
 			}
 			//::NODE::
 			if (cat===1) {return [did,lexiZip]}
@@ -428,6 +432,11 @@ var lexicon = (function() {
 					if (s && !s.match(/^most ./) && s !== j && !main[s]) {
 						main[s] = main[s] || 'JJS'
 					}
+				});
+				// Make sure CP are CP and not conjugated verb type
+				// TODO FIXME
+				lexiZip.CP.forEach(function(w) {
+					main[w] = 'CP';
 				});
 
 				return main;
