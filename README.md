@@ -1,12 +1,24 @@
-#No training, no prolog.
-a Natural-Language-Processing library *in Javascript*, small-enough for the browser, and quick-enough to run on keypress :two_men_holding_hands:
+#No training, no prolog. i18n fork.
+a Natural-Language-Processing library *in Javascript*,<br> small-enough for the browser, and quick-enough to run on keypress :two_men_holding_hands:
 
-it does [tons of clever things](http://rawgit.com/spencermountain/nlp_compromise/master/client_side/basic_demo/index.html). it's smaller than jquery, and scores 86% on the [Penn treebank](http://www.cis.upenn.edu/~treebank/).
+It does [tons of clever things](http://rawgit.com/spencermountain/nlp_compromise/master/client_side/basic_demo/index.html). it's smaller than jquery, and scores 86% on the [Penn treebank](http://www.cis.upenn.edu/~treebank/).
 ```javascript
 nlp.pos('she sells seashells by the seashore').to_past().text()
 //she sold seashells by the seashore
 ```
-[![npm version](https://badge.fury.io/js/nlp_compromise.svg)](http://badge.fury.io/js/nlp_compromise)
+[original](https://github.com/spencermountain/nlp_compromise) [![npm version](https://badge.fury.io/js/nlp_compromise.svg)](http://badge.fury.io/js/nlp_compromise)
+
+##Why this fork?
+It is optimized for Internationalization (i18n) and further metrics.
+You as a most welcome possible contributor and translator would only have to touch 2 or 3 commented files.
+The ```_dictionary```... files in /src/data. <br>
+We do the rest by running ```grunt```.
+
+####What is coming here next?
+- language detection and setting in runtime
+- further metrics as in this [proposal](https://gist.github.com/redaktor/e5866669e238221e7cef)
+- :de:
+
 ##Check it out
 
 * [Long Text Demo](http://rawgit.com/spencermountain/nlp_compromise/master/client_side/long_demo/index.html)
