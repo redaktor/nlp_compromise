@@ -10,7 +10,7 @@ nlp.pos('she sells seashells by the seashore').to_past().text()
 
 ##Why this fork?
 It is optimized for Internationalization (i18n) and further metrics.
-You as a most welcome possible contributor and translator would only have to touch 2 or 3 commented files.
+You as a most welcome possible contributor and translator would only have to touch 2 or 3 commented files.<br>
 The ```_dictionary```... files in /src/data. <br>
 We do the rest by running ```grunt```.
 
