@@ -3,7 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var verbs = (function() {
   var zip = [ 'use',
   'form',
   'hope',
@@ -555,6 +554,3 @@ var verbs = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var word_rules = (function() {
+
   var zip = { JJ: 
    [ '.[cts]hy$',
      '.[st]ty$',
@@ -136,6 +136,3 @@ var word_rules = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

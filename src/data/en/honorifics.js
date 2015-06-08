@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var honorifics = (function() {
+
   var zip = [ 'jr',
   'mr',
   'mrs',
@@ -59,6 +59,3 @@ var honorifics = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

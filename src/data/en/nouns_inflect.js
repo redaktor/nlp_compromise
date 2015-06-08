@@ -4,7 +4,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var nouns_inflect = (function() {
   
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
@@ -237,6 +236,3 @@ var zip = { NN:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

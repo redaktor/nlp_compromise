@@ -3,7 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var firstnames = (function() {
   
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
@@ -307,6 +306,3 @@ var zip = { male:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

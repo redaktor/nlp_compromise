@@ -3,7 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var numbers = (function() {
   var zip = { ones: 
    { zero: 0,
      null: 0,
@@ -85,6 +84,3 @@ var numbers = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

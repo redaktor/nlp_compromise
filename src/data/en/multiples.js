@@ -3,8 +3,12 @@
 //::NODE::
   var lang = 'en';
 //::
-var multiples = (function() {
-  var zip = { 'ad hominem': 'NN',
+
+  var zip = { 'will be': 'CP',
+  'won\'t be': 'CP',
+  'ought to': 'MD',
+  'ought not to': 'MD',
+  'ad hominem': 'NN',
   'new york': 'NN',
   'new england': 'NN',
   'new hampshire': 'NN',
@@ -15,12 +19,8 @@ var multiples = (function() {
   'united kingdom': 'NN',
   'great britain': 'NN',
   'head start': 'NN',
-  'will be': 'CP',
-  'won\'t be': 'CP',
-  'ought to': 'MD',
-  'a la': 'IN',
-  'a priori': 'FW',
-  'et cetera': 'FW',
+  'more secret': 'JJR',
+  'top secret': 'JJS',
   'on board': 'JJ',
   'vice versa': 'JJ',
   'en route': 'JJ',
@@ -77,13 +77,13 @@ var multiples = (function() {
   'de jure': 'RB',
   'par excellence': 'RB',
   'de trop': 'RB',
-  'a posteriori': 'RB' }; 
+  'a posteriori': 'RB',
+  'a la': 'IN',
+  'a priori': 'IN',
+  'et cetera': 'FW' }; 
 
   var main = zip;
 
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

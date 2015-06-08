@@ -4,7 +4,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var normalisations = (function() {
+
   var zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
   '5': 'Ƽƽ',
@@ -53,6 +53,3 @@ var normalisations = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

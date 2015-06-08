@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var adverbs_decline = (function() {
+
   var zip = [ [ 'wholly', 'whole' ],
   [ 'idly', 'idle' ],
   [ 'fully', 'full' ],
@@ -35,5 +35,3 @@ var adverbs_decline = (function() {
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
 
-  return main;
-})();

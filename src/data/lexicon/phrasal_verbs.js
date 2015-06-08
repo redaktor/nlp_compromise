@@ -1,8 +1,8 @@
-//phrasal verbs are two words that really mean one verb.
-//'beef up' is one verb, and not some direction of beefing.
-//by @spencermountain, 2015 mit
-//many credits to http://www.allmyphrasalverbs.com/
-var verb_conjugate = require("../../parents/verb/conjugate/conjugate")
+// phrasal verbs are two words that really mean one verb.
+// 'beef up' is one verb, and not some direction of beefing.
+// by @spencermountain, 2015 mit
+// many credits to http://www.allmyphrasalverbs.com/
+var verb_conjugate = require("../../parents/verb/conjugate")
 
 //start the list with some randoms
 var main = [
@@ -36,9 +36,9 @@ var opposites = {
 
 //forms that have in/out symmetry
 var symmetric = {
-  "away": "blow,bounce,bring,call,come,cut,drop,fire,get,give,go,keep,pass,put,run,send,shoot,switch,take,tie,throw",
-  "in": "bang,barge,bash,beat,block,book,box,break,bring,burn,butt,carve,cash,check,come,cross,drop,fall,fence,fill,give,grow,hand,hang,head,jack,keep,leave,let,lock,log,move,opt,pack,peel,pull,put,rain,reach,ring,rub,send,set,settle,shut,sign,smash,snow,strike,take,try,turn,type,warm,wave,wean,wear,wheel",
-  "on": "add,call,carry,catch,count,feed,get,give,go,grind,head,hold,keep,lay,log,pass,pop,power,put,send,show,snap,switch,take,tell,try,turn,wait",
+  "away": "blow,bounce,bring,call,come,cut,drop,fire,get,give,go,hide,keep,pass,put,run,send,shoot,switch,take,tie,throw",
+  "in": "bang,barge,bash,beat,block,book,box,break,bring,burn,butt,carve,cash,check,come,cross,drop,fall,fence,fill,give,grow,hand,hang,head,jack,keep,leave,let,lock,log,move,opt,pack,peel,plug,pull,put,rain,reach,ring,rub,send,set,settle,shut,sign,smash,snow,strike,take,try,turn,type,warm,wave,wean,wear,wheel",
+  "on": "add,call,carry,catch,count,feed,get,give,go,grind,head,hold,keep,kick,knock,lay,live,log,pass,pop,power,put,read,sail,send,shave,shoot,show,sleep,snap,switch,take,tell,try,turn,wait,walk,work,write",
   "over": "come,go,look,read,run,talk",
   "together": "come,pull,put",
   "up": "add,back,beat,bend,blow,boil,bottle,break,bring,buckle,bundle,call,carve,clean,cut,dress,fill,flag,fold,get,give,grind,grow,hang,hold,keep,let,load,lock,look,man,mark,melt,move,pack,pin,pipe,plump,pop,power,pull,put,rub,scale,scrape,send,set,settle,shake,show,sit,slow,smash,square,stand,strike,take,tear,tie,turn,use,wash,wind",
@@ -60,17 +60,17 @@ var asymmetric = {
   "along": "bring,move",
   "apart": "fall,take",
   "around": "ask,boss,bring,call,come,fool,get,horse,joke,lie,mess,play",
-  "away": "back,carry,file,frighten,hide,wash",
+  "away": "back,carry,file,frighten,wash",
   "back": "fall,fight,hit,hold,look,pay,stand,think",
   "by": "drop,get,go,stop,swear,swing,tick,zip",
   "down": "bog,calm,fall,hand,hunker,jot,knock,lie,narrow,note,pat,pour,run,tone,trickle,wear",
   "for": "fend,file,gun,hanker,root,shoot",
   "forth": "bring,come",
   "forward": "come,look",
-  "in": "cave,chip,hone,jump,key,pencil,plug,rein,shade,sleep,stop,suck,tie,trade,tuck,usher,weigh,zero",
+  "in": "cave,chip,hone,jump,key,pencil,rein,shade,sleep,stop,suck,tie,trade,tuck,usher,weigh,zero",
   "into": "look,run",
   "it": "go,have",
-  "off": "auction,be,beat,blast,block,brush,burn,buzz,cast,cool,drop,end,face,fall,fend,frighten,goof,jack,kick,knock,laugh,level,live,make,mouth,nod,pair,pay,peel,read,reel,ring,rip,round,sail,shave,shoot,sleep,slice,split,square,stave,stop,storm,strike,tear,tee,tick,tip,top,walk,work,write",
+  "off": "auction,be,beat,blast,block,brush,burn,buzz,cast,cool,drop,end,face,fall,fend,frighten,goof,jack,laugh,level,make,mouth,nod,pair,pay,peel,reel,ring,rip,round,slice,split,square,stave,stop,storm,strike,tear,tee,tick,tip,top",
   "on": "bank,bargain,egg,frown,hit,latch,pile,prattle,press,spring,spur,tack,urge,yammer",
   "out": "act,ask,back,bail,bear,black,blank,bleed,blow,blurt,branch,buy,cancel,cut,eat,edge,farm,figure,find,fill,find,fish,fizzle,flake,flame,flare,flesh,flip,geek,get,help,hide,hold,iron,knock,lash,level,listen,lose,luck,make,max,miss,nerd,pan,pass,pick,pig,point,print,psych,rat,read,rent,root,rule,run,scout,see,sell,shout,single,sit,smoke,sort,spell,splash,stamp,start,storm,straighten,suss,time,tire,top,trip,trot,wash,watch,weird,whip,wimp,wipe,work,zone,zonk",
   "over": "bend,bubble,do,fall,get,gloss,hold,keel,mull,pore,sleep,spill,think,tide,tip",
@@ -91,6 +91,8 @@ main = main.reduce(function (h, s) {
   return h
 }, {})
 
+
+// TODO - goes to lexicon
 //conjugate every phrasal verb. takes ~30ms
 var tags = {
   present: "VB",
@@ -112,7 +114,8 @@ Object.keys(main).forEach(function (s) {
     phrasal = cache[verb][k] + " " + particle
     main[phrasal] = tags[k]
   })
-})
+});
 
-module.exports = main;
+
+module.exports = (function(){ return main; }())
 // console.log(JSON.stringify(phrasal_verbs, null, 2))

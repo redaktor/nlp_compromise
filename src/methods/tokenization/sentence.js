@@ -11,14 +11,13 @@ module.exports = function(text) {
   // first do a greedy-split..
   var chunks = text.split(/(\S.+?[.\?!])(?=\s+|$|")/g);
 
-  // date abbrevs.
-  // these are added seperately because they are not nouns
-  abbreviations = abbreviations.concat(Object.keys(dates.monthAbbrevs));
+  // all abbreviations are used here, including nonNoun and date abbrevs.
+  abbreviations = abbreviations.nouns.concat(abbreviations.nonNouns, Object.keys(dates.monthAbbrevs));
 
   // detection of non-sentence chunks
   var abbrev_reg = new RegExp("\\b(" + abbreviations.join("|") + ")[.!?] ?$", "i");
-  var acronym_reg= new RegExp("[ |\.][A-Z]\.?$", "i")
-  var elipses_reg= new RegExp("\\.\\.\\.*$")
+  var acronym_reg = new RegExp("[ |\.][A-Z]\.?$", "i");
+  var elipses_reg = new RegExp("\\.\\.\\.*$");
 
   // loop through these chunks, and join the non-sentence chunks back together..
   var chunks_length = chunks.length;
@@ -37,7 +36,7 @@ module.exports = function(text) {
   }
   //if we never got a sentence, return the given text
   if (sentences.length === 0) {
-    return [text]
+    return [text];
   }
 	
   return sentences;

@@ -3,12 +3,18 @@
 //::NODE::
   var lang = 'en';
 //::
-var negate_data = (function() {
+
   var zip = { everyone: 'no one',
   everybody: 'nobody',
   someone: 'no one',
   somebody: 'nobody',
-  always: 'never' }; 
+  always: 'never',
+  away: 'back',
+  in: 'out',
+  on: 'off',
+  over: 'under',
+  together: 'apart',
+  up: 'down' }; 
 
   var main = (function () {
 				//::NODE::
@@ -23,6 +29,3 @@ var negate_data = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

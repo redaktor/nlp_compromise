@@ -3,8 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var pos_data = (function() {
-  
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -15,14 +13,15 @@ var zip = { particles:
      'on',
      'off',
      'of',
-     'with',
      'over',
      'under',
      'up',
      'down',
-     'about',
+     'apart',
      'before',
      'after',
+     'with',
+     'about',
      'to',
      'through',
      'onto',
@@ -37,7 +36,6 @@ var zip = { particles:
      'back',
      'forth',
      'along',
-     'apart',
      'way' ],
   cs: 
    [ 'woul|d',
@@ -91,6 +89,3 @@ var zip = { particles:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

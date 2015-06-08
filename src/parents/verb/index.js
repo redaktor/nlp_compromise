@@ -1,11 +1,12 @@
 // wrapper for verb's methods
-module.exports = function(str, sentence, word_i) {
-	if (typeof lang != 'string') lang = 'en';
-	var dPath = '../../data/'+lang+'/';
-	var schema = require(dPath+'schema');
-	var verbs_special = require(dPath+'verbs_special');
-	var verb_conjugate = require('./conjugate/conjugate');
-	
+
+if (typeof lang != 'string') lang = 'en';
+var dPath = '../../data/'+lang+'/';
+var schema = require(dPath+'schema');
+var verbs_special = require(dPath+'verbs_special');
+var verb_conjugate = require('./conjugate');
+
+var main = function(str, sentence, word_i) {
   var the = this;
   var token, next;
   if (sentence !== undefined && word_i !== undefined) {
@@ -13,6 +14,7 @@ module.exports = function(str, sentence, word_i) {
     next = sentence.tokens[word_i + i];
   }
   the.word = str || '';
+	the.conjugated = {};
 	
   var tenses = {
     past: 'VBD',
@@ -22,9 +24,13 @@ module.exports = function(str, sentence, word_i) {
     gerund: 'VBG'
   }
 
-  the.conjugate = function() {
-    return verb_conjugate(the.word);
-  }
+	the.conjugate = function() {
+		if (the.conjugated) {
+			return the.conjugated;
+		}
+		verb_conjugate = require('./conjugate');
+		return verb_conjugate(the.word);
+	}
 	
   the.to_past = function() {
     if (the.form === 'gerund') {
@@ -42,21 +48,21 @@ module.exports = function(str, sentence, word_i) {
   }
 
   // which conjugation
-  the.form = (function() {
-    // don't choose infinitive if infinitive == present
-    var order = [
-      'past',
-      'present',
-      'gerund',
-      'infinitive'
-    ];
-    var forms = verb_conjugate(the.word);
-    for (var i = 0; i < order.length; i++) {
-      if (forms[order[i]] === the.word) {
+	the.form = (function() {
+		// don't choose infinitive if infinitive == present
+		var order = [
+			'past',
+			'present',
+			'gerund',
+			'infinitive'
+		];
+		the.conjugated = verb_conjugate(the.word);
+		for (var i = 0; i < order.length; i++) {
+			if (the.conjugated[order[i]] === the.word) {
 				return order[i];
 			}
-    }
-  })()
+		}
+	})()
 
   // past/present/future   //wahh?!
   the.tense = (function() {
@@ -68,8 +74,8 @@ module.exports = function(str, sentence, word_i) {
 
   // the most accurate part_of_speech
   the.which = (function() {
-    if (verbs_special.CP[the.word]) {return schema['CP']}
-    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) {return schema['VBG']}
+    if (verbs_special.CP[the.word]) { return schema['CP']; }
+    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) { return schema['VBG']; }
     var form = the.form;
     return schema[tenses[form]];
   })()
@@ -86,6 +92,6 @@ module.exports = function(str, sentence, word_i) {
   }
   return the;
 }
-
+module.exports = main;
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)

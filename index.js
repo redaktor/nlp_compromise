@@ -4,41 +4,38 @@
 // if we're server-side, grab files, otherwise assume they're prepended already
 // console.time('nlp_boot')
 
-  var parents = require("./src/parents/parents")
-
-  var sentence_parser = require('./src/methods/tokenization/sentence');
-  var tokenize = require('./src/methods/tokenization/tokenize');
-  var ngram = require('./src/methods/tokenization/ngram');
-  //tokenize
-  var normalize = require('./src/methods/transliteration/unicode_normalisation');
-  var syllables = require('./src/methods/syllables/syllable');
-  //localization
-	var americanize = require('./src/methods/localization/americanize');
-	var britishize = require('./src/methods/localization/britishize');
-  //part of speech tagging
-  var pos = require('./src/pos');
-  //named_entity_recognition
-  var spot = require('./src/spot');
+var parents = require("./src/parents");
+var methods = require("./src/methods");	
+//part of speech tagging
+var pos = require('./src/pos');
+//named_entity_recognition
+var spot = require('./src/spot');
 	
-// api
-module.exports = {
+// API
+var nlp = {
   noun: parents.noun,
   adjective: parents.adjective,
   verb: parents.verb,
   adverb: parents.adverb,
   value: parents.value,
 
-  sentences: sentence_parser,
-  ngram: ngram,
-  tokenize: tokenize,
-  americanize: americanize,
-  britishize: britishize,
-  syllables: syllables,
-  normalize: normalize.normalize,
-  denormalize: normalize.denormalize,
+  sentences: methods.sentence_parser,
+  ngram: methods.ngram,
+  tokenize: methods.tokenize,
+  americanize: methods.americanize,
+  britishize: methods.britishize,
+  syllables: methods.syllables,
+  normalize: methods.normalize.normalize,
+  denormalize: methods.normalize.denormalize,
   pos: pos,
   spot: spot
 }
+// export it for client-side
+if (typeof window!=="undefined") { // TODO - is this right?
+  window.nlp = nlp;
+}
+// export it for server-side
+module.exports = nlp;
 
 // console.timeEnd('nlp_boot')
 // console.log( nlp.pos('she sells seashells by the seashore').sentences[0].negate().text() )

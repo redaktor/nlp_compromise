@@ -5,8 +5,6 @@ used in combination with the generic "fallback" method */
 //::NODE::
   var lang = 'en';
 //::
-var verb_rules = (function() {
-  
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -122,6 +120,3 @@ var zip = { infinitive:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

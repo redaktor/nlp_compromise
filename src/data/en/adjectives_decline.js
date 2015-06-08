@@ -6,7 +6,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var adjectives_decline = (function() {
   
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
@@ -314,6 +313,3 @@ var zip = [ [ 'wrong', 'wrong' ],
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

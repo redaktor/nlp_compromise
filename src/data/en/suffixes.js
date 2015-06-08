@@ -3,8 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var suffixes = (function() {
-  
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -676,6 +674,3 @@ var zip = { wordnet:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

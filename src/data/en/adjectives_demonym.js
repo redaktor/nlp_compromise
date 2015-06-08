@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var adjectives_demonym = (function() {
+
   var zip = [ 'afghan',
   'albanian',
   'algerian',
@@ -109,6 +109,3 @@ var adjectives_demonym = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

@@ -4,8 +4,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var verbs_conjugate = (function() {
-  
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -191,6 +189,3 @@ var zip = { irregulars:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

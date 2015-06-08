@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var adjectives = (function() {
+
   var zip = [ 'wrong',
   'public',
   'icy',
@@ -723,6 +723,3 @@ var adjectives = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

@@ -1,8 +1,8 @@
 
 var helpFns = (function() {
-  var main = (function () {
+  var main = (function _fns() {
 		return {
-			toObj: function(h,s){ h[s]=true; return h; },
+			toObj: function(h,s){ h[s] = true; return h; },
 			toObjValues: function(zip, obj){
 				if (!obj) {obj = {}}
 				return Object.keys(zip).reduce(function(h, k) {

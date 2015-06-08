@@ -3,8 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var nouns = (function() {
-  
+
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -72,8 +71,7 @@ var zip = { personBlacklist:
      'elle',
      '\'em' ],
   pps: 
-   [ [ 'mine', 0 ],
-     [ 'yours', 1 ],
+   [ [ 'yours', 1 ],
      [ 'his', 2 ],
      [ 'her', 3 ],
      [ 'its', 4 ],
@@ -95,6 +93,3 @@ var zip = { personBlacklist:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

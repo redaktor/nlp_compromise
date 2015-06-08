@@ -1,10 +1,11 @@
 // Parents are classes for each main part of speech, with appropriate methods
+
 var Adjective = require('./adjective');
 var Noun = require('./noun');
 var Adverb = require('./adverb');
 var Verb = require('./verb');
 var Value = require('./value');
-
+		
 module.exports = {
   adjective: function(str, next, last, token) {
     return new Adjective(str, next, last, token);

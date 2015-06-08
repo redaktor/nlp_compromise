@@ -1,24 +1,20 @@
 
-var lexicon = (function() {
-  
 //::NODE::
   var lang = 'en';
 //::
 //::NODE::
-  var m = {};
+  var m = require('./');
   var pm = {};
-  function reqDmodule(n) { m[n] = require('./' + n.concat('.js')); }
   function reqPmodules() {
 			pm.phrasal_verbs = require('../lexicon/phrasal_verbs'); // TODO - FIXME becomes data module
-			['conjugate','to_doer'].forEach(function(n) {
+			['index','to_doer'].forEach(function(n) {
 				pm[n] = require('../../parents/verb/conjugate/' + n);
 			});
 			['to_adverb','to_superlative','to_comparative'].forEach(function(n) {
 				pm[n] = require('../../parents/adjective/conjugate/' + n);
 			});
 		}
-  ['nouns_inflect','nouns','verbs_special','verbs_conjugate','verbs','adjectives_decline','adjectives_demonym','adjectives','adverbs_decline','numbers','dates','honorifics','abbreviations','multiples','pos_data','negate_data','firstnames','normalisations','suffixes','verb_rules','word_rules','schema'].forEach(reqDmodule);
-  reqPmodules();
+    reqPmodules();
 //::
 
   var main = {};
@@ -106,14 +102,17 @@ var lexicon = (function() {
      'on',
      'off',
      'of',
-     'with',
      'over',
      'under',
      'up',
      'down',
-     'about',
+     'together',
+     'apart',
      'before',
      'after',
+     'with',
+     'without',
+     'about',
      'to',
      'round',
      'through',
@@ -129,7 +128,6 @@ var lexicon = (function() {
      'back',
      'forth',
      'along',
-     'apart',
      'way',
      'until',
      'into',
@@ -146,7 +144,6 @@ var lexicon = (function() {
      'within',
      'during',
      'per',
-     'without',
      'throughout',
      'than',
      'via',
@@ -164,7 +161,6 @@ var lexicon = (function() {
      'atop',
      'barring',
      'chez',
-     'circa',
      'mid',
      'midst',
      'notwithstanding',
@@ -179,7 +175,8 @@ var lexicon = (function() {
      'o\'',
      'a\'' ],
   PP:
-   [ 'my',
+   [ 'mine',
+     'my',
      'myself',
      'your',
      'yourself',
@@ -247,7 +244,7 @@ var lexicon = (function() {
      'boo',
      'wow',
      'nope' ],
-  FW: [ 'etc' ],
+  FW: [ 'ie', 'etc' ],
   RB:
    [ 'when',
      'whence',
@@ -351,7 +348,7 @@ var lexicon = (function() {
      'widely' ],
   RBR: [ 'more' ],
   RBS: [ 'most' ] }
-  var unzip = function (cat){
+  var unzip = function gen(cat){
 			if (typeof window != 'undefined' && window.hasOwnProperty('nlp')) { m = window; pm = window; }
 			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' })
 			var did = {
@@ -363,7 +360,7 @@ var lexicon = (function() {
 			}
 			var lexiZip = {
 				NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-				NNAB: m.abbreviations,
+				NNAB: m.abbreviations.nouns,
 				NNP: Object.keys(m.firstnames),
 				PP: Object.keys(m.nouns.pps),
 				PRP: Object.keys(m.nouns.prps),
@@ -408,9 +405,9 @@ var lexicon = (function() {
 				});
 				// conjugate all verbs. (~8ms, triples the lexicon size)
 				m.verbs.forEach(function(v) {
-					var c = pm.conjugate(v);
+					var c = pm.index(v);
 					var d = pm.to_doer(v);
-					var map = {'infinitive': 'VBP', 'past': 'VBD', 'gerund': 'VBG', 'present': 'VBZ', 'participle': 'VBN'};
+					var map = {infinitive: 'VBP', past: 'VBD', gerund: 'VBG', present: 'VBZ', future: 'VBF', participle: 'VBN'};
 					for (var type in map) {
 						if (c[type] && !main[c[type]]) { main[c[type]] = map[type] }
 						if (d && !main[d]) { main[d] = 'NNA' }
@@ -448,6 +445,3 @@ var lexicon = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

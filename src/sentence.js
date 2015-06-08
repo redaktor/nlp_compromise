@@ -1,7 +1,10 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
-module.exports = function(tokens) {
-	var negate_data = require('./data/'+lang+'/negate_data');
+
+if (typeof lang != 'string') lang = 'en';
+var negate_data = require('./data/'+lang+'/negate_data');
+
+var main = function(tokens) {
 	var the = this;
   the.tokens = tokens || [];
 
@@ -229,3 +232,4 @@ module.exports = function(tokens) {
   return the
 }
 
+module.exports = main;

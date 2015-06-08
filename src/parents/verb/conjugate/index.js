@@ -1,4 +1,4 @@
-//turn a verb into its other grammatical forms.
+// turn a verb into its other grammatical forms.
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../../data/'+lang+'/';
 var suffixes = require(dPath+'suffixes');
@@ -93,7 +93,8 @@ function fufill(obj, prefix) {
 	return obj;
 }
 
-module.exports = function(w) {
+var main = function(w) {
+	/// console.log( '!!', w );
 	if (typeof w != 'string') {
 		return {}
 	}
@@ -103,6 +104,7 @@ module.exports = function(w) {
 	
 	if(w.match(' ') && w.match(phrasal_reg)){
 		var splits = w.match(phrasal_reg,'');
+		/// console.log( 'b', w, splits );
 		var phrasal_verb = splits[1];
 		var particle = splits[2];
 		var result = module.exports(phrasal_verb); // recursive
@@ -163,6 +165,8 @@ module.exports = function(w) {
 	// produce a generic transformation
 	return fallback(w);
 };
+
+module.exports = main;
 
 // console.log(verb_conjugate('walking'))
 // console.log(verb_conjugate('overtook'))

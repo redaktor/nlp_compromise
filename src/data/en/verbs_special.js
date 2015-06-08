@@ -3,8 +3,6 @@
 //::NODE::
   var lang = 'en';
 //::
-var verbs_special = (function() {
-  
 //::NODE::
 if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
 //::
@@ -14,13 +12,7 @@ var zip = { CP:
      [ 'are', 'aren\'t' ],
      [ 'was', 'wasn\'t' ],
      [ 'were', 'weren\'t' ],
-     [ 'will be', 'won\'t be' ],
-     [ 'isn\'t', 'isn\'t not' ],
-     [ 'ain\'t', 'ain\'t not' ],
-     [ 'aren\'t', 'aren\'t not' ],
-     [ 'wasn\'t', 'wasn\'t not' ],
-     [ 'weren\'t', 'weren\'t not' ],
-     [ 'won\'t be', 'won\'t be not' ] ],
+     [ 'will be', 'won\'t be' ] ],
   MD: 
    [ [ 'did', 'didn\'t' ],
      [ 'would', 'wouldn\'t' ],
@@ -31,21 +23,13 @@ var zip = { CP:
      [ 'must', 'mustn\'t' ],
      [ 'shall', 'shant' ],
      [ 'shall', 'shan\'t' ],
-     [ 'didn\'t', 'didn\'t not' ],
-     [ 'wouldn\'t', 'wouldn\'t not' ],
-     [ 'couldn\'t', 'couldn\'t not' ],
-     [ 'shouldn\'t', 'shouldn\'t not' ],
-     [ 'can\'t', 'can\'t not' ],
-     [ 'won\'t', 'won\'t not' ],
-     [ 'mustn\'t', 'mustn\'t not' ],
-     [ 'shant', 'shant not' ],
-     [ 'shan\'t', 'shan\'t not' ],
+     [ 'ought to', 'ought not to' ],
+     [ 'ought', 'ought not' ],
      [ 'might', 'might not' ],
      [ 'may', 'may not' ],
      [ 'lets', 'lets not' ],
      [ 'let\'s', 'let\'s not' ],
-     [ 'who\'d', 'who\'d not' ],
-     [ 'ought', 'ought not' ] ] }; 
+     [ 'who\'d', 'who\'d not' ] ] }; 
 
   var main = (function () {
 				var res = {};
@@ -56,6 +40,7 @@ var zip = { CP:
 
 						res[type][a[0]] = type;
 						res[type][a[1]] = type;
+						res.negate[a[1]] = a[0];
 						res.negate[a[0]] = a[1];
 					});
 				});
@@ -65,6 +50,3 @@ var zip = { CP:
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

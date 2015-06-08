@@ -3,7 +3,7 @@
 //::NODE::
   var lang = 'en';
 //::
-var dates = (function() {
+
   var zip = { months: 
    { january: 0,
      february: 1,
@@ -51,6 +51,3 @@ var dates = (function() {
 //::NODE::
   if (typeof module !== "undefined" && module.exports) module.exports = main;
 //::
-
-  return main;
-})();

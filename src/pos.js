@@ -10,18 +10,17 @@ var pos_data = require(dPath+'pos_data');
 var suffixes = require(dPath+'suffixes');
 var schema = require(dPath+'schema');
 var word_rules = require(dPath+'word_rules');
+var parents = require('./parents');
 var tokenize = require('./methods/tokenization/tokenize');
 var Sentence = require('./sentence');
 var Section = require('./section');
-var parents = require('./parents/parents');
-
 var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
 for (var k in numbers) {
 	vs = vs.concat(Object.keys(numbers[k]))
 }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
-var merge_tokens = function(a, b) {
+function merge_tokens(a, b) {
 	a.text += ' ' + b.text;
 	a.normalised += ' ' + b.normalised;
 	a.pos_reason += '|' + b.pos_reason;
@@ -32,7 +31,7 @@ var merge_tokens = function(a, b) {
 	return a;
 }
 
-//combine adjacent neighbours, and special cases
+// combine adjacent neighbours, and special cases
 function combine_tags(sentence) {
 	var arr = sentence.tokens || [];
 	for (var i = 0; i <= arr.length; i++) {
@@ -43,38 +42,38 @@ function combine_tags(sentence) {
 				arr[i] = null;
 			}
 			var tag = arr[i].pos.tag;
-			//'joe smith' are both NN, for example
+			// 'joe smith' are both NN, for example
 			if (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ) {
 				merge();
 			}
-			//merge NNP and NN, like firstname, lastname
+			// merge NNP and NN, like firstname, lastname
 			else if ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')) {
 				merge();
 				arr[i + 1].pos = schema['NNP'];
 			}
-			//merge dates manually, which often have punctuation
+			// merge dates manually, which often have punctuation
 			else if (tag === 'CD' && next.pos.tag ==='CD') {
 				merge();
 			}
-			//merge abbreviations with nouns manually, eg. 'Joe jr.'
+			// merge abbreviations with nouns manually, eg. 'Joe jr.'
 			else if ( (tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')) {
 				merge();
 			}
-			//'will walk' -> future-tense verb
+			// 'will walk' -> future-tense verb
 			else if (arr[i].normalised === 'will' && next.pos.parent === 'verb') {
 				merge();
 			}
-			//'hundred and fifty', 'march the 5th'
+			// 'hundred and fifty', 'march the 5th'
 			else if (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD') {
 				merge();
 			}
-			//capitals surrounding a preposition  'United States of America'
+			// capitals surrounding a preposition  'United States of America'
 			else if (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital) {
 				merge();
 				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
 				arr[i + 1] = null;
 			}
-			//capitals surrounding two prepositions  'Phantom of the Opera'
+			// capitals surrounding two prepositions  'Phantom of the Opera'
 			else if (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital) {
 				merge();
 				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
@@ -90,14 +89,14 @@ function combine_tags(sentence) {
 	return sentence
 }
 
-//some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
-//they should be combined with the verb, sometimes.
-//does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
-var combine_phrasal_verbs = function(sentence) {
+// some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
+// they should be combined with the verb, sometimes.
+// does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
+function combine_phrasal_verbs(sentence) {
 	var arr = sentence.tokens || [];
 	for (var i = 1; i < arr.length; i++) {
 		if(pos_data.particles[arr[i].normalised]){
-			//it matches a known phrasal-verb
+			// it matches a known phrasal-verb
 			if(lexicon[arr[i-1].normalised + ' ' + arr[i].normalised]){
 				arr[i] = merge_tokens(arr[i-1], arr[i]);
 				arr[i-1] = null;
@@ -115,7 +114,7 @@ function lexicon_pass(w) {
 	if (lexicon.hasOwnProperty(w)) {
 		return schema[lexicon[w]]
 	}
-	//try to match it without a prefix - eg. outworked -> worked
+	// try to match it without a prefix - eg. outworked -> worked
 	if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
 		var attempt = w.replace(/^(over|under|out|.*?-|un|re|en)/, '');
 		return schema[lexicon[attempt]];
@@ -130,7 +129,7 @@ var rules_pass = function(w) {
 	}
 }
 
-var fourth_pass = function(token, i, sentence) {
+function fourth_pass(token, i, sentence) {
 	var last = sentence.tokens[i - 1];
 	var next = sentence.tokens[i + 1];
 	var strong_determiners = { // TODO
@@ -142,54 +141,54 @@ var fourth_pass = function(token, i, sentence) {
 		token.pos = schema[p];
 		token.pos_reason = pr;
 	}
-	//resolve ambiguous 'march','april','may' with dates
+	// resolve ambiguous 'march','april','may' with dates
 	if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
 		setPos('CD', 'may_is_date');
 	}
-		//if it's before a modal verb, it's a noun -> lkjsdf would
+		// if it's before a modal verb, it's a noun -> lkjsdf would
 	if (next && token.pos.parent !== 'noun' && token.pos.parent !== 'glue' && next.pos.tag === 'MD') {
 		setPos('NN', 'before_modal');
 	}
-	//if it's after the word 'will' its probably a verb/adverb
+	// if it's after the word 'will' its probably a verb/adverb
 	if (last && last.normalised == 'will' && !last.punctuated && token.pos.parent == 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP') {
 		setPos('VB', 'after_will');
 	}
-	//if it's after the word 'i' its probably a verb/adverb
+	// if it's after the word 'i' its probably a verb/adverb
 	if (last && last.normalised == 'i' && !last.punctuated && token.pos.parent == 'noun') {
 		setPos('VB', 'after_i');
 	}
-	//if it's after an adverb, it's not a noun -> quickly acked
-	//support form 'atleast he is..'
+	// if it's after an adverb, it's not a noun -> quickly acked
+	// support form 'atleast he is..'
 	if (last && token.pos.parent === 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP' && last.pos.tag === 'RB' && !last.start) {
 		setPos('VB', 'after_adverb');
 	}
-	//no consecutive, unpunctuated adjectives -> real good
+	// no consecutive, unpunctuated adjectives -> real good
 	if (next && token.pos.parent === 'adjective' && next.pos.parent === 'adjective' && !token.punctuated) {
 		setPos('RB', 'consecutive_adjectives');
 	}
-	//if it's after a determiner, it's not a verb -> the walk
+	// if it's after a determiner, it's not a verb -> the walk
 	if (last && token.pos.parent === 'verb' && strong_determiners[last.pos.normalised] && token.pos.tag != 'CP') {
 		setPos('NN', 'determiner-verb');
 	}
-	//copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
+	// copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
 	if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.tag !== 'PRP' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
 		setPos('JJ', 'copula-adjective');
 	}
-	//copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
+	// copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
 	if (last && next && last.pos.tag === 'CP' && token.pos.tag === 'RB' && next.pos.parent === 'verb') {
 		sentence.tokens[i + 1].pos = schema['JJ'];
 		sentence.tokens[i + 1].pos_reason = 'copula-adverb-adjective';
 	}
-	// the city [verb] him.
+	//  the city [verb] him.
 	if (next && next.pos.tag == 'PRP' && token.pos.tag !== 'PP' && token.pos.parent == 'noun' && !token.punctuated) {
 		setPos('VB', 'before_[him|her|it]');
 	}
-	//the misled worker -> misled is an adjective, not vb
+	// the misled worker -> misled is an adjective, not vb
 	if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
 		setPos('JJ', 'determiner-adjective-noun');
 	}
 	
-	//where's he gone -> gone=VB, not JJ
+	// where's he gone -> gone=VB, not JJ
 	if (last && last.pos.tag==='PRP' && token.pos.tag==='JJ' ) {
 		setPos('VB', 'adjective-after-pronoun');
 	}
@@ -197,8 +196,8 @@ var fourth_pass = function(token, i, sentence) {
 	return token;
 }
 
-//add a 'quiet' token for contractions so we can represent their grammar
-var handle_contractions = function(arr) {
+// add a 'quiet' token for contractions so we can represent their grammar
+function handle_contractions(arr) {
 	var before, after, fix;
 	for (var i = 0; i < arr.length; i++) {
 		if (pos_data.contractions.hasOwnProperty(arr[i].normalised)) {
@@ -222,7 +221,7 @@ var handle_contractions = function(arr) {
 }
 
 // these contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was']
-var handle_ambiguous_contractions = function(arr) {
+function handle_ambiguous_contractions(arr) {
 	// TODO been forces has
 	var before, after, fix;
 	for (var i = 0; i < arr.length; i++) {
@@ -261,7 +260,10 @@ var handle_ambiguous_contractions = function(arr) {
 
 ////////////////
 ///party-time//
-module.exports = function(text, options) {
+var main = function(text, options) {
+	
+	console.log('main pos', main);
+	
 	options = options || {};
 	if (!text || !text.match(/[a-z0-9]/i)) {
 		return new Section([]);
@@ -464,6 +466,7 @@ module.exports = function(text, options) {
 	// return a Section object, with its methods
 	return new Section(sentences);
 }
+module.exports = main;
 
 // console.log( pos('Geroge Clooney walked, quietly into a bank. It was cold.') )
 // console.log( pos('it is a three-hundred and one').tags() )
