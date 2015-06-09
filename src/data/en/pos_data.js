@@ -1,12 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { particles: 
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { particles: 
    [ 'together',
      'in',
      'out',
@@ -79,13 +82,8 @@ var zip = { particles:
      'when\'s': 'when',
      'where\'s': 'where',
      'why\'s': 'why',
-     'how\'s': 'how' } }; 
-
-  var main = (function () {
-				zip.particles = zip.particles.reduce(helpFns.toObj, {});
-				return zip;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+     'how\'s': 'how' } }
+module.exports = (function () {
+				exports.zip.particles = exports.zip.particles.reduce(helpFns.toObj, {});
+				return exports.zip;
+			})()

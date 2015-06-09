@@ -6,8 +6,9 @@ var schema = require(dPath+'schema');
 var verbs_special = require(dPath+'verbs_special');
 var verb_conjugate = require('./conjugate');
 
-var main = function(str, sentence, word_i) {
+exports.main = function(str, sentence, word_i) {
   var the = this;
+	
   var token, next;
   if (sentence !== undefined && word_i !== undefined) {
     token = sentence.tokens[word_i];
@@ -92,6 +93,7 @@ var main = function(str, sentence, word_i) {
   }
   return the;
 }
-module.exports = main;
+module.exports = exports.main;
+
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)

@@ -1,10 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
+/* singular nouns having irregular plurals */
 
-  var zip = { nouns: 
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { nouns: 
    [ 'ave',
      'blvd',
      'uss',
@@ -101,18 +106,13 @@
      'ie',
      'vs',
      'bc',
-     'ad' ] }; 
-
-  var main = (function () {
+     'ad' ] }
+module.exports = (function () {
 				//::NODE::
 				if (typeof module !== "undefined" && module.exports) honorifics = require('./honorifics');
 				//::
 				return {
-					nouns: zip.nouns.concat(honorifics),
-					nonNouns: zip.nonNouns
+					nouns: exports.zip.nouns.concat(honorifics),
+					nonNouns: exports.zip.nonNouns
 				};
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

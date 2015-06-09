@@ -1,13 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
-  
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { male: 
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { male: 
    { will: 'iam,ie,ard,is,iams',
      fred: ',erick,die,rick,dy',
      marc: 'us,,o,os,el',
@@ -280,15 +282,14 @@ var zip = { male:
      '0d%',
      'dev0',
      'rosa~o',
-     '1e' ] }; 
-
-  var main = (function () {
+     '1e' ] }
+module.exports = (function () {
 
 				var o = {};
 				['male', 'female'].forEach(function(type) {
-					for (var k in zip[type]) {
+					for (var k in exports.zip[type]) {
 						//::NODE::
-						var arr = zip[type][k].split(',');
+						var arr = exports.zip[type][k].split(',');
 						//::
 
 						arr.forEach(function(w, i) {
@@ -297,12 +298,8 @@ var zip = { male:
 					}
 				});
 				//::NODE::
-				zip.ambiguous = zip.ambiguous.reduce(function(h,s){ h[s]='a'; return h; }, o);
+				exports.zip.ambiguous = exports.zip.ambiguous.reduce(function(h,s){ h[s]='a'; return h; }, o);
 				//::
 
 				return o;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

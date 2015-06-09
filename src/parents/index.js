@@ -6,7 +6,7 @@ var Adverb = require('./adverb');
 var Verb = require('./verb');
 var Value = require('./value');
 		
-module.exports = {
+exports.main = {
   adjective: function(str, next, last, token) {
     return new Adjective(str, next, last, token);
   },
@@ -26,3 +26,4 @@ module.exports = {
     return {};
   }
 }
+module.exports = exports.main;

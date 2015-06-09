@@ -1,6 +1,4 @@
-
-var helpFns = (function() {
-  var main = (function _fns() {
+  exports.zip = (function _fns() {
 		return {
 			toObj: function(h,s){ h[s] = true; return h; },
 			toObjValues: function(zip, obj){
@@ -32,9 +30,5 @@ var helpFns = (function() {
 			}
 		};
 	})();
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
 
-  return main;
-})();
+module.exports = exports.zip;

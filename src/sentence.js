@@ -4,7 +4,7 @@
 if (typeof lang != 'string') lang = 'en';
 var negate_data = require('./data/'+lang+'/negate_data');
 
-var main = function(tokens) {
+exports.main = function(tokens) {
 	var the = this;
   the.tokens = tokens || [];
 
@@ -231,5 +231,4 @@ var main = function(tokens) {
 
   return the
 }
-
-module.exports = main;
+module.exports = exports.main;

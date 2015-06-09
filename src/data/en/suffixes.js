@@ -1,12 +1,17 @@
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
-//::NODE::
-  var lang = 'en';
-//::
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { wordnet: 
+// types: infinitive, gerund, past, present, doer, future
+
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { wordnet: 
    { NN: 
       [ 'ceae',
         'inae',
@@ -661,16 +666,11 @@ var zip = { wordnet:
         'es',
         'ts',
         'ns',
-        's' ] } }; 
-
-  var main = (function () {
+        's' ] } }
+module.exports = (function () {
 
 				return {
-					wordnet: helpFns.toObjValues(zip.wordnet),
-					verbs: helpFns.toObjValues(zip.verbs)
+					wordnet: helpFns.toObjValues(exports.zip.wordnet),
+					verbs: helpFns.toObjValues(exports.zip.verbs)
 				};
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

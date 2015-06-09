@@ -1,7 +1,20 @@
+/* regex rules for verb conjugation
+used in combination with the generic "fallback" method */
 
-//::NODE::
-  var lang = 'en';
-//::
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
+
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
+
+// types: infinitive, gerund, past, present, doer, future
+
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+
 //::NODE::
   var m = require('./');
   var pm = {};
@@ -17,8 +30,7 @@
     reqPmodules();
 //::
 
-  var main = {};
-  var zip = { EX: [ 'there' ],
+  exports.zip = { EX: [ 'there' ],
   NN:
    [ 'president',
      'dollar',
@@ -394,9 +406,9 @@
 				for (var key in did) { toMain(key, did) }
 				for (var key in lexiZip) { toMain(key, lexiZip) }
 				// zip to main
-				for (var key in zip) {
+				for (var key in exports.zip) {
 
-					toMain(key, zip);
+					toMain(key, exports.zip);
 				}
 
 				//add phrasal verbs - TODO FIXME
@@ -441,7 +453,13 @@
 			if (cat in did) { return did[cat] }
 			return [];
 		}
-  unzip();
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+  unzip();module.exports = (function () {
+				var res = {};
+				exports.zip.tags.forEach(function(a) {
+					res[a[0]] = { name:a[1], parent:exports.zip.parents[a[2]], tag:a[0] };
+					if (a.length > 3) {
+						res[a[0]].tense = a[3];
+					}
+				});
+				return res;
+			})()

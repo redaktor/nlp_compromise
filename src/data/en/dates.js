@@ -1,10 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
+/* singular nouns having irregular plurals */
 
-  var zip = { months: 
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { months: 
    { january: 0,
      february: 1,
      march: 2,
@@ -37,17 +42,12 @@
      thursday: 4,
      friday: 5,
      saturday: 6,
-     sunday: 7 } }; 
-
-  var main = (function () {
-				var res = zip;
-				for (var w in zip.monthAbbrevs) { zip.months[w] = zip.monthAbbrevs[w] }
+     sunday: 7 } }
+module.exports = (function () {
+				var res = exports.zip;
+				for (var w in res.monthAbbrevs) { res.months[w] = exports.zip.monthAbbrevs[w] }
 				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
 				res.monthsS = res.monthS + ',?';
 				return res;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

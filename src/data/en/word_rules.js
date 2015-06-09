@@ -1,10 +1,20 @@
+/* regex rules for verb conjugation
+used in combination with the generic "fallback" method */
 
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-//::NODE::
-  var lang = 'en';
-//::
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
-  var zip = { JJ: 
+// types: infinitive, gerund, past, present, doer, future
+
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { JJ: 
    [ '.[cts]hy$',
      '.[st]ty$',
      '.[gk]y$',
@@ -118,12 +128,11 @@
      '^www.[a-z0-9]' ],
   MD: [ '.*ould$', '.\'ll$' ],
   NNO: [ '[a-z]\'s$' ],
-  CP: [ '.\'re$' ] }; 
-
-  var main = (function () {
+  CP: [ '.\'re$' ] }
+module.exports = (function () {
 				var a = [];
-				for (var k in zip) {
-					zip[k].forEach(function(r){
+				for (var k in exports.zip) {
+					exports.zip[k].forEach(function(r){
 						a.push({
 							reg: new RegExp(r, 'i'),
 							pos: k
@@ -131,8 +140,4 @@
 					});
 				}
 				return a;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

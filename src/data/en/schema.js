@@ -1,10 +1,20 @@
+/* regex rules for verb conjugation
+used in combination with the generic "fallback" method */
 
+/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-//::NODE::
-  var lang = 'en';
-//::
-var schema = (function() {
-  var zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
+
+// types: infinitive, gerund, past, present, doer, future
+
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
   tags: 
    [ [ 'VB', 'verb, generic', 0 ],
      [ 'VBD', 'past-tense verb', 0, 'past' ],
@@ -40,22 +50,14 @@ var schema = (function() {
      [ 'CC', 'co-ordating conjunction', 4 ],
      [ 'DT', 'determiner', 4 ],
      [ 'UH', 'interjection', 4 ],
-     [ 'EX', 'existential there', 4 ] ] }; 
-
-  var main = (function () {
+     [ 'EX', 'existential there', 4 ] ] }
+module.exports = (function () {
 				var res = {};
-				zip.tags.forEach(function(a) {
-					res[a[0]] = { name:a[1], parent:zip.parents[a[2]], tag:a[0] };
+				exports.zip.tags.forEach(function(a) {
+					res[a[0]] = { name:a[1], parent:exports.zip.parents[a[2]], tag:a[0] };
 					if (a.length > 3) {
 						res[a[0]].tense = a[3];
 					}
 				});
 				return res;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
-
-  return main;
-})();
+			})()

@@ -22,30 +22,29 @@ var verb_rules = require('./verb_rules.js');
 var word_rules = require('./word_rules.js');
 var schema = require('./schema.js');
 
-var main = {
-  multiples: require('./multiples.js'),
-  nouns_inflect: require('./nouns_inflect.js'),
-  nouns: require('./nouns.js'),
-  verbs_special: require('./verbs_special.js'),
-  verbs_conjugate: require('./verbs_conjugate.js'),
-  verbs: require('./verbs.js'),
-  adjectives_decline: require('./adjectives_decline.js'),
-  adjectives_demonym: require('./adjectives_demonym.js'),
-  adjectives: require('./adjectives.js'),
-  adverbs_decline: require('./adverbs_decline.js'),
-  numbers: require('./numbers.js'),
-  dates: require('./dates.js'),
-  honorifics: require('./honorifics.js'),
-  abbreviations: require('./abbreviations.js'),
-  pos_data: require('./pos_data.js'),
-  negate_data: require('./negate_data.js'),
-  firstnames: require('./firstnames.js'),
-  normalisations: require('./normalisations.js'),
-  suffixes: require('./suffixes.js'),
-  phrasalVerbs: require('./phrasalVerbs.js'),
-  verb_rules: require('./verb_rules.js'),
-  word_rules: require('./word_rules.js'),
-  schema: require('./schema.js')
+exports.zip = {
+  multiples: multiples,
+  nouns_inflect: nouns_inflect,
+  nouns: nouns,
+  verbs_special: verbs_special,
+  verbs_conjugate: verbs_conjugate,
+  verbs: verbs,
+  adjectives_decline: adjectives_decline,
+  adjectives_demonym: adjectives_demonym,
+  adjectives: adjectives,
+  adverbs_decline: adverbs_decline,
+  numbers: numbers,
+  dates: dates,
+  honorifics: honorifics,
+  abbreviations: abbreviations,
+  pos_data: pos_data,
+  negate_data: negate_data,
+  firstnames: firstnames,
+  normalisations: normalisations,
+  suffixes: suffixes,
+  phrasalVerbs: phrasalVerbs,
+  verb_rules: verb_rules,
+  word_rules: word_rules,
+  schema: schema
 };
-
-module.exports = main;
+module.exports = exports.zip;

@@ -95,7 +95,7 @@ main = main.reduce(function (h, s) {
 // TODO - goes to lexicon
 //conjugate every phrasal verb. takes ~30ms
 var tags = {
-  present: "VB",
+  present: "VBZ",
   past: "VBD",
   future: "VBF",
   gerund: "VBG",

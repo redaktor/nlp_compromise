@@ -12,7 +12,7 @@ var pos = require('./src/pos');
 var spot = require('./src/spot');
 	
 // API
-var nlp = {
+exports.nlp = {	
   noun: parents.noun,
   adjective: parents.adjective,
   verb: parents.verb,
@@ -32,10 +32,10 @@ var nlp = {
 }
 // export it for client-side
 if (typeof window!=="undefined") { // TODO - is this right?
-  window.nlp = nlp;
+  window.nlp = exports.nlp;
 }
 // export it for server-side
-module.exports = nlp;
+module.exports = exports.nlp;
 
 // console.timeEnd('nlp_boot')
 // console.log( nlp.pos('she sells seashells by the seashore').sentences[0].negate().text() )

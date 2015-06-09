@@ -1,13 +1,11 @@
 // types: infinitive, gerund, past, present, doer, future 
 
+/* singular nouns having irregular plurals */
 
-//::NODE::
-  var lang = 'en';
-//::
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { irregulars: 
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { irregulars: 
    [ [ 'be', 'being', 'was', 'is', 0 ],
      [ 'be', 'am', 'was', 'am', 0 ],
      [ 'have', 'having', 'had', 'has', 0 ],
@@ -166,19 +164,17 @@ var zip = { irregulars:
      [ 'rub', 'rubbing', 'rubbed', 'rubs', 'sailer' ],
      [ 'claim', 'claiming', 'claimed', 'claims', 'rubber' ] ],
   noDoers: { appear: 1, happen: 1, seem: 1, try: 1, aid: 1, fail: 1, marry: 1 },
-  irregularDoers: {} }; 
-
-  var main = zip;
-  main.irregulars = zip.irregulars.map(function (a) {
+  irregularDoers: {} }
+  exports.zip.irregulars = exports.zip.irregulars.map(function (a) {
 					var types = ['infinitive','gerund','past','present','doer','future'];
 					var obj = {};
 					var r = function(s) {return s;}
 					a.forEach(function(s, i) {
 
 						if (i > 3 && !s) {
-							main.noDoers[r(a[0])] = 1;
+							exports.zip.noDoers[r(a[0])] = 1;
 						} else if (i > 3) {
-							main.irregularDoers[r(a[0])] = s;
+							exports.zip.irregularDoers[r(a[0])] = s;
 						} else {
 							obj[types[i]] = s;
 						}
@@ -186,6 +182,5 @@ var zip = { irregulars:
 					return obj;
 				});
 
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+module.exports = exports.zip;
+

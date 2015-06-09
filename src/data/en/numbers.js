@@ -1,9 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
-  var zip = { ones: 
+/* singular nouns having irregular plurals */
+
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { ones: 
    { zero: 0,
      null: 0,
      nil: 0,
@@ -77,10 +83,6 @@
      septillion: 1e+24,
      octillion: 1e+27,
      nonillion: 1e+30,
-     decillion: 1.0000000000000001e+33 } }; 
+     decillion: 1.0000000000000001e+33 } }
+module.exports = exports.zip;
 
-  var main = zip;
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::

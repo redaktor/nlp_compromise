@@ -93,7 +93,7 @@ function fufill(obj, prefix) {
 	return obj;
 }
 
-var main = function(w) {
+exports.main = function(w) {
 	/// console.log( '!!', w );
 	if (typeof w != 'string') {
 		return {}
@@ -166,7 +166,7 @@ var main = function(w) {
 	return fallback(w);
 };
 
-module.exports = main;
+module.exports = exports.main;
 
 // console.log(verb_conjugate('walking'))
 // console.log(verb_conjugate('overtook'))

@@ -1,10 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
+/* singular nouns having irregular plurals */
 
-  var zip = { everyone: 'no one',
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = { everyone: 'no one',
   everybody: 'nobody',
   someone: 'no one',
   somebody: 'nobody',
@@ -14,18 +19,13 @@
   on: 'off',
   over: 'under',
   together: 'apart',
-  up: 'down' }; 
-
-  var main = (function () {
+  up: 'down' }
+module.exports = (function () {
 				//::NODE::
 				if (typeof module !== "undefined" && module.exports) var verbs_special = require('./verbs_special');
 				//::
 				var negate = verbs_special.negate || {};
-				for (var k in zip) { negate[k] = zip[k]; }
+				for (var k in exports.zip) { negate[k] = exports.zip[k]; }
 				for (var k in negate) { negate[negate[k]] = k; }
 				return negate;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

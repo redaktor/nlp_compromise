@@ -1,12 +1,9 @@
+/* singular nouns having irregular plurals */
 
+if (!lang) {var lang = 'en';}
 
-//::NODE::
-  var lang = 'en';
-//::
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { CP: 
+var helpFns = require("./helpFns");
+exports.zip = { CP: 
    [ [ 'is', 'isn\'t' ],
      [ 'am', 'ain\'t' ],
      [ 'are', 'aren\'t' ],
@@ -29,14 +26,13 @@ var zip = { CP:
      [ 'may', 'may not' ],
      [ 'lets', 'lets not' ],
      [ 'let\'s', 'let\'s not' ],
-     [ 'who\'d', 'who\'d not' ] ] }; 
-
-  var main = (function () {
+     [ 'who\'d', 'who\'d not' ] ] }
+module.exports = (function () {
 				var res = {};
 				res.negate = {};
 				['CP', 'MD'].forEach(function(type) {
 					res[type] = {};
-					zip[type].forEach(function(a) {
+					exports.zip[type].forEach(function(a) {
 
 						res[type][a[0]] = type;
 						res[type][a[1]] = type;
@@ -45,8 +41,4 @@ var zip = { CP:
 					});
 				});
 				return res;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+			})()

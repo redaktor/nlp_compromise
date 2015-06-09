@@ -260,9 +260,7 @@ function handle_ambiguous_contractions(arr) {
 
 ////////////////
 ///party-time//
-var main = function(text, options) {
-	
-	console.log('main pos', main);
+exports.main = function(text, options) {
 	
 	options = options || {};
 	if (!text || !text.match(/[a-z0-9]/i)) {
@@ -466,7 +464,7 @@ var main = function(text, options) {
 	// return a Section object, with its methods
 	return new Section(sentences);
 }
-module.exports = main;
+module.exports = exports.main;
 
 // console.log( pos('Geroge Clooney walked, quietly into a bank. It was cold.') )
 // console.log( pos('it is a three-hundred and one').tags() )

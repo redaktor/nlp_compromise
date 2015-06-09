@@ -1,10 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
+/* singular nouns having irregular plurals */
 
-  var zip = [ [ 'wholly', 'whole' ],
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = [ [ 'wholly', 'whole' ],
   [ 'idly', 'idle' ],
   [ 'fully', 'full' ],
   [ 'practically', 'practical' ],
@@ -21,17 +26,11 @@
   [ 'fantastically', 'fantastic' ],
   [ 'mystically', 'mystical' ],
   [ 'pornographically', 'pornographic' ],
-  [ 'jolly', 'jolly' ] ]; 
-
-  var main = (function () {
+  [ 'jolly', 'jolly' ] ]
+module.exports = (function () {
 				var res = {};
-				zip.forEach(function(a) {
-					res[a[0]] = a[1];
+				exports.zip.forEach(function(a) {
+					res[a[0].replace('=', a[1])] = a[1];
 				});
 				return res;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
-
+			})()

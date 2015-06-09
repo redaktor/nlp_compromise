@@ -4,7 +4,7 @@
 if (typeof lang != 'string') lang = 'en';
 var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
 
-var main = function(str) {	
+exports.main = function(str) {	
 	str = str || '';
 	/// console.log( str );
 	
@@ -42,8 +42,8 @@ var main = function(str) {
 	/// console.log('3', str + 'er');
 	return str + 'er';
 }
+module.exports = exports.main;
 
-module.exports = main;
 // console.log(verb_to_doer('set'))
 // console.log(verb_to_doer('sweep'))
 // console.log(verb_to_doer('watch'))

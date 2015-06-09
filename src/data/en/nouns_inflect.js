@@ -1,14 +1,9 @@
 /* singular nouns having irregular plurals */
 
+if (!lang) {var lang = 'en';}
 
-//::NODE::
-  var lang = 'en';
-//::
-  
-//::NODE::
-if (typeof module !== "undefined" && module.exports) helpFns = require("./helpFns");
-//::
-var zip = { NN: 
+var helpFns = require("./helpFns");
+exports.zip = { NN: 
    [ [ 'child', 'children' ],
      [ 'person', 'people' ],
      [ 'leaf', 'leaves' ],
@@ -224,15 +219,10 @@ var zip = { NN:
      'fahrenheit',
      'celcius',
      'kelvin',
-     'hertz' ] }; 
+     'hertz' ] }
+module.exports = (function () {
 
-  var main = (function () {
-
-				zip.irregulars = zip.NN.concat(zip.PRP, zip.PP);
-				zip.uncountables = zip.uc.reduce(helpFns.toObj,{});
-				return zip;
-			})();
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
+				exports.zip.irregulars = exports.zip.NN.concat(exports.zip.PRP, exports.zip.PP);
+				exports.zip.uncountables = exports.zip.uc.reduce(helpFns.toObj,{});
+				return exports.zip;
+			})()

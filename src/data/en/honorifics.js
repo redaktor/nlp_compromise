@@ -1,10 +1,15 @@
+// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
+// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
+// 1 means 'default behavior'
 
+// types: infinitive, gerund, past, present, doer, future
 
-//::NODE::
-  var lang = 'en';
-//::
+/* singular nouns having irregular plurals */
 
-  var zip = [ 'jr',
+if (!lang) {var lang = 'en';}
+
+var helpFns = require("./helpFns");
+exports.zip = [ 'jr',
   'mr',
   'mrs',
   'ms',
@@ -52,10 +57,6 @@
   'res',
   'sens',
   'sfc',
-  'surg' ]; 
+  'surg' ]
+module.exports = exports.zip;
 
-  var main = zip;
-
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::

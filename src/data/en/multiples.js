@@ -1,10 +1,5 @@
-
-
-//::NODE::
-  var lang = 'en';
-//::
-
-  var zip = { 'will be': 'CP',
+if (!lang) {var lang = 'en';}
+exports.zip = { 'will be': 'CP',
   'won\'t be': 'CP',
   'ought to': 'MD',
   'ought not to': 'MD',
@@ -80,10 +75,7 @@
   'a posteriori': 'RB',
   'a la': 'IN',
   'a priori': 'IN',
-  'et cetera': 'FW' }; 
+  'et cetera': 'FW' }
 
-  var main = zip;
+module.exports = exports.zip;
 
-//::NODE::
-  if (typeof module !== "undefined" && module.exports) module.exports = main;
-//::
