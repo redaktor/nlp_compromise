@@ -4,10 +4,10 @@
 
 exports.cache = {};
 
-// 'module.exports.setObject' logic and getProp is parts of dojo.lang
+// 'module.exports.setObject' logic and exports.getProp is parts of dojo.lang
 // Copyright (c) 2005-2015, The Dojo Foundation
 // All rights reserved.
-function getProp(/*Array*/parts, /*Boolean*/create, /*Object*/context){
+exports.getProp = function(/*Array*/parts, /*Boolean*/create, /*Object*/context){
 	if(!context){
 		return {};
 	}
@@ -59,17 +59,17 @@ module.exports = (function () {
 				return hash;
 			},
 			getObjKey: function(parts, create, o) {
-				return !parts ? o : getProp(parts, create, (o) ? o : exports.cache.nlp); // Object	
+				return !parts ? o : exports.getProp(parts, create, (o) ? o : exports.cache.nlp); // Object	
 			},
 			setObjKey: function(parts, value, o) {
 				var parts = parts.map(function(s){ 
 					return (typeof s === 'string') ? s : this.hash(s);
 				}.bind(this)); 
-				var p = parts.pop(), obj = getProp(parts, true, (o) ? o : exports.cache.nlp);
+				var p = parts.pop(), obj = exports.getProp(parts, true, (o) ? o : exports.cache.nlp);
 				return obj && p ? (obj[p] = value) : undefined; // Object
 			},
 			getObject: function(name, create, o) {
-				return !name ? o : getProp(name.split("."), create, o); // Object	
+				return !name ? o : exports.getProp(name.split("."), create, o); // Object	
 			},
 			setObject: function(name, value, o) {
 				return this.setObjKey(name.split('.'), value, o)

@@ -1443,7 +1443,10 @@ exports[t] = function (test) {
     test.deepEqual(spots, arr[2])
   })
   if(TIME){console.timeEnd(t)}
-  test.done()
+  test.done();
+	
+	// let's reset the cache
+	nlp.destroy();
 };
 
 t=""
