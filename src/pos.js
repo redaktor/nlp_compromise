@@ -14,13 +14,16 @@ var parents = require('./parents');
 var tokenize = require('./methods/tokenization/tokenize');
 var Sentence = require('./sentence');
 var Section = require('./section');
+var cache = require('./cache');
+
 var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
 for (var k in numbers) {
 	vs = vs.concat(Object.keys(numbers[k]))
 }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
-function merge_tokens(a, b) {
+// combine tokens, general logic
+function mergeTokens(a, b) {
 	a.text += ' ' + b.text;
 	a.normalised += ' ' + b.normalised;
 	a.pos_reason += '|' + b.pos_reason;
@@ -30,75 +33,69 @@ function merge_tokens(a, b) {
 	a.end = a.end || b.end;
 	return a;
 }
-
+	
 // combine adjacent neighbours, and special cases
-function combine_tags(sentence) {
+function combineTags(sentence) {
 	var arr = sentence.tokens || [];
-	for (var i = 0; i <= arr.length; i++) {
+	
+	function merge() {
+		arr[i + 1] = mergeTokens(arr[i], arr[i + 1]);
+		arr[i] = null;
+	}
+	function has(i, n) { // TODO - now decouple as data -> 'en'
+		var tag = arr[i].pos.tag;
 		var next = arr[i + 1];
-		if (arr[i] && next) {
-			var merge = function() {
-				arr[i + 1] = merge_tokens(arr[i], arr[i + 1]);
-				arr[i] = null;
-			}
+		if (next) {
+			if (n === 'NN_NN') { return (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ); }
+			if (n === 'CD_CD') { return (tag === 'CD' && next.pos.tag ==='CD'); }
+			if (n === 'CD__CD') { return (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD'); }
+			if (n === 'NNAB_NN') { return ((tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')); }
+			if (n === 'VB_VB') { return (arr[i].normalised === 'will' && next.pos.parent === 'verb'); }
+			if (n === 'NNP_NN') { return ((tag === 'NNP' && next.pos.tag ==='NN') || (tag === 'NN' && next.pos.tag === 'NNP')); }
+			if (n === 'DT1') { return (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital); }
+			if (n === 'DT2') { return (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital); }
+		}
+		return false;
+	}
+	for (var i = 0; i <= arr.length; i++) {
+		if (arr[i]) {
 			var tag = arr[i].pos.tag;
-			// 'joe smith' are both NN, for example
-			if (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ) {
-				merge();
-			}
-			// merge NNP and NN, like firstname, lastname
-			else if ((tag === 'NNP' && next.pos.tag ==='NN') || (tag==='NN' && next.pos.tag==='NNP')) {
+			if (has(i, 'NN_NN') || has(i, 'CD_CD') || has(i, 'CD__CD') || has(i, 'NNAB_NN') || has(i, 'VB_VB')) {
+				merge();	
+			} else if (has(i, 'NNP_NN')) {
 				merge();
 				arr[i + 1].pos = schema['NNP'];
-			}
-			// merge dates manually, which often have punctuation
-			else if (tag === 'CD' && next.pos.tag ==='CD') {
+			} else if (has(i, 'DT1')) {
 				merge();
-			}
-			// merge abbreviations with nouns manually, eg. 'Joe jr.'
-			else if ( (tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')) {
-				merge();
-			}
-			// 'will walk' -> future-tense verb
-			else if (arr[i].normalised === 'will' && next.pos.parent === 'verb') {
-				merge();
-			}
-			// 'hundred and fifty', 'march the 5th'
-			else if (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD') {
-				merge();
-			}
-			// capitals surrounding a preposition  'United States of America'
-			else if (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital) {
-				merge();
-				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+				arr[i + 2] = mergeTokens(arr[i + 1], arr[i + 2]);
 				arr[i + 1] = null;
-			}
-			// capitals surrounding two prepositions  'Phantom of the Opera'
-			else if (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital) {
+			} else if (has(i, 'DT2')) {
 				merge();
-				arr[i + 2] = merge_tokens(arr[i + 1], arr[i + 2]);
+				arr[i + 2] = mergeTokens(arr[i + 1], arr[i + 2]);
 				arr[i + 1] = null;
-				arr[i + 3] = merge_tokens(arr[i + 2], arr[i + 3]);
+				arr[i + 3] = mergeTokens(arr[i + 2], arr[i + 3]);
 				arr[i + 2] = null;
 			}
 		}
 	}
 	sentence.tokens = arr.filter(function(r) {
-		return r
+		return r;
 	})
-	return sentence
+	return sentence;
 }
 
+// combine phrasal verbs
 // some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
 // they should be combined with the verb, sometimes.
-// does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
-function combine_phrasal_verbs(sentence) {
+// TODO - some known are 3-gram phrasal verbs, like 'get away from' !!!
+// TODO - does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
+function combinePhrasals(sentence) {
 	var arr = sentence.tokens || [];
 	for (var i = 1; i < arr.length; i++) {
 		if(pos_data.particles[arr[i].normalised]){
 			// it matches a known phrasal-verb
 			if(lexicon[arr[i-1].normalised + ' ' + arr[i].normalised]){
-				arr[i] = merge_tokens(arr[i-1], arr[i]);
+				arr[i] = mergeTokens(arr[i-1], arr[i]);
 				arr[i-1] = null;
 			}
 		}
@@ -110,9 +107,9 @@ function combine_phrasal_verbs(sentence) {
 }
 
 
-function lexicon_pass(w) {
+function lexiPass(w) {
 	if (lexicon.hasOwnProperty(w)) {
-		return schema[lexicon[w]]
+		return schema[lexicon[w]];
 	}
 	// try to match it without a prefix - eg. outworked -> worked
 	if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
@@ -121,7 +118,7 @@ function lexicon_pass(w) {
 	}
 }
 
-var rules_pass = function(w) {
+function rulePass(w) {
 	for (var i = 0; i < word_rules.length; i++) {
 		if (w.length> 4 && w.match(word_rules[i].reg)) {
 			return schema[word_rules[i].pos];
@@ -129,18 +126,20 @@ var rules_pass = function(w) {
 	}
 }
 
-function fourth_pass(token, i, sentence) {
+function lastPass(token, i, sentence) {
 	var last = sentence.tokens[i - 1];
 	var next = sentence.tokens[i + 1];
-	var strong_determiners = { // TODO
+	var strong_determiners = { // TODO decouple as data -> 'en'
 		'the': 1,
 		'a': 1,
 		'an': 1
 	};
-	var setPos = function(p, pr) {
+	
+	function setPos(p, pr) {
 		token.pos = schema[p];
 		token.pos_reason = pr;
 	}
+	
 	// resolve ambiguous 'march','april','may' with dates
 	if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
 		setPos('CD', 'may_is_date');
@@ -197,7 +196,7 @@ function fourth_pass(token, i, sentence) {
 }
 
 // add a 'quiet' token for contractions so we can represent their grammar
-function handle_contractions(arr) {
+function handleContractions(arr) {
 	var before, after, fix;
 	for (var i = 0; i < arr.length; i++) {
 		if (pos_data.contractions.hasOwnProperty(arr[i].normalised)) {
@@ -214,15 +213,15 @@ function handle_contractions(arr) {
 			}];
 			arr = before.concat(fix);
 			arr = arr.concat(after);
-			return handle_contractions(arr); // recursive
+			return handleContractions(arr); // recursive
 		}
 	}
 	return arr;
 }
 
 // these contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was']
-function handle_ambiguous_contractions(arr) {
-	// TODO been forces has
+function handleAmbiguousContractions(arr) {
+	// TODO 'been' forces 'has' ...
 	var before, after, fix;
 	for (var i = 0; i < arr.length; i++) {
 		if (pos_data.ambiguousContractions.hasOwnProperty(arr[i].normalised)) {
@@ -252,7 +251,7 @@ function handle_ambiguous_contractions(arr) {
 			}];
 			arr = before.concat(fix);
 			arr = arr.concat(after);
-			return handle_ambiguous_contractions(arr); // recursive
+			return handleAmbiguousContractions(arr); // recursive
 		}
 	}
 	return arr;
@@ -260,7 +259,9 @@ function handle_ambiguous_contractions(arr) {
 
 ////////////////
 ///party-time//
-exports.main = function(text, options) {
+exports.pos = function(text, options) {
+	
+	//console.log( 'CACHE TEST', cache.get('test') );
 	
 	options = options || {};
 	if (!text || !text.match(/[a-z0-9]/i)) {
@@ -268,7 +269,7 @@ exports.main = function(text, options) {
 	}
 	var sentences = tokenize(text);
 	
-	var setPos = function(token, p, pr) {
+	function setPos(token, p, pr) {
 		token.pos = schema[p];
 		token.pos_reason = pr;
 		return token;
@@ -280,12 +281,12 @@ exports.main = function(text, options) {
 		var first = sentence.tokens[0];
 		if (first) {
 			// if second word is a noun-capital, give more sympathy to this capital
-			if(sentence.tokens[1] && sentence.tokens[1].noun_capital && !lexicon_pass(first.normalised)){
+			if(sentence.tokens[1] && sentence.tokens[1].noun_capital && !lexiPass(first.normalised)){
 				sentence.tokens[0].noun_capital = true;
 			}
 		}
 		// smart handling of contractions
-		sentence.tokens = handle_contractions(sentence.tokens);
+		sentence.tokens = handleContractions(sentence.tokens);
 
 		// first pass, word-level clues
 		sentence.tokens = sentence.tokens.map(function(token) {
@@ -294,7 +295,7 @@ exports.main = function(text, options) {
 				return setPos(token, 'NN', 'noun_capitalised');
 			}
 			// known words list
-			var lex = lexicon_pass(token.normalised);
+			var lex = lexiPass(token.normalised);
 			if (lex) {
 				token.pos = lex;
 				token.pos_reason = 'lexicon';
@@ -319,7 +320,7 @@ exports.main = function(text, options) {
 			}
 
 			// suffix regexes for words
-			var r = rules_pass(token.normalised);
+			var r = rulePass(token.normalised);
 			if (r) {
 				token.pos = r;
 				token.pos_reason = 'regex suffix'
@@ -345,7 +346,7 @@ exports.main = function(text, options) {
 		
 		//split-out more difficult contractions, like "he's"->["he is", "he was"]
 		// (now that we have enough pos data to do this)
-		sentence.tokens = handle_ambiguous_contractions(sentence.tokens);
+		sentence.tokens = handleAmbiguousContractions(sentence.tokens);
 		
 		// third pass, seek verb or noun phrases after their signals
 		var need = null;
@@ -422,21 +423,21 @@ exports.main = function(text, options) {
 
 		// fourth pass, error correction
 		sentence.tokens = sentence.tokens.map(function(token, i) {
-			return fourth_pass(token, i, sentence);
+			return lastPass(token, i, sentence);
 		})
 		// run the fourth-pass again!
 		sentence.tokens = sentence.tokens.map(function(token, i) {
-			return fourth_pass(token, i, sentence);
+			return lastPass(token, i, sentence);
 		})
 	})
 
 	// combine neighbours
 	if (!options.dont_combine) {
 		sentences = sentences.map(function(s) {
-			return combine_tags(s);
+			return combineTags(s);
 		})
 		sentences = sentences.map(function(s){
-			return combine_phrasal_verbs(s);
+			return combinePhrasals(s);
 		})
 	}
 
@@ -464,7 +465,8 @@ exports.main = function(text, options) {
 	// return a Section object, with its methods
 	return new Section(sentences);
 }
-module.exports = exports.main;
+
+module.exports = exports.pos;
 
 // console.log( pos('Geroge Clooney walked, quietly into a bank. It was cold.') )
 // console.log( pos('it is a three-hundred and one').tags() )

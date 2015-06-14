@@ -2,7 +2,7 @@
 // most of this logic is in ./parents/noun
 var pos = require("./pos");
 //::
-var main = function(text, options) {
+exports.main = function(text, options) {
 	options = options || {};
 	//collect 'entities' from all nouns
 	var sentences = pos(text, options).sentences;
@@ -27,7 +27,7 @@ var main = function(text, options) {
 	return arr;
 }
 
-module.exports = main;
+module.exports = exports.main;
 	
 // console.log(spot("Tony Hawk is cool. Tony eats all day.").map(function(s){return s}))
 // console.log(spot("Tony eats all day. Tony Hawk is cool.").map(function(s){return s}))
