@@ -1,16 +1,22 @@
 // nlp_comprimise by @spencermountain  in 2014
+
 // most files are self-contained modules that optionally export for nodejs
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
 // console.time('nlp_boot')
 
+// init cache 1st
+var cache = require('./src/cache');
+// parents (word types) and methods
 var parents = require("./src/parents");
-var methods = require("./src/methods");	
-//part of speech tagging
+var methods = require("./src/methods");
+// part of speech tagging
 var pos = require('./src/pos');
-//named_entity_recognition
+// named_entity_recognition
 var spot = require('./src/spot');
-	
+
+console.log( 'nlp factory' );
+
 // API
 exports.nlp = {	
   noun: parents.noun,
@@ -30,10 +36,13 @@ exports.nlp = {
   pos: pos,
   spot: spot
 }
+
 // export it for client-side
-if (typeof window!=="undefined") { // TODO - is this right?
+if (typeof window !== "undefined") { // TODO - is this right?
   window.nlp = exports.nlp;
 }
+
+
 // export it for server-side
 module.exports = exports.nlp;
 
