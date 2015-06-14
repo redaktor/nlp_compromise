@@ -1,15 +1,6 @@
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { ones: 
+  exports.zip = { ones: 
    { zero: 0,
      null: 0,
      nil: 0,
@@ -85,4 +76,3 @@ exports.zip = { ones:
      nonillion: 1e+30,
      decillion: 1.0000000000000001e+33 } }
 module.exports = exports.zip;
-

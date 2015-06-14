@@ -1,20 +1,6 @@
-/* regex rules for verb conjugation
-used in combination with the generic "fallback" method */
 
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
-
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
+  exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
   tags: 
    [ [ 'VB', 'verb, generic', 0 ],
      [ 'VBD', 'past-tense verb', 0, 'past' ],
@@ -50,7 +36,15 @@ exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value
      [ 'CC', 'co-ordating conjunction', 4 ],
      [ 'DT', 'determiner', 4 ],
      [ 'UH', 'interjection', 4 ],
-     [ 'EX', 'existential there', 4 ] ] }
+     [ 'EX', 'existential there', 4 ] ],
+  tenses: 
+   { infinitive: { en: 'infinitive', de: 'Infinitiv', tag: 'VBP' },
+     present: { en: 'present', de: 'Präsenz', tag: 'VBZ' },
+     past: { en: 'past', de: 'Imperfekt', tag: 'VBD' },
+     participle: { en: 'participle', de: 'Partizip', tag: 'VBN' },
+     gerund: { en: 'gerund', de: 'Gerundium', tag: 'VBG' },
+     doer: { en: 'doer', de: 'Ausführer', tag: 'NNA' },
+     future: { en: 'future', de: 'Futur', tag: 'VBF' } } }
 module.exports = (function () {
 				var res = {};
 				exports.zip.tags.forEach(function(a) {
@@ -59,5 +53,13 @@ module.exports = (function () {
 						res[a[0]].tense = a[3];
 					}
 				});
+				res.getTense = function(tense) {
+					if (!exports.zip.tenses.hasOwnProperty(tense)) {
+						return {tag: null};
+					}
+					return exports.zip.tenses[tense];
+				}
+				res._tenses = exports.zip.tenses;
+				res._tenseOrder = [ 'past', 'present', 'gerund', 'infinitive' ];
 				return res;
-			})()
+			})();

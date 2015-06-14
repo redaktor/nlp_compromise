@@ -1,11 +1,6 @@
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
 
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = [ 'use',
+  exports.zip = [ 'use',
   'form',
   'hope',
   'consider',
@@ -552,4 +547,3 @@ exports.zip = [ 'use',
   'what\'s' ]
 
 module.exports = exports.zip;
-

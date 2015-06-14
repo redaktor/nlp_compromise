@@ -1,4 +1,5 @@
-  exports.zip = (function _fns() {
+
+  exports.zip =  (function _fns() {
 		return {
 			toObj: function(h,s){ h[s] = true; return h; },
 			toObjValues: function(zip, obj){
@@ -30,5 +31,4 @@
 			}
 		};
 	})();
-
 module.exports = exports.zip;

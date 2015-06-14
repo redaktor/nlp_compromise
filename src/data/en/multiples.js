@@ -1,5 +1,6 @@
-if (!lang) {var lang = 'en';}
-exports.zip = { 'will be': 'CP',
+
+
+  exports.zip = { 'will be': 'CP',
   'won\'t be': 'CP',
   'ought to': 'MD',
   'ought not to': 'MD',
@@ -73,9 +74,9 @@ exports.zip = { 'will be': 'CP',
   'par excellence': 'RB',
   'de trop': 'RB',
   'a posteriori': 'RB',
+  'out of': 'IN',
   'a la': 'IN',
   'a priori': 'IN',
   'et cetera': 'FW' }
 
 module.exports = exports.zip;
-

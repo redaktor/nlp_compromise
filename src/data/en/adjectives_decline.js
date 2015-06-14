@@ -2,14 +2,8 @@
 // 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
 // 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = [ [ 'wrong', 'wrong' ],
+  exports.zip = [ [ 'wrong', 'wrong' ],
   [ 'public', 'publicly' ],
   [ 'vague', 'vaguely', 1 ],
   [ 'icy', 'icily' ],
@@ -279,33 +273,33 @@ exports.zip = [ [ 'wrong', 'wrong' ],
   'tired',
   'solid',
   'angry' ]
+var helpFns = require("./helpFns");
+var helpFns = require("./helpFns");
 module.exports = (function () {
-				var repJJ = function(s) { return (typeof s !== 'string') ? s : helpFns.repl(s, 0, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some']); }
 				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
-				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
 				exports.zip.forEach(function(_a) {
 					if (typeof _a === 'string') {
-						res.convertables.push(repJJ(_a));
+						res.convertables.push(_a);
 					} else {
-						var a = _a.map(function(w){ return repJJ(w); });
+						var a = _a.map(function(w){ return w; });
 						if (a.length > 1) {
 							if (a[1] === 0) { res.adv_donts.push(a[0]); }
-							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = expand(a[1], a[0]); }
+							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = a[1]; }
 						}
 						if (a[2] && a[2] === 1) {
-							res.convertables.push(a[0])
+							res.convertables.push(a[0]);
 						} else if (a.length>2) {
-							res.to_comparative[a[0]] = expand(a[2], a[0])
+							res.to_comparative[a[0]] = a[2];
 						}
 						if (a.length>3 && a[3]!=1) {
-							res.to_superlative[a[0]] = expand(a[3], a[0])
+							res.to_superlative[a[0]] = a[3];
 						}
 						if (a.length>4 && a[4]!=1) {
-							res.to_noun[a[0]] = expand(a[4], a[0])
+							res.to_noun[a[0]] = a[4];
 						}
 					}
 				});
 				res.convertables = res.convertables.reduce(helpFns.toObj, {});
 				res.adv_donts = res.adv_donts.reduce(helpFns.toObj, {});
 				return res;
-			})()
+			})();

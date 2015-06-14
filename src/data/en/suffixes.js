@@ -1,17 +1,6 @@
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { wordnet: 
+  exports.zip = { wordnet: 
    { NN: 
       [ 'ceae',
         'inae',
@@ -667,10 +656,10 @@ exports.zip = { wordnet:
         'ts',
         'ns',
         's' ] } }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 
 				return {
 					wordnet: helpFns.toObjValues(exports.zip.wordnet),
 					verbs: helpFns.toObjValues(exports.zip.verbs)
 				};
-			})()
+			})();

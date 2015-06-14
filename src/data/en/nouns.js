@@ -1,9 +1,6 @@
-/* singular nouns having irregular plurals */
 
-if (!lang) {var lang = 'en';}
 
-var helpFns = require("./helpFns");
-exports.zip = { personBlacklist: 
+  exports.zip = { personBlacklist: 
    [ 'center',
      'house',
      'park',
@@ -74,7 +71,7 @@ exports.zip = { personBlacklist:
      [ 'our', 5 ],
      [ 'their', 6 ],
      [ 'them', 6 ] ] }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 				var _pps = {};
 				exports.zip.pps.forEach(function(a) { _pps[a[0]] = exports.zip.prps[a[1]]; });
 				return {
@@ -83,4 +80,4 @@ module.exports = (function () {
 					entityBlacklist: exports.zip.entityBlacklist.reduce(helpFns.toObj, {}),
 					personBlacklist: exports.zip.personBlacklist,
 				}
-			})()
+			})();

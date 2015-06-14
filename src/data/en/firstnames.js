@@ -1,15 +1,6 @@
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { male: 
+  exports.zip = { male: 
    { will: 'iam,ie,ard,is,iams',
      fred: ',erick,die,rick,dy',
      marc: 'us,,o,os,el',
@@ -283,7 +274,7 @@ exports.zip = { male:
      'dev0',
      'rosa~o',
      '1e' ] }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 
 				var o = {};
 				['male', 'female'].forEach(function(type) {
@@ -302,4 +293,4 @@ module.exports = (function () {
 				//::
 
 				return o;
-			})()
+			})();

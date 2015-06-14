@@ -1,9 +1,7 @@
-/* singular nouns having irregular plurals */
+// singular nouns having irregular plurals
 
-if (!lang) {var lang = 'en';}
 
-var helpFns = require("./helpFns");
-exports.zip = { NN: 
+  exports.zip = { NN: 
    [ [ 'child', 'children' ],
      [ 'person', 'people' ],
      [ 'leaf', 'leaves' ],
@@ -220,9 +218,9 @@ exports.zip = { NN:
      'celcius',
      'kelvin',
      'hertz' ] }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 
 				exports.zip.irregulars = exports.zip.NN.concat(exports.zip.PRP, exports.zip.PP);
 				exports.zip.uncountables = exports.zip.uc.reduce(helpFns.toObj,{});
 				return exports.zip;
-			})()
+			})();

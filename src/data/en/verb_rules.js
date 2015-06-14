@@ -1,20 +1,8 @@
-/* regex rules for verb conjugation
-used in combination with the generic "fallback" method */
+// regex rules for verb conjugation
+// used in combination with the generic "fallback" method
 
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
-
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { infinitive: 
+  exports.zip = { infinitive: 
    [ [ '(eed)$', undefined, '$1s', '$1ing', '$1ed', '$1er' ],
      [ '(e)(ep)$', undefined, '$1$2s', '$1$2ing', '$1pt', '$1$2er' ],
      [ '(a[tg]|i[zn]|ur|nc|gl|is)e$',
@@ -103,7 +91,7 @@ exports.zip = { infinitive:
      [ '(.i)ed$', '$1', '$1s', '$1ing', undefined, '$1er' ],
      [ '([rl])ew$', '$1ow', '$1ows', '$1owing', undefined, undefined ],
      [ '([pl])t$', '$1t', '$1ts', '$1ting', undefined, undefined ] ] }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 
 				for (var cat in exports.zip) {
 					exports.zip[cat] = exports.zip[cat].map(function(a){
@@ -120,4 +108,4 @@ module.exports = (function () {
 					});
 				}
 				return exports.zip;
-			})()
+			})();

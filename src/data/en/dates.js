@@ -1,15 +1,6 @@
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { months: 
+  exports.zip = { months: 
    { january: 0,
      february: 1,
      march: 2,
@@ -50,4 +41,4 @@ module.exports = (function () {
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
 				res.monthsS = res.monthS + ',?';
 				return res;
-			})()
+			})();

@@ -1,17 +1,7 @@
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
+// approximate visual (not semantic) relationship between unicode and ascii characters
 
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { '2': '²ƻ',
+  exports.zip = { '2': '²ƻ',
   '3': '³ƷƸƹƺǮǯЗҘҙӞӟӠӡȜȝ',
   '5': 'Ƽƽ',
   '8': 'Ȣȣ',
@@ -53,4 +43,4 @@ module.exports = (function (a) {
 						});
 				}
 				return res;
-			})()
+			})();

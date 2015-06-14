@@ -1,28 +1,29 @@
-var multiples = require('./multiples.js');
-var nouns_inflect = require('./nouns_inflect.js');
-var nouns = require('./nouns.js');
-var verbs_special = require('./verbs_special.js');
-var verbs_conjugate = require('./verbs_conjugate.js');
-var verbs = require('./verbs.js');
-var adjectives_decline = require('./adjectives_decline.js');
-var adjectives_demonym = require('./adjectives_demonym.js');
-var adjectives = require('./adjectives.js');
-var adverbs_decline = require('./adverbs_decline.js');
-var numbers = require('./numbers.js');
-var dates = require('./dates.js');
-var honorifics = require('./honorifics.js');
-var abbreviations = require('./abbreviations.js');
-var pos_data = require('./pos_data.js');
-var negate_data = require('./negate_data.js');
-var firstnames = require('./firstnames.js');
-var normalisations = require('./normalisations.js');
-var suffixes = require('./suffixes.js');
-var phrasalVerbs = require('./phrasalVerbs.js');
-var verb_rules = require('./verb_rules.js');
-var word_rules = require('./word_rules.js');
-var schema = require('./schema.js');
+// data index
+var multiples = require('./multiples');
+var nouns_inflect = require('./nouns_inflect');
+var nouns = require('./nouns');
+var verbs_special = require('./verbs_special');
+var verbs_conjugate = require('./verbs_conjugate');
+var verbs = require('./verbs');
+var adjectives_decline = require('./adjectives_decline');
+var adjectives_demonym = require('./adjectives_demonym');
+var adjectives = require('./adjectives');
+var adverbs_decline = require('./adverbs_decline');
+var numbers = require('./numbers');
+var dates = require('./dates');
+var honorifics = require('./honorifics');
+var abbreviations = require('./abbreviations');
+var pos_data = require('./pos_data');
+var negate_data = require('./negate_data');
+var firstnames = require('./firstnames');
+var normalisations = require('./normalisations');
+var suffixes = require('./suffixes');
+var phrasalVerbs = require('./phrasalVerbs');
+var verb_rules = require('./verb_rules');
+var word_rules = require('./word_rules');
+var schema = require('./schema');
 
-exports.zip = {
+module.exports = {
   multiples: multiples,
   nouns_inflect: nouns_inflect,
   nouns: nouns,
@@ -47,4 +48,3 @@ exports.zip = {
   word_rules: word_rules,
   schema: schema
 };
-module.exports = exports.zip;

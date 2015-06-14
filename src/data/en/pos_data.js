@@ -1,29 +1,24 @@
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
 
-// types: infinitive, gerund, past, present, doer, future
 
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { particles: 
+  exports.zip = { particles: 
    [ 'together',
      'in',
      'out',
      'on',
      'off',
-     'of',
+     'away',
+     'back',
      'over',
      'under',
      'up',
      'down',
+     'together',
      'apart',
-     'before',
+     'into',
+     'for',
+     'against',
      'after',
-     'with',
+     'of',
      'about',
      'to',
      'through',
@@ -31,15 +26,14 @@ exports.zip = { particles:
      'around',
      'behind',
      'above',
-     'away',
      'across',
      'ahead',
      'upon',
      'aback',
-     'back',
      'forth',
      'along',
-     'way' ],
+     'way',
+     'with' ],
   cs: 
    [ 'woul|d',
      'wi|ll',
@@ -83,7 +77,7 @@ exports.zip = { particles:
      'where\'s': 'where',
      'why\'s': 'why',
      'how\'s': 'how' } }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 				exports.zip.particles = exports.zip.particles.reduce(helpFns.toObj, {});
 				return exports.zip;
-			})()
+			})();

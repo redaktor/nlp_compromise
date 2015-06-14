@@ -1,9 +1,6 @@
-/* singular nouns having irregular plurals */
 
-if (!lang) {var lang = 'en';}
 
-var helpFns = require("./helpFns");
-exports.zip = { CP: 
+  exports.zip = { CP: 
    [ [ 'is', 'isn\'t' ],
      [ 'am', 'ain\'t' ],
      [ 'are', 'aren\'t' ],
@@ -27,7 +24,7 @@ exports.zip = { CP:
      [ 'lets', 'lets not' ],
      [ 'let\'s', 'let\'s not' ],
      [ 'who\'d', 'who\'d not' ] ] }
-module.exports = (function () {
+var helpFns = require("./helpFns");module.exports = (function () {
 				var res = {};
 				res.negate = {};
 				['CP', 'MD'].forEach(function(type) {
@@ -41,4 +38,4 @@ module.exports = (function () {
 					});
 				});
 				return res;
-			})()
+			})();

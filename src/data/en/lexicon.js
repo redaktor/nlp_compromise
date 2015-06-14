@@ -1,37 +1,15 @@
-/* regex rules for verb conjugation
-used in combination with the generic "fallback" method */
-
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
-
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
-
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
 if (!lang) {var lang = 'en';}
 
-var helpFns = require("./helpFns");
-
-//::NODE::
-  var m = require('./');
-  var pm = {};
-  function reqPmodules() {
-			pm.phrasal_verbs = require('../lexicon/phrasal_verbs'); // TODO - FIXME becomes data module
-			['index','to_doer'].forEach(function(n) {
-				pm[n] = require('../../parents/verb/conjugate/' + n);
-			});
-			['to_adverb','to_superlative','to_comparative'].forEach(function(n) {
-				pm[n] = require('../../parents/adjective/conjugate/' + n);
-			});
-		}
-    reqPmodules();
-//::
+var data = require('./');
+var conjugate = require('../../parents/verb/conjugate');
+var to_doer = require('../../parents/verb/conjugate/to_doer');
+var to_adverb = require('../../parents/adjective/conjugate/to_adverb');
+var to_comparative = require('../../parents/adjective/conjugate/to_comparative');
+var to_superlative = require('../../parents/adjective/conjugate/to_superlative');
+var main = {};
 
   exports.zip = { EX: [ 'there' ],
-  NN:
+  NN: 
    [ 'president',
      'dollar',
      'student',
@@ -45,7 +23,7 @@ var helpFns = require("./helpFns");
      'purpose',
      'event' ],
   NNS: [ 'friends', 'sons', 'partners' ],
-  CC:
+  CC: 
    [ 'how',
      'or',
      'while',
@@ -68,7 +46,7 @@ var helpFns = require("./helpFns");
   VBD: [ 'walked', 'where\'d', 'when\'d', 'how\'d', 'what\'d' ],
   VBN: [ 'born' ],
   VBG: [ 'according', 'resulting', 'staining' ],
-  DT:
+  DT: 
    [ 'that',
      'this',
      'these',
@@ -108,22 +86,25 @@ var helpFns = require("./helpFns");
      'de',
      'du',
      'el' ],
-  IN:
+  IN: 
    [ 'in',
      'out',
      'on',
      'off',
-     'of',
+     'away',
+     'back',
      'over',
      'under',
      'up',
      'down',
      'together',
      'apart',
-     'before',
+     'into',
+     'for',
+     'against',
      'after',
-     'with',
-     'without',
+     'before',
+     'of',
      'about',
      'to',
      'round',
@@ -132,18 +113,16 @@ var helpFns = require("./helpFns");
      'around',
      'behind',
      'above',
-     'away',
      'across',
      'ahead',
      'upon',
      'aback',
-     'back',
      'forth',
      'along',
      'way',
+     'with',
+     'without',
      'until',
-     'into',
-     'against',
      'except',
      'by',
      'between',
@@ -186,7 +165,7 @@ var helpFns = require("./helpFns");
      '\'o',
      'o\'',
      'a\'' ],
-  PP:
+  PP: 
    [ 'mine',
      'my',
      'myself',
@@ -212,7 +191,7 @@ var helpFns = require("./helpFns");
      'lot',
      'nothing',
      'everything' ],
-  UH:
+  UH: 
    [ 'uhh',
      'uh-oh',
      'ugh',
@@ -257,7 +236,7 @@ var helpFns = require("./helpFns");
      'wow',
      'nope' ],
   FW: [ 'ie', 'etc' ],
-  RB:
+  RB: 
    [ 'when',
      'whence',
      'where',
@@ -360,44 +339,47 @@ var helpFns = require("./helpFns");
      'widely' ],
   RBR: [ 'more' ],
   RBS: [ 'most' ] }
-  var unzip = function gen(cat){
-			if (typeof window != 'undefined' && window.hasOwnProperty('nlp')) { m = window; pm = window; }
-			var nrOnes = Object.keys(m.numbers.ones).filter(function(s){ return s!='a' })
+  var unzip = function lexicon(cat){
+			if (typeof window != 'undefined' && window.hasOwnProperty('nlp')) { data = window; }
+			var nrOnes = Object.keys(data.numbers.ones).filter(function(s){ return s!='a' }) 
 			var did = {
-				NN: m.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(m.nouns_inflect.uncountables)),
-				NNS: m.nouns_inflect.NN.map(function(a){ return a[1]; }),
-				VBD: m.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
-				VBG: m.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
-				RB: Object.keys(m.adverbs_decline).concat(Object.keys(m.adjectives_decline.adj_to_advs).map(function(s) { return m.adjectives_decline.adj_to_advs[s]; })),
+				NN: data.nouns_inflect.NN.map(function(a){ return a[0]; }).concat(Object.keys(data.nouns_inflect.uncountables)),
+				NNS: data.nouns_inflect.NN.map(function(a){ return a[1]; }),
+				VBD: data.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
+				VBG: data.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
+				RB: Object.keys(data.adverbs_decline).concat(Object.keys(data.adjectives_decline.adj_to_advs).map(function(s) { 
+					return data.adjectives_decline.adj_to_advs[s];
+				})),
 			}
 			var lexiZip = {
-				NNA: Object.keys(m.verbs_conjugate.irregularDoers).map(function(s){ return m.verbs_conjugate.irregularDoers[s];  }),
-				NNAB: m.abbreviations.nouns,
-				NNP: Object.keys(m.firstnames),
-				PP: Object.keys(m.nouns.pps),
-				PRP: Object.keys(m.nouns.prps),
-				CP: Object.keys(m.verbs_special.CP),
-				MD: Object.keys(m.verbs_special.MD),
-				VBP: m.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
-				VBZ: m.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
-				JJR: Object.keys(m.adjectives_decline.to_comparative).map(function(s){ return m.adjectives_decline.to_comparative[s]; }),
-				JJS: Object.keys(m.adjectives_decline.to_superlative).map(function(s){ return m.adjectives_decline.to_superlative[s]; }),
-				JJ: m.adjectives_demonym.concat(
-						Object.keys(m.adjectives_decline.adv_donts), Object.keys(m.adjectives_decline.adj_to_advs),
-						Object.keys(m.adjectives_decline.to_comparative), Object.keys(m.adjectives_decline.to_superlative),
-						Object.keys(m.adverbs_decline).map(function(s) { return m.adverbs_decline[s]; })
+				NNA: Object.keys(data.verbs_conjugate.irregularDoers).map(function(s){ return data.verbs_conjugate.irregularDoers[s];  }),
+				NNAB: data.abbreviations.nouns,
+				NNP: Object.keys(data.firstnames),
+				PP: Object.keys(data.nouns.pps),
+				PRP: Object.keys(data.nouns.prps),
+				CP: Object.keys(data.verbs_special.CP),
+				MD: Object.keys(data.verbs_special.MD),
+				VBP: data.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
+				VBZ: data.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
+				JJR: Object.keys(data.adjectives_decline.to_comparative).map(function(s){ return data.adjectives_decline.to_comparative[s]; }),
+				JJS: Object.keys(data.adjectives_decline.to_superlative).map(function(s){ return data.adjectives_decline.to_superlative[s]; }),
+				JJ: data.adjectives_demonym.concat(
+						Object.keys(data.adjectives_decline.adv_donts), Object.keys(data.adjectives_decline.adj_to_advs),
+						Object.keys(data.adjectives_decline.to_comparative), Object.keys(data.adjectives_decline.to_superlative),
+						Object.keys(data.adverbs_decline).map(function(s) { return data.adverbs_decline[s]; })
 				),
-				CD: nrOnes.concat(
-					Object.keys(m.numbers.teens),
-					Object.keys(m.numbers.tens),
-					Object.keys(m.numbers.multiple),
-					Object.keys(m.dates.months),
-					Object.keys(m.dates.days)
+				CD: nrOnes.concat( 
+					Object.keys(data.numbers.teens), 
+					Object.keys(data.numbers.tens), 
+					Object.keys(data.numbers.multiple),
+					Object.keys(data.dates.months),
+					Object.keys(data.dates.days)
 				)
 			}
 			//::NODE::
 			if (cat===1) {return [did,lexiZip]}
 			//::
+			
 			if (!cat) {
 				var toMain = function(key, o) {
 					o[key].forEach(function(w) { if (w && !main[w]) {main[w] = key} });
@@ -410,34 +392,48 @@ var helpFns = require("./helpFns");
 
 					toMain(key, exports.zip);
 				}
-
-				//add phrasal verbs - TODO FIXME
-				Object.keys(pm.phrasal_verbs).forEach(function(s) {
-					main[s] = pm.phrasal_verbs[s]
-				});
-				// conjugate all verbs. (~8ms, triples the lexicon size)
-				m.verbs.forEach(function(v) {
-					var c = pm.index(v);
-					var d = pm.to_doer(v);
-					var map = {infinitive: 'VBP', past: 'VBD', gerund: 'VBG', present: 'VBZ', future: 'VBF', participle: 'VBN'};
-					for (var type in map) {
-						if (c[type] && !main[c[type]]) { main[c[type]] = map[type] }
-						if (d && !main[d]) { main[d] = 'NNA' }
+				
+				// conjugate all phrasal verbs:
+				var c = {};
+				var splits, verb, particle, phrasal;
+				for (var pv in data.phrasalVerbs) {
+					splits = pv.split(' ');
+					verb = splits.shift();
+					particle = splits.join(' ');
+					c = conjugate(verb);
+					for (var tense in c) {
+						if (tense != 'doer') {
+							phrasal = c[tense] + ' ' + particle;
+							main[phrasal] = data.schema.getTense(tense).tag;
+						}
+					}
+				}
+				
+				// conjugate all verbs: (~8ms, triples the lexicon size)
+				c = {};
+				data.verbs.forEach(function(v) {
+					c = conjugate(v);
+					//var d = to_doer(v);
+					for (var tense in data.schema._tenses) {
+						if (c[tense] && !main[c[tense]]) { 
+							main[c[tense]] = data.schema.getTense(tense).tag;
+						}
+						//if (d && !main[d]) { main[d] = 'NNA' }
 					}
 				});
-				// decline all adjectives to their adverbs. (13ms)
+				// decline all adjectives to their adverbs_ (~13ms)
 				// 'to_adverb','to_superlative','to_comparative'
-				m.adjectives.concat(Object.keys(m.adjectives_decline.convertables)).forEach(function(j) {
+				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(j) {
 					main[j] = 'JJ';
-					var adv = pm.to_adverb(j);
+					var adv = to_adverb(j);
 					if (adv && adv !== j && !main[adv]) {
 						main[adv] = main[adv] || 'RB'
 					}
-					var c = pm.to_comparative(j);
+					var c = to_comparative(j);
 					if (c && !c.match(/^more ./) && c !== j && !main[c]) {
 						main[c] = main[c] || 'JJR'
 					}
-					var s = pm.to_superlative(j);
+					var s = to_superlative(j);
 					if (s && !s.match(/^most ./) && s !== j && !main[s]) {
 						main[s] = main[s] || 'JJS'
 					}
@@ -447,19 +443,10 @@ var helpFns = require("./helpFns");
 				lexiZip.CP.forEach(function(w) {
 					main[w] = 'CP';
 				});
-
+				
 				return main;
 			}
 			if (cat in did) { return did[cat] }
 			return [];
 		}
-  unzip();module.exports = (function () {
-				var res = {};
-				exports.zip.tags.forEach(function(a) {
-					res[a[0]] = { name:a[1], parent:exports.zip.parents[a[2]], tag:a[0] };
-					if (a.length > 3) {
-						res[a[0]].tense = a[3];
-					}
-				});
-				return res;
-			})()
+  unzip();module.exports = main;

@@ -1,20 +1,6 @@
-/* regex rules for verb conjugation
-used in combination with the generic "fallback" method */
 
-/* approximate visual (not semantic) relationship between unicode and ascii characters */
 
-// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
-// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
-// 1 means 'default behavior'
-
-// types: infinitive, gerund, past, present, doer, future
-
-/* singular nouns having irregular plurals */
-
-if (!lang) {var lang = 'en';}
-
-var helpFns = require("./helpFns");
-exports.zip = { JJ: 
+  exports.zip = { JJ: 
    [ '.[cts]hy$',
      '.[st]ty$',
      '.[gk]y$',
@@ -140,4 +126,4 @@ module.exports = (function () {
 					});
 				}
 				return a;
-			})()
+			})();
