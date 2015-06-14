@@ -1,8 +1,14 @@
 // turn 'quick' into 'quicker'
-module.exports = function(str, lang) {
-	if (typeof lang != 'string') lang = 'en';
-	adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
-		
+if (typeof lang != 'string') var lang = 'en';
+var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
+var cache = require('../../../cache');
+
+module.exports = function(str) {
+	if (typeof str != 'string' || str === '') { return ''; }
+	var cached = cache.get(str, 'to_comparative');
+	if (cached) {
+		return cached;
+	}
 	var transforms = [{
 		reg: /y$/i,
 		repl: 'ier'
@@ -36,35 +42,35 @@ module.exports = function(str, lang) {
 	];
 	
 	if (adjectives_decline.to_comparative[str]===0) {
-		return null
+		return cache.set(str, null, 'to_comparative');
 	}
 	for (i = 0; i < transforms.length; i++) {
 		if (str.match(transforms[i].reg)) {
-			return str.replace(transforms[i].reg, transforms[i].repl)
+			return cache.set(str, str.replace(transforms[i].reg, transforms[i].repl), 'to_comparative');
 		}
 	}
 
 	if (adjectives_decline.convertables.hasOwnProperty(str)) {
-		return (str.match(/e$/)) ? str + 'r' : str + 'er'
+		return cache.set(str, ((str.match(/e$/)) ? str + 'r' : str + 'er'), 'to_comparative');
 	}
 
 	if (adjectives_decline.to_comparative.hasOwnProperty(str)) {
-		return adjectives_decline.to_comparative[str]
+		return cache.set(str, adjectives_decline.to_comparative[str], 'to_comparative');
 	}
 
 	var i;
 	for (i = 0; i < not_matches.length; i++) {
 		if (str.match(not_matches[i])) {
-			return 'more ' + str
+			return cache.set(str, 'more ' + str, 'to_comparative');
 		}
 	}
 
 	for (i = 0; i < matches.length; i++) {
 		if (str.match(matches[i])) {
-			return str + 'er'
+			return cache.set(str, str + 'er', 'to_comparative');
 		}
 	}
-	return 'more ' + str;
+	return cache.set(str, 'more ' + str, 'to_comparative');
 }
 
 // console.log(to_comparative('dry'))

@@ -1,8 +1,13 @@
 // turns 'quickly' into 'quick'
+if (typeof lang != 'string') lang = 'en';
+var cache = require('../../../cache');
+var adverbs_decline = require('../../../data/'+lang+'/adverbs_decline');
+
 module.exports = function(str, lang) {
-	if (typeof lang != 'string') lang = 'en';
-	var adverbs_decline = require('../../../data/'+lang+'/adverbs_decline');
-	
+	var cached = cache.get(str, 'to_adjective');
+	if (cached) {
+		return cached;
+	}
 	var transforms = [{
 		'reg': /bly$/i,
 		'repl': 'ble'
@@ -27,14 +32,14 @@ module.exports = function(str, lang) {
 	}];
 	
 	if (adverbs_decline.hasOwnProperty(str)) {
-		return adverbs_decline[str];
+		return cache.set(str, adverbs_decline[str], 'to_adjective');
 	}
 	for (var i = 0; i < transforms.length; i++) {
 		if (str.match(transforms[i].reg)) {
-			return str.replace(transforms[i].reg, transforms[i].repl);
+			return cache.set(str, str.replace(transforms[i].reg, transforms[i].repl), 'to_adjective');
 		}
 	}
-	return str;
+	return cache.set(str, str, 'to_adjective');
 }
 
 // console.log(to_adjective('quickly') === 'quick')

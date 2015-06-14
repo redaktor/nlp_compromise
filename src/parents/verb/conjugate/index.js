@@ -1,9 +1,17 @@
+// parents/verb/conjugate
 // turn a verb into its other grammatical forms.
+
+// TODO - https://www.ego4u.de/de/cram-up/grammar/past-perfect-progressive
+// also: 'Had he been' (?) pos ...
+
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../../data/'+lang+'/';
 var suffixes = require(dPath+'suffixes');
 var verbs_conjugate = require(dPath+'verbs_conjugate');
 var verb_rules = require(dPath+'verb_rules');
+var phrasalVerbs = require(dPath+'phrasalVerbs');
+var schema = require(dPath+'schema');
+var cache = require('../../../cache');
 var to_doer = require('./to_doer');
 
 //this method is the slowest in the whole library, basically TODO:whaaa
@@ -13,7 +21,9 @@ function predict(w) {
 	}
 	var arr = Object.keys(suffixes.verbs);
 	for (i = 0; i < arr.length; i++) {
-		if (endsWith(w, arr[i])) {return suffixes.verbs[arr[i]];}
+		if (endsWith(w, arr[i])) {
+			return suffixes.verbs[arr[i]];
+		}
 	}
 	return 'infinitive';
 }
@@ -42,6 +52,7 @@ function fallback(w) {
 		present = w.replace(/[aeiou]$/, 'es');
 		doer = to_doer(infinitive);
 	}
+	
 	return {
 		infinitive: infinitive,
 		present: present,
@@ -49,11 +60,11 @@ function fallback(w) {
 		gerund: gerund,
 		doer: doer,
 		future: 'will ' + infinitive
-	}
+	};
 }
 
 //make sure object has all forms
-function fufill(obj, prefix) {
+function fulfill(obj, prefix) {
 	if (!obj.infinitive) { return obj; }
 	if (!obj.gerund) {
 		obj.gerund = obj.infinitive + 'ing'
@@ -86,35 +97,44 @@ function fufill(obj, prefix) {
 		obj.pluperfect = 'had ' + obj.past
 	}
 	// future perfect is 'will have'+past-tense
-	if (!obj.future_perfect) {
-		obj.future_perfect = 'will have ' + obj.past;
+	if (!obj.futurePerfect) {
+		obj.futurePerfect = 'will have ' + obj.past;
 	}
 	
 	return obj;
 }
 
-exports.main = function(w) {
-	/// console.log( '!!', w );
-	if (typeof w != 'string') {
-		return {}
+function result(conjugated, prefix) {
+	var c = fulfill(conjugated, prefix);
+	for (var i = 0; i < schema._tenseOrder.length; i++) {
+		var w = conjugated[schema._tenseOrder[i]];
+		cache.set(w, c, 'verbConjugate');
 	}
-	//for phrasal verbs ('look out'), conjugate look, then append 'out'
-	var phrasal_reg=new RegExp('^(.*?) (in|out|on|off|behind|way|with|of|do|away|across|ahead|back|over|under|together|apart|up|upon|aback|down|about|before|after|around|to|forth|round|through|along|onto)$','i')
-	// TODO - when IN is done (see issue 40) we can build this regex
+	return c;
+}
+
+
+exports.main = function(w) {
+	if (typeof w != 'string' || w === '') {
+		return {};
+	}
+	var cached = cache.get(w, 'verbConjugate');
+	if (cached) {
+		return cached;
+	}
 	
-	if(w.match(' ') && w.match(phrasal_reg)){
-		var splits = w.match(phrasal_reg,'');
-		/// console.log( 'b', w, splits );
+	if(w.match(' ') && w.match(phrasalVerbs.particleRegex)){
+		var splits = w.match(phrasalVerbs.particleRegex,'');
 		var phrasal_verb = splits[1];
 		var particle = splits[2];
-		var result = module.exports(phrasal_verb); // recursive
-		delete result['doer'];
-		Object.keys(result).forEach(function(k){
-			if(result[k]){
-				result[k] += ' '+particle;
+		var res = module.exports(phrasal_verb); // recursive
+		delete res['doer'];
+		Object.keys(res).forEach(function(k){
+			if(res[k]){
+				res[k] += ' '+particle;
 			}
 		})
-		return result
+		return result(JSON.parse(JSON.stringify(res))); // shallow copy because deleted
 	}
 
 	// for pluperfect ('had tried') remove 'had' and call it past-tense
@@ -132,13 +152,19 @@ exports.main = function(w) {
 	// check irregulars
 	var obj = {};
 	var l = verbs_conjugate.irregulars.length;
-	var x, i;
-	// TODO - might be more performant to build an initial search array for each type
+	var c, i;
+	// TODO FIXME
+	/*
+		noDoers: 
+      { appear: 1,
+		irregularDoers: 
+      { begin: 'beginner',
+	*/
 	for (i = 0; i < l; i++) {
-		x = verbs_conjugate.irregulars[i];
-		if (verb === x.present || verb === x.gerund || verb === x.past || verb === x.infinitive) {
+		c = verbs_conjugate.irregulars[i];
+		if (verb === c.present || verb === c.gerund || verb === c.past || verb === c.infinitive) {
 			obj = JSON.parse(JSON.stringify(verbs_conjugate.irregulars[i])); // object 'clone' hack ('shallow copy'), to avoid mem leak
-			return fufill(obj, prefix)
+			return result(obj, prefix)
 		}
 	}
 	// guess the tense, so we know which transformation to make
@@ -158,12 +184,12 @@ exports.main = function(w) {
 					obj[k] = w.replace(r.reg, r.repl[k]);
 				}
 			});
-			return fufill(obj);
+			return result(obj);
 		}
 	}
 
 	// produce a generic transformation
-	return fallback(w);
+	return result(fallback(w));
 };
 
 module.exports = exports.main;

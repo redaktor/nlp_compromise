@@ -11,7 +11,7 @@ exports.main = {
     return new Adjective(str, next, last, token);
   },
   noun: function(str, next, last, token) {
-    return new Noun(str, next, last, token);
+    return new Noun(str, next, last, token, this);
   },
   adverb: function(str, next, last, token) {
     return new Adverb(str, next, last, token);

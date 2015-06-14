@@ -1,25 +1,28 @@
 // wrapper for Adverb's methods
+if (typeof lang != 'string') lang = 'en';
+var schema = require('../../data/'+lang+'/schema');
+var cache = require('../../cache');
+var to_adjective = require('./conjugate/to_adjective');
 module.exports = function(str, next, last, token) {
-	if (typeof lang != 'string') lang = 'en';
-	var to_adjective = require("./conjugate/to_adjective");
-	var schema = require('../../data/'+lang+'/schema');
-		
   var the = this;
   the.word = str || '';
   the.next = next;
   the.last = last;
-
   the.conjugate = function() {
-    return {
+		var cached = cache.get(the.word, 'adverbConjugate');
+		if (cached) {
+			return cached;
+		}
+    return cache.set(the.word, {
       adjective: to_adjective(the.word)
-    }
+    }, 'adverbConjugate');
   }
-
-  the.which = (function() {
+	cached = cache.get(the.word, 'adverbWhich');
+  the.which = (cached) ? cached : cache.set(the.word, (function() {
     if (the.word.match(/..est$/)) {return schema['RBS']}
     if (the.word.match(/..er$/)) {return schema['RBR']}
     return schema['RB'];
-  })()
+  })(), 'adverbWhich');
 
   return the;
 }

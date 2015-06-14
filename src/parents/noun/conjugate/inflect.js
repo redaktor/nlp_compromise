@@ -5,6 +5,7 @@
 
 if (typeof lang != 'string') lang = 'en';
 var nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
+var cache = require('../../../cache');
 
 function titlecase(str) {
 	if (!str) {return ''};
@@ -155,13 +156,9 @@ function is_plural(str, l) {
 
 function pluralize(str, l) {
 	var low = str.toLowerCase()
-		//uncountable
-	if (nouns_inflect.uncountables[low]) {
-		return str
-	}
-	//is it already plural?
-	if(is_plural(low)===true) {
-		return str
+	// is it uncountable or already plural?
+	if (nouns_inflect.uncountables[low] || is_plural(low)===true) {
+		return str;
 	}
 	//irregular
 	var found = nouns_inflect.irregulars.filter(function(r) {
@@ -192,23 +189,21 @@ function pluralize(str, l) {
 
 function singularize(str, l) {
 	var low = str.toLowerCase();
-		//uncountable
-	if (nouns_inflect.uncountables[low]) {
-		return str;
+	var cached = cache.get(str, 'singularize');
+	if (cached) {
+		return cached;
 	}
-	//is it already singular?
-	if(is_plural(low) === false) {
-		return str;
+	// is it uncountable or already singular?
+	if (nouns_inflect.uncountables[low] || is_plural(low) === false) {
+		return cache.set(str, str, 'singularize');
 	}
 	//irregular
-	var found = nouns_inflect.irregulars.filter(function(r) {
-		return r[1] === low;
-	})
+	var found = nouns_inflect.irregulars.filter(function(r) { return r[1] === low; });
 	if (found[0]) {
 		if (titlecase(low) === str) { //handle capitalisation properly
-			return titlecase(found[0][0]);
+			return cache.set(str, titlecase(found[0][0]), 'singularize');
 		} else {
-			return found[0][0];
+			return cache.set(str, found[0][0], 'singularize');
 		}
 	}
 	//inflect first word of preposition-phrase
@@ -216,19 +211,23 @@ function singularize(str, l) {
 		var first = str.match(/^([a-z]*) (of|in|by|for) [a-z]/);
 		if (first && first[1]) {
 			var better_first = singularize(first[1]);
-			return better_first + str.replace(first[1], '');
+			return cache.set(str, [better_first, str.replace(first[1], '')].join(''), 'singularize');
 		}
 	}
 	//regular
 	for (var i = 0; i < singularize_rules.length; i++) {
 		if (str.match(singularize_rules[i].reg)) {
-			return str.replace(singularize_rules[i].reg, singularize_rules[i].repl);
+			return cache.set(str, str.replace(singularize_rules[i].reg, singularize_rules[i].repl), 'singularize');
 		}
 	}
-	return str;
+	return cache.set(str, str, 'singularize');
 }
 
 function inflect(str, l) {
+	var cached = cache.get(str, 'nounInflect');
+	if (cached) {
+		return cached;
+	}
 	if (nouns_inflect.uncountables[str]) { //uncountables shouldn't ever inflect
 		return {
 			plural: str,
@@ -236,15 +235,21 @@ function inflect(str, l) {
 		};
 	}
 	if (is_plural(str)) {
-		return {
+		var singular = singularize(str);
+		cache.set(str, singular, 'singularize');
+		cache.set(str, str, 'pluralize');
+		return cache.set(str, {
 			plural: str,
-			singular: singularize(str)
-		};
+			singular: singular
+		}, 'nounInflect');
 	} else {
-		return {
+		var plural = pluralize(str);
+		cache.set(str, str, 'singularize');
+		cache.set(str, plural, 'pluralize');
+		return cache.set(str, {
 			singular: str,
 			plural: pluralize(str)
-		};
+		}, 'nounInflect');
 	}
 }
 

@@ -1,15 +1,18 @@
 // convert cute to cuteness
+if (typeof lang != 'string') var lang = 'en';
+var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
+var cache = require('../../../cache');
 
-module.exports = function(w, lang) {
-	if (typeof lang != 'string') lang = 'en';
-	var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
-	
-	if (!w) {return ''}
-	if (adjectives_decline.to_noun.hasOwnProperty(w)) {
-		return adjectives_decline.to_noun[w];
+module.exports = function(str) {
+	if (typeof str != 'string' || str === '') { return ''; }
+	var cached = cache.get(str, 'to_noun');
+	if (cached) {
+		return cached;
 	}
-	if (w.match(' ')) {return w}
-	if (w.match(/w$/)){return w}
+	if (adjectives_decline.to_noun.hasOwnProperty(str)) {
+		return cache.set(str, adjectives_decline.to_noun[str], 'to_noun');
+	}
+	if (str.match(' ') || str.match(/w$/)) { return cache.set(str, str, 'to_noun'); }
 	
 	var transforms=[
 		{reg:/y$/, repl:'iness'},
@@ -26,15 +29,14 @@ module.exports = function(w, lang) {
 	];
 
 	for(var i=0; i<transforms.length; i++){
-		if(w.match(transforms[i].reg)){
-			return w.replace(transforms[i].reg, transforms[i].repl)
+		if(str.match(transforms[i].reg)){
+			return cache.set(str, str.replace(transforms[i].reg, transforms[i].repl), 'to_noun');
 		}
 	}
-
-	if (w.match(/s$/)) {
-		return w;
+	if (str.match(/s$/)) {
+		return cache.set(str, str, 'to_noun');
 	}
-	return w + 'ness';
+	return cache.set(str, str + 'ness', 'to_noun');
 };
 
 // console.log(adj_to_noun('mysterious'));

@@ -2,12 +2,14 @@
 // by spencer kelly 2014
 
 // TODO - the regexes are valid for many languages - localize only 'linking words'
+if (typeof lang != 'string') lang = 'en';
 var dates = require('../../data/'+lang+'/dates');
+var cache = require('../../cache');
 
 var days = '([0-9]{1,2}),?';
 var years = '([12][0-9]{3})';
 
-var to_obj = function(arr, places) {
+function to_obj(arr, places) {
 	return Object.keys(places).reduce(function(h, k) {
 		h[k] = arr[places[k]];
 		return h;
@@ -313,16 +315,19 @@ var postprocess = function(obj, options) {
 //pass through sequence of regexes until template is matched..
 module.exports = function(str, options) {
 	options = options || {};
-	str = preprocess(str)
+	var cached = cache.get(str, ['is_date', options]);
+	if (cached) { return cached; }
+	
+	str = preprocess(str);
 	var arr, good, clone_reg, obj;
-	var l=regexes.length;
+	var l = regexes.length;
 	for(var i=0; i<l; i+=1){
-		obj=regexes[i]
+		obj = regexes[i];
 		if (str.match(obj.reg)) {
-			clone_reg=new RegExp(obj.reg.source,'i');//this avoids a memory-leak
+			clone_reg = new RegExp(obj.reg.source,'i'); // this avoids a memory-leak
 			arr = clone_reg.exec(str);
 			good = obj.process(arr);
-			return postprocess(good, options);
+			return cache.set(str, postprocess(good, options), ['is_date', options]);
 		}
 	}
 }

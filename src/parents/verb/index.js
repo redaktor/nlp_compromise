@@ -1,9 +1,11 @@
 // wrapper for verb's methods
+// TODO - maybe i18n infinitive, present etc., goes to schema
 
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
 var schema = require(dPath+'schema');
 var verbs_special = require(dPath+'verbs_special');
+var cache = require('../../cache');
 var verb_conjugate = require('./conjugate');
 
 exports.main = function(str, sentence, word_i) {
@@ -15,81 +17,63 @@ exports.main = function(str, sentence, word_i) {
     next = sentence.tokens[word_i + i];
   }
   the.word = str || '';
-	the.conjugated = {};
+	the.conjugated = verb_conjugate(the.word);
 	
-  var tenses = {
-    past: 'VBD',
-    participle: 'VBN',
-    infinitive: 'VBP',
-    present: 'VBZ',
-    gerund: 'VBG'
-  }
-
 	the.conjugate = function() {
-		if (the.conjugated) {
-			return the.conjugated;
-		}
-		verb_conjugate = require('./conjugate');
-		return verb_conjugate(the.word);
+		return the.conjugated;
 	}
 	
   the.to_past = function() {
     if (the.form === 'gerund') {
-      return the.word;
+      return the.word; 
     }
-    return verb_conjugate(the.word).past;
+    return the.conjugated.past;
   }
 
   the.to_present = function() {
-    return verb_conjugate(the.word).present;
+    return the.conjugated.present;
   }
 
   the.to_future = function() {
-    return 'will ' + verb_conjugate(the.word).infinitive;
+    return 'will ' + the.conjugated.infinitive;
   }
-
+	
+	
   // which conjugation
-	the.form = (function() {
+	var cached = cache.get(the.word, 'verbForm');
+	the.form = (cached) ? cached : cache.set(the.word, (function() {
 		// don't choose infinitive if infinitive == present
-		var order = [
-			'past',
-			'present',
-			'gerund',
-			'infinitive'
-		];
-		the.conjugated = verb_conjugate(the.word);
-		for (var i = 0; i < order.length; i++) {
-			if (the.conjugated[order[i]] === the.word) {
-				return order[i];
+		for (var i = 0; i < schema._tenseOrder.length; i++) {
+			if (the.conjugated[schema._tenseOrder[i]] === the.word) {
+				return schema._tenseOrder[i];
 			}
 		}
-	})()
+	})(), 'verbForm');
 
+	
   // past/present/future   //wahh?!
-  the.tense = (function() {
-    if (the.word.match(/\bwill\b/)) {return 'future'}
-    if (the.form === 'present') {return 'present'}
-    if (the.form === 'past') {return 'past'}
+	cached = cache.get(the.word, 'verbTense');
+  the.tense = (cached) ? cached : cache.set(the.word, (function() {
+    if (the.word.match(/\bwill\b/)) {return 'future';}
+    if (the.form === 'present') {return 'present';}
+    if (the.form === 'past') {return 'past';}
     return 'present';
-  })()
+  })(), 'verbTense');
 
   // the most accurate part_of_speech
-  the.which = (function() {
+	cached = cache.get(the.word, 'verbWhich');
+  the.which = (cached) ? cached : cache.set(the.word, (function() {
     if (verbs_special.CP[the.word]) { return schema['CP']; }
     if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) { return schema['VBG']; }
-    var form = the.form;
-    return schema[tenses[form]];
-  })()
+    return schema.getTense(the.form).tag;
+  })(), 'verbWhich');
 
   // is this verb negative already?
   the.negative = function() {
-    if (the.word.match(/n't$/)) {
-			return true
-		}
-    if ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && next && next.normalised === 'not') {
-			return true;
-    }
-    return false;
+		cached = cache.get(the.word, 'verbNeg');
+		if (cached) { return cached; }
+    var isN = ( (the.word.match(/n't$/)) || ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && next && next.normalised === 'not') );
+		return cache.set(the.word, isN, 'verbNeg');
   }
   return the;
 }

@@ -1,15 +1,15 @@
 // wrapper for noun's methods
+
+if (typeof lang != 'string') lang = 'en';
+var dPath = '../../data/'+lang+'/';
+var inflect = require('./conjugate/inflect');
+var indefinite_article = require('./indefinite_article');
+var schema = require(dPath+'schema');
+var firstnames = require(dPath+'firstnames');
+var honorifics = require(dPath+'honorifics');
+var nouns = require(dPath+'nouns');
+	
 module.exports = function(str, sentence, word_i) {
-	
-	if (typeof lang != 'string') lang = 'en';
-	var dPath = '../../data/'+lang+'/';
-	var inflect = require("./conjugate/inflect");
-	var indefinite_article = require('./indefinite_article');
-	var schema = require(dPath+'schema');
-	var firstnames = require(dPath+'firstnames');
-	var honorifics = require(dPath+'honorifics');
-	var nouns = require(dPath+'nouns');
-	
   var the = this;
   var token, next;
   if(sentence !== undefined && word_i !== undefined){
@@ -70,7 +70,7 @@ module.exports = function(str, sentence, word_i) {
   }
 
   the.article = function() {
-    return (the.is_plural()) ? "the" : indefinite_article(the.word);
+    return (the.is_plural()) ? 'the' : indefinite_article(the.word);
   }
 
   the.pluralize = function() {
@@ -157,7 +157,7 @@ module.exports = function(str, sentence, word_i) {
   //list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
   the.referenced_by = function() {
     //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
-    if(token && token.pos.tag!=="PRP" && token.pos.tag!=="PP"){
+    if(token && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP'){
       var prp = the.pronoun();
       //look at rest of sentence
       var interested = sentence.tokens.slice(word_i+1, sentence.tokens.length);
@@ -168,13 +168,13 @@ module.exports = function(str, sentence, word_i) {
       //find the matching pronouns, and break if another noun overwrites it
       var matches = [];
       for(var i=0; i<interested.length; i++){
-        if(interested[i].pos.tag ==="PRP" && (interested[i].normalised === prp || nouns.pps[interested[i].normalised] === prp)) {
+        if(interested[i].pos.tag ==='PRP' && (interested[i].normalised === prp || nouns.pps[interested[i].normalised] === prp)) {
           //this pronoun points at our noun
           matches.push(interested[i]);
-        } else if(interested[i].pos.tag==="PP" && nouns.pps[interested[i].normalised]===prp) {
+        } else if(interested[i].pos.tag==='PP' && nouns.pps[interested[i].normalised]===prp) {
           //this posessive pronoun ('his/her') points at our noun
           matches.push(interested[i]);
-        } else if(interested[i].pos.parent==="noun" && interested[i].analysis.pronoun()===prp) {
+        } else if(interested[i].pos.parent==='noun' && interested[i].analysis.pronoun()===prp) {
           //this noun stops our further pursuit
           break;
         }
@@ -187,7 +187,7 @@ module.exports = function(str, sentence, word_i) {
   // a pronoun that points at a noun mentioned previously '[he] is nice'
   the.reference_to = function() {
     // if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
-    if (token && (token.pos.tag === "PRP" || token.pos.tag === "PP")) {
+    if (token && (token.pos.tag === 'PRP' || token.pos.tag === 'PP')) {
       var prp = token.normalised;
 			if(nouns.pps[prp]!==undefined){ // support possessives
 				prp = nouns.pps[prp];
@@ -202,7 +202,7 @@ module.exports = function(str, sentence, word_i) {
       interested = interested.reverse()
       for(var i=0; i<interested.length; i++){
         //it's a match
-        if(interested[i].pos.parent === "noun" && interested[i].pos.tag !== "PRP" && interested[i].analysis.pronoun() === prp){
+        if(interested[i].pos.parent === 'noun' && interested[i].pos.tag !== 'PRP' && interested[i].analysis.pronoun() === prp){
           return interested[i];
         }
       }
