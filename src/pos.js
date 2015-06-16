@@ -1,4 +1,3 @@
-
 if (typeof lang != 'string') lang = 'en';
 var dPath = './data/'+lang+'/';
 var lexicon = require(dPath+'lexicon');
@@ -58,18 +57,14 @@ function mergeTokens(a, b) {
 function combineTags(sentence) {
 	var arr = sentence.tokens || [];
 	function merge(n, count) {
-		if (!count || count === 1) {
-			arr[n + 1] = mergeTokens(arr[n], arr[n + 1]);
-			arr[n] = null;
-		} else if (count > 1) {
-			var j, k;
-			for (var i = 0; i < count; i++) {
-				j = n + i;
-				k = j+1;
-				if (arr[k]) {
-					arr[k] = mergeTokens(arr[j], arr[k]);
-					arr[j] = null;
-				}
+		if (!count) { count = 1; }
+		var j, k;
+		for (var i = 0; i < count; i++) {
+			j = n + i;
+			k = j + 1;
+			if (arr[k]) {
+				arr[k] = mergeTokens(arr[j], arr[k]);
+				arr[j] = null;
 			}
 		}
 	}
@@ -97,8 +92,6 @@ function combineTags(sentence) {
 	})
 	return sentence;
 }
-
-
 // combine phrasal verbs
 // some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
 // they should be combined with the verb, sometimes.
@@ -134,7 +127,6 @@ function lexiPass(w) {
 		}
 	}
 }
-
 function rulePass(w) {
 	for (var i = 0; i < word_rules.length; i++) {
 		if (w.length> 4 && w.match(word_rules[i].reg)) {
@@ -142,8 +134,6 @@ function rulePass(w) {
 		}
 	}
 }
-
-
 function lastPass(token, i, sentence) {
 	return setToken(token, sentence, i, pos_rules.special);
 }
@@ -195,16 +185,14 @@ function handleContractions(arr, isAmbiguous) {
 ///party-time//
 exports.pos = function(text, options) {
 	
-	//console.log( 'CACHE TEST', cache.get('test') );
-	
 	options = options || {};
 	if (!text || !text.match(/[a-z0-9]/i)) {
 		return new Section([]);
 	}
 	var sentences = tokenize(text);
 	
-	function setPos(token, p, pr) {
-		token.pos = schema[p];
+	function setPos(token, p, pr, pIsRaw) {
+		token.pos = (pIsRaw) ? p : schema[p];
 		token.pos_reason = pr;
 		return token;
 	}
@@ -242,9 +230,7 @@ exports.pos = function(text, options) {
 			}
 
 			// handle punctuation like ' -- '
-			if (!token.normalised) {
-				return setPos(token, 'UH', 'wordless_string');
-			}
+			if (!token.normalised) { return setPos(token, 'UH', 'wordless_string'); }
 			// suffix pos signals from wordnet
 			var len = token.normalised.length;
 			if (len > 4) {
@@ -253,19 +239,11 @@ exports.pos = function(text, options) {
 					return setPos(token, suffixes.wordnet[suffix], 'wordnet suffix');
 				}
 			}
-
 			// suffix regexes for words
 			var r = rulePass(token.normalised);
-			if (r) {
-				token.pos = r;
-				token.pos_reason = 'regex suffix'
-				return token
-			}
-
+			if (r) { return setPos(token, r, 'regex suffix', 1); }
 			// see if it's a number
-			if (parseFloat(token.normalised)) {
-				return setPos(token, 'CD', 'parsefloat')
-			}
+			if (parseFloat(token.normalised)) { return setPos(token, 'CD', 'parsefloat'); }
 			
 			return token;
 		})
