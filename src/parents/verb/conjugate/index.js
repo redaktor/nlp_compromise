@@ -114,7 +114,7 @@ function result(conjugated, prefix) {
 }
 
 
-exports.main = function(w) {
+exports.verbConjugate = function(w) {
 	if (typeof w != 'string' || w === '') {
 		return {};
 	}
@@ -192,7 +192,7 @@ exports.main = function(w) {
 	return result(fallback(w));
 };
 
-module.exports = exports.main;
+module.exports = exports.verbConjugate;
 
 // console.log(verb_conjugate('walking'))
 // console.log(verb_conjugate('overtook'))
