@@ -1,6 +1,4 @@
-
-
-  exports.zip = [ [ 'wholly', 'whole' ],
+exports.zip = [ [ 'wholly', 'whole' ],
   [ 'idly', 'idle' ],
   [ 'fully', 'full' ],
   [ 'practically', 'practical' ],
@@ -18,7 +16,6 @@
   [ 'mystically', 'mystical' ],
   [ 'pornographically', 'pornographic' ],
   [ 'jolly', 'jolly' ] ]
-var helpFns = require("./helpFns");
 module.exports = (function () {
 				var res = {};
 				exports.zip.forEach(function(a) {

@@ -161,7 +161,7 @@
      [ 'claim', 'claiming', 'claimed', 'claims', 'rubber' ] ],
   noDoers: { appear: 1, happen: 1, seem: 1, try: 1, aid: 1, fail: 1, marry: 1 },
   irregularDoers: {} }
-var helpFns = require("./helpFns");exports.zip.irregulars=exports.zip.irregulars.map(function (a) {
+exports.zip.irregulars=exports.zip.irregulars.map(function (a) {
 					var types = ['infinitive','gerund','past','present','doer','future'];
 					var obj = {};
 					var r = function(s) {return s;}

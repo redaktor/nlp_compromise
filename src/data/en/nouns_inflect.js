@@ -1,3 +1,5 @@
+var _ = require("../../_");
+
 // singular nouns having irregular plurals
 
 
@@ -218,9 +220,9 @@
      'celcius',
      'kelvin',
      'hertz' ] }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 
 				exports.zip.irregulars = exports.zip.NN.concat(exports.zip.PRP, exports.zip.PP);
-				exports.zip.uncountables = exports.zip.uc.reduce(helpFns.toObj,{});
+				exports.zip.uncountables = exports.zip.uc.reduce(_.toObj,{});
 				return exports.zip;
 			})();

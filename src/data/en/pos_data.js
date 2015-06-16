@@ -1,6 +1,6 @@
+var _ = require("../../_");
 
-
-  exports.zip = { particles: 
+exports.zip = { particles: 
    [ 'together',
      'in',
      'out',
@@ -77,7 +77,7 @@
      'where\'s': 'where',
      'why\'s': 'why',
      'how\'s': 'how' } }
-var helpFns = require("./helpFns");module.exports = (function () {
-				exports.zip.particles = exports.zip.particles.reduce(helpFns.toObj, {});
+module.exports = (function () {
+				exports.zip.particles = exports.zip.particles.reduce(_.toObj, {});
 				return exports.zip;
 			})();

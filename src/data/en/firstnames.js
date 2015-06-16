@@ -1,6 +1,4 @@
-
-
-  exports.zip = { male: 
+exports.zip = { male: 
    { will: 'iam,ie,ard,is,iams',
      fred: ',erick,die,rick,dy',
      marc: 'us,,o,os,el',
@@ -274,7 +272,7 @@
      'dev0',
      'rosa~o',
      '1e' ] }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 
 				var o = {};
 				['male', 'female'].forEach(function(type) {

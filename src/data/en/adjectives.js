@@ -1,6 +1,4 @@
-
-
-  exports.zip = [ 'wrong',
+exports.zip = [ 'wrong',
   'public',
   'icy',
   'single',

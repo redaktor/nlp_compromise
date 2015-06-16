@@ -1,6 +1,6 @@
+var _ = require("../../_");
 
-
-  exports.zip = { wordnet: 
+exports.zip = { wordnet: 
    { NN: 
       [ 'ceae',
         'inae',
@@ -656,10 +656,10 @@
         'ts',
         'ns',
         's' ] } }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 
 				return {
-					wordnet: helpFns.toObjValues(exports.zip.wordnet),
-					verbs: helpFns.toObjValues(exports.zip.verbs)
+					wordnet: _.toObjValues(exports.zip.wordnet),
+					verbs: _.toObjValues(exports.zip.verbs)
 				};
 			})();

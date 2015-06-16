@@ -1,3 +1,5 @@
+var _ = require("../../_");
+
 // var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];
 // 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.
 // 1 means 'default behavior'
@@ -273,8 +275,6 @@
   'tired',
   'solid',
   'angry' ]
-var helpFns = require("./helpFns");
-var helpFns = require("./helpFns");
 module.exports = (function () {
 				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
 				exports.zip.forEach(function(_a) {
@@ -299,7 +299,7 @@ module.exports = (function () {
 						}
 					}
 				});
-				res.convertables = res.convertables.reduce(helpFns.toObj, {});
-				res.adv_donts = res.adv_donts.reduce(helpFns.toObj, {});
+				res.convertables = res.convertables.reduce(_.toObj, {});
+				res.adv_donts = res.adv_donts.reduce(_.toObj, {});
 				return res;
 			})();

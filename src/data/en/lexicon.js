@@ -408,7 +408,6 @@ var main = {};
 						}
 					}
 				}
-				
 				// conjugate all verbs: (~8ms, triples the lexicon size)
 				c = {};
 				data.verbs.forEach(function(v) {

@@ -1,6 +1,4 @@
-
-
-  exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
+exports.zip = { parents: [ 'verb', 'adjective', 'adverb', 'noun', 'glue', 'value' ],
   tags: 
    [ [ 'VB', 'verb, generic', 0 ],
      [ 'VBD', 'past-tense verb', 0, 'past' ],

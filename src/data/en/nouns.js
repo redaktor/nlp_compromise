@@ -1,6 +1,6 @@
+var _ = require("../../_");
 
-
-  exports.zip = { personBlacklist: 
+exports.zip = { personBlacklist: 
    [ 'center',
      'house',
      'park',
@@ -71,13 +71,13 @@
      [ 'our', 5 ],
      [ 'their', 6 ],
      [ 'them', 6 ] ] }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 				var _pps = {};
 				exports.zip.pps.forEach(function(a) { _pps[a[0]] = exports.zip.prps[a[1]]; });
 				return {
-					prps: exports.zip.prps.reduce(helpFns.toObj, {}),
+					prps: exports.zip.prps.reduce(_.toObj, {}),
 					pps: _pps,
-					entityBlacklist: exports.zip.entityBlacklist.reduce(helpFns.toObj, {}),
+					entityBlacklist: exports.zip.entityBlacklist.reduce(_.toObj, {}),
 					personBlacklist: exports.zip.personBlacklist,
 				}
 			})();

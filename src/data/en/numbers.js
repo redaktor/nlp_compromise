@@ -1,6 +1,4 @@
-
-
-  exports.zip = { ones: 
+exports.zip = { ones: 
    { zero: 0,
      null: 0,
      nil: 0,

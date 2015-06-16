@@ -91,7 +91,7 @@
      [ '(.i)ed$', '$1', '$1s', '$1ing', undefined, '$1er' ],
      [ '([rl])ew$', '$1ow', '$1ows', '$1owing', undefined, undefined ],
      [ '([pl])t$', '$1t', '$1ts', '$1ting', undefined, undefined ] ] }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 
 				for (var cat in exports.zip) {
 					exports.zip[cat] = exports.zip[cat].map(function(a){

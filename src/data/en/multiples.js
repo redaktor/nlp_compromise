@@ -1,6 +1,4 @@
-
-
-  exports.zip = { 'will be': 'CP',
+exports.zip = { 'will be': 'CP',
   'won\'t be': 'CP',
   'ought to': 'MD',
   'ought not to': 'MD',

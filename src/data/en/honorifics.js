@@ -1,6 +1,4 @@
-
-
-  exports.zip = [ 'jr',
+exports.zip = [ 'jr',
   'mr',
   'mrs',
   'ms',

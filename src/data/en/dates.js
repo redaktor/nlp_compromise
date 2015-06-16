@@ -1,6 +1,4 @@
-
-
-  exports.zip = { months: 
+exports.zip = { months: 
    { january: 0,
      february: 1,
      march: 2,

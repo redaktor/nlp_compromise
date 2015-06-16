@@ -1,6 +1,4 @@
-
-
-  exports.zip = { CP: 
+exports.zip = { CP: 
    [ [ 'is', 'isn\'t' ],
      [ 'am', 'ain\'t' ],
      [ 'are', 'aren\'t' ],
@@ -24,7 +22,7 @@
      [ 'lets', 'lets not' ],
      [ 'let\'s', 'let\'s not' ],
      [ 'who\'d', 'who\'d not' ] ] }
-var helpFns = require("./helpFns");module.exports = (function () {
+module.exports = (function () {
 				var res = {};
 				res.negate = {};
 				['CP', 'MD'].forEach(function(type) {

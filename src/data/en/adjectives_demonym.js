@@ -1,6 +1,4 @@
-
-
-  exports.zip = [ 'afghan',
+exports.zip = [ 'afghan',
   'albanian',
   'algerian',
   'argentine',
