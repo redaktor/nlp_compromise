@@ -198,7 +198,6 @@ exports.pos = function(text, options) {
 	}
 
 	sentences.forEach(function(sentence) {
-
 		// first, let's handle the capitalisation-of-the-first-word issue
 		var first = sentence.tokens[0];
 		if (first) {
@@ -209,7 +208,6 @@ exports.pos = function(text, options) {
 		}
 		// smart handling of contractions
 		sentence.tokens = handleContractions(sentence.tokens, false);
-
 
 		// first pass, word-level clues
 		sentence.tokens = sentence.tokens.map(function(token) {
@@ -247,7 +245,6 @@ exports.pos = function(text, options) {
 			
 			return token;
 		})
-
 
 		// second pass, wrangle results a bit
 		sentence.tokens = sentence.tokens.map(function(token, i) {
