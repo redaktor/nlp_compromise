@@ -8,14 +8,14 @@
 // see ./build.js for generating the lexica
 
 module.exports = {
-//: strong_determiners
+//: strongDeterminers
 // TODO - this might go to dictionary as flag 'strongDeterminer' (build automatically)
 // list strong noun determiners
-strong_determiners: {
+strongDeterminers: {
 	en: {the: 1, a: 1, an: 1}
 },
 	
-//: merge_pos (preprocessing)
+//: mergePos (preprocessing)
 // rules for pos merging of tokens
 /*
 	{{posReason}}: {
@@ -34,7 +34,7 @@ strong_determiners: {
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 // {{tokenMergeCount}} - optional, default: 1 - e.g. 2 to merge (this + (i+1) + (i+2)) set <1 for no merging
 */
-merge_pos: {
+mergePos: {
 	en: {
 		NN_NN: {
 			_if: function (t,n,a,i) { return (t.pos.tag === n.pos.tag && t.punctuated !== true && t.noun_capital == n.noun_capital ); }
@@ -67,11 +67,29 @@ merge_pos: {
 	// end of english
 },
 
-//: replace_pos (1st pass)
+//: ambiguousContractions
+// if any of the contractions, specified in dictionary are ambiguous (like 's = is||has) then specify
+// a simple function - (i, arr)
+// {{i}} is the index of the found first contraction word and {{arr}} is the array of sentence tokens
+
+ambiguousContractions: {
+	// choose which verb this contraction should have..
+	en: function (i, arr) {
+		// look for the next verb, and if it's past-tense (he's walked -> he has walked)
+		for(var j = i+1; j < arr.length; j++){
+			if(arr[j] && arr[j].pos && arr[j].pos.tag=='VBD'){ // past tense
+				return 'has';
+			}
+		}
+		return 'is';
+	}
+},
+
+//: replacePos (1st pass)
 // all of these matches/replaces/replacer regex objects will be used in the pos lexi pass 
 // if they match the language ('matches' finds and 'replaces' replaces by 'replacer') ...
 // native regexes, set to 0, false or null if not needed in your language
-replace_pos: { 
+replacePos: { 
 	prefix: {
 		// try to match it without a prefix - eg. outworked -> worked
 		en: {
@@ -82,7 +100,7 @@ replace_pos: {
 	}
 },
 
-//: set_pos (2nd pass)
+//: setPos (2nd pass)
 // rules for pos tagging
 /*
 	{{posReason}}: {
@@ -99,7 +117,7 @@ replace_pos: {
 // {{posTag}} - optional, default: null - if any token.pos receives a tag
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 */
-set_pos: { 
+setPos: { 
 	en: {
 		ed: {
 			tag: 'VB', // set ambiguous 'ed' endings as either verb/adjective
@@ -108,8 +126,8 @@ set_pos: {
 	}
 },
 	
-//: special_pos (3rd/last pass)
-// rules for pos exceptions (same signature like for set_pos above) ::
+//: specialPos (3rd/last pass)
+// rules for pos exceptions (same signature like for setPos above) ::
 /*
 	{{posReason}}: {
 		// condition
@@ -125,7 +143,7 @@ set_pos: {
 // {{posTag}} - optional, default: null - if any token.pos receives a tag
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 */
-special_pos: { 
+specialPos: { 
 	en: {
 		mayIsDate: {
 			tag: 'CD', // resolve ambiguous 'march','april','may' with dates

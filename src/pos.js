@@ -149,62 +149,43 @@ function lastPass(token, i, sentence) {
 }
 
 // add a 'quiet' token for contractions so we can represent their grammar
-function handleContractions(arr) {
+function handleContractions(arr, isAmbiguous) {
+	// isAmbiguous contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was'])
 	var before, after, fix;
+	var type = (isAmbiguous) ? 'ambiguousContractions' : 'contractions';
 	for (var i = 0; i < arr.length; i++) {
-		if (pos_data.contractions.hasOwnProperty(arr[i].normalised)) {
+		if (pos_data[type].hasOwnProperty(arr[i].normalised)) {
 			before = arr.slice(0, i);
 			after = arr.slice(i + 1, arr.length);
-			fix = [{
-				text: arr[i].text,
-				normalised: pos_data.contractions[arr[i].normalised][0],
-				start: arr[i].start
-			}, {
-				text: '',
-				normalised: pos_data.contractions[arr[i].normalised][1],
-				start: undefined
-			}];
-			arr = before.concat(fix);
-			arr = arr.concat(after);
-			return handleContractions(arr); // recursive
-		}
-	}
-	return arr;
-}
-
-// these contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was']
-function handleAmbiguousContractions(arr) {
-	// TODO 'been' forces 'has' ...
-	var before, after, fix;
-	for (var i = 0; i < arr.length; i++) {
-		if (pos_data.ambiguousContractions.hasOwnProperty(arr[i].normalised)) {
-			before = arr.slice(0, i);
-			after = arr.slice(i + 1, arr.length);
-			// choose which verb this contraction should have..
-			var chosen = 'is';
-			// look for the next verb, and if it's past-tense (he's walked -> he has walked)
-			for(var o=i+1; o<arr.length; o++){
-				if(arr[o] && arr[o].pos && arr[o].pos.tag=='VBD'){ // past tense
-					chosen = 'has';
-					break;
-				}
+			if (isAmbiguous && pos_rules.hasOwnProperty(type)) {
+				var chosen = pos_rules.ambiguousContractions(i, arr);
+				fix = [{
+					text: arr[i].text,
+					normalised: pos_data.ambiguousContractions[arr[i].normalised], // e.g. the 'he' part
+					start: arr[i].start,
+					pos: schema[lexicon[pos_data.ambiguousContractions[arr[i].normalised]]],
+					pos_reason:'ambiguous_contraction'
+				}, {
+					text: '',
+					normalised: chosen, //e.g. 'is', 'was' or 'have'
+					start: undefined,
+					pos: schema[lexicon[chosen]],
+					pos_reason:'silent_contraction'
+				}];
+			} else {
+				fix = [{
+					text: arr[i].text,
+					normalised: pos_data.contractions[arr[i].normalised][0],
+					start: arr[i].start
+				}, {
+					text: '',
+					normalised: pos_data.contractions[arr[i].normalised][1],
+					start: undefined
+				}];
 			}
-			fix = [{
-				text: arr[i].text,
-				normalised: pos_data.ambiguousContractions[arr[i].normalised], // the "he" part
-				start: arr[i].start,
-				pos: schema[lexicon[pos_data.ambiguousContractions[arr[i].normalised]]],
-				pos_reason:'ambiguous_contraction'
-			}, {
-				text: '',
-				normalised: chosen, //is,was,or have
-				start: undefined,
-				pos: schema[lexicon[chosen]],
-				pos_reason:'silent_contraction'
-			}];
 			arr = before.concat(fix);
 			arr = arr.concat(after);
-			return handleAmbiguousContractions(arr); // recursive
+			return handleContractions(arr, isAmbiguous); // recursive
 		}
 	}
 	return arr;
@@ -239,7 +220,7 @@ exports.pos = function(text, options) {
 			}
 		}
 		// smart handling of contractions
-		sentence.tokens = handleContractions(sentence.tokens);
+		sentence.tokens = handleContractions(sentence.tokens, false);
 
 
 		// first pass, word-level clues
@@ -290,14 +271,14 @@ exports.pos = function(text, options) {
 		})
 
 
-		// second pass, wrangle results a bit // TODO DECOUPLE
+		// second pass, wrangle results a bit
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			return setToken(token, sentence, i, pos_rules.set);
 		})
 		
-		//split-out more difficult contractions, like "he's"->["he is", "he was"]
+		// split-out more difficult contractions, like "he's"->["he is", "he was"]
 		// (now that we have enough pos data to do this)
-		sentence.tokens = handleAmbiguousContractions(sentence.tokens);
+		sentence.tokens = handleContractions(sentence.tokens, true); // ambiguous
 		
 		// third pass, seek verb or noun phrases after their signals
 		var need = null;
@@ -305,8 +286,8 @@ exports.pos = function(text, options) {
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			var next = sentence.tokens[i + 1];
 			if (token.pos) {
-				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its)  // TODO DECOUPLE
-				if ((pos_rules.strong_determiners[token.normalised]) || token.pos.tag === 'PP') {
+				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its)  // TODO - MAYBE DECOUPLE (needs language check again)
+				if ((pos_rules.strongDeterminers[token.normalised]) || token.pos.tag === 'PP') {
 					need = 'noun';
 					reason = token.pos.name;
 					return token; // proceed

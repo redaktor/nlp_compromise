@@ -8,7 +8,7 @@ exports.zip = {
 			replacer: ''
 		}
 		},
-	strong_determiners: {
+	strongDeterminers: {
 			the: 1,
 			a: 1,
 			an: 1
@@ -99,6 +99,15 @@ exports.zip = {
 			tag: 'VB',
 			_if: function (t,n,l) { return (l && l.pos.tag==='PRP' && t.pos.tag==='JJ' ); }
 		}
+		},
+	ambiguousContractions: function (i, arr) {
+		// look for the next verb, and if it's past-tense (he's walked -> he has walked)
+		for(var j = i+1; j < arr.length; j++){
+			if(arr[j] && arr[j].pos && arr[j].pos.tag=='VBD'){ // past tense
+				return 'has';
+			}
 		}
+		return 'is';
+	}
 }
 module.exports = exports.zip;

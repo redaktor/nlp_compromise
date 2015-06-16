@@ -1015,15 +1015,16 @@ function generateLanguage(lang) {
 			zip: function(lang, isZip) {
 				var o = {
 					replace: {},
-					strong_determiners: (rule.strong_determiners.hasOwnProperty(lang)) ? rule.strong_determiners[lang] : {},
-					set: (rule.set_pos.hasOwnProperty(lang)) ? rule.set_pos[lang] : {},
-					merge: (rule.merge_pos.hasOwnProperty(lang)) ? rule.merge_pos[lang] : {},
-					special: (rule.special_pos.hasOwnProperty(lang)) ? rule.special_pos[lang] : {},
+					strongDeterminers: (rule.strongDeterminers.hasOwnProperty(lang)) ? rule.strongDeterminers[lang] : {},
+					set: (rule.setPos.hasOwnProperty(lang)) ? rule.setPos[lang] : {},
+					merge: (rule.mergePos.hasOwnProperty(lang)) ? rule.mergePos[lang] : {},
+					special: (rule.specialPos.hasOwnProperty(lang)) ? rule.specialPos[lang] : {},
+					ambiguousContractions: (rule.ambiguousContractions.hasOwnProperty(lang)) ? rule.ambiguousContractions[lang] : {},
 					inspect: inspectFn
 				};
-				for (var id in rule.replace_pos) {
-					if (rule.replace_pos[id].hasOwnProperty(lang)) {
-						o.replace[id] = rule.replace_pos[id][lang];
+				for (var id in rule.replacePos) {
+					if (rule.replacePos[id].hasOwnProperty(lang)) {
+						o.replace[id] = rule.replacePos[id][lang];
 					}
 				}
 				return o;
