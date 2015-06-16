@@ -1,4 +1,4 @@
-// TODO
+// TODO - stub, WIP, not used yet
 // caching by sentence, so unchanged-sentences aren't re-parsed on keystroke -> set: function (key, val) { nlpOptions.nlp.sentences[key] = val; } (hashing ?)
 
 exports.nlpOptions = {
