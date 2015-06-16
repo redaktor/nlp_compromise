@@ -6,15 +6,17 @@ var dates = require(dPath+'dates');
 var numbers = require(dPath+'numbers');
 var firstnames = require(dPath+'firstnames');
 // .particles (possible 2nd part in a phrasal verb) and .contractions:
-var pos_data = require(dPath+'pos_data');		
 var suffixes = require(dPath+'suffixes');
-var schema = require(dPath+'schema');
+var pos_data = require(dPath+'pos_data');		
+var pos_rules = require(dPath+'pos_rules');
 var word_rules = require(dPath+'word_rules');
+var schema = require(dPath+'schema');
+var _ = require('./_');
+var cache = require('./cache');
 var parents = require('./parents');
 var tokenize = require('./methods/tokenization/tokenize');
 var Sentence = require('./sentence');
 var Section = require('./section');
-var cache = require('./cache');
 
 var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
 for (var k in numbers) {
@@ -22,6 +24,24 @@ for (var k in numbers) {
 }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
+// set token against data rules, general logic
+function setToken(t, sentence, i, rules) {
+	var IDs = Object.keys(rules);
+	var specO = {};
+	for (var j = 0; j < IDs.length; j++) {
+		specO = rules[IDs[j]];
+		if (specO && specO._if(t, sentence.tokens[i+1], sentence.tokens[i-1], i)) {
+			if (specO.set) {
+				sentence.tokens[i+(specO.set)].pos = schema[specO.tag];
+				sentence.tokens[i+(specO.set)].pos_reason = _.toReadable(IDs[j]);
+			} else {
+				t.pos = schema[specO.tag];
+				t.pos_reason = _.toReadable(IDs[j]);
+			}
+		}
+	}
+	return t;
+}
 // combine tokens, general logic
 function mergeTokens(a, b) {
 	a.text += ' ' + b.text;
@@ -33,48 +53,42 @@ function mergeTokens(a, b) {
 	a.end = a.end || b.end;
 	return a;
 }
-	
 // combine adjacent neighbours, and special cases
+// automatically from any data/{{lang}}/pos_rules
 function combineTags(sentence) {
 	var arr = sentence.tokens || [];
-	
-	function merge() {
-		arr[i + 1] = mergeTokens(arr[i], arr[i + 1]);
-		arr[i] = null;
-	}
-	function has(i, n) { // TODO - now decouple as data -> 'en'
-		var tag = arr[i].pos.tag;
-		var next = arr[i + 1];
-		if (next) {
-			if (n === 'NN_NN') { return (tag === next.pos.tag && arr[i].punctuated !== true && arr[i].noun_capital == next.noun_capital ); }
-			if (n === 'CD_CD') { return (tag === 'CD' && next.pos.tag ==='CD'); }
-			if (n === 'CD__CD') { return (tag === 'CD' && (next.normalised === 'and' || next.normalised === 'the') && arr[i + 2] && arr[i + 2].pos.tag === 'CD'); }
-			if (n === 'NNAB_NN') { return ((tag === 'NNAB' && next.pos.parent ==='noun') || (arr[i].pos.parent==='noun' && next.pos.tag==='NNAB')); }
-			if (n === 'VB_VB') { return (arr[i].normalised === 'will' && next.pos.parent === 'verb'); }
-			if (n === 'NNP_NN') { return ((tag === 'NNP' && next.pos.tag ==='NN') || (tag === 'NN' && next.pos.tag === 'NNP')); }
-			if (n === 'DT1') { return (tag=='NN' && arr[i].noun_capital && (next.normalised == 'of' || next.normalised == 'and') && arr[i + 2] && arr[i + 2].noun_capital); }
-			if (n === 'DT2') { return (arr[i].noun_capital && next.normalised == 'of' && arr[i + 2] && arr[i + 2].pos.tag == 'DT' && arr[i + 3] && arr[i + 3].noun_capital); }
+	function merge(n, count) {
+		if (!count || count === 1) {
+			arr[n + 1] = mergeTokens(arr[n], arr[n + 1]);
+			arr[n] = null;
+		} else if (count > 1) {
+			var j, k;
+			for (var i = 0; i < count; i++) {
+				j = n + i;
+				k = j+1;
+				if (arr[k]) {
+					arr[k] = mergeTokens(arr[j], arr[k]);
+					arr[j] = null;
+				}
+			}
 		}
-		return false;
 	}
-	for (var i = 0; i <= arr.length; i++) {
-		if (arr[i]) {
-			var tag = arr[i].pos.tag;
-			if (has(i, 'NN_NN') || has(i, 'CD_CD') || has(i, 'CD__CD') || has(i, 'NNAB_NN') || has(i, 'VB_VB')) {
-				merge();	
-			} else if (has(i, 'NNP_NN')) {
-				merge();
-				arr[i + 1].pos = schema['NNP'];
-			} else if (has(i, 'DT1')) {
-				merge();
-				arr[i + 2] = mergeTokens(arr[i + 1], arr[i + 2]);
-				arr[i + 1] = null;
-			} else if (has(i, 'DT2')) {
-				merge();
-				arr[i + 2] = mergeTokens(arr[i + 1], arr[i + 2]);
-				arr[i + 1] = null;
-				arr[i + 3] = mergeTokens(arr[i + 2], arr[i + 3]);
-				arr[i + 2] = null;
+	var IDs = Object.keys(pos_rules.merge);
+	for (var i = 0; i < arr.length; i++) {
+		if (arr[i+1]) {
+			for (var j = 0; j < IDs.length; j++) {
+				specO = pos_rules.merge[IDs[j]];
+				if (specO && arr[i] && specO._if(arr[i], arr[i+1], arr, i)) {
+					// merge
+					if (!specO.merge) { specO.merge = 1; }
+					if (specO.merge > 0) { merge(i, specO.merge); }
+					// set pos				
+					if (specO.set) {
+						sentence.tokens[i+(specO.set)].pos = schema[specO.tag];
+						arr[i+(specO.set)].pos_reason = _.toReadable(IDs[j]);
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -83,6 +97,7 @@ function combineTags(sentence) {
 	})
 	return sentence;
 }
+
 
 // combine phrasal verbs
 // some prepositions are clumped onto the back of a verb 'looked for', 'looks at'
@@ -106,15 +121,17 @@ function combinePhrasals(sentence) {
 	return sentence;
 }
 
-
 function lexiPass(w) {
 	if (lexicon.hasOwnProperty(w)) {
 		return schema[lexicon[w]];
 	}
-	// try to match it without a prefix - eg. outworked -> worked
-	if (w.match(/^(over|under|out|-|un|re|en).{4}/)) {
-		var attempt = w.replace(/^(over|under|out|.*?-|un|re|en)/, '');
-		return schema[lexicon[attempt]];
+	if (pos_rules.replace) {
+		for (var key in pos_rules.replace) {
+			if (w.match(pos_rules.replace[key].matches)) {
+				var attempt = w.replace(pos_rules.replace[key].replaces, pos_rules.replace[key].replacer);
+				return schema[lexicon[attempt]];
+			}
+		}
 	}
 }
 
@@ -126,73 +143,9 @@ function rulePass(w) {
 	}
 }
 
-function lastPass(token, i, sentence) {
-	var last = sentence.tokens[i - 1];
-	var next = sentence.tokens[i + 1];
-	var strong_determiners = { // TODO decouple as data -> 'en'
-		'the': 1,
-		'a': 1,
-		'an': 1
-	};
-	
-	function setPos(p, pr) {
-		token.pos = schema[p];
-		token.pos_reason = pr;
-	}
-	
-	// resolve ambiguous 'march','april','may' with dates
-	if((token.normalised=='march'||token.normalised=='april'||token.normalised=='may') && ( (next && next.pos.tag=='CD') || (last && last.pos.tag=='CD') ) ){
-		setPos('CD', 'may_is_date');
-	}
-		// if it's before a modal verb, it's a noun -> lkjsdf would
-	if (next && token.pos.parent !== 'noun' && token.pos.parent !== 'glue' && next.pos.tag === 'MD') {
-		setPos('NN', 'before_modal');
-	}
-	// if it's after the word 'will' its probably a verb/adverb
-	if (last && last.normalised == 'will' && !last.punctuated && token.pos.parent == 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP') {
-		setPos('VB', 'after_will');
-	}
-	// if it's after the word 'i' its probably a verb/adverb
-	if (last && last.normalised == 'i' && !last.punctuated && token.pos.parent == 'noun') {
-		setPos('VB', 'after_i');
-	}
-	// if it's after an adverb, it's not a noun -> quickly acked
-	// support form 'atleast he is..'
-	if (last && token.pos.parent === 'noun' && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP' && last.pos.tag === 'RB' && !last.start) {
-		setPos('VB', 'after_adverb');
-	}
-	// no consecutive, unpunctuated adjectives -> real good
-	if (next && token.pos.parent === 'adjective' && next.pos.parent === 'adjective' && !token.punctuated) {
-		setPos('RB', 'consecutive_adjectives');
-	}
-	// if it's after a determiner, it's not a verb -> the walk
-	if (last && token.pos.parent === 'verb' && strong_determiners[last.pos.normalised] && token.pos.tag != 'CP') {
-		setPos('NN', 'determiner-verb');
-	}
-	// copulas are followed by a determiner ('are a ..'), or an adjective ('are good')
-	if (last && last.pos.tag === 'CP' && token.pos.tag !== 'DT' && token.pos.tag !== 'RB' && token.pos.tag !== 'PRP' && token.pos.parent !== 'adjective' && token.pos.parent !== 'value') {
-		setPos('JJ', 'copula-adjective');
-	}
-	// copula, adverb, verb -> copula adverb adjective -> is very lkjsdf
-	if (last && next && last.pos.tag === 'CP' && token.pos.tag === 'RB' && next.pos.parent === 'verb') {
-		sentence.tokens[i + 1].pos = schema['JJ'];
-		sentence.tokens[i + 1].pos_reason = 'copula-adverb-adjective';
-	}
-	//  the city [verb] him.
-	if (next && next.pos.tag == 'PRP' && token.pos.tag !== 'PP' && token.pos.parent == 'noun' && !token.punctuated) {
-		setPos('VB', 'before_[him|her|it]');
-	}
-	// the misled worker -> misled is an adjective, not vb
-	if (last && next && last.pos.tag === 'DT' && next.pos.parent === 'noun' && token.pos.parent === 'verb') {
-		setPos('JJ', 'determiner-adjective-noun');
-	}
-	
-	// where's he gone -> gone=VB, not JJ
-	if (last && last.pos.tag==='PRP' && token.pos.tag==='JJ' ) {
-		setPos('VB', 'adjective-after-pronoun');
-	}
 
-	return token;
+function lastPass(token, i, sentence) {
+	return setToken(token, sentence, i, pos_rules.special);
 }
 
 // add a 'quiet' token for contractions so we can represent their grammar
@@ -288,6 +241,7 @@ exports.pos = function(text, options) {
 		// smart handling of contractions
 		sentence.tokens = handleContractions(sentence.tokens);
 
+
 		// first pass, word-level clues
 		sentence.tokens = sentence.tokens.map(function(token) {
 			// it has a capital and isn't a month, etc.
@@ -331,17 +285,14 @@ exports.pos = function(text, options) {
 			if (parseFloat(token.normalised)) {
 				return setPos(token, 'CD', 'parsefloat')
 			}
+			
 			return token;
 		})
 
-		// second pass, wrangle results a bit
+
+		// second pass, wrangle results a bit // TODO DECOUPLE
 		sentence.tokens = sentence.tokens.map(function(token, i) {
-			// set ambiguous 'ed' endings as either verb/adjective
-			if ( token.pos_reason!=='lexicon' && token.normalised.match(/.ed$/)) {
-				token.pos = schema['VB'];
-				token.pos_reason = 'ed';
-			}
-			return token;
+			return setToken(token, sentence, i, pos_rules.set);
 		})
 		
 		//split-out more difficult contractions, like "he's"->["he is", "he was"]
