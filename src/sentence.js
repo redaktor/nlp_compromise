@@ -167,7 +167,6 @@ exports.Sentence = function(tokens) {
     }
     return this;
   }
-
   return this;
 }
 
