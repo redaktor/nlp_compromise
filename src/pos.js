@@ -305,8 +305,8 @@ exports.pos = function(text, options) {
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			var next = sentence.tokens[i + 1];
 			if (token.pos) {
-				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its)
-				if (token.normalised == 'the' || token.normalised == 'a' || token.normalised == 'an' || token.pos.tag === 'PP') {
+				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its)  // TODO DECOUPLE
+				if ((pos_rules.strong_determiners[token.normalised]) || token.pos.tag === 'PP') {
 					need = 'noun';
 					reason = token.pos.name;
 					return token; // proceed

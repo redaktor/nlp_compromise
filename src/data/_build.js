@@ -1015,6 +1015,7 @@ function generateLanguage(lang) {
 			zip: function(lang, isZip) {
 				var o = {
 					replace: {},
+					strong_determiners: (rule.strong_determiners.hasOwnProperty(lang)) ? rule.strong_determiners[lang] : {},
 					set: (rule.set_pos.hasOwnProperty(lang)) ? rule.set_pos[lang] : {},
 					merge: (rule.merge_pos.hasOwnProperty(lang)) ? rule.merge_pos[lang] : {},
 					special: (rule.special_pos.hasOwnProperty(lang)) ? rule.special_pos[lang] : {},

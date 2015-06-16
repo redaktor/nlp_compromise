@@ -8,6 +8,12 @@
 // see ./build.js for generating the lexica
 
 module.exports = {
+//: strong_determiners
+// TODO - this might go to dictionary as flag 'strongDeterminer' (build automatically)
+// list strong noun determiners
+strong_determiners: {
+	en: {the: 1, a: 1, an: 1}
+},
 	
 //: merge_pos (preprocessing)
 // rules for pos merging of tokens

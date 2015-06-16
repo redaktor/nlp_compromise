@@ -8,6 +8,11 @@ exports.zip = {
 			replacer: ''
 		}
 		},
+	strong_determiners: {
+			the: 1,
+			a: 1,
+			an: 1
+		},
 	set: {
 			ed: {
 			tag: 'VB',
