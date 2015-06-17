@@ -1,6 +1,20 @@
 var _ = require("../../_");
 
 exports.zip = {
+	strongDeterminers: {
+			the: 1,
+			a: 1,
+			an: 1
+		},
+	ambiguousContractions: function (a, i) {
+		// look for the next verb, and if it's past-tense (he's walked -> he has walked)
+		for(var j = i+1; j < a.length; j++){
+			if(a[j] && a[j].pos && a[j].pos.tag=='VBD'){ // past tense
+				return 'has';
+			}
+		}
+		return 'is';
+	},
 	replace: {
 			prefix: {
 			matches: /^(over|under|out|-|un|re|en).{4}/,
@@ -8,45 +22,40 @@ exports.zip = {
 			replacer: ''
 		}
 		},
-	strongDeterminers: {
-			the: 1,
-			a: 1,
-			an: 1
-		},
 	set: {
 			ed: {
 			tag: 'VB',
-			_if: function (t) { return (t.pos_reason!=='lexicon' && t.normalised.match(/.ed$/)); }
+			_if: function (t,n,l) { return (t.pos_reason!=='lexicon' && t.normalised.match(/.ed$/)); }
 		}
 		},
 	merge: {
 			NN_NN: {
-			_if: function (t,n,a,i) { return (t.pos.tag === n.pos.tag && t.punctuated !== true && t.noun_capital == n.noun_capital ); }
+			_if: function (t,a,i) { return (t.pos.tag === a[i+1].pos.tag && t.punctuated !== true && t.noun_capital == a[i+1].noun_capital ); }
 		},
 			CD_CD: {
-			_if: function (t,n) { return (t.pos.tag === 'CD' && n.pos.tag ==='CD'); }
+			_if: function (t,a,i) { return (t.pos.tag === 'CD' && a[i+1].pos.tag ==='CD'); }
 		},
 			CD_w_CD: {
-			_if: function (t,n,a,i) { return (t.pos.tag === 'CD' && (n.normalised === 'and' || n.normalised === 'the') && a[i+2] && a[i+2].pos.tag === 'CD'); }
+			_if: function (t,a,i) { return (t.pos.tag === 'CD' && (a[i+1].normalised === 'and' || a[i+1].normalised === 'the') && a[i+2] && a[i+2].pos.tag === 'CD'); }
 		},
 			NNAB_NN: {
-			_if: function (t,n,a,i) { return ((t.pos.tag === 'NNAB' && n.pos.parent ==='noun') || (t.pos.parent==='noun' && n.pos.tag==='NNAB')); }
+			_if: function (t,a,i) { return ((t.pos.tag === 'NNAB' && a[i+1].pos.parent ==='noun') || (t.pos.parent==='noun' && a[i+1].pos.tag==='NNAB')); }
 		},
 			VB_VB: {
-			_if: function (t,n,a,i) { return (t.normalised === 'will' && n.pos.parent === 'verb'); }
+			_if: function (t,a,i) { return (t.normalised === 'will' && a[i+1].pos.parent === 'verb'); }
 		},
 			NNP_NN: {
 			tag: 'NNP',
 			set: 1,
-			_if: function (t,n) { return ((t.pos.tag === 'NNP' && n.pos.tag ==='NN') || (t.pos.tag === 'NN' && n.pos.tag === 'NNP')); }
+			_if: function (t,a,i) { return ((t.pos.tag === 'NNP' && a[i+1].pos.tag ==='NN') || (t.pos.tag === 'NN' && a[i+1].pos.tag === 'NNP')); }
 		},
 			DT1: {
 			merge: 2,
-			_if: function (t,n,a,i) { return (t.pos.tag=='NN' && t.noun_capital && (n.normalised == 'of' || n.normalised == 'and') && a[i+2] && a[i+2].noun_capital); }
+			_if: function (t,a,i) { return (t.pos.tag=='NN' && t.noun_capital && (a[i+1].normalised == 'of' || a[i+1].normalised == 'and') && a[i+2] && a[i+2].noun_capital); }
 		},
 			DT2: {
 			merge: 3,
-			_if: function (t,n,a,i) { return (t.noun_capital && n.normalised == 'of' && a[i+2] && a[i+2].pos.tag == 'DT' && a[i+3] && a[i+3].noun_capital); }
+			_if: function (t,a,i) { return (t.noun_capital && a[i+1].normalised == 'of' && a[i+2] && a[i+2].pos.tag == 'DT' && a[i+3] && a[i+3].noun_capital); }
 		}
 		},
 	special: {
@@ -99,15 +108,6 @@ exports.zip = {
 			tag: 'VB',
 			_if: function (t,n,l) { return (l && l.pos.tag==='PRP' && t.pos.tag==='JJ' ); }
 		}
-		},
-	ambiguousContractions: function (i, arr) {
-		// look for the next verb, and if it's past-tense (he's walked -> he has walked)
-		for(var j = i+1; j < arr.length; j++){
-			if(arr[j] && arr[j].pos && arr[j].pos.tag=='VBD'){ // past tense
-				return 'has';
-			}
 		}
-		return 'is';
-	}
 }
 module.exports = exports.zip;

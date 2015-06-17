@@ -20,6 +20,7 @@ var normalisations = require('./normalisations');
 var suffixes = require('./suffixes');
 var phrasalVerbs = require('./phrasalVerbs');
 var pos_rules = require('./pos_rules');
+var sentence_rules = require('./sentence_rules');
 var verb_rules = require('./verb_rules');
 var word_rules = require('./word_rules');
 var schema = require('./schema');
@@ -46,6 +47,7 @@ module.exports = {
   suffixes: suffixes,
   phrasalVerbs: phrasalVerbs,
   pos_rules: pos_rules,
+  sentence_rules: sentence_rules,
   verb_rules: verb_rules,
   word_rules: word_rules,
   schema: schema
