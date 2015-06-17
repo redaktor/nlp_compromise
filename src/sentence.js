@@ -1,6 +1,7 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
 if (typeof lang != 'string') lang = 'en';
+var nouns = require('./data/'+lang+'/nouns');
 var negate_data = require('./data/'+lang+'/negate_data');
 var sentence_rules = require('./data/'+lang+'/sentence_rules');
 
@@ -84,9 +85,9 @@ exports.Sentence = function(tokens) {
 	// find the 'it', 'he', 'she', and 'they' of this sentence
   // these are the words that get 'exported' to be used in other sentences
   this.referables = function(){
-    var pronouns = { he: undefined, she: undefined, they: undefined, it: undefined };
+    var pronouns = nouns.refs.reduce(function(o, w) { o[w] = undefined; return o; }, {});
     this.tokens.forEach(function(t){
-      if(t.pos.parent=="noun" && t.pos.tag!="PRP"){
+      if(t.pos.parent === 'noun' && t.pos.tag != 'PRP'){
         pronouns[t.analysis.pronoun()] = t;
       }
     })

@@ -320,9 +320,13 @@ function generateLanguage(lang) {
 			zip: function(lang, isZip) {
 				// TODO: 'it', 'one'
 				var _all = dict.NN.words.concat(dict.PP.words, dict.DT.words, dict.NNAB.words, dict.CC.words).filter(possible);
-				var _prps = dict.PRP.words.map(val);
+				var _refs = [];
+				var _prps = dict.PRP.words.map(function(o, i) {
+					if(meta(o, {key: 'referable', isZip: isZip})) { _refs.push(i); }
+					return val(o);
+				});
 				var _pps = dict.PP.words.filter(meta, {key: 'parent', noLang: 1}).map(function(o) {
-					return [o[lang], o.meta.parent];
+					return [val(o), o.meta.parent];
 				});
 				var _black = function(type) {
 					var b = _all.filter(meta, {key: type+'Blacklist', isZip: isZip}).map(val);
@@ -333,7 +337,8 @@ function generateLanguage(lang) {
 					personBlacklist: _black('person'), 
 					entityBlacklist: _black('entity'),
 					prps: _prps,
-					pps: _pps
+					pps: _pps,
+					refs: _refs
 				};
 			},
 			// expand
@@ -341,6 +346,7 @@ function generateLanguage(lang) {
 				var _pps = {};
 				exports.zip.pps.forEach(function(a) { _pps[a[0]] = exports.zip.prps[a[1]]; });
 				return {
+					refs: exports.zip.refs.map(function(i) { return exports.zip.prps[i]; }),
 					prps: exports.zip.prps.reduce(_.toObj, {}),
 					pps: _pps,
 					entityBlacklist: exports.zip.entityBlacklist.reduce(_.toObj, {}),

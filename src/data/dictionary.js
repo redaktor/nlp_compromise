@@ -2694,8 +2694,13 @@ var main = {
 			
 	//: PRP personal-pronouns
 	// uid/ref for singular/plural
+	// contractions flag
 	// contractions must be defined on top, e.g. 
 	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
+	// referable flag
+	// referable pronouns that get 'exported' to be used in other sentences
+	// some would be questionable; 
+	// e.g. we flagged 'you', 'him', 'here', 'them' here (think of dialogs)
   PRP: { 
 		title: 'personal pronoun',
 		example: 'I, you, she',
@@ -2703,21 +2708,21 @@ var main = {
 		tag: 'PRP',
 		words: [
 			{ uid: 0, en: 'i', meta: {contractions: {en: ['would', 'will', 'have', 'am']}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 1, en: 'you', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
-			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is', 'has'/*, 'was'*/]}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 1, en: 'you', meta: {referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 2, en: 'he', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 3, en: 'she', meta: {contractions: {en: ['would', 'will', 'is', 'has'/*, 'was'*/]}, referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 4, en: 'it', meta: {contractions: {en: ['will', 'is', 'has'/*, 'was'*/]}, referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
 			{ uid: 5, ref: 0, en: 'we', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ uid: 6, ref: [2,3], en: 'they', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, stopword: ['en'], entitySubstitution: ['en']} },
+			{ uid: 6, ref: [2,3], en: 'they', meta: {contractions: {en: ['would', 'will', 'have', 'are']}, referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'me', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ en: 'him', meta: {stopword: ['en'], entitySubstitution: ['en']} },
-			{ en: 'her', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ en: 'him', meta: {referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
+			{ en: 'her', meta: {referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
 			// it ;) a space for other languages
 			{ en: 'us', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ en: 'them', meta: {stopword: ['en'], entitySubstitution: ['en']} },
+			{ en: 'them', meta: {referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'thou', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'il', meta: {stopword: ['en']} },
 			{ en: 'elle', meta: {stopword: ['en']} },

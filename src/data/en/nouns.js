@@ -70,11 +70,13 @@ exports.zip = { personBlacklist:
      [ 'its', 4 ],
      [ 'our', 5 ],
      [ 'their', 6 ],
-     [ 'them', 6 ] ] }
-module.exports = (function () {
+     [ 'them', 6 ] ],
+  refs: [ 1, 2, 3, 4, 6, 8, 9, 11 ] }
+	module.exports = (function () {
 				var _pps = {};
 				exports.zip.pps.forEach(function(a) { _pps[a[0]] = exports.zip.prps[a[1]]; });
 				return {
+					refs: exports.zip.refs.map(function(i) { return exports.zip.prps[i]; }),
 					prps: exports.zip.prps.reduce(_.toObj, {}),
 					pps: _pps,
 					entityBlacklist: exports.zip.entityBlacklist.reduce(_.toObj, {}),
