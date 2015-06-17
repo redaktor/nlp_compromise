@@ -1,5 +1,7 @@
 // TODO
-// caching by sentence, so unchanged-sentences aren't re-parsed on keystroke -> set: function (key, val) { cache.nlp.sentences[key] = val; } (hashing ?)
+// derives from 'redaktor' 's fork, note by author:
+// this is very cheap. while it might be desired to maintain one set cache for all nlp instances, empty it SHOULD be per instance.
+// caching by sentence, so unchanged-sentences aren't re-parsed on keystroke -> set: function (method, key, val) { cache.nlp.sentences[key] = val; } (hashing ?)
 // caching per method -> set: function (method, key, val) { cache.nlp[method][key] = val; }
 var _ = require('./_');
 exports.cache = {};
@@ -8,8 +10,8 @@ module.exports = (function () {
 		/* TODO
 		if (options.cache.db) {
 			exports.cache = // TODO - write something for redis here	
-		} else if (hasDefine) { 
-			exports.cache = // TODO AMD Module
+		} else if (hasDefine ...) { 
+			exports.cache = // TODO AMD cache ...
 		} else 
 		*/
 		if (typeof module !== 'undefined' && module.exports) {
