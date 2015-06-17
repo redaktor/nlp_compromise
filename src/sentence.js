@@ -1,8 +1,8 @@
 // methods that hang on a parsed set of words
 // accepts parsed tokens
-
 if (typeof lang != 'string') lang = 'en';
 var negate_data = require('./data/'+lang+'/negate_data');
+var sentence_rules = require('./data/'+lang+'/sentence_rules');
 
 exports.fn = function(type, todo) {
 	if (todo === 'tokens') {
@@ -81,8 +81,8 @@ exports.Sentence = function(tokens) {
     })
   }
 
-	//find the 'it', 'he', 'she', and 'they' of this sentence
-  //these are the words that get 'exported' to be used in other sentences
+	// find the 'it', 'he', 'she', and 'they' of this sentence
+  // these are the words that get 'exported' to be used in other sentences
   this.referables = function(){
     var pronouns = { he: undefined, she: undefined, they: undefined, it: undefined };
     this.tokens.forEach(function(t){
@@ -97,74 +97,45 @@ exports.Sentence = function(tokens) {
 	// these are cheap ways to negate the meaning
 	// ('none' is ambiguous because it could mean (all or some) )
   this.negate = function() {
-		function setNegative(i, txt, norm, capitalize) {
-			this.tokens[i].text = txt;
-			this.tokens[i].normalised = norm;
-			if (capitalize) {
-				this.tokens[i].text = capitalise(this.tokens[i].text);
-			}
-			return this;
+		var o = sentence_rules.negate;
+    var t, txt, arr;
+		// loop through each term.. 
+		for (var i = 0; i < this.tokens.length; i++) {
+			t = this.tokens[i];
 			
-		}
-		function negative(i, w, inf) {
-			var t = this.tokens[i];
-			var a = [w, ((inf) ? (t.analysis.conjugate().infinitive || t.text) : t.text)];
-			this.tokens[i].text = a.join(' ');
-			this.tokens[i].normalised = this.tokens[i].text.toLowerCase();
-			return this;
-		}
-		
-    // loop through each term..
-    for (var i = 0; i < this.tokens.length; i++) {
-      var tok = this.tokens[i];
       // turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
-      if (negate_data[tok.normalised] && (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
-				return setNegative.bind(this)(i, negate_data[tok.normalised], negate_data[tok.normalised], tok.capitalised);
+      if (negate_data[t.normalised] && (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
+				this.tokens[i].text = negate_data[t.normalised];
+				this.tokens[i].normalised = negate_data[t.normalised];
+				if (t.capitalised) {
+					this.tokens[i].text = capitalise(this.tokens[i].text);
+				}
+				return this;
       }
       // find the first verb..
-      if (tok.pos.parent == 'verb') {
-        // if verb is already negative, make it not negative
-        if (tok.analysis.negative()) {
+      if (t.pos.parent == 'verb') {
+				// if verb is already negative, make it not negative
+        if (t.analysis.negative()) {
           if (this.tokens[i + 1] && this.tokens[i + 1].normalised == 'not') {
             this.tokens.splice(i + 1, 1);
           }
           return this;
         }
-        // turn future-tense 'will go' into 'won't go'
-        if (tok.normalised.match(/^will /i)) {
-					return setNegative.bind(this)(i, tok.text.replace(/^will /i, "won't "), tok.text, tok.capitalised);
-        }
-        // - INFINITIVE-
-        // 'i walk' -> 'i don't walk'
-        if (tok.analysis.form == 'infinitive' && tok.analysis.form != 'future') {
-					return negative.bind(this)(i, "don't", 1);
-        }
-        // - GERUND-
-        // if verb is gerund, 'walking' -> 'not walking'
-        if (tok.analysis.form == 'gerund') {
-					return negative.bind(this)(i, 'not');
-        }
-        // - PAST-
-        // if verb is past-tense, 'he walked' -> 'he did't walk'
-        if (tok.analysis.tense == 'past') {
-					return negative.bind(this)(i, "didn't", 1);
-        }
-        // - PRESENT-
-        // if verb is present-tense, 'he walks' -> 'he doesn't walk'
-        if (tok.analysis.tense == 'present') {
-					return negative.bind(this)(i, "doesn't", 1);
-        }
-        // - FUTURE-
-        // if verb is future-tense, 'will go' -> won't go. easy-peasy
-        if (tok.analysis.tense == 'future') {
-					var isWill = (tok.normalised == 'will');
-					var text = ((isWill) ? "won't" : tok.text.replace(/^will /i, "won't "));
-					var norm = ((isWill) ? "won't" : tok.normalised.replace(/^will /i, "won't "));
-					return setNegative.bind(this)(i, text, norm, tok.capitalised);
-        }
+				for (var id in o) {
+					if (o[id]._if && o[id]._if(t, this.tokens, i)) {
+						txt = (o[id].tense) ? (t.analysis.conjugate()[o[id].tense] || t.text) : t.text;
+						arr = (o[id].prefix) ? [o[id].prefix, txt] : [txt, o[id].suffix||''];
+						this.tokens[i].text = arr.join(' ');
+						if (t.capitalised) {
+							this.tokens[i].text = capitalise(this.tokens[i].text);
+						}
+						this.tokens[i].normalised = (t.normalised) ? t.normalised : this.tokens[i].text.toLowerCase();
+						return this;
+					}
+				}
         return this;
-      }
-    }
+			}
+		}
     return this;
   }
   return this;

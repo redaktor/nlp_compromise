@@ -100,7 +100,7 @@ function inspectFn(depth) {
 				om.push('\t', k, ': ');
 				om = om.concat(formatO(_t));
 			} else if (typeof _t === 'string') {
-				om.push('\t', k, ': ', "'", _t, "'");
+				om.push('\t', k, ': ', "'", _t.replace("'", '\\\''), "'");
 			} else {
 				om.push('\t', k, ': ', (typeof _t === 'function' || _t instanceof RegExp) ? (_t.toString()) : (_t));
 			}
@@ -1014,32 +1014,35 @@ function generateLanguage(lang) {
 			// build
 			zip: function(lang, isZip) {
 				var o = {
+					strongDeterminers: (rule.pos.strongDeterminers.hasOwnProperty(lang)) ? rule.pos.strongDeterminers[lang] : {},
+					ambiguousContractions: (rule.pos.ambiguousContractions.hasOwnProperty(lang)) ? rule.pos.ambiguousContractions[lang] : {},
 					replace: {},
-					strongDeterminers: (rule.strongDeterminers.hasOwnProperty(lang)) ? rule.strongDeterminers[lang] : {},
-					set: (rule.setPos.hasOwnProperty(lang)) ? rule.setPos[lang] : {},
-					merge: (rule.mergePos.hasOwnProperty(lang)) ? rule.mergePos[lang] : {},
-					special: (rule.specialPos.hasOwnProperty(lang)) ? rule.specialPos[lang] : {},
-					ambiguousContractions: (rule.ambiguousContractions.hasOwnProperty(lang)) ? rule.ambiguousContractions[lang] : {},
+					set: (rule.pos.set.hasOwnProperty(lang)) ? rule.pos.set[lang] : {},
+					merge: (rule.pos.merge.hasOwnProperty(lang)) ? rule.pos.merge[lang] : {},
+					special: (rule.pos.special.hasOwnProperty(lang)) ? rule.pos.special[lang] : {},
 					inspect: inspectFn
 				};
-				for (var id in rule.replacePos) {
-					if (rule.replacePos[id].hasOwnProperty(lang)) {
-						o.replace[id] = rule.replacePos[id][lang];
+				for (var id in rule.pos.replace) {
+					if (rule.pos.replace[id].hasOwnProperty(lang)) {
+						o.replace[id] = rule.pos.replace[id][lang];
 					}
 				}
 				return o;
 			}
 		},
-		/*
+		
 		{ // 21
-			id: '',
+			id: 'sentence_rules',
 			description: '',
 			// build
 			zip: function(lang, isZip) {
-				
+				return {
+					negate: (rule.sentence.negate.hasOwnProperty(lang)) ? rule.sentence.negate[lang] : {},
+					inspect: inspectFn					
+				}
 			}
 		},
-		*/
+		
 		{ // 22
 			id: 'verb_rules',
 			description: 'regex rules for verb conjugation\nused in combination with the generic "fallback" method',

@@ -8,6 +8,12 @@
 // see ./build.js for generating the lexica
 
 module.exports = {
+
+
+// RULES FOR POS TAGGING
+// --------------------v
+pos: {
+	
 //: strongDeterminers
 // TODO - this might go to dictionary as flag 'strongDeterminer' (build automatically)
 // list strong noun determiners
@@ -15,12 +21,12 @@ strongDeterminers: {
 	en: {the: 1, a: 1, an: 1}
 },
 	
-//: mergePos (preprocessing)
+//: merge (preprocessing)
 // rules for pos merging of tokens
 /*
 	{{posReason}}: {
 		// condition
-		_if: function (token, nextToken, tokenArray (sentence tokens), tokenIndex) { 
+		_if: function (token, tokenArray (sentence tokens), tokenIndex) { 
 			return {{posCondition}}
 		},
 		tag: {{posTag}},
@@ -34,34 +40,34 @@ strongDeterminers: {
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 // {{tokenMergeCount}} - optional, default: 1 - e.g. 2 to merge (this + (i+1) + (i+2)) set <1 for no merging
 */
-mergePos: {
+merge: {
 	en: {
 		NN_NN: {
-			_if: function (t,n,a,i) { return (t.pos.tag === n.pos.tag && t.punctuated !== true && t.noun_capital == n.noun_capital ); }
+			_if: function (t,a,i) { return (t.pos.tag === a[i+1].pos.tag && t.punctuated !== true && t.noun_capital == a[i+1].noun_capital ); }
 		},
 		CD_CD: {
-			_if: function (t,n) { return (t.pos.tag === 'CD' && n.pos.tag ==='CD'); }
+			_if: function (t,a,i) { return (t.pos.tag === 'CD' && a[i+1].pos.tag ==='CD'); }
 		},
 		CD_w_CD: {
-			_if: function (t,n,a,i) { return (t.pos.tag === 'CD' && (n.normalised === 'and' || n.normalised === 'the') && a[i+2] && a[i+2].pos.tag === 'CD'); }
+			_if: function (t,a,i) { return (t.pos.tag === 'CD' && (a[i+1].normalised === 'and' || a[i+1].normalised === 'the') && a[i+2] && a[i+2].pos.tag === 'CD'); }
 		},
 		NNAB_NN: {
-			_if: function (t,n,a,i) { return ((t.pos.tag === 'NNAB' && n.pos.parent ==='noun') || (t.pos.parent==='noun' && n.pos.tag==='NNAB')); }
+			_if: function (t,a,i) { return ((t.pos.tag === 'NNAB' && a[i+1].pos.parent ==='noun') || (t.pos.parent==='noun' && a[i+1].pos.tag==='NNAB')); }
 		},
 		VB_VB: {
-			_if: function (t,n,a,i) { return (t.normalised === 'will' && n.pos.parent === 'verb'); }
+			_if: function (t,a,i) { return (t.normalised === 'will' && a[i+1].pos.parent === 'verb'); }
 		},
 		NNP_NN: {
 			tag: 'NNP', set: 1,
-			_if: function (t,n) { return ((t.pos.tag === 'NNP' && n.pos.tag ==='NN') || (t.pos.tag === 'NN' && n.pos.tag === 'NNP')); }
+			_if: function (t,a,i) { return ((t.pos.tag === 'NNP' && a[i+1].pos.tag ==='NN') || (t.pos.tag === 'NN' && a[i+1].pos.tag === 'NNP')); }
 		},
 		DT1: {
 			merge: 2,
-			_if: function (t,n,a,i) { return (t.pos.tag=='NN' && t.noun_capital && (n.normalised == 'of' || n.normalised == 'and') && a[i+2] && a[i+2].noun_capital); }
+			_if: function (t,a,i) { return (t.pos.tag=='NN' && t.noun_capital && (a[i+1].normalised == 'of' || a[i+1].normalised == 'and') && a[i+2] && a[i+2].noun_capital); }
 		},
 		DT2: {
 			merge: 3,
-			_if: function (t,n,a,i) { return (t.noun_capital && n.normalised == 'of' && a[i+2] && a[i+2].pos.tag == 'DT' && a[i+3] && a[i+3].noun_capital); }
+			_if: function (t,a,i) { return (t.noun_capital && a[i+1].normalised == 'of' && a[i+2] && a[i+2].pos.tag == 'DT' && a[i+3] && a[i+3].noun_capital); }
 		},
 	}
 	// end of english
@@ -69,15 +75,15 @@ mergePos: {
 
 //: ambiguousContractions
 // if any of the contractions, specified in dictionary are ambiguous (like 's = is||has) then specify
-// a simple function - (i, arr)
-// {{i}} is the index of the found first contraction word and {{arr}} is the array of sentence tokens
+// a simple function - (a, i)
+// {{a}} is the array of sentence tokens and {{i}} is the index of the found first contraction word.
 
 ambiguousContractions: {
 	// choose which verb this contraction should have..
-	en: function (i, arr) {
+	en: function (a, i) {
 		// look for the next verb, and if it's past-tense (he's walked -> he has walked)
-		for(var j = i+1; j < arr.length; j++){
-			if(arr[j] && arr[j].pos && arr[j].pos.tag=='VBD'){ // past tense
+		for(var j = i+1; j < a.length; j++){
+			if(a[j] && a[j].pos && a[j].pos.tag=='VBD'){ // past tense
 				return 'has';
 			}
 		}
@@ -85,11 +91,13 @@ ambiguousContractions: {
 	}
 },
 
-//: replacePos (1st pass)
+//: replacing (1st pass)
 // all of these matches/replaces/replacer regex objects will be used in the pos lexi pass 
-// if they match the language ('matches' finds and 'replaces' replaces by 'replacer') ...
+// if they match the language. -
 // native regexes, set to 0, false or null if not needed in your language
-replacePos: { 
+// {{matches}} finds
+// {{replaces}} replaces by {{replacer}}  // ({{replaces}} is optional, defaults to {{matches}})
+replace: { 
 	prefix: {
 		// try to match it without a prefix - eg. outworked -> worked
 		en: {
@@ -100,7 +108,7 @@ replacePos: {
 	}
 },
 
-//: setPos (2nd pass)
+//: set (2nd pass)
 // rules for pos tagging
 /*
 	{{posReason}}: {
@@ -117,16 +125,16 @@ replacePos: {
 // {{posTag}} - optional, default: null - if any token.pos receives a tag
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 */
-setPos: { 
+set: { 
 	en: {
 		ed: {
 			tag: 'VB', // set ambiguous 'ed' endings as either verb/adjective
-			_if: function (t) { return (t.pos_reason!=='lexicon' && t.normalised.match(/.ed$/)); }
+			_if: function (t,n,l) { return (t.pos_reason!=='lexicon' && t.normalised.match(/.ed$/)); }
 		}
 	}
 },
 	
-//: specialPos (3rd/last pass)
+//: special (3rd/last pass)
 // rules for pos exceptions (same signature like for setPos above) ::
 /*
 	{{posReason}}: {
@@ -143,7 +151,7 @@ setPos: {
 // {{posTag}} - optional, default: null - if any token.pos receives a tag
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
 */
-specialPos: { 
+special: { 
 	en: {
 		mayIsDate: {
 			tag: 'CD', // resolve ambiguous 'march','april','may' with dates
@@ -195,6 +203,47 @@ specialPos: {
 		}
 	}
 	// end of english
+}
+
+},
+// end of POS rules
+
+
+// RULES FOR SENTENCES
+// ------------------v
+sentence: {
+	
+	//: negate
+	// rules for pos merging of tokens
+	negate: {
+		en: {
+			infinitive: {
+				prefix: "don't", // 'i walk' -> 'i don't walk'
+				tense: 'infinitive',
+				_if: function (t/*, a, i*/) { return (t.analysis.form === 'infinitive' && t.analysis.tense != 'future'); }
+			},
+			gerund: {
+				prefix: 'not', // if verb is gerund, 'walking' -> 'not walking'
+				_if: function (t) { return (t.analysis.form === 'gerund'); }
+			},
+			past: {
+				prefix: "didn't", // if verb is past-tense, 'he walked' -> 'he did't walk'
+				tense: 'infinitive',
+				_if: function (t) { return (t.analysis.tense === 'past'); }
+			},
+			present: {
+				prefix: "doesn't", // if verb is present-tense, 'he walks' -> 'he doesn't walk'
+				tense: 'infinitive',
+				_if: function (t) { return (t.analysis.tense === 'present'); }
+			},
+			future: {
+				prefix: "won't", 
+				tense: 'infinitive',
+				_if: function (t) { return (t.analysis.tense === 'future' && t.normalised.match(/will\b/)); }
+			}
+		}
+	}
+	
 },
 
 
