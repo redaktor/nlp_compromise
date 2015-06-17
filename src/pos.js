@@ -25,17 +25,14 @@ var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
 // set token against data rules, general logic
 function setToken(t, sentence, i, rules) {
-	var IDs = Object.keys(rules);
-	var specO = {};
-	for (var j = 0; j < IDs.length; j++) {
-		specO = rules[IDs[j]];
-		if (specO && specO._if(t, sentence.tokens[i+1], sentence.tokens[i-1], i)) {
-			if (specO.set) {
-				sentence.tokens[i+(specO.set)].pos = schema[specO.tag];
-				sentence.tokens[i+(specO.set)].pos_reason = _.toReadable(IDs[j]);
+	for (var id in rules) {
+		if (rules[id] && rules[id]._if && rules[id]._if(t, sentence.tokens[i+1], sentence.tokens[i-1], i)) {
+			if (rules[id].set) {
+				sentence.tokens[i+(rules[id].set)].pos = schema[rules[id].tag];
+				sentence.tokens[i+(rules[id].set)].pos_reason = _.toReadable(id);
 			} else {
-				t.pos = schema[specO.tag];
-				t.pos_reason = _.toReadable(IDs[j]);
+				t.pos = schema[rules[id].tag];
+				t.pos_reason = _.toReadable(id);
 			}
 		}
 	}
@@ -68,19 +65,18 @@ function combineTags(sentence) {
 			}
 		}
 	}
-	var IDs = Object.keys(pos_rules.merge);
 	for (var i = 0; i < arr.length; i++) {
 		if (arr[i+1]) {
-			for (var j = 0; j < IDs.length; j++) {
-				specO = pos_rules.merge[IDs[j]];
-				if (specO && arr[i] && specO._if(arr[i], arr[i+1], arr, i)) {
+			for (var id in pos_rules.merge) {
+				specO = pos_rules.merge[id];
+				if (specO && arr[i] && specO._if && specO._if(arr[i], arr, i)) {
 					// merge
 					if (!specO.merge) { specO.merge = 1; }
 					if (specO.merge > 0) { merge(i, specO.merge); }
 					// set pos				
 					if (specO.set) {
 						sentence.tokens[i+(specO.set)].pos = schema[specO.tag];
-						arr[i+(specO.set)].pos_reason = _.toReadable(IDs[j]);
+						arr[i+(specO.set)].pos_reason = _.toReadable(id);
 					}
 					break;
 				}
@@ -121,7 +117,8 @@ function lexiPass(w) {
 	if (pos_rules.replace) {
 		for (var key in pos_rules.replace) {
 			if (w.match(pos_rules.replace[key].matches)) {
-				var attempt = w.replace(pos_rules.replace[key].replaces, pos_rules.replace[key].replacer);
+				var repl = (pos_rules.replace[key].hasOwnProperty('replaces')) ? 'replaces' : 'matches';
+				var attempt = w.replace(pos_rules.replace[key][repl], pos_rules.replace[key].replacer);
 				return schema[lexicon[attempt]];
 			}
 		}
@@ -148,7 +145,7 @@ function handleContractions(arr, isAmbiguous) {
 			before = arr.slice(0, i);
 			after = arr.slice(i + 1, arr.length);
 			if (isAmbiguous && pos_rules.hasOwnProperty(type)) {
-				var chosen = pos_rules.ambiguousContractions(i, arr);
+				var chosen = pos_rules.ambiguousContractions(arr, i);
 				fix = [{
 					text: arr[i].text,
 					normalised: pos_data.ambiguousContractions[arr[i].normalised], // e.g. the 'he' part
