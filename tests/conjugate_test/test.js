@@ -1,7 +1,8 @@
 //test verb conjugation data.
 //conjugate every tense to every tense, for every verb, and find patterns in the errors
-var data = require("./data").data
-var nlp = require("../../index")
+var data = require("./data").data;
+var NLP = require("../../index");
+var nlp = new NLP();
 
 types = [
   "infinitive",

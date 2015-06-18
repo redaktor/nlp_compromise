@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 //a wrapper to allow the library to be used as a shell command
 'use strict';
-var nlp = require('../index');
+var NLP = require('../index');
+var nlp = new NLP();
 var method = process.argv[2];
 
 var txt = process.argv.slice(3, process.argv.length).join(" ");

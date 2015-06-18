@@ -1,8 +1,9 @@
 //this soft-test measures changes in pos using reference text from wikipedia
 //it prints-out a nice diff of changes in the current nlp.pos()
-var texts = require("./texts")
-var latest = require("./latest")
-var nlp = require("../../index")
+var texts = require("./texts");
+var latest = require("./latest");
+var NLP = require("../../index");
+var nlp = new NLP();
 
 function compare_to_latest() {
   console.log("comparing results..")

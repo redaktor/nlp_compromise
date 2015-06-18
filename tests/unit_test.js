@@ -2,7 +2,8 @@ var TIME=true
 
 //load in methods if using node, otherwise assume
 if (typeof module !== "undefined" && module.exports) {
-  var nlp = require("../index")
+  var NLP = require("../index");
+	var nlp = new NLP();
 } else {
   exports = {} //for clientside
 }
