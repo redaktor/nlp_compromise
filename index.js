@@ -1,47 +1,54 @@
-// nlp_comprimise by @spencermountain  in 2014
+/**
+ * nlp_comprimise by @spencermountain in 2014
+ * a Natural-Language-Processing library in Javascript, small-enough for the browser, and quick-enough to run on keypress -
+ * it does tons of clever things. it's smaller than jquery, and scores 86% on the Penn treebank.
+ * @module index
+ * @param {object} options
+ * @returns {object}
+ * @summary Natural-Language-Processing library in .js
+ */
 
 // most files are self-contained modules that optionally export for nodejs
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
-// init cache 1st
+// let's init cache 1st
 var cache = require('./src/cache');
 // parents (word types) and methods
-var parents = require("./src/parents");
-var methods = require("./src/methods");
+var parents = require('./src/parents');
+var methods = require('./src/methods');
 // part of speech tagging
 var pos = require('./src/pos');
 // named_entity_recognition
 var spot = require('./src/spot');
 
-// API
-exports.nlp = {	
-  noun: parents.noun,
-  adjective: parents.adjective,
-  verb: parents.verb,
-  adverb: parents.adverb,
-  value: parents.value,
-
-  sentences: methods.sentence_parser,
-  ngram: methods.ngram,
-  tokenize: methods.tokenize,
-  americanize: methods.americanize,
-  britishize: methods.britishize,
-  syllables: methods.syllables,
-  normalize: methods.normalize.normalize,
-  denormalize: methods.normalize.denormalize,
-  pos: pos,
-  spot: spot,
-	
-	destroy: function() {
+/** nlp API */
+exports.nlp = function(options) {
+  this.pos = pos;
+  this.spot = spot;
+  this.adjective = parents.adjective;
+  this.adverb = parents.adverb;
+  this.noun = parents.noun;
+  this.value = parents.value;
+  this.verb = parents.verb;
+  this.glue = parents.glue;
+  this.sentences = methods.sentence_parser;
+  this.ngram = methods.ngram;
+  this.tokenize = methods.tokenize;
+  this.americanize = methods.americanize;
+  this.britishize = methods.britishize;
+  this.syllables = methods.syllables;
+  this.normalize = methods.normalize.normalize;
+  this.denormalize = methods.normalize.denormalize;
+	this.destroy = function() {
 		cache.empty();	
 	}
+	return this;
 }
 
 // export it for client-side
-if ((!module || !module.exports) && typeof window !== "undefined") { // TODO - is this right?
+if ((!module || !module.exports) && typeof window !== 'undefined') { // TODO - is this right?
   window.nlp = exports.nlp;
 }
-
 
 // export it for server-side
 module.exports = exports.nlp;
