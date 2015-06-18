@@ -1,5 +1,8 @@
-//somone who does this present-tense verb
-//turn 'walk' into 'walker'
+/**
+ * somone who does this present-tense verb: 
+ * turn 'walk' into 'walker'
+ * @module src/parents/verb/conjugate/to_doer
+ */
 
 if (typeof lang != 'string') lang = 'en';
 var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');

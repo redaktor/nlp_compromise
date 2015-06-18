@@ -1,4 +1,8 @@
-// turn 'quick' into 'quicker'
+/**
+ * adjective to comparative: 
+ * turn 'quick' into 'quicker'
+ * @module src/parents/adjective/to_comparative
+ */
 if (typeof lang != 'string') var lang = 'en';
 var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 var cache = require('../../../cache');

@@ -1,5 +1,8 @@
-// split a string into 'words' - as intended to be most helpful for this library.
-
+/**
+ * split a string into 'words' - as intended to be most helpful for this library.
+ *
+ * @module src/methods/tokenization/tokenize
+ */
 if (typeof lang != 'string') lang = 'en';
 var multiples = require('../../data/'+lang+'/multiples');
 var sentence_parser = require('./sentence');
@@ -11,7 +14,7 @@ var multi_words = Object.keys(multiples).map(function(m) {
 
 function normalise (str) {
 	// TODO - does it handle all european languages?
-	if (!str) { return "" }
+	if (!str) { return ''; }
 	str = str.toLowerCase();
 	str = str.replace(/[,\.!:;\?\(\)]/, '');
 	// single curly quotes

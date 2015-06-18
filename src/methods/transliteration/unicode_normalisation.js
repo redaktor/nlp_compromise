@@ -1,36 +1,40 @@
-// a hugely-ignorant, and widely subjective transliteration of latin, cryllic, greek unicode characters to english ascii.
-//http://en.wikipedia.org/wiki/List_of_Unicode_characters
-//https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
-
+/**
+ * a hugely-ignorant, and widely subjective transliteration 
+ * of latin, cryllic, greek unicode characters to english ascii.
+ * http://en.wikipedia.org/wiki/List_of_Unicode_characters
+ * https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
+ *
+ * @module src/methods/transliteration/unicode_normalisation
+ */
 if (typeof lang != 'string') lang = 'en';
 var normalisations = require('../../data/'+lang+'/'+'normalisations');
 
 var normalize = function(str, options) {
-	options = options || {}
-	options.percentage = options.percentage || 50
+	options = options || {};
+	options.percentage = options.percentage || 50;
 	var arr = str.split('').map(function(s) {
-		var r = Math.random() * 100
+		var r = Math.random() * 100;
 		if (normalisations.normaler[s] && r < options.percentage) {
-			return normalisations.normaler[s] || s
+			return normalisations.normaler[s] || s;
 		} else {
-			return s
+			return s;
 		}
 	})
-	return arr.join('')
+	return arr.join('');
 }
 
 var denormalize = function(str, options) {
-	options = options || {}
-	options.percentage = options.percentage || 50
+	options = options || {};
+	options.percentage = options.percentage || 50;
 	var arr = str.split('').map(function(s) {
-		var r = Math.random() * 100
+		var r = Math.random() * 100;
 		if (normalisations.greek[s] && r < options.percentage) {
-			return normalisations.greek[s] || s
+			return normalisations.greek[s] || s;
 		} else {
-			return s
+			return s;
 		}
 	})
-	return arr.join('')
+	return arr.join('');
 }
 
 

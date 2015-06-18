@@ -1,8 +1,11 @@
-// TODO - localize 'of|in|by|for' use
-// converts nouns from plural and singular, and viceversases
+/**
+ * converts nouns from plural and singular, and viceversases
+ * @module src/parents/noun/conjugate/inflect
+ */
 // some regex borrowed from pksunkara/inflect
 // https://github.com/pksunkara/inflect/blob/master/lib/defaults.js
 
+// TODO - localize 'of|in|by|for' use DECOUPLE
 if (typeof lang != 'string') lang = 'en';
 var nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
 var cache = require('../../../cache');

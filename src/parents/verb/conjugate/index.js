@@ -1,9 +1,9 @@
-// parents/verb/conjugate
-// turn a verb into its other grammatical forms.
-
+/**
+ * turn a verb into its other grammatical forms.
+ * @module src/parents/verb/conjugate/index
+ */
 // TODO - https://www.ego4u.de/de/cram-up/grammar/past-perfect-progressive
 // also: 'Had he been' (?) pos ...
-
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../../data/'+lang+'/';
 var suffixes = require(dPath+'suffixes');

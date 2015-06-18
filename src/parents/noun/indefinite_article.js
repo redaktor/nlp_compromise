@@ -1,5 +1,8 @@
-// TODO - localize
-// chooses an indefinite aricle 'a/an' for a word
+/**
+ * chooses an indefinite aricle 'a/an' for a word
+ * @module src/parents/noun/indefinite_article
+ */
+// TODO - localize DECOUPLE
 module.exports = function(str) {
 	if (!str) {return null}
 	var irregulars = {

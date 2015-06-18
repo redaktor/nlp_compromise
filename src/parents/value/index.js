@@ -1,4 +1,7 @@
-// wrapper for value's methods
+/**
+ * wrapper module for value's methods
+ * @module src/parents/value/index
+ */
 if (typeof lang != 'string') lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var dates = require('../../data/'+lang+'/dates');

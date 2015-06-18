@@ -1,4 +1,8 @@
-// convert cute to cuteness
+/**
+ * adjective to noun: 
+ * convert cute to cuteness
+ * @module src/parents/adjective/to_noun
+ */
 if (typeof lang != 'string') var lang = 'en';
 var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 var cache = require('../../../cache');

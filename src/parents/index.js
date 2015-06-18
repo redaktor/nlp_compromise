@@ -1,5 +1,7 @@
-// Parents are classes for each main part of speech, with appropriate methods
-
+/**
+ * parents are classes for each main part of speech, with appropriate methods
+ * @module src/parents/index
+ */
 var Adjective = require('./adjective');
 var Noun = require('./noun');
 var Adverb = require('./adverb');
@@ -11,7 +13,8 @@ exports.main = {
     return new Adjective(str, next, last, token);
   },
   noun: function(str, next, last, token) {
-    return new Noun(str, next, last, token, this);
+		//console.log( this );
+    return new Noun(str, next, last, token);
   },
   adverb: function(str, next, last, token) {
     return new Adverb(str, next, last, token);

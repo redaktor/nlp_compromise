@@ -1,14 +1,16 @@
-// converts spoken numbers into integers  'fifty seven point eight' -> 57.8
-//
-// Spoken numbers take the following format
-// [sixty five] (thousand) [sixty five] (hundred) [sixty five]
-// aka: [one/teen/ten] (multiple) [one/teen/ten] (multiple) ...
-// combile the [one/teen/ten]s as 'current_sum', then multiply it by its following multiple
-// multiple not repeat
-
-// these sets of numbers each have different rules
-// [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so are ignored
-// var decimal_multiple={'tenth':0.1, 'hundredth':0.01, 'thousandth':0.001, 'millionth':0.000001,'billionth':0.000000001};
+/**
+ * converts spoken numbers into integers
+ * e.g. 'fifty seven point eight' -> 57.8
+ *
+ * Spoken numbers take the following format
+ * [sixty five] (thousand) [sixty five] (hundred) [sixty five]
+ * aka: [one/teen/ten] (multiple) [one/teen/ten] (multiple) ...
+ * combine the [one/teen/ten]s as 'current_sum', then multiply it by its following multiple
+ *
+ * these sets of numbers each have different rules
+ * [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so ignore
+ * @module src/parents/value/to_number
+ */
 var numbers = require('../../data/'+lang+'/numbers');
 
 module.exports = function(s) {

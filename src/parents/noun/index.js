@@ -1,13 +1,15 @@
-// wrapper for noun's methods
-
+/**
+ * wrapper module for noun's methods
+ * @module src/parents/noun/index
+ */
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
-var inflect = require('./conjugate/inflect');
-var indefinite_article = require('./indefinite_article');
 var schema = require(dPath+'schema');
 var firstnames = require(dPath+'firstnames');
 var honorifics = require(dPath+'honorifics');
 var nouns = require(dPath+'nouns');
+var inflect = require('./conjugate/inflect');
+var indefinite_article = require('./indefinite_article');
 	
 module.exports = function(str, sentence, word_i) {
   var the = this;

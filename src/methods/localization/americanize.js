@@ -1,6 +1,9 @@
-// convert british spellings into american ones
-// built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
-
+/**
+ * convert british spellings into american ones
+ * built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
+ *
+ * @module src/methods/localization/americanize
+ */
 module.exports = function (str) {
   var patterns = [
     // ise -> ize

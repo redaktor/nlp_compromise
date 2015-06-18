@@ -1,6 +1,7 @@
-// generates properly-formatted dates from free-text date forms
-// by spencer kelly 2014
-
+/**
+ * generates properly-formatted dates from free-text date forms
+ * @module src/parents/value/date_extractor
+ */
 // TODO - the regexes are valid for many languages - localize only 'linking words'
 if (typeof lang != 'string') lang = 'en';
 var dates = require('../../data/'+lang+'/dates');

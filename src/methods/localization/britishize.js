@@ -1,7 +1,10 @@
-// convert american spellings into british ones
-// built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
-// (some patterns are only safe to do in one direction)
-
+/**
+ * convert american spellings into british ones
+ * built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
+ * (some patterns are only safe to do in one direction)
+ *
+ * @module src/methods/localization/britishize
+ */
 module.exports = function (str) {
   var patterns = [
     // ise -> ize

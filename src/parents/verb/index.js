@@ -1,6 +1,8 @@
-// wrapper for verb's methods
-// TODO - maybe i18n infinitive, present etc., goes to schema
-
+/**
+ * wrapper module for verb's methods
+ * @module src/parents/verb/index
+ */
+// TODO - maybe i18n 'infinitive', 'present' etc., goes to schema
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
 var schema = require(dPath+'schema');

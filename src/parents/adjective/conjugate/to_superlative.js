@@ -1,4 +1,8 @@
-// turn 'quick' into 'quickest'
+/**
+ * adjective to superlative: 
+ * turn 'quick' into 'quickest'
+ * @module src/parents/adjective/to_superlative
+ */
 if (typeof lang != 'string') var lang = 'en';
 var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 var cache = require('../../../cache');

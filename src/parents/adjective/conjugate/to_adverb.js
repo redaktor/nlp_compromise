@@ -1,4 +1,8 @@
-// turn 'quick' into 'quickly'
+/**
+ * adjective to adverb: 
+ * turn 'quick' into 'quickly'
+ * @module src/parents/adjective/to_adverb
+ */
 if (typeof lang != 'string') var lang = 'en';
 var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
 var cache = require('../../../cache');

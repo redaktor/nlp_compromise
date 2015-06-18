@@ -1,4 +1,7 @@
-// wrapper for Adjective's methods
+/**
+ * wrapper module for adjective's methods
+ * @module src/parents/adjective/index
+ */
 if (typeof lang != 'string') var lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var cache = require('../../cache');

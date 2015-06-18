@@ -1,10 +1,13 @@
-//split a string into all possible parts
-
+/**
+ * split a string into all possible parts
+ *
+ * @module src/methods/tokenization/ngram
+ */
 module.exports = function (text, options) {
-  options = options || {}
+  options = options || {};
   var min_count = options.min_count || 1; // minimum hit-count
   var max_size = options.max_size || 5; // maximum gram count
-  var REallowedChars = /[^a-zA-Z'\-]+/g; //Invalid characters are replaced with a whitespace
+  var REallowedChars = /[^a-zA-Z'\-]+/g; // Invalid characters are replaced with a whitespace
   var i, j, k, textlen, s;
   var keys = [null];
   var results = [];
@@ -13,7 +16,7 @@ module.exports = function (text, options) {
     keys.push({});
   }
   // clean the text
-  text = text.replace(REallowedChars, " ").replace(/^\s+/, "").replace(/\s+$/, "");
+  text = text.replace(REallowedChars, ' ').replace(/^\s+/, '').replace(/\s+$/, '');
   text = text.toLowerCase()
   // Create a hash
   text = text.split(/\s+/);
@@ -22,7 +25,7 @@ module.exports = function (text, options) {
     keys[1][s] = (keys[1][s] || 0) + 1;
     for (j = 2; j <= max_size; j++) {
       if (i + j <= textlen) {
-        s += " " + text[i + j - 1];
+        s += ' ' + text[i + j - 1];
         keys[j][s] = (keys[j][s] || 0) + 1;
       } else {
         break
@@ -37,9 +40,9 @@ module.exports = function (text, options) {
     for (i in key) {
       if (key.hasOwnProperty(i) && key[i] >= min_count) {
         results[k].push({
-          "word": i,
-          "count": key[i],
-          "size": k
+          'word': i,
+          'count': key[i],
+          'size': k
         })
       }
     }
@@ -56,5 +59,5 @@ module.exports = function (text, options) {
   return results
 }
 
-// s = ngram("i really think that we all really think it's all good")
+// s = ngram('i really think that we all really think it's all good')
 // console.log(s)

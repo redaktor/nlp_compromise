@@ -1,6 +1,10 @@
-// (Rule-based sentence boundary segmentation) - chop given text into its proper sentences.
-// Ignore periods/questions/exclamations used in acronyms/abbreviations/numbers, etc.
-// @spencermountain 2015 MIT
+/**
+ * rule-based sentence boundary segmentation - 
+ * chop given text into its proper sentences.
+ * ignore periods/questions/exclamations used in acronyms/abbreviations/numbers, etc.
+ *
+ * @module src/methods/tokenization/sentence
+ */
 module.exports = function(text) {
 	if (typeof lang != 'string') lang = 'en';
 	var dPath = '../../data/'+lang+'/';
@@ -23,9 +27,9 @@ module.exports = function(text) {
   var chunks_length = chunks.length;
   for (i = 0; i < chunks_length; i++) {
     if (chunks[i]) {
-      //trim whitespace
+      // trim whitespace
       chunks[i] = chunks[i].replace(/^\s+|\s+$/g, "");
-      //should this chunk be combined with the next one?
+      // should this chunk be combined with the next one?
       if (chunks[i+1] && chunks[i].match(abbrev_reg) || chunks[i].match(acronym_reg) || chunks[i].match(elipses_reg) ) {
           chunks[i + 1] = ((chunks[i]||'') + " " + (chunks[i + 1]||'')).replace(/ +/g, " ");
       } else if(chunks[i] && chunks[i].length>0){ //this chunk is a proper sentence..
@@ -34,7 +38,7 @@ module.exports = function(text) {
       }
     }
   }
-  //if we never got a sentence, return the given text
+  // if we never got a sentence, return the given text
   if (sentences.length === 0) {
     return [text];
   }

@@ -1,4 +1,7 @@
-// wrapper for Adverb's methods
+/**
+ * wrapper module for adverb's methods
+ * @module src/parents/adverb/index
+ */
 if (typeof lang != 'string') lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var cache = require('../../cache');

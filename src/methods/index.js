@@ -1,5 +1,8 @@
-// Classes for each methods
-	// tokenization
+/**
+ * methods are classes performing standalone methods
+ * @module src/methods/index
+ */
+// tokenization
 var sentence_parser = require('./tokenization/sentence');
 var tokenize = require('./tokenization/tokenize');
 var ngram = require('./tokenization/ngram');
