@@ -1,11 +1,9 @@
 // just a wrapper for text -> entities
 // most of this logic is in ./parents/noun
-var pos = require("./pos");
-
 exports.main = function(text, options) {
 	options = options || {};
 	// collect 'entities' from all nouns
-	var sentences = pos(text, options).sentences;
+	var sentences = this.pos(text, options).sentences;
 	var arr = sentences.reduce(function(arr, s) {
 		return arr.concat(s.entities(options));
 	}, []);

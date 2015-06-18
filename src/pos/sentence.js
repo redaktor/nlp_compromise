@@ -1,9 +1,13 @@
-// methods that hang on a parsed set of words
-// accepts parsed tokens
+/**
+ * methods that hang on a parsed set of words
+ * accepts parsed tokens
+ * @module src/pos/sentence
+ */
 if (typeof lang != 'string') lang = 'en';
-var nouns = require('./data/'+lang+'/nouns');
-var negate_data = require('./data/'+lang+'/negate_data');
-var sentence_rules = require('./data/'+lang+'/sentence_rules');
+var dPath = '../data/'+lang+'/';
+var nouns = require(dPath+'nouns');
+var negate_data = require(dPath+'negate_data');
+var sentence_rules = require(dPath+'sentence_rules');
 
 exports.fn = function(type, todo) {
 	if (todo === 'tokens') {

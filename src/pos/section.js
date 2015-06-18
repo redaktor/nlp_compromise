@@ -1,6 +1,8 @@
-// a section is a block of text, with an arbitrary number of sentences
-// these methods are just wrappers around the ones in sentence.js
-
+/**
+ * a section is a block of text, with an arbitrary number of sentences
+ * these methods are just wrappers around the ones in sentence.js
+ * @module src/pos/section
+ */
 exports.fn = function(type, todo) {
 	if (todo === 'reduce') {
 		return function(options) {

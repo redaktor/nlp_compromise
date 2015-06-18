@@ -1,5 +1,9 @@
+/**
+ * parts of speech tagging (POS) module.
+ * @module src/pos/index
+ */
 if (typeof lang != 'string') lang = 'en';
-var dPath = './data/'+lang+'/';
+var dPath = '../data/'+lang+'/';
 var lexicon = require(dPath+'lexicon');
 var dates = require(dPath+'dates');
 var numbers = require(dPath+'numbers');
@@ -10,10 +14,9 @@ var pos_data = require(dPath+'pos_data');
 var pos_rules = require(dPath+'pos_rules');
 var word_rules = require(dPath+'word_rules');
 var schema = require(dPath+'schema');
-var _ = require('./_');
-var cache = require('./cache');
-var parents = require('./parents');
-var tokenize = require('./methods/tokenization/tokenize');
+var _ = require('../_');
+var cache = require('../cache');
+
 var Sentence = require('./sentence');
 var Section = require('./section');
 
@@ -181,20 +184,19 @@ function handleContractions(arr, isAmbiguous) {
 ////////////////
 ///party-time//
 exports.pos = function(text, options) {
-	
+	//console.log( 'pos this', this );
 	options = options || {};
 	if (!text || !text.match(/[a-z0-9]/i)) {
 		return new Section([]);
 	}
-	var sentences = tokenize(text);
+	var sentences = this.tokenize(text);
 	
 	function setPos(token, p, pr, pIsRaw) {
 		token.pos = (pIsRaw) ? p : schema[p];
 		token.pos_reason = pr;
 		return token;
 	}
-
-	sentences.forEach(function(sentence) {
+	function sentencePos(sentence) {
 		// first, let's handle the capitalisation-of-the-first-word issue
 		var first = sentence.tokens[0];
 		if (first) {
@@ -205,7 +207,7 @@ exports.pos = function(text, options) {
 		}
 		// smart handling of contractions
 		sentence.tokens = handleContractions(sentence.tokens, false);
-
+	
 		// first pass, word-level clues
 		sentence.tokens = sentence.tokens.map(function(token) {
 			// it has a capital and isn't a month, etc.
@@ -223,7 +225,7 @@ exports.pos = function(text, options) {
 				}
 				return token;
 			}
-
+	
 			// handle punctuation like ' -- '
 			if (!token.normalised) { return setPos(token, 'UH', 'wordless_string'); }
 			// suffix pos signals from wordnet
@@ -242,7 +244,7 @@ exports.pos = function(text, options) {
 			
 			return token;
 		})
-
+	
 		// second pass, wrangle results a bit
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			return setToken(token, sentence, i, pos_rules.set);
@@ -270,7 +272,7 @@ exports.pos = function(text, options) {
 					reason = token.pos.name;
 					return token; // proceed
 				}
-
+	
 			}
 			// satisfy need on a conflict, and fix a likely error
 			if (token.pos) {
@@ -303,7 +305,7 @@ exports.pos = function(text, options) {
 			}
 			return token;
 		})
-
+	
 		// third pass, identify missing clauses, fallback to noun
 		var has = {};
 		sentence.tokens.forEach(function(token) {
@@ -318,13 +320,13 @@ exports.pos = function(text, options) {
 					has['verb'] = true;
 					return setPos(token, 'VB', 'need one verb');
 				}
-
+	
 				// fallback to a noun
 				token = setPos(token, 'NN', 'noun fallback');
 			}
 			return token;
 		})
-
+	
 		// fourth pass, error correction
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			return lastPass(token, i, sentence);
@@ -333,7 +335,10 @@ exports.pos = function(text, options) {
 		sentence.tokens = sentence.tokens.map(function(token, i) {
 			return lastPass(token, i, sentence);
 		})
-	})
+	}
+	
+	// run above for each sentence
+	sentences.forEach(sentencePos.bind(this))
 
 	// combine neighbours
 	if (!options.dont_combine) {
@@ -354,11 +359,11 @@ exports.pos = function(text, options) {
 	// add analysis on each token
 	sentences = sentences.map(function(s) {
 		s.tokens = s.tokens.map(function(token, i) {
-			token.analysis = parents[token.pos.parent](token.normalised, s, i);
+			token.analysis = this[token.pos.parent](token.normalised, s, i);
 			return token;
-		})
+		}.bind(this));
 		return s;
-	})
+	}.bind(this));
 
 	// add next-last references
 	sentences = sentences.map(function(sentence,i) {
