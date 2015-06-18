@@ -9,5 +9,4 @@ About the data folder
 It's easy.
 
 
-:lock_with_ink_pen: :exclamation:Never touch any file in the language folders (e.g. 'en', 'de') !
-
+:lock_with_ink_pen: :exclamation:Never touch any file in the language folders (e.g. 'en', 'de').
