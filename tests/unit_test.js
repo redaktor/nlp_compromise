@@ -1344,14 +1344,14 @@ exports[t] = function (test) {
   ].forEach(function (arr) {
     test.deepEqual(nlp.pos(arr[0], {}).tags(), [arr[1]], arr[0])
   })
-  //dont_combine option
+  //combine option
   test.deepEqual(nlp.pos("tony hawk walks", {
-    dont_combine: false
+    combine: 1
   }).tags(), [
     ["NNP", "VBZ"]
   ])
   test.deepEqual(nlp.pos("tony hawk walks", {
-    dont_combine: true
+    combine: false
   }).tags(), [
     ["NNP", "NN", "VBZ"]
   ])

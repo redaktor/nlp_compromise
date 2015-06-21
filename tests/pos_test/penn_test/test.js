@@ -93,7 +93,7 @@ var compare = function(mine, theirs) {
 //
 for (var i in data) {
   var mine = pos(data[i].text, {
-    dont_combine: true
+    combine: false
   }).sentences
   var theirs = data[i].pos
 

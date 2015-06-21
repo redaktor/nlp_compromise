@@ -2,6 +2,7 @@
  * nlp_comprimise by @spencermountain in 2014
  * a Natural-Language-Processing library in Javascript, small-enough for the browser, and quick-enough to run on keypress -
  * it does tons of clever things. it's smaller than jquery, and scores 86% on the Penn treebank.
+ *
  * @module index
  * @param {object} options
  * @returns {object}
@@ -11,7 +12,6 @@
 // most files are self-contained modules that optionally export for nodejs
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
-// let's init cache 1st
 var cache = require('./src/cache');
 // parents (word types) and methods
 var parents = require('./src/parents');
@@ -22,7 +22,7 @@ var pos = require('./src/pos');
 var spot = require('./src/spot');
 
 /** nlp API */
-exports.nlp = function(options) {
+exports.nlp = function(o) {
   this.pos = pos;
   this.spot = spot;
   this.adjective = parents.adjective;
@@ -49,7 +49,6 @@ exports.nlp = function(options) {
 if ((!module || !module.exports) && typeof window !== 'undefined') { // TODO - is this right?
   window.nlp = exports.nlp;
 }
-
 // export it for server-side
 module.exports = exports.nlp;
 

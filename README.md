@@ -14,6 +14,25 @@ You as a most welcome possible contributor / translator would only have to touch
 The ```dictionary```... files in /src/data. <br>
 We do the rest by running ```grunt```.
 
+And the fork is smaller and even more performant.
+We reduced duplicate code and do cache now.
+
+:point_up: Heads up!
+This fork introduces API changes soon:
+
+```js
+var nlp = new NLP();
+nlp.set('some text'); // as an alternative option
+nlp.pluralize().text() // --> "some texts"
+```
+We will add an alternative to set options here directly.
+
+and<br>
+The pos option<br>
+```dont_combine: true``` <br>
+is now<br>
+```combine: false``` <br>
+
 ####What is coming here next?
 - language detection and setting in runtime
 - further metrics as in this [proposal](https://gist.github.com/redaktor/e5866669e238221e7cef)
@@ -219,7 +238,7 @@ nlp.ngram(str, {min_count:1, max_size:5})
 // [{ word: 'she sells', count: 2, size: 2 },
 // ...
 options.min_count // throws away seldom-repeated grams. defaults to 1
-options.max_gram // prevents the result from becoming gigantic. defaults to 5
+options.max_size  // prevents the result from becoming gigantic. defaults to 5
 ```
 ### Date parsing
 ```javascript
