@@ -1,5 +1,5 @@
-// helpers
-
+// helpers - TODO DOC
+var defaultOptions = require('./_options');
 // some logic is part of dojo.lang
 // Copyright (c) 2005-2015, The Dojo Foundation
 // All rights reserved.
@@ -25,32 +25,61 @@ exports.getProp = function(/*Array*/parts, /*Boolean or Object*/create, /*Object
 	} catch(e) { }
 }
 
-module.exports = {
+exports._ = {
 	// used for factories
-	repl: function(a,s,r){
+	repl: function(a, r, s){
 		// advanced data minifying - standard
 		if (typeof a === 'undefined') {return null}
 		var std = ['&','_','#','~','!','%',';','@','0','1','2','3','4','5','6','7','8','9','>','`'];
-		if (!s && r) {
-			s = std.slice(0, r.length);
-		}
-		if (!r) {
-			r = std;
-		}
-		var _r = function(w){
+		if (!s && r) { s = std.slice(0, r.length); }
+		if (!r) { r = std; }
+		function _r(w){
 			s.forEach(function(rS, i) { w = w.replace(new RegExp(rS, 'g'), r[i]) });
 			return w;
 		}
 		return (a instanceof Array) ? a.map(_r) : _r(a);
 	},
-	replBase: function(a,s,r){
+	replBase: function(a, r, s, baseI){
 		// advanced data minifying - also replace another array element (['fantastic', '=ally'])
-		if (typeof a === 'undefined') {return null}
-		var _s = a[1].replace('=',a[0]).replace('<', a[0].slice(0,-2));
-		return [a[0], ((typeof s !== 'undefined') ? helpFns.repl(_s, s, r) : _s) ];
+		if (!(a instanceof Array)) {return null;}
+		if (!baseI) baseI = 0;
+		return a.map(function(w, i) {
+			if (typeof w != 'string') {
+				return w;
+			} else if (i === baseI) {
+				return (r||s) ? this.repl(w, r, s) : w;
+			} else if (r) {
+				var _w = w.replace('=', a[baseI]).replace('<', a[baseI].slice(0,-2));
+			} else { // do zip
+				var _w = w.replace(a[baseI], '=').replace(a[baseI].slice(0,-2), '<');
+			}
+			return (r||s) ? this.repl(_w, r, s) : _w;
+		}.bind(this));
 	},
 	
 	// helpers
+	mixOptions: function(key, options) {
+		if (!options || Object.keys(options).length<1) { return defaultOptions[key]; }
+		if (!key in defaultOptions) { defaultOptions[key] = options; }
+		return this.mix(options, defaultOptions[key]);
+	},
+	_mix: function(dest, source, copyFunc){
+		var name, s, i, empty = {};
+		for(name in source){
+			s = source[name];
+			if(!(dest.hasOwnProperty(name))){
+				dest[name] = copyFunc ? copyFunc(s) : s;
+			}
+		}        
+		return dest; // Object
+	},    
+	mix: function(dest, sources){
+		if(!dest){ dest = {}; }
+		for(var i = 1, l = arguments.length; i < l; i++){
+			this._mix(dest, arguments[i]);
+		}
+		return dest; // Object
+	},
 	toCamelCase: function(str) {
 		return this.replace(/(\-[a-z])/g, function($1){return $1.toUpperCase().replace('-','');});
 	},
@@ -102,3 +131,4 @@ module.exports = {
 		return this.setObjKey(name.split('.'), value, o);
 	}
 };
+module.exports = exports._
