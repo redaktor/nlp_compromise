@@ -18,7 +18,7 @@ And the fork is smaller and even more performant.
 We reduced duplicate code and do cache now.
 
 :point_up: Heads up!
-This fork introduces API changes soon:
+This fork introduces API changes:
 
 ```js
 var nlp = new NLP();
