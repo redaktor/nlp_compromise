@@ -25,13 +25,10 @@ var nlp = new NLP();
 nlp.set('some text'); // as an alternative option
 nlp.pluralize().text() // --> "some texts"
 ```
-We will add an alternative to set options here directly.
+[we will add an alternative to set options here directly]
 
 and<br>
-The pos option<br>
-```dont_combine: true``` <br>
-is now<br>
-```combine: false``` <br>
+The pos option ```dont_combine: true``` is now ```combine: false``` <br>
 
 ####What is coming here next?
 - language detection and setting in runtime
