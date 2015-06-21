@@ -22,8 +22,8 @@ This fork introduces API changes:
 
 ```js
 var nlp = new NLP();
-nlp.set('some text'); // as an alternative option
-nlp.pluralize().text() // --> "some texts"
+nlp.set('some text');   // soon, as an alternative option
+nlp.pluralize().text(); // --> "some texts"
 ```
 [we will add an alternative to set options here directly]
 
