@@ -11,7 +11,7 @@
  * [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so ignore
  * @module src/parents/value/to_number
  */
-var numbers = require('../../data/'+lang+'/numbers');
+var numbers = require('../../data/'+lang+'/lexicon/numbers');
 
 module.exports = function(s) {
 	var ones = numbers.ones;

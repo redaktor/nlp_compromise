@@ -4,7 +4,7 @@
  */
 if (typeof lang != 'string') lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
-var dates = require('../../data/'+lang+'/dates');
+var dates = require('../../data/'+lang+'/lexicon/dates');
 var cache = require('../../cache');
 var to_number = require('./to_number');
 var date_extractor = require('./date_extractor');

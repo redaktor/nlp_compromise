@@ -1,28 +1,22 @@
 // data index
-var multiples = require('./multiples');
-var nouns_inflect = require('./nouns_inflect');
-var nouns = require('./nouns');
-var verbs_special = require('./verbs_special');
-var verbs_conjugate = require('./verbs_conjugate');
-var verbs = require('./verbs');
-var adjectives_decline = require('./adjectives_decline');
-var adjectives_demonym = require('./adjectives_demonym');
-var adjectives = require('./adjectives');
-var adverbs_decline = require('./adverbs_decline');
-var numbers = require('./numbers');
-var dates = require('./dates');
-var honorifics = require('./honorifics');
-var abbreviations = require('./abbreviations');
-var pos_data = require('./pos_data');
-var negate_data = require('./negate_data');
-var firstnames = require('./firstnames');
-var normalisations = require('./normalisations');
-var suffixes = require('./suffixes');
-var phrasalVerbs = require('./phrasalVerbs');
-var pos_rules = require('./pos_rules');
-var sentence_rules = require('./sentence_rules');
-var verb_rules = require('./verb_rules');
-var word_rules = require('./word_rules');
+var multiples = require('./lexicon/multiples');
+var nouns_inflect = require('./nouns/inflect');
+var nouns = require('./nouns/index');
+var verbs_special = require('./verbs/special');
+var verbs_conjugate = require('./verbs/conjugate');
+var verbs = require('./verbs/index');
+var adjectives_decline = require('./adjectives/decline');
+var adjectives_demonym = require('./adjectives/demonym');
+var adjectives = require('./adjectives/index');
+var adverbs_decline = require('./adverbs/decline');
+var numbers = require('./lexicon/numbers');
+var dates = require('./lexicon/dates');
+var honorifics = require('./lexicon/honorifics');
+var abbreviations = require('./lexicon/abbreviations');
+var pos = require('./lexicon/pos');
+var negate = require('./lexicon/negate');
+var firstnames = require('./lexicon/firstnames');
+var phrasalVerbs = require('./lexicon/phrasalVerbs');
 var schema = require('./schema');
 
 module.exports = {
@@ -40,15 +34,9 @@ module.exports = {
   dates: dates,
   honorifics: honorifics,
   abbreviations: abbreviations,
-  pos_data: pos_data,
-  negate_data: negate_data,
+  pos: pos,
+  negate: negate,
   firstnames: firstnames,
-  normalisations: normalisations,
-  suffixes: suffixes,
   phrasalVerbs: phrasalVerbs,
-  pos_rules: pos_rules,
-  sentence_rules: sentence_rules,
-  verb_rules: verb_rules,
-  word_rules: word_rules,
   schema: schema
 };

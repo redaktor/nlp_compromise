@@ -5,7 +5,7 @@
  */
 if (typeof lang != 'string') lang = 'en';
 var cache = require('../../../cache');
-var adverbs_decline = require('../../../data/'+lang+'/adverbs_decline');
+var adverbs_decline = require('../../../data/'+lang+'/adverbs/decline');
 
 module.exports = function(str, lang) {
 	var cached = cache.get(str, 'to_adjective');

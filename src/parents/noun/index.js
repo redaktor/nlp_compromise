@@ -5,8 +5,8 @@
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
 var schema = require(dPath+'schema');
-var firstnames = require(dPath+'firstnames');
-var honorifics = require(dPath+'honorifics');
+var firstnames = require(dPath+'lexicon/firstnames');
+var honorifics = require(dPath+'lexicon/honorifics');
 var nouns = require(dPath+'nouns');
 var inflect = require('./conjugate/inflect');
 var indefinite_article = require('./indefinite_article');

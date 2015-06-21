@@ -6,10 +6,9 @@
 // also: 'Had he been' (?) pos ...
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../../data/'+lang+'/';
-var suffixes = require(dPath+'suffixes');
-var verbs_conjugate = require(dPath+'verbs_conjugate');
-var verb_rules = require(dPath+'verb_rules');
-var phrasalVerbs = require(dPath+'phrasalVerbs');
+var verbs_conjugate = require(dPath+'verbs/conjugate');
+var phrasalVerbs = require(dPath+'lexicon/phrasalVerbs');
+var verb_rules = require(dPath+'rules/verb');
 var schema = require(dPath+'schema');
 var cache = require('../../../cache');
 var to_doer = require('./to_doer');
@@ -19,10 +18,10 @@ function predict(w) {
 	var endsWith = function(str, suffix) {
 		return str.indexOf(suffix, str.length - suffix.length) !== -1;
 	}
-	var arr = Object.keys(suffixes.verbs);
+	var arr = Object.keys(verb_rules.suffixes);
 	for (i = 0; i < arr.length; i++) {
 		if (endsWith(w, arr[i])) {
-			return suffixes.verbs[arr[i]];
+			return verb_rules.suffixes[arr[i]];
 		}
 	}
 	return 'infinitive';
@@ -171,10 +170,10 @@ exports.verbConjugate = function(w) {
 	var predicted = predict(w) || 'infinitive';
 
 	// check against verb rules
-	l = verb_rules[predicted].length
+	l = verb_rules.conjugate[predicted].length
 	var r;
 	for (i = 0; i < l; i++) {
-		r = verb_rules[predicted][i];
+		r = verb_rules.conjugate[predicted][i];
 		if (w.match(r.reg)) {
 			obj[predicted] = w;
 			Object.keys(r.repl).forEach(function(k) {

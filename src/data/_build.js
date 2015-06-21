@@ -1,3 +1,5 @@
+// TODO - suffix and 12/13
+
 // up to date status: includes last commit d4feb704d3e7ae527566cc12dc14af01679e8798
 // of https://github.com/spencermountain/nlp_compromise
 
@@ -34,6 +36,7 @@
 
 
 /* TODO
+// DOC the {{}} stuff to real JSdoc with return types etc. ...
 // schema - maximized, readable module version
 // phrasalVerbs - maximized, readable m. version
 */
@@ -41,7 +44,9 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
-var _ = require('../_.js');
+// special util custom inspect fn (functions and regexes in obj)
+var __ = require('./_'); 
+var _ = require('../_');
 var dict = require('./dictionary');
 var name = require('./dictionaryNames');
 var rule = require('./dictionaryRules');
@@ -65,7 +70,6 @@ function setMyPath(site){
 	}
 }
 
-// TODO - could become vice-versa: a whitelist of ISO-languages ...
 var plObj = {};
 var ignores = ['uid', 'ref', 'title', 'description', 'meta'];
 for (var cat in dict) {
@@ -83,51 +87,6 @@ for (var cat in dict) {
 var possibleLanguages = Object.keys(plObj);
 var results = {main:[[]], zip:[[]]};
 
-function inspectFn(depth) {
-	// makes util.inspect logging nested objects with written functions
-	var m = ['{\n\t'];
-	var x = 0;
-	var l = Object.keys(this).length-1;
-	var level = 0; // TODO
-	function formatO(o) {
-		var om = ['{\n\t\t'];
-		var ox = 0;
-		var ol = Object.keys(o).length;
-		for (var k in o) {
-			ox++;
-			var _t = o[k];
-			if (typeof _t === 'object' && !(_t instanceof Array) && !(_t instanceof RegExp)) {
-				om.push('\t', k, ': ');
-				om = om.concat(formatO(_t));
-			} else if (typeof _t === 'string') {
-				om.push('\t', k, ': ', "'", _t.replace("'", '\\\''), "'");
-			} else {
-				om.push('\t', k, ': ', (typeof _t === 'function' || _t instanceof RegExp) ? (_t.toString()) : (_t));
-			}
-			om.push((ox < ol) ? ',\n\t\t' : '\n\t\t');
-		}
-		om.push('}');
-		return om;
-	}
-	for (var key in this) {
-		if (key != 'inspect') {
-			x++;
-			var _t = this[key];
-			if (typeof _t === 'object' && !(_t instanceof Array) && !(_t instanceof RegExp)) {
-				m.push(key, ': ');
-				m = m.concat(formatO(_t));
-			} else if (typeof _t === 'string') {
-				m.push(key, ': ', "'", _t, "'");
-			} else {
-				m.push(key, ': ', (typeof _t === 'function' || _t instanceof RegExp) ? (_t.toString()) : (_t));
-			}
-			m.push((x<l) ? ',\n\t' : '\n');
-		}
-	}
-	m.push('}');
-	return m.join('');
-}
-
 function generateLanguage(lang) {
 	if (possibleLanguages.indexOf(lang) < 0) {
 		console.log( 'Language not found:', '"'+lang+'"' );
@@ -135,6 +94,7 @@ function generateLanguage(lang) {
 	}
 	// make lang and lang/rules directory
 	try { fs.mkdirSync(path.join(MYPATH, lang)); } catch (e) {};
+	try { fs.mkdirSync(path.join(MYPATH, lang, 'lexicon')); } catch (e) {};
 	// for metrics module TODO
 	function flag(meta) {
 		// return flags compressed, like 'IAW'
@@ -223,13 +183,6 @@ function generateLanguage(lang) {
 		}
 		return false;
 	}
-	function baseRepl(w, iStr, s) {
-		w = w.replace(iStr, '=');
-		var iSl = iStr.slice(0,-2);
-		w = (iSl === '') ? w : w.replace(iSl, '<');
-		return (s) ? _.repl(w, s, 0) : w;
-	}
-
 	function allPossible() {
 		var _all = [];
 		for (var key in dict) {
@@ -253,7 +206,8 @@ function generateLanguage(lang) {
 		// sort out multiple words
 		{ // 0
 			id: 'multiples',
-			description: '',
+			folder: 'lexicon',
+			description: 'known "multiples" (words with more than one)\ne. g. "New York"',
 			// build
 			zip: function(lang, isZip) {
 				newRes(isZip);
@@ -261,20 +215,24 @@ function generateLanguage(lang) {
 				allPossibles.forEach(function(o) {
 					var v = val(o);
 					if (v.indexOf(' ') > -1) {
-						var s = (isZip) ? _.repl(v, ['at', ' ', 'united', 'new', 'in '], 0) : v;
+						var s = (isZip) ? _.repl(v, 0, ['at', ' ', 'united', 'new', 'in ']) : v;
 						res[s] = o.tag;
 					}
 				});
 				return res;
 			},
 			make: 0,
-			unzip: "_.repl(exports.zip, 0, ['at', ' ', 'united', 'new', 'in ']);"
+			unzip: "_.repl(exports.zip, ['at', ' ', 'united', 'new', 'in ']);"
 		},
 
 		// NOUN
 		{ // 1 irregulars (plural), uncountables
-			id: 'nouns_inflect',
-			description: 'singular nouns having irregular plurals',
+			id: 'inflect',
+			folder: 'nouns',
+			description: ['singular nouns having irregular plurals\n',
+										'and uncountable nouns\n',
+										'{{.irregulars}} irregular singular/plural nouns (NN, PRP, PP),\n',
+										'{{.uncountables}} uncountable nouns (NN, PRP, PP)'].join(''),
 			// zip
 			zip: function(lang, isZip) {
 				var _irregulars = [];
@@ -286,10 +244,11 @@ function generateLanguage(lang) {
 				};
 				[[dict.NN.words, dict.NNS.words], [dict.PRP.words], [dict.PP.words]].forEach(function(a, i) {
 					a[0].filter(possibleOrig).forEach(function(o) {
+						var singular = val(o);
 						a[((a[1]) ? 1 : 0)].filter(possibleRef).forEach(function(op) {
 							if (isRef(op, o)) {
-								var v = val(o);
-								var nA = (isZip) ? [v, baseRepl(op[lang], v, ['es'])] : [v, op[lang]];
+								var plural = val(op);	
+								var nA = (isZip) ? _.replBase([singular, plural], 0, ['es']) : [singular, plural];
 								res[Object.keys(res)[i]].push(nA);
 								_irregulars.push(nA);
 							}
@@ -302,7 +261,7 @@ function generateLanguage(lang) {
 			// expand
 			unzip: function() {
 				//::BROWSER::
-				var repl = function(a) { return _.replBase(a,0,['es']); }
+				var repl = function(a) { return _.replBase(a, ['es']); }
 				exports.zip.NN = exports.zip.NN.map(repl);
 				exports.zip.PRP = exports.zip.PRP.map(repl);
 				exports.zip.PP = exports.zip.PP.map(repl);
@@ -313,9 +272,16 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 2 entityBlacklist, personBlacklist, prps
-			id: 'nouns',
-			description: '',
+		{ // 2 other
+			id: 'index',
+			folder: 'nouns',
+			description: ['singular nouns having irregular plurals\n',
+										'and uncountable nouns\n',
+										'{{.refs}} PRPs that can be a reference (e.g. "she"),\n',
+										'{{.prps}} all PRP "nouns",',
+										'{{.pps}} all PP "nouns",',
+										'{{.entityBlacklist}},', // TODO doc
+										'{{.personBlacklist}}'].join(''),
 			// build
 			zip: function(lang, isZip) {
 				// TODO: 'it', 'one'
@@ -334,11 +300,11 @@ function generateLanguage(lang) {
 					return b;
 				}
 				return {
-					personBlacklist: _black('person'), 
-					entityBlacklist: _black('entity'),
+					refs: _refs,
 					prps: _prps,
 					pps: _pps,
-					refs: _refs
+					entityBlacklist: _black('entity'),
+					personBlacklist: _black('person')
 				};
 			},
 			// expand
@@ -357,8 +323,13 @@ function generateLanguage(lang) {
 
 
 		// VERB :
-		{ // 3 CP, MD, negate
-			id: 'verbs_special',
+		{ // 3 verbs - CP, MD, negate
+			id: 'special',
+			folder: 'verbs',
+			description: ['special verbs\n',
+										'{{.CP}} CP verbs,\n',
+										'{{.MD}} MD verbs,\n',
+										'{{.negate}} '].join(''),
 			description: '',
 			// compress
 			zip: function(lang, isZip) {
@@ -367,15 +338,17 @@ function generateLanguage(lang) {
 				['CP', 'MD'].forEach(function(type) {
 					dict[type].words.filter(possibleAndMulti).forEach(function(o) {
 						var hasRef = 0;
-						var v = val(o);
+						var pos = val(o);
 						dict[type].words.filter(possibleRef).forEach(function(ov) {
 							if (isRef(ov, o)) {
 								hasRef = 1;
-								res[type].push((isZip) ? [v, baseRepl(ov[lang], v, ['\'t']) ] : [v, ov[lang]]);
+								var neg = val(ov);
+								res[type].push((isZip) ? _.replBase([pos, neg], 0, ["'t"]) : [pos, neg]);
 							}
 						});
 						if (hasRef < 1 && !(o.hasOwnProperty('ref')) && !(o.hasOwnProperty('uid'))) {
-							res[type].push([v, v+' not']);
+							neg = pos+' not';
+							res[type].push([pos, neg]);
 						}
 					});
 				});
@@ -389,7 +362,7 @@ function generateLanguage(lang) {
 					res[type] = {};
 					exports.zip[type].forEach(function(a) {
 						//::BROWSER::
-						a = _.replBase(a,0,['\'t']);
+						a = _.replBase(a, ["'t"]);
 						//::
 						res[type][a[0]] = type;
 						res[type][a[1]] = type;
@@ -401,10 +374,14 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 4 irregulars, noDoers, irregularDoers
-			id: 'verbs_conjugate',
-			description: '',
-			prefix: '// types: infinitive, gerund, past, present, doer, future \n',
+		{ // 4 verbs conjugate - irregulars, noDoers, irregularDoers
+			id: 'conjugate',
+			folder: 'verbs',
+			description: ['{{.irregulars}} irregular conjuagated verbs,\n',
+										'{{.noDoers}} verbs without doers,\n',
+										'{{.irregularDoers}} with irregular doers\n',
+										'types: [infinitive, gerund, past, present, doer, future]'].join(''),
+			prefix: "var types = ['infinitive','gerund','past','present','doer','future'];",
 			// compress
 			zip: function(lang, isZip) {
 				var types = {
@@ -421,23 +398,24 @@ function generateLanguage(lang) {
 				var _noDoers = {};
 				//var irregularFlags = [];
 				dict.VBP.words.filter(possibleOrig).forEach(function(o) {
-					var v = val(o);
-					var conjugateds = (isZip) ? [_.repl(v, ['ing', 'er', 've'], 0)] : [v];
+					var inf = val(o);
+					var cs = [inf];
 					for (var type in types) {
 						var conjugated = 0;
 						dict[type].words.filter(possibleRef).forEach(function(oc) {
 							if (isRef(oc, o)) {
-								conjugated = (isZip) ? baseRepl(oc[lang], v, ['ing', 'er', 've']) : oc[lang];
+								conjugated = val(oc);
 							}
-							did(v, isZip);
+							did(inf, isZip);
 						});
-						conjugateds.push( (conjugated) ? conjugated : 0 );
+						cs.push( (conjugated) ? conjugated : 0 );
 					}
 					// check noDoer
-					if (!conjugateds[4] && (!o.hasOwnProperty('meta') || !o.meta.noDoer || o.meta.noDoer.indexOf(lang) < 0)) {
-						conjugateds.pop();
+					if (!cs[4] && (!o.hasOwnProperty('meta') || !o.meta.noDoer || o.meta.noDoer.indexOf(lang) < 0)) {
+						cs.pop();
 					}
-
+					
+					var conjugateds = (isZip) ? _.replBase(cs, 0, ['ing', 'er', 've']) : cs;
 					_irregulars.push(conjugateds);
 				});
 
@@ -458,18 +436,12 @@ function generateLanguage(lang) {
 			unzip: {
 				array: 'zip.irregulars',
 				fn: function(a) {
-					var types = ['infinitive','gerund','past','present','doer','future'];
 					var obj = {};
 					var r = function(s) {return s;}
+					//::BROWSER::
+					a = _.replBase(a, ['ing', 'er', 've']);
+					//::
 					a.forEach(function(s, i) {
-						//::BROWSER::
-						if (s && i > 0) {
-							s = s.replace('=',a[0]).replace('<', a[0].slice(0,-2));
-						}
-						if (s) {
-							s = _.repl(s, 0, ['ing', 'er', 've']);
-						}
-						//::
 						if (i > 3 && !s) {
 							exports.zip.noDoers[r(a[0])] = 1;
 						} else if (i > 3) {
@@ -484,29 +456,36 @@ function generateLanguage(lang) {
 		},
 
 		{ // 5
-			id: 'verbs',
-			description: '',
+			id: 'index',
+			folder: 'verbs',
+			description: 'some other known verbs for conjugating',
 			// build
 			zip: function(lang, isZip) {
 				var regular = rest('VBP', isZip).map(val).concat(dict.VB.words.filter(possible).map(val));
-				return (isZip) ? _.repl(JSON.stringify(regular), ['re', 'er', 'co', 'es', '","'], 0) : regular;
+				return (isZip) ? _.repl(JSON.stringify(regular), 0, ['re', 'er', 'co', 'es', '","']) : regular;
 			},
 			make: 0,
-			unzip: 'JSON.parse(_.repl(exports.zip, 0, [\'re\', \'er\', \'co\', \'es\', \'","\']));'
+			unzip: 'JSON.parse(_.repl(exports.zip, [\'re\', \'er\', \'co\', \'es\', \'","\']));'
 		},
 
 
 		// ADJECTIVE
 		//
 		{ // 6
-			id: 'adjectives_decline',
-			description: '',
-			prefix: "// var types = ['adjective', 'adverb', 'comparative', 'superlative', 'noun'];\n"+
-			"// 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.\n"+
-			"// 1 means 'default behavior'\n",
+			id: 'decline',
+			folder: 'adjectives',
+			description: ['{{.convertables}} regulars,\n',
+										'{{.adj_to_advs}} to adverbs,\n',
+										'{{.adv_donts}} having no adverb\n',
+										'{{.to_comparative}} \n',
+										'{{.to_superlative}} \n',
+										'{{.to_noun}} \n',
+										'types: [adjective, adverb, comparative, superlative, noun];\n',
+										"0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.\n",
+										"1 means 'default behavior'"].join(''),
 			// compress
 			zip: function(lang, isZip) {
-				var repJJ = function(s) { return ((typeof s === 'string') ? _.repl(s, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some'], 0) : s); }
+				var repJJ = function(s) { return ((typeof s === 'string') ? _.repl(s, 0, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some']) : s); }
 				var types = {
 					/*JJ: 'adjective',*/
 					RB: 'adverb',
@@ -597,7 +576,7 @@ function generateLanguage(lang) {
 			},
 			// browser - expand
 			unzip: function() {
-				var repJJ = function(s) { return (typeof s !== 'string') ? s : _.repl(s, 0, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some']); }
+				var repJJ = function(s) { return (typeof s !== 'string') ? s : _.repl(s, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some']); }
 				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
 				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
 				exports.zip.forEach(function(_a) {
@@ -629,13 +608,14 @@ function generateLanguage(lang) {
 		},
 
 		{ // 7
-			id: 'adjectives_demonym',
-			description: '',
+			id: 'demonym',
+			folder: 'adjectives',
+			description: 'adjective demonyms, e.g. "australian"',
 			// compress
 			zip: function(lang, isZip) {
 				var demonyms = [];
 				dict.JJ.words.filter(meta, {key: 'demonym', isZip: isZip}).forEach(function(o) {
-					demonyms.push((isZip) ? _.repl(o[lang], ['can', 'dan', 'ean', 'ian', 'ese', 'an', 'austr', 'ish'], 0) : o[lang]);
+					demonyms.push((isZip) ? _.repl(o[lang], 0, ['can', 'dan', 'ean', 'ian', 'ese', 'an', 'austr', 'ish']) : o[lang]);
 					did(o[lang], isZip);
 				});
 				return demonyms;
@@ -645,30 +625,32 @@ function generateLanguage(lang) {
 			unzip: {
 				array: 'zip',
 				fn: function(w) {
-					return _.repl(w, 0, ['can', 'dan', 'ean', 'ian', 'ese', 'an', 'austr', 'ish']);
+					return _.repl(w, ['can', 'dan', 'ean', 'ian', 'ese', 'an', 'austr', 'ish']);
 				}
 			}
 		},
 
 		{ // 8
-			id: 'adjectives',
-			description: '',
+			id: 'index',
+			folder: 'adjectives',
+			description: 'some other adjectives',
 			// build
 			zip: function(lang, isZip) {
 				var a = rest('JJ', isZip).map(val);
 				if (!isZip) return a;
-				return _.repl(JSON.stringify(a), ['ight', 'ing', 'ant', 'ent', 're', 'er', 'al', 'ed', 'ly', 'en', 'es', 'ate', '","'], 0);
+				return _.repl(JSON.stringify(a), 0, ['ight', 'ing', 'ant', 'ent', 're', 'er', 'al', 'ed', 'ly', 'en', 'es', 'ate', '","']);
 			},
 			make: 0,
 			// expand
-			unzip: 'JSON.parse(_.repl(exports.zip, 0, [\'ight\', \'ing\', \'ant\', \'ent\', \'re\', \'er\', \'al\', \'ed\', \'ly\', \'en\', \'es\', \'ate\', \'","\']));'
+			unzip: 'JSON.parse(_.repl(exports.zip, [\'ight\', \'ing\', \'ant\', \'ent\', \'re\', \'er\', \'al\', \'ed\', \'ly\', \'en\', \'es\', \'ate\', \'","\']));'
 		},
 
 
 		// ADVERB
 		{ // 9
-			id: 'adverbs_decline',
-			description: '',
+			id: 'decline',
+			folder: 'adverbs',
+			description: 'adverbs to adjectives',
 
 			// build
 			zip: function(lang, isZip) {
@@ -704,7 +686,8 @@ function generateLanguage(lang) {
 		// OTHER : numbers, dates, honorifics, abbreviations, normalisations, multiples, suffixes
 		{ // 10
 			id: 'numbers',
-			description: '',
+			folder: 'lexicon',
+			description: 'for number recognition',
 			// build
 			zip: function(lang, isZip) {
 				newRes(isZip);
@@ -727,7 +710,8 @@ function generateLanguage(lang) {
 
 		{ // 11
 			id: 'dates',
-			description: '',
+			folder: 'lexicon',
+			description: 'for date extraction',
 			// build
 			zip: function(lang, isZip) {
 				var dates = {months: {}, monthAbbrevs: {}, days: {}};
@@ -757,6 +741,7 @@ function generateLanguage(lang) {
 
 		{ // 12
 			id: 'honorifics',
+			folder: 'lexicon',
 			description: '',
 			// build
 			zip: function(lang, isZip) {
@@ -767,6 +752,7 @@ function generateLanguage(lang) {
 
 		{ // 13
 			id: 'abbreviations',
+			folder: 'lexicon',
 			description: '',
 			// build
 			zip: function(lang, isZip) {
@@ -787,8 +773,13 @@ function generateLanguage(lang) {
 		},
 
 		{ // 14
-			id: 'pos_data',
-			description: '',
+			id: 'pos',
+			folder: 'lexicon',
+			
+			description: ['data for Parts Of Speech tagging', // TODO DOC
+										'{{.particles}} ,\n',
+										'{{.contractions}} ,\n',
+										'{{.ambiguousContractions}}\n'].join(''),
 			// build
 			zip: function(lang, isZip) {
 				var res = { particles: [], cs: [], contractions: {}, ambiguousContractions: {} };
@@ -828,13 +819,14 @@ function generateLanguage(lang) {
 		},
 
 		{ // 15
-			id: 'negate_data',
-			description: '',
+			id: 'negate',
+			folder: 'lexicon',
+			description: 'the complete negate data',
 			// build
 			zip: function(lang, isZip) {
 				return dict.negate.hasOwnProperty(lang) ? dict.negate[lang] : {};
 			},
-			prefix: "var verbs_special = require('./verbs_special');\n",
+			prefix: "var verbs_special = require('../verbs/special');\n",
 			// convert it to an easier format
 			unzip: function() {
 				var negate = verbs_special.negate || {};
@@ -846,11 +838,12 @@ function generateLanguage(lang) {
 
 		{ // 16
 			id: 'firstnames',
-			description: '',
+			folder: 'lexicon',
+			description: 'first name recognition',
 			// build
 			zip: function(lang, isZip) {
 				var replN = function(w) { 
-					return _.repl(w, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia'], 0);
+					return _.repl(w, 0, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']);
 				}
 				var names = {male: {}, female: {}, ambiguous: []};
 				['male', 'female'].forEach(function(type) {
@@ -868,7 +861,7 @@ function generateLanguage(lang) {
 			unzip: function() {
 				//::BROWSER::
 				var replN = function(w) { 
-					return _.repl(w, 0, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) 
+					return _.repl(w, ['ie', 'na', 'la', 'ri', 'ne', 'ra', 'el', 'in', 'an', 'le', 'en', 'ia']) 
 				}
 				//::
 				var o = {};
@@ -894,65 +887,19 @@ function generateLanguage(lang) {
 				return o;
 			}
 		},
-
-		{ // 17
-			id: 'normalisations',
-			description: 'approximate visual (not semantic) relationship between unicode and ascii characters',
-			// compress
-			zip: function(lang, isZip) {
-				var res = {};
-				rule.normalisations.forEach(function(a){
-					if(!res.hasOwnProperty(a[1])) res[a[1]] = '';
-					res[a[1]] = res[a[1]].concat(a[0]);
-				});
-				return did(res, isZip);
-			},
-			// expand
-			unzip: function(a) {
-				var res = { normaler: {}, greek: {}	};
-				for (var normCh in exports.zip) {
-						exports.zip[normCh].split('').forEach(function(grCh){
-							res.normaler[grCh] = normCh;
-							res.greek[normCh] = grCh;
-						});
-				}
-				return res;
-			}
-		},
-
-		{ // 18
-			id: 'suffixes',
-			description: '',
-			// build
-			zip: function(lang, isZip) {
-				if (!rule.unambiguousSuffixes.hasOwnProperty(lang) || !rule.verbSuffixes.hasOwnProperty(lang)) { return; }
-				var o = {
-					wordnet: rule.unambiguousSuffixes[lang],
-					verbs: rule.verbSuffixes[lang]
-				};
-				var s = [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ];
-				return (isZip) ? _.repl(JSON.stringify(o), s, 0) : o;
-			},
-			// convert it to an easier format
-			unzip: function() {
-				//::BROWSER::
-				exports.zip = JSON.parse(_.repl(exports.zip, 0, [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ]));
-				//::
-				return {
-					wordnet: _.toObjValues(exports.zip.wordnet),
-					verbs: _.toObjValues(exports.zip.verbs)
-				};
-			}
-		},
 		
-		{ // 19
+		{ // 17
 			id: 'phrasalVerbs',
-			description: '',
-			prefix: "var schema = require('./schema');\n"+
-							"var opposite = require('./negate_data');\n"+
-							"var verbs = require('./verbs');\n"+
-							"var verbs_conjugate = require('./verbs_conjugate');\n"+
-							"var conjugate = require('../../parents/verb/conjugate');",
+			folder: 'lexicon',
+			description: ['phrasal verbs',
+										'{{.verbs}} base verbs,\n',
+										'{{.symmetric}} behaviour (references),\n',
+										'{{.asymmetric}} behaviour (references)'].join(''),
+			prefix: "var schema = require('../schema');\n"+
+							"var opposite = require('./negate');\n"+
+							"var verbs = require('../verbs');\n"+
+							"var verbs_conjugate = require('../verbs/conjugate');\n"+
+							"var conjugate = require('../../../parents/verb/conjugate');",
 			// build
 			zip: function(lang, isZip) {
 				var res = {
@@ -961,7 +908,7 @@ function generateLanguage(lang) {
 					asymmetric: {} 
 				}
 				
-				var VBPs = require('./'+lang+'/verbs_conjugate').irregulars.map(function(o){
+				var VBPs = require('./'+lang+'/verbs/conjugate').irregulars.map(function(o){
 					return o.infinitive;	
 				}).concat( require('./'+lang+'/verbs'), res.verbs );
 				
@@ -1013,20 +960,68 @@ function generateLanguage(lang) {
 				return res;
 			}
 		},
+
+		{ // 18
+			id: 'normalisations',
+			folder: 'rules',
+			description: 'approximate visual (not semantic) relationship between unicode and ascii characters',
+			// compress
+			zip: function(lang, isZip) {
+				var res = {};
+				rule.normalisations.forEach(function(a){
+					if(!res.hasOwnProperty(a[1])) res[a[1]] = '';
+					res[a[1]] = res[a[1]].concat(a[0]);
+				});
+				return did(res, isZip);
+			},
+			// expand
+			unzip: function(a) {
+				var res = { normaler: {}, greek: {}	};
+				for (var normCh in exports.zip) {
+						exports.zip[normCh].split('').forEach(function(grCh){
+							res.normaler[grCh] = normCh;
+							res.greek[normCh] = grCh;
+						});
+				}
+				return res;
+			}
+		},
+
+		{ // 19
+		// TODO = rules/verb .suffixes // TODO becomes "wordnet"
+			id: 'wordnet',
+			folder: 'rules',
+			description: 'wordnet generated suffixes',
+			// build
+			zip: function(lang, isZip) {
+				if (!rule.unambiguousSuffixes.hasOwnProperty(lang)) { return; }
+				var s = [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ];
+				return (isZip) ? _.repl(JSON.stringify(rule.unambiguousSuffixes[lang]), 0, s) : rule.unambiguousSuffixes[lang];
+			},
+			// convert it to an easier format
+			unzip: function() {
+				//::BROWSER::
+				exports.zip = JSON.parse(_.repl(exports.zip, [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ]));
+				//::
+				return _.toObjValues(exports.zip);
+			}
+		},
 		
 		{ // 20
-			id: 'pos_rules',
-			description: '',
+			id: 'pos',
+			folder: 'rules',
+			description: 'rules for Parts Of Speech tagging',
 			// build
 			zip: function(lang, isZip) {
 				var o = {
+					words: (rule.pos.words.hasOwnProperty(lang)) ? rule.pos.words[lang] : {},
 					strongDeterminers: (rule.pos.strongDeterminers.hasOwnProperty(lang)) ? rule.pos.strongDeterminers[lang] : {},
 					ambiguousContractions: (rule.pos.ambiguousContractions.hasOwnProperty(lang)) ? rule.pos.ambiguousContractions[lang] : {},
 					replace: {},
 					set: (rule.pos.set.hasOwnProperty(lang)) ? rule.pos.set[lang] : {},
 					merge: (rule.pos.merge.hasOwnProperty(lang)) ? rule.pos.merge[lang] : {},
 					special: (rule.pos.special.hasOwnProperty(lang)) ? rule.pos.special[lang] : {},
-					inspect: inspectFn
+					inspect: __.inspectFn
 				};
 				for (var id in rule.pos.replace) {
 					if (rule.pos.replace[id].hasOwnProperty(lang)) {
@@ -1034,28 +1029,44 @@ function generateLanguage(lang) {
 					}
 				}
 				return o;
+			},
+			// convert word rules to an easier format
+			unzip: function() {
+				var a = [];
+				for (var k in exports.zip.words) {
+					exports.zip.words[k].forEach(function(r){
+						a.push({
+							reg: r,
+							pos: k
+						});
+					});
+				}
+				exports.zip.words = a;
+				return exports.zip;
 			}
 		},
 		
 		{ // 21
-			id: 'sentence_rules',
-			description: '',
+			id: 'sentence',
+			folder: 'rules',
+			description: 'rules for sentences\n(currently only .negate)',
 			// build
 			zip: function(lang, isZip) {
 				return {
 					negate: (rule.sentence.negate.hasOwnProperty(lang)) ? rule.sentence.negate[lang] : {},
-					inspect: inspectFn					
+					inspect: __.inspectFn					
 				}
 			}
 		},
 		
 		{ // 22
-			id: 'verb_rules',
-			description: 'regex rules for verb conjugation\nused in combination with the generic "fallback" method',
+			id: 'verb',
+			folder: 'rules',
+			description: 'regex rules and suffixes for verb conjugation\nused in combination with the generic "fallback" method',
 			// build
 			zip: function(lang, isZip) {
-				if (!rule.verbRules.hasOwnProperty(lang)) { return; }
-				var rs = rule.verbRules[lang];
+				if (!rule.verbs.conjugate.hasOwnProperty(lang)) { return; }
+				var rs = rule.verbs.conjugate[lang];
 				if(!isZip) {
 					for (var cat in rs) {
 						rs[cat] = rs[cat].map(function(o){
@@ -1066,15 +1077,29 @@ function generateLanguage(lang) {
 						});
 					}
 				}
-				return (isZip) ? _.repl(JSON.stringify(rs), ['\\$1e', '\\$1s', '\\$1es', '\\$1ed', '\\$1ing', 'ing'], 0) : rs;
+				var o = { 
+					conjugate: (isZip) ? _.repl(JSON.stringify(rs), 0, ['\\$1e', '\\$1s', '\\$1es', '\\$1ed', '\\$1ing', 'ing']) : rs,
+					suffixes: {}
+				};
+				if (!rule.verbs.suffixes.hasOwnProperty(lang)) { 
+					return o;
+				}
+				var s = [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ];
+				o.suffixes = (isZip) ? _.repl(JSON.stringify(val(rule.verbs.suffixes)), 0, s) : val(rule.verbs.suffixes);				
+				return o;
 			},
 			// convert it to an easier format
 			unzip: function() {
 				//::BROWSER::
-				exports.zip = JSON.parse(_.repl(exports.zip, 0, ['$1e', '$1s', '$1es', '$1ed', '$1ing', 'ing']));
+				exports.zip.conjugate= JSON.parse(_.repl(exports.zip.conjugate, ['$1e', '$1s', '$1es', '$1ed', '$1ing', 'ing']));
+				exports.zip.suffixes = JSON.parse(_.repl(
+					exports.zip.suffixes, 
+					[ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ]
+				));
 				//::
-				for (var cat in exports.zip) {
-					exports.zip[cat] = exports.zip[cat].map(function(a){
+				exports.zip.suffixes = _.toObjValues(exports.zip.suffixes);
+				for (var cat in exports.zip.conjugate) {
+					exports.zip.conjugate[cat] = exports.zip.conjugate[cat].map(function(a){
 						return {
 							reg: new RegExp(a[0],'i'),
 							repl: {
@@ -1092,31 +1117,8 @@ function generateLanguage(lang) {
 		},
 
 		{ // 23
-			id: 'word_rules',
-			description: '',
-			// build
-			zip: function(lang, isZip) {
-				if (!rule.wordRules.hasOwnProperty(lang)) { return; }
-				return rule.wordRules[lang];
-			},
-			// convert it to an easier format
-			unzip: function() {
-				var a = [];
-				for (var k in exports.zip) {
-					exports.zip[k].forEach(function(r){
-						a.push({
-							reg: new RegExp(r, 'i'),
-							pos: k
-						});
-					});
-				}
-				return a;
-			}
-		},
-
-		{ // 24
 			id: 'schema',
-			description: '',
+			description: 'The schema for Parts Of Speech tagging',
 			// compress
 			zip: function(lang, isZip) {
 				var o = {parents: [], tags: []};
@@ -1160,7 +1162,7 @@ function generateLanguage(lang) {
 
 
 	// //////// //
-	// LEXICON //
+	// LEXICON // 24
 	// some string constants
 	var C = {
 		// TODO - this is a stub to make sure until anything is browserified we have a 'lang'
@@ -1186,7 +1188,11 @@ function generateLanguage(lang) {
 		mod0: 'module.exports = ',
 		mod1: 'module.exports = (',
 		mod2: ')();\n',
-		mod: '\nmodule.exports = exports.zip;\n'
+		mod: '\nmodule.exports = exports.zip;\n',
+		doc1: '/**\n',
+		doc2: ' */\n',
+		docm: ' * @module ',
+		doc: ' * '
 	};
 	function buildLexi(lang, isZip) {
 		var data = {};
@@ -1200,34 +1206,46 @@ function generateLanguage(lang) {
 		
 		// Now let's handle the module names
 		// for data modules index and lexicon
-		var _names = generators.map(function(g) { return g.id; });
+		var _names = generators.map(function(g) {			 
+			return {
+				_var: [((g.folder && g.folder != 'lexicon') ? g.folder+'_' : ''), g.id].join('').replace('_index',''),
+				_req: (g.folder) ? path.join(g.folder, g.id) : g.id
+			}; 
+		});
+		
+		
 		// require data modules for use in build
-		function reqModule(n) { data[n] = require('./' + lang + '/' + n); }
+		function reqModule(o) { data[o._var] = require(['./', path.join(lang, o._req)].join('')); }
 		_names.forEach(reqModule);
 		// TODO - rest of VBN should be in lexicon.js already - also for sl "// TODO adjectives_regular"
 		var __VBN = dict.VBN.words.filter(function(o) { return (possible(o) && o.hasOwnProperty('ref')); }).map(val);
 		
-		// write the data modules INDEX
+		// write the data modules INDEX for build, lexicon and as survey
 		var names = [];
-		var expNames = [];
-		_names.forEach(function(n){ 
-			names.push(C._var, n, C.req1, n, C.req2);
-			expNames.push(C.tab, n, C.col, n, ',', C._);
+		var exports = [];
+		_names.forEach(function(o){
+			if (o._var.indexOf('rules_') === 0) {
+				// TODO - we could write a separate index for /rules/
+			} else {
+				names.push( C._var, o._var, C.req1, o._req, C.req2 );
+				exports.push(C.tab, o._var, C.col, o._var, ',', C._);
+			}
 		});
-		var expStr = expNames.join('').slice(0,-2);
-		names.push(C._, C.mod0, C.exp0, expStr, C.exp2);
+		
+		var exportStr = exports.join('').slice(0,-2);
+		names.push(C._, C.mod0, C.exp0, exportStr, C.exp2);
 		fs.writeFileSync(	path.join(MYPATH, lang, '/index.js'), '// data index\n' + names.join('')	);
-		fs.writeFileSync(	path.join(MYPATH, lang, '/index.min.js'), names.join('').replace(/'\);/gm, ".min');") );	
+		fs.writeFileSync(	path.join(MYPATH, lang, '/index.min.js'), names.join('').replace(/'\);/gm, ".min');") );
 		
 		// now require this index module and other needed modules in the LEXICON
 		var reqs = [
 			C.l, C._,
-			"var data = require('./');", C._,
-			"var conjugate = require('../../parents/verb/conjugate');", C._,
-			"var to_doer = require('../../parents/verb/conjugate/to_doer');", C._,
-			"var to_adverb = require('../../parents/adjective/conjugate/to_adverb');", C._,
-			"var to_comparative = require('../../parents/adjective/conjugate/to_comparative');", C._,
-			"var to_superlative = require('../../parents/adjective/conjugate/to_superlative');", C._,
+			"var data = require('../');", C._,
+			"var conjugate = require('../../../parents/verb/conjugate');", C._,
+			"var to_doer = require('../../../parents/verb/conjugate/to_doer');", C._,
+			"var to_adverb = require('../../../parents/adjective/conjugate/to_adverb');", C._,
+			"var to_comparative = require('../../../parents/adjective/conjugate/to_comparative');", C._,
+			"var to_superlative = require('../../../parents/adjective/conjugate/to_superlative');", C._,
 			C.main
 		];
 		
@@ -1286,7 +1304,7 @@ function generateLanguage(lang) {
 				// zip to main
 				for (var key in exports.zip) {
 					//::BROWSER::
-					exports.zip[key] = _.repl(exports.zip[key], 0, ['selves', 'self', 'thing', 'what', 'how', 'ing', 'ally', 'ily', 'ly', 'ever', 'er', 'ed', 'es']);
+					exports.zip[key] = _.repl(exports.zip[key], ['selves', 'self', 'thing', 'what', 'how', 'ing', 'ally', 'ily', 'ly', 'ever', 'er', 'ed', 'es']);
 					//:: 
 					toMain(key, exports.zip);
 				}
@@ -1377,7 +1395,7 @@ function generateLanguage(lang) {
 				}
 				
 				_lMain[cat] = dw.map(val).filter(possibleLexi);
-				var repl = function(a) { return _.repl(a, ['selves', 'self', 'thing', 'what', 'how', 'ing', 'ally', 'ily', 'ly', 'ever', 'er', 'ed', 'es'], 0); }
+				var repl = function(a) { return _.repl(a, 0, ['selves', 'self', 'thing', 'what', 'how', 'ing', 'ally', 'ily', 'ly', 'ever', 'er', 'ed', 'es']); }
 				_lZip[cat] = _lMain[cat].map(repl);
 			}
 		});
@@ -1386,15 +1404,8 @@ function generateLanguage(lang) {
 		var lexiconStr = util.inspect(((isZip) ? _lZip : _lMain), {depth: null});
 		var genStr = lexicon.toString().replace(/\bVBN:\s*__VBN\s*,\s*\n*/g,''); // TODO FIXME
 		reqs.push(C._exp, lexiconStr, C.un1, genStr, C.un2);
-		lexiconStr = reqs.join('');
-		
-		
-		// write a file to simply log the data modules in the folder // TODO FIXME only for .min
+		lexiconStr = reqs.join('');	
 		_names.push('lexicon.js');
-		var logStr = "var util = require('util'); \nvar names = " + JSON.stringify( _names ) + ";".concat(
-				"\nnames.forEach(function(n, i) { console.log( n ); console.log( util.inspect(require('./'+n), {depth: null}) ); });"
-		);
-		fs.writeFileSync(	path.join(MYPATH, lang, '/', 'logExpandedModules.js'), logStr	);
 		
 		// return the lexicon in all its glory ...
 		return lexiconStr;
@@ -1406,13 +1417,11 @@ function generateLanguage(lang) {
 	// MAIN BUILD FUNCTION //
 	var i = 0;
 	var _regex = /\b(_)[\[.]["']*[a-zA-Z_]+["'\]]*/g;
-	var _require = 'var _ = require("../../_");\n';
-	
 	
 	function build(g, i) {
 		var hasMake = 0;
 		function clean(s) {
-			// TODO - better beautifying HERE
+			// TODO - better beautifying HERE // TODO the tab bug
 			if (this.isZip) {
 				return s.trim()/*.replace(/[ \t]+$/gm, '')*/;
 			}		
@@ -1427,9 +1436,29 @@ function generateLanguage(lang) {
 			}
 		}
 		
-		var desc = (g.description) ? ['// ', g.description.replace(/\n/gm, '\n// '), C._].join('') : '';
+		// folder
+		var fUp = (g.hasOwnProperty('folder')) ? '../' : '';
+		var _require = ['var _ = require("../../', fUp, '_");\n'].join('');
+		var folder = '';
+		if (fUp === '../') {
+			folder = g.folder+'/';
+			// make subfolder in {{lang}}
+			try { fs.mkdirSync(path.join(MYPATH, lang, folder)); } catch (e) {};
+		}
+		
+		// meta
+		var nl = [C._, C.doc].join('');
+		var meta = [C.doc, 'data module, autogenerated by grunt.', nl];
+		var cm = (g.folder === 'rules') ? 'dictionaryRules' : ((g.id === 'firstnames') ? 'dictionaryNames':'dictionary');
+		meta.push('change and contribute to ', cm, nl, nl);
+		var modu = [C.docm, 'data/', lang, '/', folder, g.id, C._];
+		if (typeof g.description === 'string' && g.description != '') {
+			meta = meta.concat([g.description.replace(/\n/gm, nl), nl]);
+		}
+		meta.push(nl, '@readonly', C._);
+		var jsDocs = [C.doc1, meta.join(''), modu.join(''), C.doc2];
 		var gens = {
-			main: [desc, g.prefix||'', C._, C._l],
+			main: [jsDocs.join(''), g.prefix||'', C._, C._l],
 			zip: [g.prefix||'', C._, C._l]
 		};
 		
@@ -1470,8 +1499,8 @@ function generateLanguage(lang) {
 		}
 		
 		// WRITE the generated ...
-		var mainStr = gens.main.join('').trim();
-		var zipStr = gens.zip.join('').trim();
+		mainStr = gens.main.join('').trim();
+		zipStr = gens.zip.join('').trim();
 		// check if any needs the _ helper module
 		if (mainStr.match(_regex)) {
 			mainStr = [_require, C._, mainStr].join('');
@@ -1480,8 +1509,8 @@ function generateLanguage(lang) {
 			zipStr = [_require, C._, zipStr].join('');
 		}
 		// TODO - run through beautifier
-		fs.writeFileSync( path.join(MYPATH, lang, '/', g.id.concat('.js')), mainStr);
-		fs.writeFileSync( path.join(MYPATH, lang, '/', g.id.concat('.min.js')), zipStr);
+		fs.writeFileSync( path.join(MYPATH, lang, folder, g.id.concat('.js')), mainStr);
+		fs.writeFileSync( path.join(MYPATH, lang, folder, g.id.concat('.min.js')), zipStr);
 		
 		i++;
 		var colors = ['',''];		
@@ -1491,11 +1520,12 @@ function generateLanguage(lang) {
 			var lexiZip = buildLexi(lang, true);
 			var lMainStr = [clean(lexiMain), C.mod0, 'main;', C._].join('');
 			var lZipStr = [clean(lexiZip, true), C._, C.mod0, 'main;', C._].join('');
-			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.js'), lMainStr);
-			fs.writeFileSync(	path.join(MYPATH, lang, '/', 'lexicon.min.js'), lZipStr);
+			fs.writeFileSync(	path.join(MYPATH, lang, '/lexicon/index.js'), lMainStr);
+			fs.writeFileSync(	path.join(MYPATH, lang, '/lexicon/index.min.js'), lZipStr);
 			console.log( 'wrote', colors[0], 'lexicon', colors[1], 'for language', '"'+lang+'"');
 		}
-		console.log( 'wrote module for language', '"'+lang+'"', colors[0], i+' of '+generators.length, colors[1], '('+g.id+')' );
+		meta = (g.folder) ? [folder, g.id].join('') : g.id;
+		console.log( 'wrote module for language', '"'+lang+'"', colors[0], i+' of '+generators.length, colors[1], ['(', meta, ')'].join('') );
 		if (i === generators.length) { console.log( ' ' ); }
 	}
 

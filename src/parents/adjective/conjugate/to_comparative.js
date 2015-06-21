@@ -4,7 +4,7 @@
  * @module src/parents/adjective/to_comparative
  */
 if (typeof lang != 'string') var lang = 'en';
-var adjectives_decline = require('../../../data/'+lang+'/adjectives_decline');
+var adjectives_decline = require('../../../data/'+lang+'/adjectives/decline');
 var cache = require('../../../cache');
 
 module.exports = function(str) {

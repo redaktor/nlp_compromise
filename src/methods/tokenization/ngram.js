@@ -3,10 +3,10 @@
  *
  * @module src/methods/tokenization/ngram
  */
-module.exports = function (text, options) {
+function ngram(text, options) {
   options = options || {};
   var min_count = options.min_count || 1; // minimum hit-count
-  var max_size = options.max_size || 5; // maximum gram count
+  var max_size = options.max_size || 5; // maximum gram size
   var REallowedChars = /[^a-zA-Z'\-]+/g; // Invalid characters are replaced with a whitespace
   var i, j, k, textlen, s;
   var keys = [null];
@@ -34,7 +34,7 @@ module.exports = function (text, options) {
   }
   // map to array
   i = undefined;
-  for (k = 1; k <= max_size; k++) {
+  for (k = 1; k < max_size; k++) {
     results[k] = [];
     var key = keys[k];
     for (i in key) {
@@ -58,6 +58,7 @@ module.exports = function (text, options) {
   });
   return results
 }
+module.exports = ngram;
 
-// s = ngram('i really think that we all really think it's all good')
+// s = ngram('i really think that we all really think it\'s all good')
 // console.log(s)

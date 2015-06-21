@@ -8,8 +8,8 @@
 module.exports = function(text) {
 	if (typeof lang != 'string') lang = 'en';
 	var dPath = '../../data/'+lang+'/';
-	dates = require(dPath+'dates');
-	abbreviations = require(dPath+'abbreviations');
+	dates = require(dPath+'lexicon/dates');
+	abbreviations = require(dPath+'lexicon/abbreviations');
 		
   var sentences = [];
   // first do a greedy-split..

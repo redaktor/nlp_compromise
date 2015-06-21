@@ -4,7 +4,7 @@
  * @module src/methods/tokenization/tokenize
  */
 if (typeof lang != 'string') lang = 'en';
-var multiples = require('../../data/'+lang+'/multiples');
+var multiples = require('../../data/'+lang+'/lexicon/multiples');
 var sentence_parser = require('./sentence');
 
 // these expressions ought to be one token, not two, because they are a distinct POS together
@@ -56,7 +56,7 @@ function combine_multiples(arr) {
 	return better.filter(function(w) { return w; })
 }
 
-module.exports = function(str) {
+module.exports = function(str) {	
 	var sentences = sentence_parser(str);
 	return sentences.map(function(sentence) {
 		var arr = sentence.split(' ');
@@ -72,12 +72,13 @@ module.exports = function(str) {
 				start: (i === 0) || undefined
 			}
 		});
+		
 		return {
 			sentence: sentence,
 			tokens: tokens,
 			type: sentence_type(sentence)
 		}
-	})
+	});
 }
 	
 // console.log(tokenize('i live in new york')[0].tokens.length==4)

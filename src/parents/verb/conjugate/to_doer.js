@@ -5,7 +5,7 @@
  */
 
 if (typeof lang != 'string') lang = 'en';
-var verbs_conjugate = require('../../../data/'+lang+'/verbs_conjugate');
+var verbs_conjugate = require('../../../data/'+lang+'/verbs/conjugate');
 
 exports.main = function(str) {	
 	str = str || '';

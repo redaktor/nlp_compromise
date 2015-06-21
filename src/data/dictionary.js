@@ -2518,10 +2518,10 @@ var main = {
 			{ ref: 110, en: 'spinner' },
 			{ ref: 129, en: 'winner' },
 			{ ref: 132, en: 'tier' },
-			{ ref: 175, en: 'dreamer' },
-			{ ref: 176, en: 'sailer' },
-			{ ref: 177, en: 'rubber' },
-			{ ref: 178, en: 'claimant' }
+			{ ref: 174, en: 'dreamer' },
+			{ ref: 175, en: 'sailer' },
+			{ ref: 176, en: 'rubber' },
+			{ ref: 177, en: 'claimant' }
 		]
 	},
 	

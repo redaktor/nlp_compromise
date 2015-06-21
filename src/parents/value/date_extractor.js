@@ -4,7 +4,7 @@
  */
 // TODO - the regexes are valid for many languages - localize only 'linking words'
 if (typeof lang != 'string') lang = 'en';
-var dates = require('../../data/'+lang+'/dates');
+var dates = require('../../data/'+lang+'/lexicon/dates');
 var cache = require('../../cache');
 
 var days = '([0-9]{1,2}),?';

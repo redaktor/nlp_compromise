@@ -6,7 +6,7 @@
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
 var schema = require(dPath+'schema');
-var verbs_special = require(dPath+'verbs_special');
+var verbs_special = require(dPath+'verbs/special');
 var cache = require('../../cache');
 var verb_conjugate = require('./conjugate');
 

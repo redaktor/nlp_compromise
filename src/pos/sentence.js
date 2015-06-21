@@ -6,8 +6,8 @@
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../data/'+lang+'/';
 var nouns = require(dPath+'nouns');
-var negate_data = require(dPath+'negate_data');
-var sentence_rules = require(dPath+'sentence_rules');
+var negate_data = require(dPath+'lexicon/negate');
+var sentence_rules = require(dPath+'rules/sentence');
 
 exports.fn = function(type, todo) {
 	if (todo === 'tokens') {

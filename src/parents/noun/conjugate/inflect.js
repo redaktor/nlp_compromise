@@ -7,7 +7,7 @@
 
 // TODO - localize 'of|in|by|for' use DECOUPLE
 if (typeof lang != 'string') lang = 'en';
-var nouns_inflect = require('../../../data/'+lang+'/nouns_inflect');
+var nouns_inflect = require('../../../data/'+lang+'/nouns/inflect');
 var cache = require('../../../cache');
 
 function titlecase(str) {

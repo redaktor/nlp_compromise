@@ -7,7 +7,7 @@
  * @module src/methods/transliteration/unicode_normalisation
  */
 if (typeof lang != 'string') lang = 'en';
-var normalisations = require('../../data/'+lang+'/'+'normalisations');
+var normalisations = require('../../data/'+lang+'/rules/normalisations');
 
 var normalize = function(str, options) {
 	options = options || {};
