@@ -1,5 +1,3 @@
-// TODO - suffix and 12/13
-
 // up to date status: includes last commit d4feb704d3e7ae527566cc12dc14af01679e8798
 // of https://github.com/spencermountain/nlp_compromise
 
@@ -988,7 +986,6 @@ function generateLanguage(lang) {
 		},
 
 		{ // 19
-		// TODO = rules/verb .suffixes // TODO becomes "wordnet"
 			id: 'wordnet',
 			folder: 'rules',
 			description: 'wordnet generated suffixes',
@@ -1167,8 +1164,7 @@ function generateLanguage(lang) {
 	var C = {
 		// TODO - this is a stub to make sure until anything is browserified we have a 'lang'
 		// would be singleton language ::
-		// FIXME - merge local 'dev' fork
-		l: ["if (!lang) {var lang = '", lang, "';}\n"].join(''),
+		l: ["if (!lang) {var lang = '", lang, "';}\n"].join(''), // FIXME - merge local 'dev' fork
 		_: '\n',
 		_var: 'var ',
 		tab: '  ',
@@ -1225,7 +1221,7 @@ function generateLanguage(lang) {
 		var exports = [];
 		_names.forEach(function(o){
 			if (o._var.indexOf('rules_') === 0) {
-				// TODO - we could write a separate index for /rules/
+				// TODO - we could write a separate index for /rules/ - STUB not needed yet
 			} else {
 				names.push( C._var, o._var, C.req1, o._req, C.req2 );
 				exports.push(C.tab, o._var, C.col, o._var, ',', C._);
