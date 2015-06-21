@@ -2,6 +2,9 @@
  * special util custom inspect fn (functions and regexes in obj)
  * makes util.inspect logging nested objects with functions and regexes
  * 
+ * not used in the project itself, only used by ./_build
+ *
+ * @readonly
  * @module data/_
  */
 function inspectFn(depth, ctx) {

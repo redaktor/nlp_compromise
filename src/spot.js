@@ -1,5 +1,9 @@
-// just a wrapper for text -> entities
-// most of this logic is in ./parents/noun
+/**
+ * spot named entities <br>
+ * just a wrapper for text -> entities <br>
+ * most of this logic is in ./parents/noun
+ * @module src/pos/sentence
+ */
 exports.main = function(text, options) {
 	options = options || {};
 	// collect 'entities' from all nouns

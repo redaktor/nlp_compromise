@@ -1,4 +1,7 @@
-// helpers - TODO DOC
+/**
+ * HELPER fns
+ * @module src/_
+ */
 var defaultOptions = require('./_options');
 // some logic is part of dojo.lang
 // Copyright (c) 2005-2015, The Dojo Foundation

@@ -1,5 +1,5 @@
 /**
- * convert british spellings into american ones
+ * convert british spellings into american ones <br>
  * built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
  *
  * @module src/methods/localization/americanize

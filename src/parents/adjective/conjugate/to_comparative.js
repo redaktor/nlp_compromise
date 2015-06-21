@@ -1,5 +1,5 @@
 /**
- * adjective to comparative: 
+ * adjective to comparative: <br>
  * turn 'quick' into 'quicker'
  * @module src/parents/adjective/to_comparative
  */

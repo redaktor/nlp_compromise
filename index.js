@@ -1,6 +1,6 @@
 /**
- * nlp_comprimise by @spencermountain in 2014
- * a Natural-Language-Processing library in Javascript, small-enough for the browser, and quick-enough to run on keypress -
+ * nlp_comprimise by @spencermountain in 2014 <br>
+ * a Natural-Language-Processing library in Javascript, small-enough for the browser, and quick-enough to run on keypress - <br>
  * it does tons of clever things. it's smaller than jquery, and scores 86% on the Penn treebank.
  *
  * @module index
@@ -18,10 +18,9 @@ var parents = require('./src/parents');
 var methods = require('./src/methods');
 // part of speech tagging
 var pos = require('./src/pos');
-// named_entity_recognition
+// named entity recognition
 var spot = require('./src/spot');
 
-/** nlp API */
 exports.nlp = function(o) {
   this.pos = pos;
   this.spot = spot;
@@ -50,6 +49,7 @@ if ((!module || !module.exports) && typeof window !== 'undefined') { // TODO - i
   window.nlp = exports.nlp;
 }
 // export it for server-side
+/** nlp API */
 module.exports = exports.nlp;
 
 // console.timeEnd('nlp_boot')

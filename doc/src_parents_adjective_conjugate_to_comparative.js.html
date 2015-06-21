@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/parents/adjective/conjugate/to_comparative.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/parents/adjective/conjugate/to_comparative.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * adjective to comparative: &lt;br>
+ * turn 'quick' into 'quicker'
+ * @module src/parents/adjective/to_comparative
+ */
+if (typeof lang != 'string') var lang = 'en';
+var adjectives_decline = require('../../../data/'+lang+'/adjectives/decline');
+var cache = require('../../../cache');
+
+module.exports = function(str) {
+	if (typeof str != 'string' || str === '') { return ''; }
+	var cached = cache.get(str, 'to_comparative');
+	if (cached) {
+		return cached;
+	}
+	var transforms = [{
+		reg: /y$/i,
+		repl: 'ier'
+	}, {
+		reg: /([aeiou])t$/i,
+		repl: '$1tter'
+	}, {
+		reg: /([aeou])de$/i,
+		repl: '$1der'
+	}, {
+		reg: /nge$/i,
+		repl: 'nger'
+	}];
+
+	var matches = [
+		/ght$/,
+		/nge$/,
+		/ough$/,
+		/ain$/,
+		/uel$/,
+		/[au]ll$/,
+		/ow$/,
+		/old$/,
+		/oud$/,
+		/e[ae]p$/
+	];
+
+	var not_matches = [
+		/ary$/,
+		/ous$/
+	];
+	
+	if (adjectives_decline.to_comparative[str]===0) {
+		return cache.set(str, null, 'to_comparative');
+	}
+	for (i = 0; i &lt; transforms.length; i++) {
+		if (str.match(transforms[i].reg)) {
+			return cache.set(str, str.replace(transforms[i].reg, transforms[i].repl), 'to_comparative');
+		}
+	}
+
+	if (adjectives_decline.convertables.hasOwnProperty(str)) {
+		return cache.set(str, ((str.match(/e$/)) ? str + 'r' : str + 'er'), 'to_comparative');
+	}
+
+	if (adjectives_decline.to_comparative.hasOwnProperty(str)) {
+		return cache.set(str, adjectives_decline.to_comparative[str], 'to_comparative');
+	}
+
+	var i;
+	for (i = 0; i &lt; not_matches.length; i++) {
+		if (str.match(not_matches[i])) {
+			return cache.set(str, 'more ' + str, 'to_comparative');
+		}
+	}
+
+	for (i = 0; i &lt; matches.length; i++) {
+		if (str.match(matches[i])) {
+			return cache.set(str, str + 'er', 'to_comparative');
+		}
+	}
+	return cache.set(str, 'more ' + str, 'to_comparative');
+}
+
+// console.log(to_comparative('dry'))
+// console.log(to_comparative('cruel'))
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-data_en_adjectives_decline.html">data/en/adjectives/decline</a></li><li><a href="module-data_en_adjectives_demonym.html">data/en/adjectives/demonym</a></li><li><a href="module-data_en_adjectives_index.html">data/en/adjectives/index</a></li><li><a href="module-data_en_adverbs_decline.html">data/en/adverbs/decline</a></li><li><a href="module-data_en_lexicon_abbreviations.html">data/en/lexicon/abbreviations</a></li><li><a href="module-data_en_lexicon_dates.html">data/en/lexicon/dates</a></li><li><a href="module-data_en_lexicon_firstnames.html">data/en/lexicon/firstnames</a></li><li><a href="module-data_en_lexicon_honorifics.html">data/en/lexicon/honorifics</a></li><li><a href="module-data_en_lexicon_multiples.html">data/en/lexicon/multiples</a></li><li><a href="module-data_en_lexicon_negate.html">data/en/lexicon/negate</a></li><li><a href="module-data_en_lexicon_numbers.html">data/en/lexicon/numbers</a></li><li><a href="module-data_en_lexicon_phrasalVerbs.html">data/en/lexicon/phrasalVerbs</a></li><li><a href="module-data_en_lexicon_pos.html">data/en/lexicon/pos</a></li><li><a href="module-data_en_nouns_index.html">data/en/nouns/index</a></li><li><a href="module-data_en_nouns_inflect.html">data/en/nouns/inflect</a></li><li><a href="module-data_en_rules_normalisations.html">data/en/rules/normalisations</a></li><li><a href="module-data_en_rules_pos.html">data/en/rules/pos</a></li><li><a href="module-data_en_rules_sentence.html">data/en/rules/sentence</a></li><li><a href="module-data_en_rules_verb.html">data/en/rules/verb</a></li><li><a href="module-data_en_rules_wordnet.html">data/en/rules/wordnet</a></li><li><a href="module-data_en_schema.html">data/en/schema</a></li><li><a href="module-data_en_verbs_conjugate.html">data/en/verbs/conjugate</a></li><li><a href="module-data_en_verbs_index.html">data/en/verbs/index</a></li><li><a href="module-data_en_verbs_special.html">data/en/verbs/special</a></li><li><a href="module-index.html">index</a></li><li><a href="module-src_methods_index.html">src/methods/index</a></li><li><a href="module-src_methods_localization_americanize.html">src/methods/localization/americanize</a></li><li><a href="module-src_methods_localization_britishize.html">src/methods/localization/britishize</a></li><li><a href="module-src_methods_syllables_index.html">src/methods/syllables/index</a></li><li><a href="module-src_methods_tokenization_ngram.html">src/methods/tokenization/ngram</a></li><li><a href="module-src_methods_tokenization_sentence.html">src/methods/tokenization/sentence</a></li><li><a href="module-src_methods_tokenization_tokenize.html">src/methods/tokenization/tokenize</a></li><li><a href="module-src_methods_transliteration_unicode_normalisation.html">src/methods/transliteration/unicode_normalisation</a></li><li><a href="module-src_parents_adjective_index.html">src/parents/adjective/index</a></li><li><a href="module-src_parents_adjective_to_adverb.html">src/parents/adjective/to_adverb</a></li><li><a href="module-src_parents_adjective_to_comparative.html">src/parents/adjective/to_comparative</a></li><li><a href="module-src_parents_adjective_to_noun.html">src/parents/adjective/to_noun</a></li><li><a href="module-src_parents_adjective_to_superlative.html">src/parents/adjective/to_superlative</a></li><li><a href="module-src_parents_adverb_index.html">src/parents/adverb/index</a></li><li><a href="module-src_parents_adverb_to_adjective.html">src/parents/adverb/to_adjective</a></li><li><a href="module-src_parents_index.html">src/parents/index</a></li><li><a href="module-src_parents_noun_conjugate_inflect.html">src/parents/noun/conjugate/inflect</a></li><li><a href="module-src_parents_noun_indefinite_article.html">src/parents/noun/indefinite_article</a></li><li><a href="module-src_parents_noun_index.html">src/parents/noun/index</a></li><li><a href="module-src_parents_value_date_extractor.html">src/parents/value/date_extractor</a></li><li><a href="module-src_parents_value_index.html">src/parents/value/index</a></li><li><a href="module-src_parents_value_to_number.html">src/parents/value/to_number</a></li><li><a href="module-src_parents_verb_conjugate_index.html">src/parents/verb/conjugate/index</a></li><li><a href="module-src_parents_verb_conjugate_to_doer.html">src/parents/verb/conjugate/to_doer</a></li><li><a href="module-src_parents_verb_index.html">src/parents/verb/index</a></li><li><a href="module-src_pos_index.html">src/pos/index</a></li><li><a href="module-src_pos_section.html">src/pos/section</a></li><li><a href="module-src_pos_sentence.html">src/pos/sentence</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Sun Jun 21 2015 14:09:58 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

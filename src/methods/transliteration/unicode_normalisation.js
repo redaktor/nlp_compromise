@@ -1,7 +1,7 @@
 /**
- * a hugely-ignorant, and widely subjective transliteration 
- * of latin, cryllic, greek unicode characters to english ascii.
- * http://en.wikipedia.org/wiki/List_of_Unicode_characters
+ * a hugely-ignorant, and widely subjective transliteration <br>
+ * of latin, cryllic, greek unicode characters to english ascii. <br>
+ * http://en.wikipedia.org/wiki/List_of_Unicode_characters <br>
  * https://docs.google.com/spreadsheet/ccc?key=0Ah46z755j7cVdFRDM1A2YVpwa1ZYWlpJM2pQZ003M0E
  *
  * @module src/methods/transliteration/unicode_normalisation

@@ -1,5 +1,5 @@
 /**
- * a section is a block of text, with an arbitrary number of sentences
+ * a section is a block of text, with an arbitrary number of sentences <br>
  * these methods are just wrappers around the ones in sentence.js
  * @module src/pos/section
  */

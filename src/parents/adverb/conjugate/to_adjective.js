@@ -1,5 +1,5 @@
 /**
- * adverb to adjective: 
+ * adverb to adjective: <br>
  * turns 'quickly' into 'quick'
  * @module src/parents/adverb/to_adjective
  */

@@ -1,14 +1,14 @@
 /**
- * converts spoken numbers into integers
- * e.g. 'fifty seven point eight' -> 57.8
+ * converts spoken numbers into integers <br>
+ * e.g. 'fifty seven point eight' -> 57.8 <br><br>
  *
- * Spoken numbers take the following format
- * [sixty five] (thousand) [sixty five] (hundred) [sixty five]
- * aka: [one/teen/ten] (multiple) [one/teen/ten] (multiple) ...
- * combine the [one/teen/ten]s as 'current_sum', then multiply it by its following multiple
+ * Spoken numbers take the following format <br>
+ * [sixty five] (thousand) [sixty five] (hundred) [sixty five] <br>
+ * aka: [one/teen/ten] (multiple) [one/teen/ten] (multiple) ... <br>
+ * combine the [one/teen/ten]s as 'current_sum', then multiply it by its following multiple <br> <br>
  *
- * these sets of numbers each have different rules
- * [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so ignore
+ * these sets of numbers each have different rules <br>
+ * [tenth, hundreth, thousandth..] are ambiguous because they could be ordinal like fifth, or decimal like one-one-hundredth, so ignore <br>
  * @module src/parents/value/to_number
  */
 var numbers = require('../../data/'+lang+'/lexicon/numbers');

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/pos/sentence.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/pos/sentence.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * methods that hang on a parsed set of words &lt;br>
+ * accepts parsed tokens
+ * @module src/pos/sentence
+ */
+if (typeof lang != 'string') lang = 'en';
+var dPath = '../data/'+lang+'/';
+var nouns = require(dPath+'nouns');
+var negate_data = require(dPath+'lexicon/negate');
+var sentence_rules = require(dPath+'rules/sentence');
+
+exports.fn = function(type, todo) {
+	if (todo === 'tokens') {
+		return function() {
+			this.tokens = this.tokens.map(function(token) {
+				if (token.pos.parent === 'verb') {
+					token.text = token.analysis[type]();
+					token.normalised = token.text;
+				}
+				return token;
+			})
+			return this;
+		}
+	}
+	return function() {
+		return this.tokens.filter(function(t) {
+			return t.pos.parent == type;
+		})
+	}
+}
+
+exports.Sentence = function(tokens) {
+  this.tokens = tokens || [];
+
+  function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+	this.text = function() {
+    return this.tokens.map(function(s) {
+      return s.text;
+    }).join(' ');
+  }
+  this.tense = function() {
+    return this.tokens.filter(function(token) {
+			return token.pos.parent === 'verb';
+		}).map(function(v) {
+			return v.analysis.tense;
+		});
+  }
+  this.tags = function() {
+    return this.tokens.map(function(t) {
+      return t.pos.tag;
+    })
+  }
+	// sugar 'grab' methods
+	this.verbs = exports.fn('verb');
+  this.adverbs = exports.fn('adverb');
+  this.nouns = exports.fn('noun');
+  this.adjectives = exports.fn('adjective');
+  this.values = exports.fn('value');
+	
+	// conjugate
+  this.to_past = exports.fn('to_past', 'tokens');
+  this.to_present = exports.fn('to_present', 'tokens');
+  this.to_future = exports.fn('to_future', 'tokens');
+	
+  this.insert = function(token, i) {
+    if (i &amp;&amp; token) { this.tokens.splice(i, 0, token); }
+  }
+
+  this.entities = function(options) {
+    var spots = [];
+    options = options || {};
+    this.tokens.forEach(function(t) {
+			var optCond = (options.ignore_gerund) ? (t.pos.tag !== 'VBG') : (t.pos);
+      if (optCond &amp;&amp; t.pos.parent === 'noun' &amp;&amp; t.analysis.is_entity()) {
+        spots.push(t);
+      }
+    });
+    return spots;
+  }
+
+  // noun-entities that look like person names..
+	this.people = function(){
+    return this.entities({}).filter(function(o){
+      return o.analysis.is_person();
+    })
+  }
+
+	// find the 'it', 'he', 'she', and 'they' of this sentence
+  // these are the words that get 'exported' to be used in other sentences
+  this.referables = function(){
+    var pronouns = nouns.refs.reduce(function(o, w) { o[w] = undefined; return o; }, {});
+    this.tokens.forEach(function(t){
+      if(t.pos.parent === 'noun' &amp;&amp; t.pos.tag != 'PRP'){
+        pronouns[t.analysis.pronoun()] = t;
+      }
+    })
+    return pronouns;
+  }
+	
+  // negate makes the sentence mean the opposite thing.
+	// these are cheap ways to negate the meaning
+	// ('none' is ambiguous because it could mean (all or some) )
+  this.negate = function() {
+		var o = sentence_rules.negate;
+    var t, txt, arr;
+		// loop through each term.. 
+		for (var i = 0; i &lt; this.tokens.length; i++) {
+			t = this.tokens[i];
+			
+      // turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
+      if (negate_data[t.normalised] &amp;&amp; (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
+				this.tokens[i].text = negate_data[t.normalised];
+				this.tokens[i].normalised = negate_data[t.normalised];
+				if (t.capitalised) {
+					this.tokens[i].text = capitalise(this.tokens[i].text);
+				}
+				return this;
+      }
+      // find the first verb..
+      if (t.pos.parent == 'verb') {
+				// if verb is already negative, make it not negative
+        if (t.analysis.negative()) {
+          if (this.tokens[i + 1] &amp;&amp; this.tokens[i + 1].normalised == 'not') {
+            this.tokens.splice(i + 1, 1);
+          }
+          return this;
+        }
+				for (var id in o) {
+					if (o[id]._if &amp;&amp; o[id]._if(t, this.tokens, i)) {
+						txt = (o[id].tense) ? (t.analysis.conjugate()[o[id].tense] || t.text) : t.text;
+						arr = (o[id].prefix) ? [o[id].prefix, txt] : [txt, o[id].suffix||''];
+						this.tokens[i].text = arr.join(' ');
+						if (t.capitalised) {
+							this.tokens[i].text = capitalise(this.tokens[i].text);
+						}
+						this.tokens[i].normalised = (t.normalised) ? t.normalised : this.tokens[i].text.toLowerCase();
+						return this;
+					}
+				}
+        return this;
+			}
+		}
+    return this;
+  }
+  return this;
+}
+
+module.exports = exports.Sentence;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-data_en_adjectives_decline.html">data/en/adjectives/decline</a></li><li><a href="module-data_en_adjectives_demonym.html">data/en/adjectives/demonym</a></li><li><a href="module-data_en_adjectives_index.html">data/en/adjectives/index</a></li><li><a href="module-data_en_adverbs_decline.html">data/en/adverbs/decline</a></li><li><a href="module-data_en_lexicon_abbreviations.html">data/en/lexicon/abbreviations</a></li><li><a href="module-data_en_lexicon_dates.html">data/en/lexicon/dates</a></li><li><a href="module-data_en_lexicon_firstnames.html">data/en/lexicon/firstnames</a></li><li><a href="module-data_en_lexicon_honorifics.html">data/en/lexicon/honorifics</a></li><li><a href="module-data_en_lexicon_multiples.html">data/en/lexicon/multiples</a></li><li><a href="module-data_en_lexicon_negate.html">data/en/lexicon/negate</a></li><li><a href="module-data_en_lexicon_numbers.html">data/en/lexicon/numbers</a></li><li><a href="module-data_en_lexicon_phrasalVerbs.html">data/en/lexicon/phrasalVerbs</a></li><li><a href="module-data_en_lexicon_pos.html">data/en/lexicon/pos</a></li><li><a href="module-data_en_nouns_index.html">data/en/nouns/index</a></li><li><a href="module-data_en_nouns_inflect.html">data/en/nouns/inflect</a></li><li><a href="module-data_en_rules_normalisations.html">data/en/rules/normalisations</a></li><li><a href="module-data_en_rules_pos.html">data/en/rules/pos</a></li><li><a href="module-data_en_rules_sentence.html">data/en/rules/sentence</a></li><li><a href="module-data_en_rules_verb.html">data/en/rules/verb</a></li><li><a href="module-data_en_rules_wordnet.html">data/en/rules/wordnet</a></li><li><a href="module-data_en_schema.html">data/en/schema</a></li><li><a href="module-data_en_verbs_conjugate.html">data/en/verbs/conjugate</a></li><li><a href="module-data_en_verbs_index.html">data/en/verbs/index</a></li><li><a href="module-data_en_verbs_special.html">data/en/verbs/special</a></li><li><a href="module-index.html">index</a></li><li><a href="module-src_methods_index.html">src/methods/index</a></li><li><a href="module-src_methods_localization_americanize.html">src/methods/localization/americanize</a></li><li><a href="module-src_methods_localization_britishize.html">src/methods/localization/britishize</a></li><li><a href="module-src_methods_syllables_index.html">src/methods/syllables/index</a></li><li><a href="module-src_methods_tokenization_ngram.html">src/methods/tokenization/ngram</a></li><li><a href="module-src_methods_tokenization_sentence.html">src/methods/tokenization/sentence</a></li><li><a href="module-src_methods_tokenization_tokenize.html">src/methods/tokenization/tokenize</a></li><li><a href="module-src_methods_transliteration_unicode_normalisation.html">src/methods/transliteration/unicode_normalisation</a></li><li><a href="module-src_parents_adjective_index.html">src/parents/adjective/index</a></li><li><a href="module-src_parents_adjective_to_adverb.html">src/parents/adjective/to_adverb</a></li><li><a href="module-src_parents_adjective_to_comparative.html">src/parents/adjective/to_comparative</a></li><li><a href="module-src_parents_adjective_to_noun.html">src/parents/adjective/to_noun</a></li><li><a href="module-src_parents_adjective_to_superlative.html">src/parents/adjective/to_superlative</a></li><li><a href="module-src_parents_adverb_index.html">src/parents/adverb/index</a></li><li><a href="module-src_parents_adverb_to_adjective.html">src/parents/adverb/to_adjective</a></li><li><a href="module-src_parents_index.html">src/parents/index</a></li><li><a href="module-src_parents_noun_conjugate_inflect.html">src/parents/noun/conjugate/inflect</a></li><li><a href="module-src_parents_noun_indefinite_article.html">src/parents/noun/indefinite_article</a></li><li><a href="module-src_parents_noun_index.html">src/parents/noun/index</a></li><li><a href="module-src_parents_value_date_extractor.html">src/parents/value/date_extractor</a></li><li><a href="module-src_parents_value_index.html">src/parents/value/index</a></li><li><a href="module-src_parents_value_to_number.html">src/parents/value/to_number</a></li><li><a href="module-src_parents_verb_conjugate_index.html">src/parents/verb/conjugate/index</a></li><li><a href="module-src_parents_verb_conjugate_to_doer.html">src/parents/verb/conjugate/to_doer</a></li><li><a href="module-src_parents_verb_index.html">src/parents/verb/index</a></li><li><a href="module-src_pos_index.html">src/pos/index</a></li><li><a href="module-src_pos_section.html">src/pos/section</a></li><li><a href="module-src_pos_sentence.html">src/pos/sentence</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Sun Jun 21 2015 14:09:58 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /**
- * somone who does this present-tense verb: 
+ * somone who does this present-tense verb: <br>
  * turn 'walk' into 'walker'
  * @module src/parents/verb/conjugate/to_doer
  */

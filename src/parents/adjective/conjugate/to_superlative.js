@@ -1,5 +1,5 @@
 /**
- * adjective to superlative: 
+ * adjective to superlative: <br>
  * turn 'quick' into 'quickest'
  * @module src/parents/adjective/to_superlative
  */

@@ -1,18 +1,23 @@
+/**
+ * default OPTIONS <br>
+ * for mixin in modules <br>
+ * WIP <br>
+ * @module src/_options
+ */
 // TODO - WIP
-// default options - will be mixed in
 module.exports = {
 	cache: {
-		size:256, 
-		db:false
+		size: 256, 
+		db: false
 	},
 	pos: {
-		combine:true
+		combine: true
 	},
 	ngram: {
-		min_count:1, 
-		max_size:5
+		min_count: 1, 
+		max_size: 5
 	},
 	normalize: {
-		percentage:50
+		percentage: 50
 	}
 };

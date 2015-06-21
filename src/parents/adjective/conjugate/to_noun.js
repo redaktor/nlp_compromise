@@ -1,5 +1,5 @@
 /**
- * adjective to noun: 
+ * adjective to noun: <br>
  * convert cute to cuteness
  * @module src/parents/adjective/to_noun
  */

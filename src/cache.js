@@ -1,5 +1,5 @@
 // TODO
-// derives from 'redaktor' 's fork, note by author:
+// derives from 'redaktor' fork, note by author:
 // this is very cheap. while it might be desired to maintain one set cache for all nlp instances, empty it SHOULD be per instance.
 // caching by sentence, so unchanged-sentences aren't re-parsed on keystroke -> set: function (method, key, val) { cache.nlp.sentences[key] = val; } (hashing ?)
 // caching per method -> set: function (method, key, val) { cache.nlp[method][key] = val; }

@@ -1,6 +1,6 @@
 /**
- * convert american spellings into british ones
- * built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling
+ * convert american spellings into british ones <br>
+ * built with patterns+exceptions from https://en.wikipedia.org/wiki/British_spelling <br>
  * (some patterns are only safe to do in one direction)
  *
  * @module src/methods/localization/britishize

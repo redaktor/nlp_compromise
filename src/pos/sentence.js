@@ -1,5 +1,5 @@
 /**
- * methods that hang on a parsed set of words
+ * methods that hang on a parsed set of words <br>
  * accepts parsed tokens
  * @module src/pos/sentence
  */

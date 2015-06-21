@@ -1,6 +1,6 @@
 /**
- * rule-based sentence boundary segmentation - 
- * chop given text into its proper sentences.
+ * rule-based sentence boundary segmentation - <br>
+ * chop given text into its proper sentences. <br>
  * ignore periods/questions/exclamations used in acronyms/abbreviations/numbers, etc.
  *
  * @module src/methods/tokenization/sentence
