@@ -1,4 +1,4 @@
-// TODO - stub, WIP, not used yet
+// TODO - WIP
 // default options - will be mixed in
 module.exports = {
 	cache: {

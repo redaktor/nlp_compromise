@@ -209,13 +209,13 @@ function passFn() {
 			if (parseFloat(token.normalised)) { return setPos(token, 'CD', 'parsefloat'); }
 			return token;
 		},
-		// wrangles results a bit
+		// wrangles results a bit, i18n
 		two: setTokenFn('set'),
 		// seek verb or noun phrases after their signals
 		three: function(token, i, tokens) {
 			var next = tokens[i + 1];
 			if (token.pos) {
-				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its) // TODO - MAYBE DECOUPLE (needs language check again)
+				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its) // i18n
 				if ((pos_rules.strongDeterminers[token.normalised]) || token.pos.tag === 'PP') {
 					return this.set(token, {needs: 'noun', reason: token.pos.name}); // proceed
 				}
@@ -264,7 +264,7 @@ function passFn() {
 			}
 			return token;
 		},
-		// error correction
+		// error correction, i18n
 		five: setTokenFn('special')
 	};
 }
