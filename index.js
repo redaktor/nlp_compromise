@@ -12,6 +12,7 @@
 // most files are self-contained modules that optionally export for nodejs
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
+var _ = require('./src/_')
 var cache = require('./src/cache');
 // parents (word types) and methods
 var parents = require('./src/parents');
@@ -21,7 +22,23 @@ var pos = require('./src/pos');
 // named entity recognition
 var spot = require('./src/spot');
 
-exports.nlp = function(o) {
+function destroy() {
+	cache.empty();	
+}
+function set(v) {
+	if (typeof v === 'string') {
+		this._text = v;
+	} else {
+		this._options = _.mixOptions(v);	
+	}
+	return v;
+}
+exports.nlp = function(text, opts) {
+	this._text = '';
+	this._options = {};
+	this.set = set;
+	if (text) { this.set(text); }
+	if (opts) { this.set(opts); }
   this.pos = pos;
   this.spot = spot;
   this.adjective = parents.adjective;
@@ -38,16 +55,11 @@ exports.nlp = function(o) {
   this.syllables = methods.syllables;
   this.normalize = methods.normalize.normalize;
   this.denormalize = methods.normalize.denormalize;
-	this.destroy = function() {
-		cache.empty();	
-	}
+	this.destroy = destroy;
 	return this;
 }
-
-// export it for client-side
-if ((!module || !module.exports) && typeof window !== 'undefined') { // TODO - is this right?
-  window.nlp = exports.nlp;
-}
+// export it for client-side // TODO - is this right? Do we need it?
+if ((!module || !module.exports) && typeof window !== 'undefined') { window.nlp = exports.nlp; }
 // export it for server-side
 /** nlp API */
 module.exports = exports.nlp;
