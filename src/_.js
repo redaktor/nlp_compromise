@@ -61,21 +61,22 @@ exports._ = {
 	},
 	
 	// helpers
-	mixOptions: function(key, options) {
-		if (!options || Object.keys(options).length<1) { return defaultOptions[key]; }
-		if (!key in defaultOptions) { defaultOptions[key] = options; }
-		return this.mix(options, defaultOptions[key]);
-	},
 	_mix: function(dest, source, copyFunc){
-		var name, s, i, empty = {};
+		var name, s;
 		for(name in source){
 			s = source[name];
-			if(!(dest.hasOwnProperty(name))){
+			if(!(name in dest)){
 				dest[name] = copyFunc ? copyFunc(s) : s;
 			}
 		}        
 		return dest; // Object
-	},    
+	},
+	mixOptions: function(options, key) {
+		if (!key) { var key; for (key in options) { this.mixOptions(options, key); } }
+		if (!options || Object.keys(options).length<1) { return defaultOptions[key]; }
+		if (!key in defaultOptions) { defaultOptions[key] = options; }
+		return this.mix(options, defaultOptions[key]);
+	},
 	mix: function(dest, sources){
 		if(!dest){ dest = {}; }
 		for(var i = 1, l = arguments.length; i < l; i++){
@@ -90,7 +91,7 @@ exports._ = {
 		return str.replace(/([A-Z])/g, function($1){return [' ', $1.toLowerCase()].join('');});
 	},
 	toObj: function(h,s){
-		h[s] = true; 
+		h[(s instanceof Array) ? s[0] : s] = true; 
 		return h;
 	},
 	toObjValues: function(zip, obj){

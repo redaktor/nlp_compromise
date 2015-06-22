@@ -2690,17 +2690,20 @@ var main = {
 			{ en: 'ad', meta: {nonNoun: ['en']} }
 		]
 	},
-	
 			
 	//: PRP personal-pronouns
-	// uid/ref for singular/plural
-	// contractions flag
-	// contractions must be defined on top, e.g. 
-	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
+	// uid / ref for singular / plural
+	// !
+	// meta.parent MUST reference according 'referenced personal pronoun' PRP
+	
 	// referable flag
 	// referable pronouns that get 'exported' to be used in other sentences
 	// some would be questionable; 
 	// e.g. we flagged 'you', 'him', 'here', 'them' here (think of dialogs)
+	
+	// contractions flag
+	// contractions must be defined on top, e.g. 
+	// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
   PRP: { 
 		title: 'personal pronoun',
 		example: 'I, you, she',
@@ -2722,19 +2725,25 @@ var main = {
 			// it ;) a space for other languages
 			{ en: 'us', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			// you ;) a space for other languages
-			{ en: 'them', meta: {referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
+			{ en: 'them', meta: {parent: 6, referable: ['en'], stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'thou', meta: {stopword: ['en'], entitySubstitution: ['en']} },
 			{ en: 'il', meta: {stopword: ['en']} },
 			{ en: 'elle', meta: {stopword: ['en']} },
 			{ en: '\'em', meta: {stopword: ['en']} }
 		]
 	},
+	
 	//: PP posessive-pronouns
-  PP: { 
+	// TODO - this covers more than the original :
+	// posessive-pronouns (should) have multiple forms :
+	// as possessive (adjective) determiner (my) OR
+	// as possessive (noun) pronoun (mine)
+	// as a reflexive pronoun (myself)
+  PP: {
 		// note :
-		// uid/ref for singular/plural
+		// uid / ref for singular / plural
 		// !
-		// meta.parent MUST reference according personal pronoun PRP
+		// meta.parent MUST reference according 'referenced personal pronoun' PRP
 		// contractions must be defined on top, e.g. 
 		// { en: ['woul|d','wi|ll','ha|ve','a|m','i|s','wa|s','ha|s','a|re','not'] }
 		title: 'possessive pronoun',
@@ -2752,16 +2761,16 @@ var main = {
 			{ uid: 7, en: 'his', meta: {parent: 2, stopword: ['en']} },
 			{ uid: 8, en: 'himself', meta: {stopword: ['en']} },
 			{ uid: 9, en: 'her', meta: {parent: 3, stopword: ['en']}, description:'this one is pretty ambiguous...' },
-			{ uid: 10, en: 'hers', meta: {stopword: ['en']} },
+			{ uid: 10, en: 'hers', meta: {parent: 3, stopword: ['en']} },
 			{ uid: 11, en: 'herself', meta: {stopword: ['en']} },
 			{ uid: 12, en: 'its', meta: {parent: 4, stopword: ['en']} },
 			{ uid: 13, en: 'itself', meta: {stopword: ['en'], entityBlacklist: ['en']} },
 			{ uid: 14, en: 'our', meta: {parent: 5, stopword: ['en']} },
-			{ uid: 15, ref: 0, en: 'ours', meta: {stopword: ['en']} },
+			{ uid: 15, ref: 0, en: 'ours', meta: {parent: 5, stopword: ['en']} },
 			{ uid: 16, ref: 2, en: 'ourselves', meta: {stopword: ['en']} },
 			{ uid: 17, ref: [7, 9, 10, 12, 17], en: 'theirs', meta: {stopword: ['en']} },
-			{ uid: 18, en: 'their', meta: {parent: 6, stopword: ['en']} },
-			{ uid: 19, en: 'them', meta: {parent: 6, stopword: ['en']} },
+			{ uid: 18, en: 'theirs', meta: {parent: 6, stopword: ['en']} },
+			{ uid: 19, en: 'their', meta: {parent: 6, stopword: ['en']} },
 			{ uid: 20, en: 'themself', meta: {stopword: ['en']} },
 			{ uid: 21, ref: [5, 8, 11, 20], en: 'themselves', meta: {stopword: ['en']} },
 			{ en: 'none', meta: {demonstrative: ['en']} },
