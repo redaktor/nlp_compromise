@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/parents/value/date_extractor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/parents/value/date_extractor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * generates properly-formatted dates from free-text date forms
+ * @module src/parents/value/date_extractor
+ */
+// TODO - the regexes are valid for many languages - localize only 'linking words'
+if (typeof lang != 'string') lang = 'en';
+var dates = require('../../data/'+lang+'/lexicon/dates');
+var cache = require('../../cache');
+
+var days = '([0-9]{1,2}),?';
+var years = '([12][0-9]{3})';
+
+function to_obj(arr, places) {
+	return Object.keys(places).reduce(function(h, k) {
+		h[k] = arr[places[k]];
+		return h;
+	}, {});
+}
+
+var regexes = [{
+	reg: dates.monthsS + ' ' + days + '-' + days + ' ' + years,
+	//example: 'March 7th-11th 1987',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			day: 2,
+			to_day: 3,
+			year: 4
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: days + ' of ' + dates.monthsS + ' to ' + days + ' of ' + dates.monthsS + ' ' + years,
+	//example: '28th of September to 5th of October 2008',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			day: 1,
+			month: 2,
+			to_day: 3,
+			to_month: 4,
+			to_year: 5
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: dates.monthsS + ' ' + days + ' to ' + dates.monthsS + ' ' + days + ' ' + years,
+	//example: 'March 7th to june 11th 1987',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			day: 2,
+			to_month: 3,
+			to_day: 4,
+			year: 5,
+			to_year: 5
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: 'between ' + days + ' ' + dates.monthsS + ' and ' + days + ' ' + dates.monthsS + ' ' + years,
+	//example: 'between 13 February and 15 February 1945',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			day: 1,
+			month: 2,
+			to_day: 3,
+			to_month: 4,
+			year: 5,
+			to_year: 5
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: 'between ' + dates.monthsS + ' ' + days + ' and ' + dates.monthsS + ' ' + days + ' ' + years,
+	//example: 'between March 7th and june 11th 1987',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			day: 2,
+			to_month: 3,
+			to_day: 4,
+			year: 5,
+			to_year: 5
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: dates.monthsS + ' ' + days + ' ' + years,
+	//example: 'March 1st 1987',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			day: 2,
+			year: 3
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: days + ' - ' + days + ' of ' + dates.monthsS + ' ' + years,
+	//example: '3rd - 5th of March 1969',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			day: 1,
+			to_day: 2,
+			month: 3,
+			year: 4
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: days + ' of ' + dates.monthsS + ' ' + years,
+	//example: '3rd of March 1969',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			day: 1,
+			month: 2,
+			year: 3
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: dates.monthsS + ' ' + years + ',? to ' + dates.monthsS + ' ' + years,
+	//example: 'September 1939 to April 1945',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			year: 2,
+			to_month: 3,
+			to_year: 4
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: dates.monthsS + ' ' + years,
+	//example: 'March 1969',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			year: 2
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: dates.monthsS + ' ' + days,
+	//example: 'March 18th',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 1,
+			day: 2
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: days + ' of ' + dates.monthsS,
+	//example: '18th of March',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			month: 2,
+			day: 1
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: years + ' ?- ?' + years,
+	//example: '1997-1998',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			year: 1,
+			to_year: 2
+		};
+		return to_obj(arr, places);
+	}
+}, {
+	reg: years,
+	//example: '1998',
+	process: function(arr) {
+		if (!arr) {
+			arr = []
+		}
+		var places = {
+			year: 1
+		};
+		return to_obj(arr, places);
+	}
+}].map(function(o) {
+	o.reg = new RegExp(o.reg, 'g');
+	return o;
+});
+
+//0 based months, 1 based days...
+//thirty days hath september...
+var last_dates = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+var preprocess = function(str) {
+	str = str.toLowerCase();
+	str = str.replace(/([0-9])(th|rd|st)/g, '$1');
+	return str;
+};
+
+var postprocess = function(obj, options) {
+	var d;
+	d = new Date();
+	options = options || {};
+	obj.year = parseInt(obj.year, 10) || undefined;
+	obj.day = parseInt(obj.day, 10) || undefined;
+	obj.to_day = parseInt(obj.to_day, 10) || undefined;
+	obj.to_year = parseInt(obj.to_year, 10) || undefined;
+	obj.month = dates.months[obj.month];
+	obj.to_month = dates.months[obj.to_month];
+	//swap to_month and month
+	if (obj.to_month !== undefined &amp;&amp; obj.month === undefined) {
+		obj.month = obj.to_month
+	}
+	if (obj.to_month === undefined &amp;&amp; obj.month !== undefined) {
+		obj.to_month = obj.month
+	}
+	//swap to_year and year
+	if (obj.to_year &amp;&amp; !obj.year) {
+		obj.year = obj.to_year
+	}
+	if (!obj.to_year &amp;&amp; obj.year &amp;&amp; obj.to_month !== undefined) {
+		obj.to_year = obj.year
+	}
+	if (options.assume_year &amp;&amp; !obj.year) {
+		obj.year = d.getFullYear()
+	}
+	//make sure date is in that month..
+	if (obj.day !== undefined &amp;&amp; (obj.day > 31 || (obj.month !== undefined &amp;&amp; obj.day > last_dates[obj.month]))) {
+		obj.day = undefined
+	}
+	//make sure to date is after from date. fail everything if so...
+	//todo: do this smarter
+	if (obj.to_month !== undefined &amp;&amp; obj.to_month &lt; obj.month) {
+		return {}
+	}
+	if (obj.to_year &amp;&amp; obj.to_year &lt; obj.year) {
+		obj.year = undefined;
+		obj.to_year = undefined;
+	}
+
+	//make sure date is in reasonable range (very opinionated)
+	if (obj.year > 2090 || obj.year &lt; 1200) {
+		obj.year = undefined;
+		obj.to_year = undefined;
+	}
+	//format result better
+	obj = {
+		day: obj.day,
+		month: obj.month,
+		year: obj.year,
+		to: {
+			day: obj.to_day,
+			month: obj.to_month,
+			year: obj.to_year
+		}
+	};
+	//add javascript date objects, if you can
+	if (obj.year &amp;&amp; obj.day &amp;&amp; obj.month !== undefined) {
+		obj.date_object = new Date();
+		obj.date_object.setYear(obj.year);
+		obj.date_object.setMonth(obj.month);
+		obj.date_object.setDate(obj.day);
+	}
+	if (obj.to.year &amp;&amp; obj.to.day &amp;&amp; obj.to.month !== undefined) {
+		obj.to.date_object = new Date();
+		obj.to.date_object.setYear(obj.to.year);
+		obj.to.date_object.setMonth(obj.to.month);
+		obj.to.date_object.setDate(obj.to.day);
+	}
+	//if we have enough data to return a result..
+	if (obj.year || obj.month !== undefined) {
+		return obj;
+	}
+	return {};
+};
+
+//pass through sequence of regexes until template is matched..
+module.exports = function(str, options) {
+	options = options || {};
+	var cached = cache.get(str, ['is_date', options]);
+	if (cached) { return cached; }
+	
+	str = preprocess(str);
+	var arr, good, clone_reg, obj;
+	var l = regexes.length;
+	for(var i=0; i&lt;l; i+=1){
+		obj = regexes[i];
+		if (str.match(obj.reg)) {
+			clone_reg = new RegExp(obj.reg.source,'i'); // this avoids a memory-leak
+			arr = clone_reg.exec(str);
+			good = obj.process(arr);
+			return cache.set(str, postprocess(good, options), ['is_date', options]);
+		}
+	}
+}
+
+// console.log(date_extractor('1998'))
+// console.log(date_extractor('1999'))
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-data_en_adjectives_decline.html">data/en/adjectives/decline</a></li><li><a href="module-data_en_adjectives_demonym.html">data/en/adjectives/demonym</a></li><li><a href="module-data_en_adjectives_index.html">data/en/adjectives/index</a></li><li><a href="module-data_en_adverbs_decline.html">data/en/adverbs/decline</a></li><li><a href="module-data_en_lexicon_abbreviations.html">data/en/lexicon/abbreviations</a></li><li><a href="module-data_en_lexicon_dates.html">data/en/lexicon/dates</a></li><li><a href="module-data_en_lexicon_firstnames.html">data/en/lexicon/firstnames</a></li><li><a href="module-data_en_lexicon_honorifics.html">data/en/lexicon/honorifics</a></li><li><a href="module-data_en_lexicon_multiples.html">data/en/lexicon/multiples</a></li><li><a href="module-data_en_lexicon_negate.html">data/en/lexicon/negate</a></li><li><a href="module-data_en_lexicon_numbers.html">data/en/lexicon/numbers</a></li><li><a href="module-data_en_lexicon_phrasalVerbs.html">data/en/lexicon/phrasalVerbs</a></li><li><a href="module-data_en_lexicon_pos.html">data/en/lexicon/pos</a></li><li><a href="module-data_en_nouns_index.html">data/en/nouns/index</a></li><li><a href="module-data_en_nouns_inflect.html">data/en/nouns/inflect</a></li><li><a href="module-data_en_rules_normalisations.html">data/en/rules/normalisations</a></li><li><a href="module-data_en_rules_pos.html">data/en/rules/pos</a></li><li><a href="module-data_en_rules_sentence.html">data/en/rules/sentence</a></li><li><a href="module-data_en_rules_verb.html">data/en/rules/verb</a></li><li><a href="module-data_en_rules_wordnet.html">data/en/rules/wordnet</a></li><li><a href="module-data_en_schema.html">data/en/schema</a></li><li><a href="module-data_en_verbs_conjugate.html">data/en/verbs/conjugate</a></li><li><a href="module-data_en_verbs_index.html">data/en/verbs/index</a></li><li><a href="module-data_en_verbs_special.html">data/en/verbs/special</a></li><li><a href="module-index.html">index</a></li><li><a href="module-src_methods_index.html">src/methods/index</a></li><li><a href="module-src_methods_localization_americanize.html">src/methods/localization/americanize</a></li><li><a href="module-src_methods_localization_britishize.html">src/methods/localization/britishize</a></li><li><a href="module-src_methods_syllables_index.html">src/methods/syllables/index</a></li><li><a href="module-src_methods_tokenization_ngram.html">src/methods/tokenization/ngram</a></li><li><a href="module-src_methods_tokenization_sentence.html">src/methods/tokenization/sentence</a></li><li><a href="module-src_methods_tokenization_tokenize.html">src/methods/tokenization/tokenize</a></li><li><a href="module-src_methods_transliteration_unicode_normalisation.html">src/methods/transliteration/unicode_normalisation</a></li><li><a href="module-src_parents_adjective_index.html">src/parents/adjective/index</a></li><li><a href="module-src_parents_adjective_to_adverb.html">src/parents/adjective/to_adverb</a></li><li><a href="module-src_parents_adjective_to_comparative.html">src/parents/adjective/to_comparative</a></li><li><a href="module-src_parents_adjective_to_noun.html">src/parents/adjective/to_noun</a></li><li><a href="module-src_parents_adjective_to_superlative.html">src/parents/adjective/to_superlative</a></li><li><a href="module-src_parents_adverb_index.html">src/parents/adverb/index</a></li><li><a href="module-src_parents_adverb_to_adjective.html">src/parents/adverb/to_adjective</a></li><li><a href="module-src_parents_index.html">src/parents/index</a></li><li><a href="module-src_parents_noun_conjugate_inflect.html">src/parents/noun/conjugate/inflect</a></li><li><a href="module-src_parents_noun_indefinite_article.html">src/parents/noun/indefinite_article</a></li><li><a href="module-src_parents_noun_index.html">src/parents/noun/index</a></li><li><a href="module-src_parents_value_date_extractor.html">src/parents/value/date_extractor</a></li><li><a href="module-src_parents_value_index.html">src/parents/value/index</a></li><li><a href="module-src_parents_value_to_number.html">src/parents/value/to_number</a></li><li><a href="module-src_parents_verb_conjugate_index.html">src/parents/verb/conjugate/index</a></li><li><a href="module-src_parents_verb_conjugate_to_doer.html">src/parents/verb/conjugate/to_doer</a></li><li><a href="module-src_parents_verb_index.html">src/parents/verb/index</a></li><li><a href="module-src_pos_index.html">src/pos/index</a></li><li><a href="module-src_pos_section.html">src/pos/section</a></li><li><a href="module-src_pos_sentence.html">src/pos/sentence</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Jun 22 2015 15:51:16 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

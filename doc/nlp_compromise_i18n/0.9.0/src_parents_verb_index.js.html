@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/parents/verb/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/parents/verb/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * wrapper module for verb's methods
+ * @module src/parents/verb/index
+ */
+// TODO - maybe i18n 'infinitive', 'present' etc., goes to schema
+if (typeof lang != 'string') lang = 'en';
+var dPath = '../../data/'+lang+'/';
+var schema = require(dPath+'schema');
+var verbs_special = require(dPath+'verbs/special');
+var cache = require('../../cache');
+var verb_conjugate = require('./conjugate');
+
+exports.main = function(str, sentence, word_i) {
+  var the = this;
+	
+  var token, next;
+  if (sentence !== undefined &amp;&amp; word_i !== undefined) {
+    token = sentence.tokens[word_i];
+    next = sentence.tokens[word_i + i];
+  }
+  the.word = str || '';
+	the.conjugated = verb_conjugate(the.word);
+	
+	the.conjugate = function() {
+		return the.conjugated;
+	}
+	
+  the.to_past = function() {
+    if (the.form === 'gerund') {
+      return the.word; 
+    }
+    return the.conjugated.past;
+  }
+
+  the.to_present = function() {
+    return the.conjugated.present;
+  }
+
+  the.to_future = function() {
+    return 'will ' + the.conjugated.infinitive;
+  }
+	
+	
+  // which conjugation
+	var cached = cache.get(the.word, 'verbForm');
+	the.form = (cached) ? cached : cache.set(the.word, (function() {
+		// don't choose infinitive if infinitive == present
+		for (var i = 0; i &lt; schema._tenseOrder.length; i++) {
+			if (the.conjugated[schema._tenseOrder[i]] === the.word) {
+				return schema._tenseOrder[i];
+			}
+		}
+	})(), 'verbForm');
+
+	
+  // past/present/future   //wahh?!
+	cached = cache.get(the.word, 'verbTense');
+  the.tense = (cached) ? cached : cache.set(the.word, (function() {
+    if (the.word.match(/\bwill\b/)) {return 'future';}
+    if (the.form === 'present') {return 'present';}
+    if (the.form === 'past') {return 'past';}
+    return 'present';
+  })(), 'verbTense');
+
+  // the most accurate part_of_speech
+	cached = cache.get(the.word, 'verbWhich');
+  the.which = (cached) ? cached : cache.set(the.word, (function() {
+    if (verbs_special.CP[the.word]) { return schema['CP']; }
+    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) { return schema['VBG']; }
+    return schema.getTense(the.form).tag;
+  })(), 'verbWhich');
+
+  // is this verb negative already?
+  the.negative = function() {
+		cached = cache.get(the.word, 'verbNeg');
+		if (cached) { return cached; }
+    var isN = ( (the.word.match(/n't$/)) || ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) &amp;&amp; next &amp;&amp; next.normalised === 'not') );
+		return cache.set(the.word, isN, 'verbNeg');
+  }
+  return the;
+}
+module.exports = exports.main;
+
+// console.log(new Verb('will'))
+// console.log(new Verb('stalking').tense)
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-data_en_adjectives_decline.html">data/en/adjectives/decline</a></li><li><a href="module-data_en_adjectives_demonym.html">data/en/adjectives/demonym</a></li><li><a href="module-data_en_adjectives_index.html">data/en/adjectives/index</a></li><li><a href="module-data_en_adverbs_decline.html">data/en/adverbs/decline</a></li><li><a href="module-data_en_lexicon_abbreviations.html">data/en/lexicon/abbreviations</a></li><li><a href="module-data_en_lexicon_dates.html">data/en/lexicon/dates</a></li><li><a href="module-data_en_lexicon_firstnames.html">data/en/lexicon/firstnames</a></li><li><a href="module-data_en_lexicon_honorifics.html">data/en/lexicon/honorifics</a></li><li><a href="module-data_en_lexicon_multiples.html">data/en/lexicon/multiples</a></li><li><a href="module-data_en_lexicon_negate.html">data/en/lexicon/negate</a></li><li><a href="module-data_en_lexicon_numbers.html">data/en/lexicon/numbers</a></li><li><a href="module-data_en_lexicon_phrasalVerbs.html">data/en/lexicon/phrasalVerbs</a></li><li><a href="module-data_en_lexicon_pos.html">data/en/lexicon/pos</a></li><li><a href="module-data_en_nouns_index.html">data/en/nouns/index</a></li><li><a href="module-data_en_nouns_inflect.html">data/en/nouns/inflect</a></li><li><a href="module-data_en_rules_normalisations.html">data/en/rules/normalisations</a></li><li><a href="module-data_en_rules_pos.html">data/en/rules/pos</a></li><li><a href="module-data_en_rules_sentence.html">data/en/rules/sentence</a></li><li><a href="module-data_en_rules_verb.html">data/en/rules/verb</a></li><li><a href="module-data_en_rules_wordnet.html">data/en/rules/wordnet</a></li><li><a href="module-data_en_schema.html">data/en/schema</a></li><li><a href="module-data_en_verbs_conjugate.html">data/en/verbs/conjugate</a></li><li><a href="module-data_en_verbs_index.html">data/en/verbs/index</a></li><li><a href="module-data_en_verbs_special.html">data/en/verbs/special</a></li><li><a href="module-index.html">index</a></li><li><a href="module-src_methods_index.html">src/methods/index</a></li><li><a href="module-src_methods_localization_americanize.html">src/methods/localization/americanize</a></li><li><a href="module-src_methods_localization_britishize.html">src/methods/localization/britishize</a></li><li><a href="module-src_methods_syllables_index.html">src/methods/syllables/index</a></li><li><a href="module-src_methods_tokenization_ngram.html">src/methods/tokenization/ngram</a></li><li><a href="module-src_methods_tokenization_sentence.html">src/methods/tokenization/sentence</a></li><li><a href="module-src_methods_tokenization_tokenize.html">src/methods/tokenization/tokenize</a></li><li><a href="module-src_methods_transliteration_unicode_normalisation.html">src/methods/transliteration/unicode_normalisation</a></li><li><a href="module-src_parents_adjective_index.html">src/parents/adjective/index</a></li><li><a href="module-src_parents_adjective_to_adverb.html">src/parents/adjective/to_adverb</a></li><li><a href="module-src_parents_adjective_to_comparative.html">src/parents/adjective/to_comparative</a></li><li><a href="module-src_parents_adjective_to_noun.html">src/parents/adjective/to_noun</a></li><li><a href="module-src_parents_adjective_to_superlative.html">src/parents/adjective/to_superlative</a></li><li><a href="module-src_parents_adverb_index.html">src/parents/adverb/index</a></li><li><a href="module-src_parents_adverb_to_adjective.html">src/parents/adverb/to_adjective</a></li><li><a href="module-src_parents_index.html">src/parents/index</a></li><li><a href="module-src_parents_noun_conjugate_inflect.html">src/parents/noun/conjugate/inflect</a></li><li><a href="module-src_parents_noun_indefinite_article.html">src/parents/noun/indefinite_article</a></li><li><a href="module-src_parents_noun_index.html">src/parents/noun/index</a></li><li><a href="module-src_parents_value_date_extractor.html">src/parents/value/date_extractor</a></li><li><a href="module-src_parents_value_index.html">src/parents/value/index</a></li><li><a href="module-src_parents_value_to_number.html">src/parents/value/to_number</a></li><li><a href="module-src_parents_verb_conjugate_index.html">src/parents/verb/conjugate/index</a></li><li><a href="module-src_parents_verb_conjugate_to_doer.html">src/parents/verb/conjugate/to_doer</a></li><li><a href="module-src_parents_verb_index.html">src/parents/verb/index</a></li><li><a href="module-src_pos_index.html">src/pos/index</a></li><li><a href="module-src_pos_section.html">src/pos/section</a></li><li><a href="module-src_pos_sentence.html">src/pos/sentence</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Jun 22 2015 15:51:16 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

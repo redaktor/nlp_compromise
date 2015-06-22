@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3>nlp_compromise_i18n 0.9.0</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>No training, no prolog. i18n fork.</h1><p>a Natural-Language-Processing library <em>in Javascript</em>,<br> small-enough for the browser, and quick-enough to run on keypress :two_men_holding_hands:</p>
+<p>It does <a href="http://rawgit.com/spencermountain/nlp_compromise/master/client_side/basic_demo/index.html">tons of clever things</a>. it's smaller than jquery, and scores 86% on the <a href="http://www.cis.upenn.edu/~treebank/">Penn treebank</a>.</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.pos('she sells seashells by the seashore').to_past().text()
+//she sold seashells by the seashore</code></pre><p><a href="https://github.com/spencermountain/nlp_compromise">original</a> <a href="http://badge.fury.io/js/nlp_compromise"><img src="https://badge.fury.io/js/nlp_compromise.svg" alt="npm version"></a></p>
+<h2>Why this fork?</h2><p>It is optimized for Internationalization (i18n) and further metrics.
+You as a most welcome possible contributor / translator would only have to touch <a href="https://github.com/redaktor/nlp_compromise/tree/master/src/data">2 or 3 commented files</a>: the <code>dictionary</code>... files in /src/data. <br>
+We do the rest by running <code>grunt</code>.</p>
+<p>And the fork is smaller and even more performant.
+We reduced duplicate code and do cache now.</p>
+<p>:point_up: Heads up!
+This fork introduces API changes:</p>
+<pre class="prettyprint source lang-js"><code>var nlp = new NLP();
+nlp.set('some text');   // soon, as an alternative option
+nlp.pluralize().text(); // --> &quot;some texts&quot;</code></pre><p>[we will add an alternative to set options here directly]</p>
+<p>and<br>
+The pos option <code>dont_combine: true</code> is now <code>combine: false</code> <br></p>
+<h4>What is coming here next?</h4><ul>
+<li>language detection and setting in runtime</li>
+<li>further metrics as in this <a href="https://gist.github.com/redaktor/e5866669e238221e7cef">proposal</a></li>
+<li>:de:</li>
+</ul>
+<h2>Check it out</h2><ul>
+<li><a href="http://rawgit.com/spencermountain/nlp_compromise/master/client_side/long_demo/index.html">Long Text Demo</a></li>
+<li><a href="http://rawgit.com/spencermountain/nlp_compromise/master/client_side/basic_demo/index.html">Specific Methods</a></li>
+<li><a href="http://rawgit.com/spencermountain/nlp_compromise/master/client_side/cute_demo/index.html">Realtime Demo</a></li>
+<li><a href="http://rawgit.com/kroid/angular-nlp-compromise/master/example/index.html">Angular Demo</a></li>
+</ul>
+<p><a href="https://vimeo.com/109880250"><img src="http://i.vimeocdn.com/video/493948602_640.jpg" alt="Video"></a></p>
+<h2>Justification</h2><p>If the 80-20 rule applies for most things, the ''94-6 rule'' applies when working with language - by <a href="http://www.businessinsider.com/zipfs-law-and-the-most-common-words-in-english-2013-10">Zipfs law</a>:</p>
+<blockquote>
+<p>The <strong><a href="http://www.businessinsider.com/zipfs-law-and-the-most-common-words-in-english-2013-10">top 10 words</a></strong> account for 25% of used language.</p>
+<p>The <strong>top 100 words</strong> account for 50% of used language.</p>
+<p>The <strong>top 50,000 words</strong> account for 95% of used language.</p>
+</blockquote>
+<p>On the <a href="http://www.cis.upenn.edu/~treebank/">Penn treebank</a>, for example, this is possible:</p>
+<ul>
+<li>just a 1 thousand word lexicon: <strong>45% accuracy</strong></li>
+<li>... then falling back to nouns: <strong>70% accuracy</strong></li>
+<li>... then some suffix regexes: <strong>74% accuracy</strong></li>
+<li>... then some sentence-level postprocessing: <strong>81% accuracy</strong></li>
+</ul>
+<p>The process is to get some curated data, find the patterns, and list the exceptions. Bada bing, bada boom.
+In this way a satisfactory NLP library can be built with breathtaking lightness.</p>
+<p>Namely, it can be run right on the user's computer instead of a server.</p>
+<h2>Client-side</h2><pre class="prettyprint source lang-javascript"><code>&lt;script src=&quot;https://rawgit.com/spencermountain/nlp_compromise/master/client_side/nlp.min.js&quot;> &lt;/script>
+&lt;script>
+  nlp.noun(&quot;dinosaur&quot;).pluralize()
+  //dinosaurs
+&lt;/script></code></pre><p>or, use the <a href="https://github.com/Kroid/angular-nlp-compromise">angular module</a></p>
+<h2>Server-side</h2><pre class="prettyprint source lang-javascript"><code>$ npm install nlp_compromise
+
+nlp = require(&quot;nlp_compromise&quot;)
+nlp.syllables(&quot;hamburger&quot;)
+//[ 'ham', 'bur', 'ger' ]</code></pre><h2>API</h2><h3>Sentence methods</h3><pre class="prettyprint source lang-javascript"><code>  var s= nlp.pos(&quot;Tony Danza is dancing&quot;).sentences[0]
+
+  s.tense()
+  //present
+
+  s.text()
+  //&quot;Tony Danza is dancing&quot;
+
+  s.to_past().text()
+  //Tony Danza was dancing
+
+  s.to_present().text()
+  //Tony Danza is dancing
+
+  s.to_future().text()
+  //Tony Danza will be dancing
+
+  s.negate().text()
+  //Tony Danza is not dancing
+
+  s.tags()
+  //[ 'NNP', 'CP', 'VB' ]
+
+  s.entities()
+  //[{text:&quot;Tony Danza&quot;...}]
+
+  s.people()
+  //[{text:&quot;Tony Danza&quot;...}]
+
+  s.nouns()
+  //[{text:&quot;Tony Danza&quot;...}]
+
+  s.adjectives()
+  //[]
+
+  s.adverbs()
+  //[]
+
+  s.verbs()
+  //[{text:&quot;dancing&quot;}]
+
+  s.values()
+  //[]
+`</code></pre><h3>Noun methods:</h3><pre class="prettyprint source lang-javascript"><code>nlp.noun(&quot;earthquakes&quot;).singularize()
+//earthquake
+
+nlp.noun(&quot;earthquake&quot;).pluralize()
+//earthquakes
+
+nlp.noun('veggie burger').is_plural
+//false
+
+nlp.noun('tony danza').is_person
+//true
+nlp.noun('Tony J. Danza elementary school').is_person
+//false
+nlp.noun('SS Tony danza').is_person
+//false
+
+nlp.noun('hour').article()
+//an
+
+nlp.inflect('mayors of toronto'))
+//{ plural: 'mayors of toronto', singular: 'mayor of toronto' }</code></pre><h3>Verb methods:</h3><pre class="prettyprint source lang-javascript"><code>nlp.verb(&quot;walked&quot;).conjugate()
+//{ infinitive: 'walk',
+//  present: 'walks',
+//  past: 'walked',
+//  gerund: 'walking'}
+nlp.verb('swimming').to_past()
+//swam
+nlp.verb('swimming').to_present()
+//swims
+nlp.verb('swimming').to_future()
+//will swim</code></pre><h3>Adjective methods:</h3><pre class="prettyprint source lang-javascript"><code>nlp.adjective(&quot;quick&quot;).conjugate()
+//  { comparative: 'quicker',
+//    superlative: 'quickest',
+//    adverb: 'quickly',
+//    noun: 'quickness'}</code></pre><h3>Adverb methods</h3><pre class="prettyprint source lang-javascript"><code>nlp.adverb(&quot;quickly&quot;).conjugate()
+//  { adjective: 'quick'}</code></pre><h2>Part-of-speech tagging</h2><p>86% on the <a href="http://www.cis.upenn.edu/~treebank/">Penn treebank</a></p>
+<pre class="prettyprint source lang-javascript"><code>nlp.pos(&quot;Tony Hawk walked quickly to the store.&quot;).tags()
+// [ [ 'NNP', 'VBD', 'RB', 'IN', 'DT', 'NN' ] ]
+
+nlp.pos(&quot;they would swim&quot;).tags()
+// [ [ 'PRP', 'MD', 'VBP' ] ]
+nlp.pos(&quot;the obviously good swim&quot;).tags()
+// [ [ 'DT', 'RB', 'JJ', 'NN' ] ]</code></pre><h2>Named-Entity recognition</h2><pre class="prettyprint source lang-javascript"><code>nlp.spot(&quot;joe carter loves toronto&quot;)
+// [{text:&quot;joe carter&quot;...}, {text:&quot;toronto&quot;...}]</code></pre><h2>Sentence segmentation</h2><pre class="prettyprint source lang-javascript"><code>nlp.sentences(&quot;Hi Dr. Miller the price is 4.59 for the U.C.L.A. Ph.Ds.&quot;).length
+//1
+
+nlp.tokenize(&quot;she sells sea-shells&quot;).length
+//3</code></pre><h2>Syllable hyphenization</h2><p>70% on the <a href="http://www.gutenberg.org/dirs/etext02/mhyph10.zip">moby hyphenization corpus</a>  0.5k</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.syllables(&quot;hamburger&quot;)
+//[ 'ham', 'bur', 'ger' ]</code></pre><h2>US-UK Localization</h2><pre class="prettyprint source lang-javascript"><code>nlp.americanize(&quot;favourite&quot;)
+//favorite
+nlp.britishize(&quot;synthesized&quot;)
+//synthesised</code></pre><h2>N-gram</h2><pre class="prettyprint source lang-javascript"><code>str= &quot;She sells seashells by the seashore. The shells she sells are surely seashells.&quot;
+nlp.ngram(str, {min_count:1, max_size:5})
+// [{ word: 'she sells', count: 2, size: 2 },
+// ...
+options.min_count // throws away seldom-repeated grams. defaults to 1
+options.max_size  // prevents the result from becoming gigantic. defaults to 5</code></pre><h3>Date parsing</h3><pre class="prettyprint source lang-javascript"><code>nlp.value(&quot;I married April for the 2nd time on June 5th 1998 &quot;).date()
+// { text: 'June 5th 1998',
+//   from: { year: '1998', month: '06', day: '05' },
+//   to: {} }</code></pre><h3>Number parsing</h3><pre class="prettyprint source lang-javascript"><code>nlp.value(&quot;two thousand five hundred and sixty&quot;).number()
+//2560
+nlp.value(&quot;ten and a half million&quot;).number()
+//15000000</code></pre><h3>Unicode Normalisation</h3><p>a hugely-ignorant, and widely subjective transliteration of latin, cryllic, greek unicode characters to english ascii.</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.normalize(&quot;Björk&quot;)
+//Bjork</code></pre><p>and for fun,</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.denormalize(&quot;The quick brown fox jumps over the lazy dog&quot;, {percentage:50})
+// The ɋӈїck brown fox juӎÞs over tӊe laζy dog</code></pre><h3>Details</h3><h4>Tags</h4><pre class="prettyprint source lang-javascript"><code>  &quot;verb&quot;:
+    &quot;VB&quot; : &quot;verb, generic (eat)&quot;
+    &quot;VBD&quot; : &quot;past-tense verb (ate)&quot;
+    &quot;VBN&quot; : &quot;past-participle verb (eaten)&quot;
+    &quot;VBP&quot; : &quot;infinitive verb (eat)&quot;
+    &quot;VBZ&quot; : &quot;present-tense verb (eats, swims)&quot;
+    &quot;CP&quot; : &quot;copula (is, was, were)&quot;
+    &quot;VBG&quot; : &quot;gerund verb (eating,winning)&quot;
+  &quot;adjective&quot;:
+    &quot;JJ&quot; : &quot;adjective, generic (big, nice)&quot;
+    &quot;JJR&quot; : &quot;comparative adjective (bigger, cooler)&quot;
+    &quot;JJS&quot; : &quot;superlative adjective (biggest, fattest)&quot;
+  &quot;adverb&quot;:
+    &quot;RB&quot; : &quot;adverb (quickly, softly)&quot;
+    &quot;RBR&quot; : &quot;comparative adverb (faster, cooler)&quot;
+    &quot;RBS&quot; : &quot;superlative adverb (fastest (driving), coolest (looking))&quot;
+  &quot;noun&quot;:
+    &quot;NN&quot; : &quot;noun, singular (dog, rain)&quot;
+    &quot;NNP&quot; : &quot;singular proper noun (Edinburgh, skateboard)&quot;
+    &quot;NNPA&quot; : &quot;noun, acronym (FBI)&quot;
+    &quot;NNAB&quot; : &quot;noun, abbreviation (jr.)&quot;
+    &quot;NNPS&quot; : &quot;plural proper noun (Smiths)&quot;
+    &quot;NNS&quot; : &quot;plural noun (dogs, foxes)&quot;
+    &quot;NNO&quot; : &quot;possessive noun (spencer's, sam's)&quot;
+    &quot;NG&quot; : &quot;gerund noun (eating,winning&quot; : &quot;but used grammatically as a noun)&quot;
+    &quot;PRP&quot; : &quot;personal pronoun (I,you,she)&quot;
+  &quot;glue&quot;:
+    &quot;PP&quot; : &quot;possessive pronoun (my,one's)&quot;
+    &quot;FW&quot; : &quot;foreign word (mon dieu, voila)&quot;
+    &quot;IN&quot; : &quot;preposition (of,in,by)&quot;
+    &quot;MD&quot; : &quot;modal verb (can,should)&quot;
+    &quot;CC&quot; : &quot;co-ordating conjunction (and,but,or)&quot;
+    &quot;DT&quot; : &quot;determiner (the,some)&quot;
+    &quot;UH&quot; : &quot;interjection (oh, oops)&quot;
+    &quot;EX&quot; : &quot;existential there (there)&quot;
+  &quot;value&quot;:
+    &quot;CD&quot; : &quot;cardinal value, generic (one, two, june 5th)&quot;
+    &quot;DA&quot; : &quot;date (june 5th, 1998)&quot;
+    &quot;NU&quot; : &quot;number (89, half-million)&quot;</code></pre><h4>Lexicon</h4><p>Because the library can conjugate all sorts of forms, it only needs to store one grammatical form.
+The lexicon was built using the <a href="http://www.americannationalcorpus.org/">American National Corpus</a>, then intersected with the regex rule-list. For example, it lists only 300 verbs, then blasts-out their 1200+ derived forms.</p>
+<h4>Contractions</h4><p>Unlike other nlp toolkits, this library puts a 'silent token' into the phrase for contractions. Otherwise something would be neglected.</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.pos(&quot;i'm good.&quot;)
+ [{
+   text:&quot;i'm&quot;,
+   normalised:&quot;i&quot;,
+   pos:&quot;PRP&quot;
+ },
+ {
+   text:&quot;&quot;,
+   normalised:&quot;am&quot;,
+   pos:&quot;CP&quot;
+ },
+ {
+   text:&quot;good.&quot;,
+   normalised:&quot;good&quot;,
+   pos:&quot;JJ&quot;
+ }]</code></pre><h4>Tokenization</h4><p>Neighbouring words with the same part of speech are merged together, unless there is punctuation, different capitalisation, or special cases.</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.pos(&quot;tony hawk won&quot;).tags()
+//tony hawk   NN
+//won   VB</code></pre><p>To turn this off:</p>
+<pre class="prettyprint source lang-javascript"><code>nlp.pos(&quot;tony hawk won&quot;, {dont_combine:true}).tags()
+//tony   NN
+//hawk   NN
+//won   VB</code></pre><h2>Licence</h2><p>MIT</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-data_en_adjectives_decline.html">data/en/adjectives/decline</a></li><li><a href="module-data_en_adjectives_demonym.html">data/en/adjectives/demonym</a></li><li><a href="module-data_en_adjectives_index.html">data/en/adjectives/index</a></li><li><a href="module-data_en_adverbs_decline.html">data/en/adverbs/decline</a></li><li><a href="module-data_en_lexicon_abbreviations.html">data/en/lexicon/abbreviations</a></li><li><a href="module-data_en_lexicon_dates.html">data/en/lexicon/dates</a></li><li><a href="module-data_en_lexicon_firstnames.html">data/en/lexicon/firstnames</a></li><li><a href="module-data_en_lexicon_honorifics.html">data/en/lexicon/honorifics</a></li><li><a href="module-data_en_lexicon_multiples.html">data/en/lexicon/multiples</a></li><li><a href="module-data_en_lexicon_negate.html">data/en/lexicon/negate</a></li><li><a href="module-data_en_lexicon_numbers.html">data/en/lexicon/numbers</a></li><li><a href="module-data_en_lexicon_phrasalVerbs.html">data/en/lexicon/phrasalVerbs</a></li><li><a href="module-data_en_lexicon_pos.html">data/en/lexicon/pos</a></li><li><a href="module-data_en_nouns_index.html">data/en/nouns/index</a></li><li><a href="module-data_en_nouns_inflect.html">data/en/nouns/inflect</a></li><li><a href="module-data_en_rules_normalisations.html">data/en/rules/normalisations</a></li><li><a href="module-data_en_rules_pos.html">data/en/rules/pos</a></li><li><a href="module-data_en_rules_sentence.html">data/en/rules/sentence</a></li><li><a href="module-data_en_rules_verb.html">data/en/rules/verb</a></li><li><a href="module-data_en_rules_wordnet.html">data/en/rules/wordnet</a></li><li><a href="module-data_en_schema.html">data/en/schema</a></li><li><a href="module-data_en_verbs_conjugate.html">data/en/verbs/conjugate</a></li><li><a href="module-data_en_verbs_index.html">data/en/verbs/index</a></li><li><a href="module-data_en_verbs_special.html">data/en/verbs/special</a></li><li><a href="module-index.html">index</a></li><li><a href="module-src_methods_index.html">src/methods/index</a></li><li><a href="module-src_methods_localization_americanize.html">src/methods/localization/americanize</a></li><li><a href="module-src_methods_localization_britishize.html">src/methods/localization/britishize</a></li><li><a href="module-src_methods_syllables_index.html">src/methods/syllables/index</a></li><li><a href="module-src_methods_tokenization_ngram.html">src/methods/tokenization/ngram</a></li><li><a href="module-src_methods_tokenization_sentence.html">src/methods/tokenization/sentence</a></li><li><a href="module-src_methods_tokenization_tokenize.html">src/methods/tokenization/tokenize</a></li><li><a href="module-src_methods_transliteration_unicode_normalisation.html">src/methods/transliteration/unicode_normalisation</a></li><li><a href="module-src_parents_adjective_index.html">src/parents/adjective/index</a></li><li><a href="module-src_parents_adjective_to_adverb.html">src/parents/adjective/to_adverb</a></li><li><a href="module-src_parents_adjective_to_comparative.html">src/parents/adjective/to_comparative</a></li><li><a href="module-src_parents_adjective_to_noun.html">src/parents/adjective/to_noun</a></li><li><a href="module-src_parents_adjective_to_superlative.html">src/parents/adjective/to_superlative</a></li><li><a href="module-src_parents_adverb_index.html">src/parents/adverb/index</a></li><li><a href="module-src_parents_adverb_to_adjective.html">src/parents/adverb/to_adjective</a></li><li><a href="module-src_parents_index.html">src/parents/index</a></li><li><a href="module-src_parents_noun_conjugate_inflect.html">src/parents/noun/conjugate/inflect</a></li><li><a href="module-src_parents_noun_indefinite_article.html">src/parents/noun/indefinite_article</a></li><li><a href="module-src_parents_noun_index.html">src/parents/noun/index</a></li><li><a href="module-src_parents_value_date_extractor.html">src/parents/value/date_extractor</a></li><li><a href="module-src_parents_value_index.html">src/parents/value/index</a></li><li><a href="module-src_parents_value_to_number.html">src/parents/value/to_number</a></li><li><a href="module-src_parents_verb_conjugate_index.html">src/parents/verb/conjugate/index</a></li><li><a href="module-src_parents_verb_conjugate_to_doer.html">src/parents/verb/conjugate/to_doer</a></li><li><a href="module-src_parents_verb_index.html">src/parents/verb/index</a></li><li><a href="module-src_pos_index.html">src/pos/index</a></li><li><a href="module-src_pos_section.html">src/pos/section</a></li><li><a href="module-src_pos_sentence.html">src/pos/sentence</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Jun 22 2015 15:51:16 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
