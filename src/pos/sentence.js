@@ -103,11 +103,11 @@ exports.Sentence = function(tokens) {
 	// ('none' is ambiguous because it could mean (all or some) )
   this.negate = function() {
 		var o = sentence_rules.negate;
-    var t, txt, arr;
+    var t, _txt, txt, arr;
 		// loop through each term.. 
 		for (var i = 0; i < this.tokens.length; i++) {
 			t = this.tokens[i];
-			
+			if (t.pos_reason === 'ambiguous contraction') t.text = t.normalised;
       // turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
       if (negate_data[t.normalised] && (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
 				this.tokens[i].text = negate_data[t.normalised];
