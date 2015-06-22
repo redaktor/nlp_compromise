@@ -572,7 +572,7 @@ exports[t] = function (test) {
   // other stuff
   test.strictEqual(negate("he will be the best"), "he won't be the best")
   test.strictEqual(negate("he is the best"), "he isn't the best")
-  test.strictEqual(negate("he is walking to toronto"), "he isn't walking to toronto")
+  test.strictEqual(negate("he's walking to toronto"), "he isn't walking to toronto")
   // coumpound sentences
   test.strictEqual(negate("he will be a lion and will be on stage"), "he won't be a lion and will be on stage")
   test.strictEqual(negate("he was a lion and will be on stage"), "he wasn't a lion and will be on stage")
@@ -1322,7 +1322,7 @@ exports[t] = function (test) {
     ["he is very shoe", ["PRP", "CP", "RB", "JJ"]], ["she is so camp", ["PRP", "CP", "RB", "JJ"]],
     //before a pronoun
     ["Spencer lkajf him", ["NNP", "VB", "PRP"]], 
-		/*["Toronto lkajf them",["NN", "VB", "PRP"] ], TODO redaktor*/
+		["Toronto lkajf them",["NN", "VB", "PRP"] ], //TODO redaktor*/
     //contractions
     ["he's amazing", ["PRP", "CP", "JJ"]], ["we're excited", ["PRP", "CP", "JJ"]], ["I'd go", ["PRP", "MD", "VBP"]], ["he's amazing, she's corrupt", ["PRP", "CP", "JJ", "PRP", "CP", "JJ"]],
     //numbers
@@ -1340,7 +1340,7 @@ exports[t] = function (test) {
     ["Björk Guðmundsdóttir lives in Reykjavík", ["NN", "VBZ", "IN", "NN"]], ["Bjork Guomundsdottir lives in Reykjavik", ["NN", "VBZ", "IN", "NN"]],
 
     ["Climate Change, Miliband", ["NN", "NN"]], ["http://google.com", ["CD"]], ["may live", ["MD", "VBP"]], ["may 7th live", ["CD", "VBP"]], 
-		/*["She and Marc Emery married on July 23, 2006", ["PRP", "CC", "NN", "VBD", "IN", "CD"]] TODO redaktor*/
+		["She and Marc Emery married on July 23, 2006", ["PRP", "CC", "NN", "VBD", "IN", "CD"]] //TODO redaktor*/
   ].forEach(function (arr) {
     test.deepEqual(nlp.pos(arr[0], {}).tags(), [arr[1]], arr[0])
   })
