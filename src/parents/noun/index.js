@@ -36,29 +36,29 @@ module.exports = function(str, sentence, word_i) {
 
   the.is_entity = function() {
     if (!token) {return false}
-    if (token.normalised.length < 3 || !token.normalised.match(/[a-z]/i)) {return false}
+    if (token.normalised.length < 3 || !token.normalised.match(/[a-z]/i)) { return false; }
     // prepositions
-    if (nouns.prps[token.normalised]) {return false}
+    if (nouns.prps[token.normalised]) { return false; }
     // blacklist
-    if (nouns.entityBlacklist[token.normalised]) {return false}
+    if (nouns.entityBlacklist[token.normalised]) { return false; }
     // discredit specific nouns forms
     if (token.pos) {
-      if (token.pos.tag == 'NNA') {return false} //eg. 'singer'
-      if (token.pos.tag == 'NNO') {return false} //eg. "spencer's"
-      if (token.pos.tag == 'NNG') {return false} //eg. 'walking'
+      if (token.pos.tag == 'NNA') { return false; } //eg. 'singer'
+      if (token.pos.tag == 'NNO') { return false; } //eg. "spencer's"
+      if (token.pos.tag == 'NNG') { return false; } //eg. 'walking'
 			
-      if (token.pos.tag=='NNP') {return true} //yes! eg. 'Edinburough'
+      if (token.pos.tag=='NNP') { return true; } //yes! eg. 'Edinburough'
     }
     // distinct capital is very good signal
-    if (token.noun_capital) {return true}
+    if (token.noun_capital) { return true; }
     // multiple-word nouns are very good signal
-    if (token.normalised.match(/ /)) {return true}
+    if (token.normalised.match(/ /)) { return true; }
     // if it has an acronym/abbreviation, like 'business ltd.'
-    if (token.normalised.match(/\./)) {return true}
+    if (token.normalised.match(/\./)) { return true; }
     // appears to be a non-capital acronym, and not just caps-lock
-    if (token.normalised.length < 5 && token.text.match(/^[A-Z]*$/)) {return true}
+    if (token.normalised.length < 5 && token.text.match(/^[A-Z]*$/)) { return true; }
     // acronyms are a-ok
-    if (the.is_acronym()) {return true}
+    if (the.is_acronym()) { return true; }
     // else, be conservative
     return false;
   }
@@ -120,7 +120,7 @@ module.exports = function(str, sentence, word_i) {
 
   // decides if it deserves a he, she, they, or it
   the.pronoun = function(){
-    //if it's a person try to classify male/female
+    // if it's a person try to classify male/female
     if(the.is_person()){
 			var nameType = function(t) { 
 				return (firstnames[names[0]]===t || firstnames[names[1]]==t); 
@@ -128,56 +128,56 @@ module.exports = function(str, sentence, word_i) {
       var names = the.word.split(' ').map(function(a){
         return a.toLowerCase();
       })
-      if (nameType('m')) {return 'he'}
-      if (nameType('f')) {return 'she'}
-      //test some honorifics
-      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) {return 'she'}
-      if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) {return 'he'}
-      //if it's a known unisex name, don't try guess it. be safe.
-      if(nameType('a')) {return 'they'}
-      //if we think it's a person, but still don't know the gender, do a little guessing
-			//if it ends in a 'ee or ah', female
-      if (names[0].match(/[aeiy]$/)) {return 'she'}
-			//if it ends in a 'oh or uh', male
-      if (names[0].match(/[ou]$/)) {return 'he'}
-      //if it has double-consonants, female
+      if (nameType('m')) { return 'he'; }
+      if (nameType('f')) { return 'she'; }
+      // test some honorifics
+      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) { return 'she'; }
+      if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) { return 'he'; }
+      // if it's a known unisex name, don't try guess it. be safe.
+      if(nameType('a')) { return 'they'; }
+      // if we think it's a person, but still don't know the gender, do a little guessing
+			// if it ends in a 'ee or ah', female
+      if (names[0].match(/[aeiy]$/)) { return 'she'; }
+			// if it ends in a 'oh or uh', male
+      if (names[0].match(/[ou]$/)) { return 'he'; }
+      // if it has double-consonants, female
       if(names[0].match(/(nn|ll|tt)/)){
         return 'she';
       }
-      //fallback to 'singular-they'
+      // fallback to 'singular-they'
       return 'they';
     }
 
-    //not a person
+    // not a person
     if(the.is_plural()){
       return 'they';
     }
 
     return 'it';
   }
-
-  //list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
+	
+  // list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
   the.referenced_by = function() {
-    //if it's named-noun, look forward for the pronouns pointing to it -> '... he'
+    // if it's named-noun, look forward for the pronouns pointing to it -> '... he'
     if(token && token.pos.tag !== 'PRP' && token.pos.tag !== 'PP'){
       var prp = the.pronoun();
-      //look at rest of sentence
+      // look at rest of sentence
       var interested = sentence.tokens.slice(word_i+1, sentence.tokens.length);
-      //add next sentence too, could go further..
+      // add next sentence too, could go further..
       if(sentence.next){
         interested = interested.concat(sentence.next.tokens);
       }
-      //find the matching pronouns, and break if another noun overwrites it
+      // find the matching pronouns, and break if another noun overwrites it
       var matches = [];
       for(var i=0; i<interested.length; i++){
-        if(interested[i].pos.tag ==='PRP' && (interested[i].normalised === prp || nouns.pps[interested[i].normalised] === prp)) {
-          //this pronoun points at our noun
+        if(interested[i].pos.tag === 'PRP' && (interested[i].normalised === prp || nouns.ppRefs[interested[i].normalised] === prp)) {
+          // this pronoun points at our noun
           matches.push(interested[i]);
-        } else if(interested[i].pos.tag==='PP' && nouns.pps[interested[i].normalised]===prp) {
-          //this posessive pronoun ('his/her') points at our noun
+        } else if(interested[i].pos.tag === 'PP' && nouns.ppRefs[interested[i].normalised] === prp) {
+          // this posessive pronoun ('his/her') points at our noun
           matches.push(interested[i]);
-        } else if(interested[i].pos.parent==='noun' && interested[i].analysis.pronoun()===prp) {
-          //this noun stops our further pursuit
+        } else if(interested[i].pos.parent === 'noun' && interested[i].analysis.pronoun() === prp) {
+          // this noun stops our further pursuit
           break;
         }
       }
@@ -191,8 +191,8 @@ module.exports = function(str, sentence, word_i) {
     // if it's a pronoun, look backwards for the first mention '[obama]... <-.. [he]'
     if (token && (token.pos.tag === 'PRP' || token.pos.tag === 'PP')) {
       var prp = token.normalised;
-			if(nouns.pps[prp]!==undefined){ // support possessives
-				prp = nouns.pps[prp];
+			if(nouns.ppRefs.hasOwnProperty(prp)){ // support possessives
+				prp = nouns.ppRefs[prp];
 			}
       //look at starting of this sentence
       var interested = sentence.tokens.slice(0, word_i)
