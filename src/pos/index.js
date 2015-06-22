@@ -14,7 +14,6 @@ var wordnet = require(dPath+'rules/wordnet');
 var pos_rules = require(dPath+'rules/pos');
 var schema = require(dPath+'schema');
 var _ = require('../_');
-//var cache = require('../cache');
 var Sentence = require('./sentence');
 var Section = require('./section');
 // all 'CD'
@@ -39,6 +38,12 @@ function setTokenFn(type) {
 		}
 		return t;
 	}
+}
+// shorthand .pos...
+function setPos(token, p, pr, pIsSchema) {
+	token.pos = (pIsSchema) ? p : schema[p];
+	token.pos_reason = _.toReadable(pr);
+	return token;
 }
 // combine tokens, general logic
 function mergeTokens(a, b) {
@@ -118,12 +123,6 @@ function wordRule(w) {
 		}
 	}
 }
-// shorthand .pos...
-function setPos(token, p, pr, pIsSchema) {
-	token.pos = (pIsSchema) ? p : schema[p];
-	token.pos_reason = pr;
-	return token;
-}
 // add a 'quiet' token for contractions so we can represent their grammar
 function contract(isAmbiguous) {
 	if (this.tokens.length < 2) { return this.tokens; } // nothing to contract
@@ -134,23 +133,16 @@ function contract(isAmbiguous) {
 		if (pos_data[type].hasOwnProperty(this.tokens[i].normalised)) {
 			before = this.tokens.slice(0, i);
 			after = this.tokens.slice(i + 1, this.tokens.length);
-			fix = [{
-				text: this.tokens[i].text,
-				normalised: '',
-				start: this.tokens[i].start,
-			}, {
-				text: '',
-				normalised: '',
-				start: undefined,
-			}];
+			fix = [{text: this.tokens[i].text, normalised: '', start: this.tokens[i].start}, 
+						{text: '', normalised: '', start: undefined}];
 			if (isAmbiguous && pos_rules.hasOwnProperty(type)) {
 				var chosen = pos_rules.ambiguousContractions(this.tokens, i);
 				fix[0].normalised = pos_data.ambiguousContractions[this.tokens[i].normalised], // e.g. the 'he' part
 				fix[0].pos = schema[lexicon[pos_data.ambiguousContractions[this.tokens[i].normalised]]];
-				fix[0].pos_reason = 'ambiguous_contraction';
+				fix[0].pos_reason = 'ambiguous contraction';
 				fix[1].normalised = chosen, //e.g. 'is', 'was' or 'have'
 				fix[1].pos = schema[lexicon[chosen]];
-				fix[1].pos_reason = 'silent_contraction';
+				fix[1].pos_reason = 'silent contraction';
 			} else {
 				fix[0].normalised = pos_data.contractions[this.tokens[i].normalised][0];
 				fix[1].normalised = pos_data.contractions[this.tokens[i].normalised][1];
@@ -163,9 +155,9 @@ function contract(isAmbiguous) {
 };
 // The mapping of sentence tokens: 5 pass functions:
 function passFn() {
+	this.has = {};
 	this.needs = null;
 	this.reason = '';
-	this.has = {};
 	this.set = function(token, o) {
 		if (o.pos) {
 			token = setPos(token, o.pos, ((o.pos_reason) ? o.pos_reason : 'signal from '+this.reason));	
@@ -174,14 +166,14 @@ function passFn() {
 		if (o.hasOwnProperty('needs')) { this.needs = o.needs; }
 		if (o.hasOwnProperty('reason')) { this.reason = o.reason; }
 		return token;
-	}
+	} // pass functions:
 	return {
 		// general rules
 		one: function(token) {
 			// first pass, word-level clues
 			// it has a capital and isn't a month, etc.
 			if (token.noun_capital && !values[token.normalised]) {
-				return setPos(token, 'NN', 'noun_capitalised');
+				return setPos(token, 'NN', 'capitalised noun');
 			}
 			// known words list
 			var lexiPos = lexi(token.normalised);
@@ -193,7 +185,7 @@ function passFn() {
 				return token;
 			}
 			// handle punctuation like ' -- '
-			if (!token.normalised) { return setPos(token, 'UH', 'wordless_string'); }
+			if (!token.normalised) { return setPos(token, 'UH', 'wordless string'); }
 			// suffix pos signals from wordnet
 			var l = token.normalised.length;
 			if (l > 4) {
@@ -312,10 +304,11 @@ function addNextLast(sentence, i, sentences) {
 }
 
 exports.pos = function(text, options) {
-	this.options = _.mixOptions('pos', options);
+	this.options = _.mixOptions(options, 'pos');
 	if (!text || !text.match(/[a-z0-9]/i)) { return new Section([]); }
 	// split to sentences, for each sentence run pos, make it a sentence object and add next/last :
 	var sentences = this.tokenize(text).map(sentencePos).map(toSentence.bind(this)).map(addNextLast);
+	
 	// return a Section object, with its methods
 	return new Section(sentences);
 }
