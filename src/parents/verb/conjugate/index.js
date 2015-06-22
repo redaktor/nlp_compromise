@@ -121,19 +121,20 @@ exports.verbConjugate = function(w) {
 	if (cached) {
 		return cached;
 	}
+	var hasDoer = !(verbs_conjugate.noDoers.hasOwnProperty(w));
 	
 	if(w.match(' ') && w.match(phrasalVerbs.particleRegex)){
 		var splits = w.match(phrasalVerbs.particleRegex,'');
 		var phrasal_verb = splits[1];
 		var particle = splits[2];
 		var res = module.exports(phrasal_verb); // recursive
-		delete res['doer'];
+		res['doer'] = null;
 		Object.keys(res).forEach(function(k){
 			if(res[k]){
 				res[k] += ' '+particle;
 			}
 		})
-		return result(JSON.parse(JSON.stringify(res))); // shallow copy because deleted
+		return result(res);
 	}
 
 	// for pluperfect ('had tried') remove 'had' and call it past-tense
@@ -152,13 +153,6 @@ exports.verbConjugate = function(w) {
 	var obj = {};
 	var l = verbs_conjugate.irregulars.length;
 	var c, i;
-	// TODO FIXME
-	/*
-		noDoers: 
-      { appear: 1,
-		irregularDoers: 
-      { begin: 'beginner',
-	*/
 	for (i = 0; i < l; i++) {
 		c = verbs_conjugate.irregulars[i];
 		if (verb === c.present || verb === c.gerund || verb === c.past || verb === c.infinitive) {
@@ -174,13 +168,17 @@ exports.verbConjugate = function(w) {
 	var r;
 	for (i = 0; i < l; i++) {
 		r = verb_rules.conjugate[predicted][i];
-		if (w.match(r.reg)) {
+		if (w.match(r.reg)) {		
 			obj[predicted] = w;
 			Object.keys(r.repl).forEach(function(k) {
 				if (k === predicted) {
 					obj[k] = w;
 				} else {
-					obj[k] = w.replace(r.reg, r.repl[k]);
+					if (k === 'doer' && !hasDoer) {
+						obj[k] = null;
+					} else {
+						obj[k] = w.replace(r.reg, r.repl[k]);
+					}
 				}
 			});
 			return result(obj);
