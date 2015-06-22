@@ -166,19 +166,15 @@ var main = {};
      'o\'',
      'a\'' ],
   PP: 
-   [ 'mine',
-     'my',
+   [ 'my',
      'myself',
      'your',
      'yourself',
      'yourselves',
      'himself',
-     'hers',
      'herself',
      'itself',
-     'ours',
      'ourselves',
-     'theirs',
      'themself',
      'themselves',
      'none',
@@ -412,29 +408,29 @@ var main = {};
 				c = {};
 				data.verbs.forEach(function(v) {
 					c = conjugate(v);
-					//var d = to_doer(v);
 					for (var tense in data.schema._tenses) {
 						if (c[tense] && !main[c[tense]]) { 
 							main[c[tense]] = data.schema.getTense(tense).tag;
 						}
-						//if (d && !main[d]) { main[d] = 'NNA' }
 					}
 				});
 				// decline all adjectives to their adverbs_ (~13ms)
 				// 'to_adverb','to_superlative','to_comparative'
 				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(j) {
-					main[j] = 'JJ';
-					var adv = to_adverb(j);
-					if (adv && adv !== j && !main[adv]) {
-						main[adv] = main[adv] || 'RB'
-					}
-					var c = to_comparative(j);
-					if (c && !c.match(/^more ./) && c !== j && !main[c]) {
-						main[c] = main[c] || 'JJR'
-					}
-					var s = to_superlative(j);
-					if (s && !s.match(/^most ./) && s !== j && !main[s]) {
-						main[s] = main[s] || 'JJS'
+					if (!main.hasOwnProperty(j)) {
+						main[j] = 'JJ';
+						var adv = to_adverb(j);
+						if (adv && adv !== j && !main[adv]) {
+							main[adv] = main[adv] || 'RB';
+						}
+						var c = to_comparative(j);
+						if (c && !c.match(/^more ./) && c !== j && !main[c]) {
+							main[c] = main[c] || 'JJR';
+						}
+						var s = to_superlative(j);
+						if (s && !s.match(/^most ./) && s !== j && !main[s]) {
+							main[s] = main[s] || 'JJS';
+						}
 					}
 				});
 				// Make sure CP are CP and not conjugated verb type
@@ -448,4 +444,5 @@ var main = {};
 			if (cat in did) { return did[cat] }
 			return [];
 		}
-  unzip();module.exports = main;
+  unzip();
+module.exports = main;

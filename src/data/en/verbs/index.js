@@ -9,7 +9,14 @@
  */
 
 
-  exports.zip = [ 'use',
+  exports.zip = [ 'appear',
+  'happen',
+  'seem',
+  'try',
+  'aid',
+  'fail',
+  'marry',
+  'use',
   'form',
   'hope',
   'consider',

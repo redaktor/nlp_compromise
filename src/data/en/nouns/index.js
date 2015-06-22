@@ -33,13 +33,17 @@ var _ = require("../../../_");
      'elle',
      '\'em' ],
   pps: 
-   [ [ 'yours', 1 ],
+   [ [ 'mine', 0 ],
+     [ 'yours', 1 ],
      [ 'his', 2 ],
      [ 'her', 3 ],
+     [ 'hers', 3 ],
      [ 'its', 4 ],
      [ 'our', 5 ],
-     [ 'their', 6 ],
-     [ 'them', 6 ] ],
+     [ 'ours', 5 ],
+     [ 'theirs', 6 ],
+     [ 'their', 6 ] ],
+  prpRefs: [ [ 11, 6 ] ],
   entityBlacklist: 
    [ 'west',
      'western',
@@ -87,12 +91,14 @@ var _ = require("../../../_");
      'and',
      '&' ] }
 module.exports = (function () {
-				var _pps = {};
-				exports.zip.pps.forEach(function(a) { _pps[a[0]] = exports.zip.prps[a[1]]; });
+				var _ppRefs = {};
+				exports.zip.pps.forEach(function(a) { _ppRefs[a[0]] = exports.zip.prps[a[1]]; });
+				exports.zip.prpRefs.forEach(function(a) { _ppRefs[exports.zip.prps[a[0]]] = exports.zip.prps[a[1]]; });
 				return {
 					refs: exports.zip.refs.map(function(i) { return exports.zip.prps[i]; }),
 					prps: exports.zip.prps.reduce(_.toObj, {}),
-					pps: _pps,
+					pps: exports.zip.pps.reduce(_.toObj, {}),
+					ppRefs: _ppRefs,
 					entityBlacklist: exports.zip.entityBlacklist.reduce(_.toObj, {}),
 					personBlacklist: exports.zip.personBlacklist,
 				}
