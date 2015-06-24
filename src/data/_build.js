@@ -1069,7 +1069,7 @@ function generateLanguage(lang) {
 		var _lZip = {};
 		var conjugate = require('../parents/verb/conjugate');
 		var to_doer = require('../parents/verb/conjugate/to_doer');
-		var to_adverb = require('../parents/adjective/conjugate/to_adverb');
+		var to_adverb = require('../parents/adjective/conjugate');
 		var to_comparative = require('../parents/adjective/conjugate/to_comparative');
 		var to_superlative = require('../parents/adjective/conjugate/to_superlative');
 		
@@ -1112,7 +1112,7 @@ function generateLanguage(lang) {
 			"var data = require('../');", C._,
 			"var conjugate = require('../../../parents/verb/conjugate');", C._,
 			"var to_doer = require('../../../parents/verb/conjugate/to_doer');", C._,
-			"var to_adverb = require('../../../parents/adjective/conjugate/to_adverb');", C._,
+			"var to_adverb = require('../../../parents/adjective/conjugate');", C._,
 			"var to_comparative = require('../../../parents/adjective/conjugate/to_comparative');", C._,
 			"var to_superlative = require('../../../parents/adjective/conjugate/to_superlative');", C._,
 			C.main

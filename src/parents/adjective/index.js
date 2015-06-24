@@ -5,10 +5,10 @@
 if (typeof lang != 'string') var lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var cache = require('../../cache');
+var to_adverb = require('./conjugate');
+var to_noun = require('./conjugate/to_noun');
 var to_comparative = require('./conjugate/to_comparative');
 var to_superlative = require('./conjugate/to_superlative');
-var to_adverb = require('./conjugate/to_adverb');
-var to_noun = require('./conjugate/to_noun');
 	
 module.exports = function(str, next, last, token) {
   var the = this;

@@ -14,15 +14,15 @@
 // most files are self-contained modules that optionally export for nodejs
 // this file loads them all together
 // if we're server-side, grab files, otherwise assume they're prepended already
-var _ = require('./src/_')
-var cache = require('./src/cache');
+var _ = require('./_')
+var cache = require('./cache');
 // parents (word types) and methods
-var parents = require('./src/parents');
-var methods = require('./src/methods');
+var parents = require('./parents');
+var methods = require('./methods');
 // part of speech tagging
-var pos = require('./src/pos');
+var pos = require('./pos');
 // named entity recognition
-var spot = require('./src/spot');
+var spot = require('./spot');
 
 function destroy() {
 	cache.empty();	

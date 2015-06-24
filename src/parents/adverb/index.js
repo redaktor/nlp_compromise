@@ -5,7 +5,7 @@
 if (typeof lang != 'string') lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var cache = require('../../cache');
-var to_adjective = require('./conjugate/to_adjective');
+var to_adjective = require('./conjugate');
 module.exports = function(str, next, last, token) {
   var the = this;
   the.word = str || '';
