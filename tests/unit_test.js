@@ -1256,6 +1256,8 @@ exports[t] = function (test) {
   test.strictEqual(nlp.value("twenty first").number(), 21)
   test.strictEqual(nlp.value("fifty ninth").number(), 59)
   test.strictEqual(nlp.value("nine hundred fiftieth").number(), 950)
+	test.strictEqual(nlp.value("Five and one-half").number(), 5.5)
+	test.strictEqual(nlp.value("Ten and a half million").number(), 10500000)
   if(TIME){console.timeEnd(t)}
   test.done()
 };
@@ -1322,7 +1324,7 @@ exports[t] = function (test) {
     ["he is very shoe", ["PRP", "CP", "RB", "JJ"]], ["she is so camp", ["PRP", "CP", "RB", "JJ"]],
     //before a pronoun
     ["Spencer lkajf him", ["NNP", "VB", "PRP"]], 
-		["Toronto lkajf them",["NN", "VB", "PRP"] ], //TODO redaktor*/
+		["Toronto lkajf them",["NN", "VB", "PRP"] ],
     //contractions
     ["he's amazing", ["PRP", "CP", "JJ"]], ["we're excited", ["PRP", "CP", "JJ"]], ["I'd go", ["PRP", "MD", "VBP"]], ["he's amazing, she's corrupt", ["PRP", "CP", "JJ", "PRP", "CP", "JJ"]],
     //numbers
@@ -1340,7 +1342,7 @@ exports[t] = function (test) {
     ["Björk Guðmundsdóttir lives in Reykjavík", ["NN", "VBZ", "IN", "NN"]], ["Bjork Guomundsdottir lives in Reykjavik", ["NN", "VBZ", "IN", "NN"]],
 
     ["Climate Change, Miliband", ["NN", "NN"]], ["http://google.com", ["CD"]], ["may live", ["MD", "VBP"]], ["may 7th live", ["CD", "VBP"]], 
-		["She and Marc Emery married on July 23, 2006", ["PRP", "CC", "NN", "VBD", "IN", "CD"]] //TODO redaktor*/
+		["She and Marc Emery married on July 23, 2006", ["PRP", "CC", "NN", "VBD", "IN", "CD"]]
   ].forEach(function (arr) {
     test.deepEqual(nlp.pos(arr[0], {}).tags(), [arr[1]], arr[0])
   })
