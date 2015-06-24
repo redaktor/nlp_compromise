@@ -21,30 +21,6 @@ var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
 for (var k in numbers) { vs = vs.concat(Object.keys(numbers[k])) }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 
-// set token against data rules, general logic
-function setTokenFn(type) {
-	return function(t, i, tokens) {
-		for (var id in pos_rules[type]) {
-			var r = pos_rules[type][id];
-			if (r._if && r._if(t, tokens[i+1], tokens[i-1], i)) {
-				if (r.set) {
-					tokens[i+(r.set)].pos = schema[r.tag];
-					tokens[i+(r.set)].pos_reason = _.toReadable(id);
-				} else {
-					t.pos = schema[r.tag];
-					t.pos_reason = _.toReadable(id);
-				}
-			}
-		}
-		return t;
-	}
-}
-// shorthand .pos...
-function setPos(token, p, pr, pIsSchema) {
-	token.pos = (pIsSchema) ? p : schema[p];
-	token.pos_reason = _.toReadable(pr);
-	return token;
-}
 // combine tokens, general logic
 function mergeTokens(a, b) {
 	a.text += ' ' + b.text;
@@ -59,8 +35,8 @@ function mergeTokens(a, b) {
 // combine multiple words
 function merge(a, n, c) {
 	var count = (!c || c < 1) ? 1 : c;
-	var j, k;
-	for (var i = 0; i < count; i++) {
+	var i, j, k;
+	for (i = 0; i < count; i++) {
 		j = (c < 1) ? n-i : n+i;
 		k = (c < 1) ? j : j+1;
 		if (a[k]) {
@@ -73,8 +49,8 @@ function merge(a, n, c) {
 // automatically from any data/{{lang}}/pos_rules
 function combine(tokens) {
 	var arr = tokens || [];
-	var r;
-	for (var i = 0; i < arr.length; i++) {
+	var i, r;
+	for (i = 0; i < arr.length; i++) {
 		// combine adjacent neighbours, and special cases
 		if (arr[i+1]) {
 			for (var id in pos_rules.merge) {
@@ -104,20 +80,17 @@ function combine(tokens) {
 	// TODO phrasal verbs: some known are 3-gram phrasal verbs, like 'get away from' !!!
 	// - does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
 }
+var lexiFn = _.tokenFn(pos_rules, 'replace', schema);
 function lexi(w) {
 	if (lexicon.hasOwnProperty(w)) { return schema[lexicon[w]]; }
 	if (pos_rules.replace) {
-		for (var key in pos_rules.replace) {
-			if (w.match(pos_rules.replace[key].matches)) {
-				var repl = (pos_rules.replace[key].hasOwnProperty('replaces')) ? 'replaces' : 'matches';
-				var attempt = w.replace(pos_rules.replace[key][repl], pos_rules.replace[key].replacer);
-				return schema[lexicon[attempt]];
-			}
-		}
+		var matches = lexiFn(w);
+		return (matches) ? schema[lexicon[matches]]: false;
 	}
 }
 function wordRule(w) {
-	for (var i = 0; i < pos_rules.words.length; i++) {
+	var i;
+	for (i = 0; i < pos_rules.words.length; i++) {
 		if (w.length > 4 && w.match(pos_rules.words[i].reg)) {
 			return schema[pos_rules.words[i].pos];
 		}
@@ -127,9 +100,9 @@ function wordRule(w) {
 function contract(isAmbiguous) {
 	if (this.tokens.length < 2) { return this.tokens; } // nothing to contract
 	// isAmbiguous contractions require (some) grammatical knowledge to disambigous properly (e.g "he's"=> ['he is', 'he was'])
-	var before, after, fix;
+	var i, before, after, fix;
 	var type = (isAmbiguous) ? 'ambiguousContractions' : 'contractions';
-	for (var i = 0; i < this.tokens.length; i++) {
+	for (i = 0; i < this.tokens.length; i++) {
 		if (pos_data[type].hasOwnProperty(this.tokens[i].normalised)) {
 			before = this.tokens.slice(0, i);
 			after = this.tokens.slice(i + 1, this.tokens.length);
@@ -160,20 +133,22 @@ function passFn() {
 	this.reason = '';
 	this.set = function(token, o) {
 		if (o.pos) {
-			token = setPos(token, o.pos, ((o.pos_reason) ? o.pos_reason : 'signal from '+this.reason));	
+			token = _.setPos(token, schema[o.pos], ((o.pos_reason) ? o.pos_reason : 'signal from '+this.reason));	
 		} 
 		if (token.pos) { this.has[token.pos.parent] = true; }
 		if (o.hasOwnProperty('needs')) { this.needs = o.needs; }
 		if (o.hasOwnProperty('reason')) { this.reason = o.reason; }
 		return token;
-	} // pass functions:
+	} 
+	
+	// pass functions:
 	return {
-		// general rules
+	// general rules
 		one: function(token) {
 			// first pass, word-level clues
 			// it has a capital and isn't a month, etc.
 			if (token.noun_capital && !values[token.normalised]) {
-				return setPos(token, 'NN', 'capitalised noun');
+				return _.setPos(token, schema.NN, 'capitalised noun');
 			}
 			// known words list
 			var lexiPos = lexi(token.normalised);
@@ -185,24 +160,24 @@ function passFn() {
 				return token;
 			}
 			// handle punctuation like ' -- '
-			if (!token.normalised) { return setPos(token, 'UH', 'wordless string'); }
+			if (!token.normalised) { return _.setPos(token, schema.UH, 'wordless string'); }
 			// suffix pos signals from wordnet
 			var l = token.normalised.length;
 			if (l > 4) {
 				var suffix = token.normalised.substr(l - 4, l - 1)
 				if (wordnet.hasOwnProperty(suffix)) {
-					return setPos(token, wordnet[suffix], 'wordnet suffix');
+					return _.setPos(token, schema[wordnet[suffix]], 'wordnet suffix');
 				}
 			}
 			// suffix regexes for words
 			var r = wordRule(token.normalised);
-			if (r) { return setPos(token, r, 'regex suffix', 1); }
+			if (r) { return _.setPos(token, r, 'regex suffix'); }
 			// see if it's a number
-			if (parseFloat(token.normalised)) { return setPos(token, 'CD', 'parsefloat'); }
+			if (parseFloat(token.normalised)) { return _.setPos(token, schema.CD, 'parseFloat'); }
 			return token;
 		},
 		// wrangles results a bit, i18n
-		two: setTokenFn('set'),
+		two: _.tokenFn(pos_rules, 'set', schema),
 		// seek verb or noun phrases after their signals
 		three: function(token, i, tokens) {
 			var next = tokens[i + 1];
@@ -257,7 +232,7 @@ function passFn() {
 			return token;
 		},
 		// error correction, i18n
-		five: setTokenFn('special')
+		five: _.tokenFn(pos_rules, 'special', schema)
 	};
 }
 
@@ -304,7 +279,8 @@ function addNextLast(sentence, i, sentences) {
 }
 
 exports.pos = function(text, options) {
-	this.options = _.mixOptions(options, 'pos');
+	this.options = _.mixOptions(options, this.options, 'pos');
+	if (!text) { text = this.text; }
 	if (!text || !text.match(/[a-z0-9]/i)) { return new Section([]); }
 	// split to sentences, for each sentence run pos, make it a sentence object and add next/last :
 	var sentences = this.tokenize(text).map(sentencePos).map(toSentence.bind(this)).map(addNextLast);
