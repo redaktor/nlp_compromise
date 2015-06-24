@@ -23,7 +23,7 @@ var factors = [{
 	mult: 0.25
 }];
 function checkNum(s) {
-	// try to finish-fast
+	// try to finish-fast if it's already an actual number
 	if (s.match(/[0-9]\.[0-9]/) && parseFloat(s) == s) {
 		return parseFloat(s);
 	}
@@ -102,9 +102,6 @@ function numeral2number(s, j, a) {
 				continue;
 			}
 		}
-		// if it's already an actual number
-		if (w.match(/^[0-9]\.[0-9]$/)) { this.setParams(parseFloat(w)); continue; }
-		if (parseInt(w, 10) == w) { this.setParams(parseInt(w, 10)); continue; }
 		for(var k in did){
 			// ones rules, e.g. five seven OR five seventeen
 			// teens rules, e.g. five seven OR fifteen seventeen OR sixty fifteen
