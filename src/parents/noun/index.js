@@ -130,8 +130,9 @@ module.exports = function(str, sentence, word_i) {
       })
       if (nameType('m')) { return 'he'; }
       if (nameType('f')) { return 'she'; }
+			
       // test some honorifics
-      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.? /,'i')) { return 'she'; }
+      if (the.word.match(/^(mrs|miss|ms|misses|mme|mlle)\.?\b/,'i')) { return 'she'; }
       if (the.word.match(/\b(mr|mister|sr|jr)\b/,'i')) { return 'he'; }
       // if it's a known unisex name, don't try guess it. be safe.
       if(nameType('a')) { return 'they'; }
@@ -156,6 +157,7 @@ module.exports = function(str, sentence, word_i) {
     return 'it';
   }
 	
+	// TODO - empire style self reflexives like (his|her|your) + (royal|majesty|highness|spyness|lordship|ladyship)
   // list of pronouns that refer to this named noun. "[obama] is cool, [he] is nice."
   the.referenced_by = function() {
     // if it's named-noun, look forward for the pronouns pointing to it -> '... he'
@@ -213,14 +215,14 @@ module.exports = function(str, sentence, word_i) {
 
   // specifically which pos it is
   the.which = (function() {
-    // posessive
+    // possessive
     if (the.word.match(/'s$/)) {
 			return schema['NNO'];
 		}
-    // plural
-    // if (the.is_plural) {
-    //   return schema['NNS']
-    // }
+    // plural - TODO, was commented out
+    if (the.is_plural) {
+    	return schema['NNS']
+    }
     // generic
     return schema['NN'];
   })();

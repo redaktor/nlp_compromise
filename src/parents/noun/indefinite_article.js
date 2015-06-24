@@ -3,6 +3,7 @@
  * @module src/parents/noun/indefinite_article
  */
 // TODO - localize DECOUPLE
+
 module.exports = function(str) {
 	if (!str) {return null}
 	var irregulars = {

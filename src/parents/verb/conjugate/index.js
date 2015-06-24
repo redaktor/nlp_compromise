@@ -27,7 +27,7 @@ function predict(w) {
 	return 'infinitive';
 }
 
-//fallback to this transformation if it has an unknown prefix
+// fallback to this transformation if it has an unknown prefix
 function fallback(w) {
 	var infinitive;
 	if (w.length > 4) {
@@ -62,7 +62,7 @@ function fallback(w) {
 	};
 }
 
-//make sure object has all forms
+// make sure object has all forms
 function fulfill(obj, prefix) {
 	if (!obj.infinitive) { return obj; }
 	if (!obj.gerund) {
@@ -99,17 +99,16 @@ function fulfill(obj, prefix) {
 	if (!obj.futurePerfect) {
 		obj.futurePerfect = 'will have ' + obj.past;
 	}
-	
 	return obj;
 }
 
-function result(conjugated, prefix) {
-	var c = fulfill(conjugated, prefix);
+function result(c, prefix) {
+	var conjugated = fulfill(c, prefix);
 	for (var i = 0; i < schema._tenseOrder.length; i++) {
 		var w = conjugated[schema._tenseOrder[i]];
-		cache.set(w, c, 'verbConjugate');
+		cache.set(w, conjugated, 'verbConjugate');
 	}
-	return c;
+	return conjugated;
 }
 
 

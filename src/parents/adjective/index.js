@@ -15,9 +15,7 @@ module.exports = function(str, next, last, token) {
   the.word = str || '';
 	
   the.conjugate = function() {
-		if (typeof the.word != 'string' || the.word === '') {
-			return {};
-		}
+		if (typeof the.word != 'string' || the.word === '') { return {}; }
 		var cached = cache.get(the.word, 'adjectiveConjugate');
 		if (cached) {
 			return cached;
