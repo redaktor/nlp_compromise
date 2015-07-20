@@ -2,84 +2,68 @@
  * wrapper module for verb's methods
  * @module src/parents/verb/index
  */
-// TODO - maybe i18n 'infinitive', 'present' etc., goes to schema
+// TODO - maybe i18n type explanations like 'infinitive', 'present' etc., goes to schema
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../../data/'+lang+'/';
 var schema = require(dPath+'schema');
-var verbs_special = require(dPath+'verbs/special');
+var special = require(dPath+'verbs/special');
+var rules = require(dPath+'rules/verb');
+var _ = require('../../_');
 var cache = require('../../cache');
-var verb_conjugate = require('./conjugate');
-
-exports.main = function(str, sentence, word_i) {
-  var the = this;
-	
-  var token, next;
-  if (sentence !== undefined && word_i !== undefined) {
-    token = sentence.tokens[word_i];
-    next = sentence.tokens[word_i + i];
-  }
-  the.word = str || '';
-	the.conjugated = verb_conjugate(the.word);
-	
-	the.conjugate = function() {
-		return the.conjugated;
+var conjugate = require('./conjugate');
+function form() {
+	for (var i = 0; i < schema._tenses.length; i++) {
+		if (this.conjugated[schema._tenses[i]] === this.word) { return schema._tenses[i]; }
 	}
-	
-  the.to_past = function() {
-    if (the.form === 'gerund') {
-      return the.word; 
-    }
-    return the.conjugated.past;
-  }
-
-  the.to_present = function() {
-    return the.conjugated.present;
-  }
-
-  the.to_future = function() {
-    return 'will ' + the.conjugated.infinitive;
-  }
-	
-	
-  // which conjugation
-	var cached = cache.get(the.word, 'verbForm');
-	the.form = (cached) ? cached : cache.set(the.word, (function() {
-		// don't choose infinitive if infinitive == present
-		for (var i = 0; i < schema._tenseOrder.length; i++) {
-			if (the.conjugated[schema._tenseOrder[i]] === the.word) {
-				return schema._tenseOrder[i];
-			}
-		}
-	})(), 'verbForm');
-
-	
-  // past/present/future   //wahh?!
-	cached = cache.get(the.word, 'verbTense');
-  the.tense = (cached) ? cached : cache.set(the.word, (function() {
-    if (the.word.match(/\bwill\b/)) {return 'future';}
-    if (the.form === 'present') {return 'present';}
-    if (the.form === 'past') {return 'past';}
-    return 'present';
-  })(), 'verbTense');
-
-  // the most accurate part_of_speech
-	cached = cache.get(the.word, 'verbWhich');
-  the.which = (cached) ? cached : cache.set(the.word, (function() {
-    if (verbs_special.CP[the.word]) { return schema['CP']; }
-    if (the.word.match(/([aeiou][^aeiouwyrlm])ing$/)) { return schema['VBG']; }
-    return schema.getTense(the.form).tag;
-  })(), 'verbWhich');
-
-  // is this verb negative already?
-  the.negative = function() {
-		cached = cache.get(the.word, 'verbNeg');
-		if (cached) { return cached; }
-    var isN = ( (the.word.match(/n't$/)) || ((verbs_special.MD[the.word] || verbs_special.CP[the.word]) && next && next.normalised === 'not') );
-		return cache.set(the.word, isN, 'verbNeg');
-  }
-  return the;
+	if (this.rulesDetect === 'future') { return this.rulesDetect; }
 }
-module.exports = exports.main;
+function tense() {
+	if (this.rulesDetect === 'future') { return this.rulesDetect; }
+	if (this.form === 'present' || this.form === 'past') { return this.form; }
+	return 'present';
+}
+function which() {
+	if (special.CP[this.word]) { return schema['CP']; }
+	if (this.rulesDetect && this.rulesDetect in schema._tense) { return schema[schema._tense[this.rulesDetect]]; }
+	return schema.getTense(this.form).tag;
+}
+// is this verb negative ?
+function isNegative() {
+	cached = cache.get(this.word, 'verbNeg');
+	if (cached) { return cached; }
+	var rulesN = (this.rulesDetect === 'negative');
+	var isN = ( rulesN || ((special.MD[this.word] || special.CP[this.word]) && this.next && this.next.normalised === 'not') );
+	return cache.set(this.word, isN, 'verbNeg');
+}
+
+exports.verb = function(str, sentence, word_i) {
+  if (sentence !== undefined && word_i !== undefined) {
+    this.next = sentence.tokens[word_i + i];
+  }
+  this.word = str || '';
+	this.rulesDetect = rules.detect(this.word);	
+	// .conjugated (maintaining its own cache for all conjugation forms)
+	this.conjugated = (conjugate.bind(this))();
+  // .form (current conjugation type)
+	var cached = cache.get(str, 'verbForm');
+	this.form = (cached) ? cached : cache.set(str, (form.bind(this))(), 'verbForm');
+  // .tense (past/present/future)
+	cached = cache.get(this.word, 'verbTense');
+  this.tense = (cached) ? cached : cache.set(this.word, (tense.bind(this))(), 'verbTense');
+  // .which - the most accurate part_of_speech
+	cached = cache.get(this.word, 'verbWhich');
+  this.which = (cached) ? cached : cache.set(this.word, (which.bind(this))(), 'verbWhich');
+  return this;
+}
+// VERB core methods :
+exports.verb.prototype.conjugate = function() { return this.conjugated; }
+exports.verb.prototype.form = function() { return this.form; }
+exports.verb.prototype.tense = function() { return this.tense; }
+exports.verb.prototype.which = function() { return this.which; }
+exports.verb.prototype.negative = isNegative;
+// shorthands ...
+exports.verb.prototype = _.sugarProto('to_', conjugate(), exports.verb.prototype);
+module.exports = exports.verb;
 
 // console.log(new Verb('will'))
 // console.log(new Verb('stalking').tense)
