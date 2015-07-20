@@ -16,7 +16,7 @@ module.exports = function(text) {
   var chunks = text.split(/(\S.+?[.\?!])(?=\s+|$|")/g);
 
   // all abbreviations are used here, including nonNoun and date abbrevs.
-  abbreviations = abbreviations.nouns.concat(abbreviations.nonNouns, Object.keys(dates.monthAbbrevs));
+  abbreviations = abbreviations.nouns.concat(abbreviations.nonNouns, Object.keys(dates.monthsAbbrevs), Object.keys(dates.daysAbbrevs));
 
   // detection of non-sentence chunks
   var abbrev_reg = new RegExp("\\b(" + abbreviations.join("|") + ")[.!?] ?$", "i");
