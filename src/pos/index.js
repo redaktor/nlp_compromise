@@ -8,18 +8,20 @@ var lexicon = require(dPath+'lexicon');
 var dates = require(dPath+'lexicon/dates');
 var numbers = require(dPath+'lexicon/numbers');
 var firstnames = require(dPath+'lexicon/firstnames');
-var pos_data = require(dPath+'lexicon/pos');
+var data = require(dPath+'lexicon/pos');
 // .particles (possible 2nd part in a phrasal verb) and .contractions:
 var wordnet = require(dPath+'rules/wordnet');
-var pos_rules = require(dPath+'rules/pos');
+var rules = require(dPath+'rules/pos');
 var schema = require(dPath+'schema');
 var _ = require('../_');
+var cache = require('../cache');
 var Sentence = require('./sentence');
 var Section = require('./section');
 // all 'CD'
 var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
 for (var k in numbers) { vs = vs.concat(Object.keys(numbers[k])) }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
+// TODO - pos could use parents/value methods for a better analysis ...
 
 // combine tokens, general logic
 function mergeTokens(a, b) {
@@ -27,7 +29,7 @@ function mergeTokens(a, b) {
 	a.normalised += ' ' + b.normalised;
 	a.pos_reason += '|' + b.pos_reason;
 	a.start = a.start || b.start;
-	a.noun_capital = (a.noun_capital && b.noun_capital);
+	a.noun_capital = a.noun_capital || b.noun_capital;
 	a.punctuated = a.punctuated || b.punctuated;
 	a.end = a.end || b.end;
 	return a;
@@ -46,15 +48,15 @@ function merge(a, n, c) {
 	}
 	return a;
 }
-// automatically from any data/{{lang}}/pos_rules
+// automatically from any data/{{lang}}/rules
 function combine(tokens) {
 	var arr = tokens || [];
 	var i, r;
 	for (i = 0; i < arr.length; i++) {
 		// combine adjacent neighbours, and special cases
 		if (arr[i+1]) {
-			for (var id in pos_rules.merge) {
-				r = pos_rules.merge[id];
+			for (var id in rules.merge) {
+				r = rules.merge[id];
 				if (r && arr[i] && r._if && r._if(arr[i], arr, i)) {
 					arr = merge(arr, i, r.merge); // merge
 					if (r.set) { // set pos	
@@ -67,34 +69,21 @@ function combine(tokens) {
 		}
 		// combine phrasal verbs
 		// 'beef up' is one verb, and not some direction of beefing.
-		if(!!(arr[i]) && !!(arr[i-1]) && pos_data.particles[arr[i].normalised]){
+		if(!!(arr[i]) && !!(arr[i-1]) && data.particles[arr[i].normalised]){
 			// it matches a known phrasal-verb
 			if(lexicon[ [arr[i-1].normalised, arr[i].normalised].join(' ') ]){
 				arr = merge(arr, i, -1);
 			}
 		}
 	}
-	return arr.filter(function(r) {
-		return r;
-	})
+	return arr.filter(function(r) { return r; });
 	// TODO phrasal verbs: some known are 3-gram phrasal verbs, like 'get away from' !!!
 	// - does not handle seperated phrasal verbs ('take the coat off' -> 'take off')
 }
-var lexiFn = _.tokenFn(pos_rules, 'replace', schema);
 function lexi(w) {
 	if (lexicon.hasOwnProperty(w)) { return schema[lexicon[w]]; }
-	if (pos_rules.replace) {
-		var matches = lexiFn(w);
-		return (matches) ? schema[lexicon[matches]]: false;
-	}
-}
-function wordRule(w) {
-	var i;
-	for (i = 0; i < pos_rules.words.length; i++) {
-		if (w.length > 4 && w.match(pos_rules.words[i].reg)) {
-			return schema[pos_rules.words[i].pos];
-		}
-	}
+	var hasMatch = rules.lexiReplace(w);
+	return (hasMatch) ? schema[lexicon[hasMatch]] : false;
 }
 // add a 'quiet' token for contractions so we can represent their grammar
 function contract(isAmbiguous) {
@@ -103,43 +92,45 @@ function contract(isAmbiguous) {
 	var i, before, after, fix;
 	var type = (isAmbiguous) ? 'ambiguousContractions' : 'contractions';
 	for (i = 0; i < this.tokens.length; i++) {
-		if (pos_data[type].hasOwnProperty(this.tokens[i].normalised)) {
+		if (data[type].hasOwnProperty(this.tokens[i].normalised)) {
 			before = this.tokens.slice(0, i);
 			after = this.tokens.slice(i + 1, this.tokens.length);
 			fix = [{text: this.tokens[i].text, normalised: '', start: this.tokens[i].start}, 
 						{text: '', normalised: '', start: undefined}];
-			if (isAmbiguous && pos_rules.hasOwnProperty(type)) {
-				var chosen = pos_rules.ambiguousContractions(this.tokens, i);
-				fix[0].normalised = pos_data.ambiguousContractions[this.tokens[i].normalised], // e.g. the 'he' part
-				fix[0].pos = schema[lexicon[pos_data.ambiguousContractions[this.tokens[i].normalised]]];
+			if (isAmbiguous && rules.hasOwnProperty(type)) {
+				var chosen = rules.ambiguousContractions(this.tokens, i);
+				fix[0].normalised = data.ambiguousContractions[this.tokens[i].normalised], // e.g. the 'he' part
+				fix[0].pos = schema[lexicon[data.ambiguousContractions[this.tokens[i].normalised]]];
 				fix[0].pos_reason = 'ambiguous contraction';
 				fix[1].normalised = chosen, //e.g. 'is', 'was' or 'have'
 				fix[1].pos = schema[lexicon[chosen]];
 				fix[1].pos_reason = 'silent contraction';
 			} else {
-				fix[0].normalised = pos_data.contractions[this.tokens[i].normalised][0];
-				fix[1].normalised = pos_data.contractions[this.tokens[i].normalised][1];
+				fix[0].normalised = data.contractions[this.tokens[i].normalised][0];
+				fix[1].normalised = data.contractions[this.tokens[i].normalised][1];
 			}
 			this.tokens = before.concat(fix).concat(after);
 			return contract(this.tokens, isAmbiguous); // recursive
 		}
 	}
 	return this.tokens;
-};
+}
+function set(token, o) {
+	if (o.pos) {
+		token = _.setPos(token, schema[o.pos], ((o.pos_reason) ? o.pos_reason : 'signal from '+this.reason));	
+	} 
+	if (token.pos) { this.has[token.pos.parent] = true; }
+	if (o.hasOwnProperty('needs')) { this.needs = o.needs; }
+	if (o.hasOwnProperty('reason')) { this.reason = o.reason; }
+	return token;
+}
+
 // The mapping of sentence tokens: 5 pass functions:
 function passFn() {
+	this.set = set;
 	this.has = {};
 	this.needs = null;
 	this.reason = '';
-	this.set = function(token, o) {
-		if (o.pos) {
-			token = _.setPos(token, schema[o.pos], ((o.pos_reason) ? o.pos_reason : 'signal from '+this.reason));	
-		} 
-		if (token.pos) { this.has[token.pos.parent] = true; }
-		if (o.hasOwnProperty('needs')) { this.needs = o.needs; }
-		if (o.hasOwnProperty('reason')) { this.reason = o.reason; }
-		return token;
-	} 
 	
 	// pass functions:
 	return {
@@ -170,20 +161,22 @@ function passFn() {
 				}
 			}
 			// suffix regexes for words
-			var r = wordRule(token.normalised);
-			if (r) { return _.setPos(token, r, 'regex suffix'); }
+			if (token.normalised.length > 4) {
+				var r = rules.wordsMatch(token.normalised);
+				if (r) { return _.setPos(token, r, 'regex suffix'); }
+			}
 			// see if it's a number
 			if (parseFloat(token.normalised)) { return _.setPos(token, schema.CD, 'parseFloat'); }
 			return token;
 		},
 		// wrangles results a bit, i18n
-		two: _.tokenFn(pos_rules, 'set', schema),
+		two: rules.set,
 		// seek verb or noun phrases after their signals
 		three: function(token, i, tokens) {
 			var next = tokens[i + 1];
 			if (token.pos) {
 				// suggest noun after some determiners (a|the), posessive pronouns (her|my|its) // i18n
-				if ((pos_rules.strongDeterminers[token.normalised]) || token.pos.tag === 'PP') {
+				if ((rules.strongDeterminers[token.normalised]) || token.pos.tag === 'PP') {
 					return this.set(token, {needs: 'noun', reason: token.pos.name}); // proceed
 				}
 				// suggest verb after personal pronouns (he|she|they), modal verbs (would|could|should) // TODO - MAYBE DECOUPLE (needs language check again)
@@ -211,10 +204,7 @@ function passFn() {
 				}
 			}
 			// set them back as satisfied..
-			if (this.needs === 'verb' && token.pos && token.pos.parent === 'verb') {
-				this.needs = null;
-			}
-			if (this.needs === 'noun' && token.pos && token.pos.parent === 'noun') {
+			if (token.pos && (this.needs === 'verb' || this.needs === 'noun') && this.needs === token.pos.parent) {
 				this.needs = null;
 			}
 			return this.set(token, {});
@@ -232,14 +222,18 @@ function passFn() {
 			return token;
 		},
 		// error correction, i18n
-		five: _.tokenFn(pos_rules, 'special', schema)
+		five: rules.special
 	};
 }
 
 ////////////////
 ///party-time//
 function sentencePos(sentence) {
-	// run the passes above for current sentence
+	var cached = cache.get(sentence.sentence, 'pos', 1);
+	if (cached) {
+		return cached;
+	}
+	// run the passes above for the current sentence
 	this.tokens = sentence.tokens || {};
 	this.pass = passFn();
 	this.contract = contract;
@@ -247,7 +241,7 @@ function sentencePos(sentence) {
 	if (this.tokens[1]) {
 		// if second word is a noun-capital, give more sympathy to this capital
 		if(this.tokens[1] && this.tokens[1].noun_capital && !lexi(this.tokens[0].normalised)){
-			this.tokens[0].noun_capital = true;
+			this.tokens[0].noun_capital = this.tokens[1].noun_capital;
 		}
 	}
 	// Pass 1 and 2
@@ -271,20 +265,18 @@ function toSentence(_s) {
 	}.bind(this));
 	return sentence;
 }
-function addNextLast(sentence, i, sentences) {
-	// add next / last
-	sentence.last = sentences[i-1];
-	sentence.next = sentences[i+1];
-	return sentence;
-}
 
 exports.pos = function(text, options) {
-	this.options = _.mixOptions(options, this.options, 'pos');
+	this.options = exports.options = _.mixOptions(options, this.options, 'pos');
 	if (!text) { text = this.text; }
 	if (!text || !text.match(/[a-z0-9]/i)) { return new Section([]); }
 	// split to sentences, for each sentence run pos, make it a sentence object and add next/last :
-	var sentences = this.tokenize(text).map(sentencePos).map(toSentence.bind(this)).map(addNextLast);
-	
+	var sentences = this.tokenize(text).map(sentencePos).map(toSentence, this).map(_.addNextLast);
+	// write cache per sentence
+	sentences.forEach(function(s) {
+		var sIn = [s.text(), (exports.options.combine) ? '1' : ''].join('');
+		cache.set(sIn, s, 'pos', 1);
+	});
 	// return a Section object, with its methods
 	return new Section(sentences);
 }

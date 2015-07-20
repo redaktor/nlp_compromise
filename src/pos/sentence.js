@@ -6,11 +6,12 @@
 if (typeof lang != 'string') lang = 'en';
 var dPath = '../data/'+lang+'/';
 var nouns = require(dPath+'nouns');
-var negate_data = require(dPath+'lexicon/negate');
-var sentence_rules = require(dPath+'rules/sentence');
+var data = require(dPath+'lexicon/negate');
+var rules = require(dPath+'rules/sentence');
+var _ = require('../_');
 
-exports.fn = function(type, todo) {
-	if (todo === 'tokens') {
+exports.fn = function(type, doTokens) {
+	if (doTokens) {
 		return function() {
 			this.tokens = this.tokens.map(function(token) {
 				if (token.pos.parent === 'verb') {
@@ -24,32 +25,23 @@ exports.fn = function(type, todo) {
 	}
 	return function() {
 		return this.tokens.filter(function(t) {
-			return t.pos.parent == type;
+			return (t.pos.parent === type);
 		})
 	}
 }
 
 exports.Sentence = function(tokens) {
   this.tokens = tokens || [];
-
-  function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
 	this.text = function() {
-    return this.tokens.map(function(s) {
-      return s.text;
-    }).join(' ');
+    return this.tokens.map(_.mapFn('text')).join(' ');
   }
   this.tense = function() {
     return this.tokens.filter(function(token) {
 			return token.pos.parent === 'verb';
-		}).map(function(v) {
-			return v.analysis.tense;
-		});
+		}).map(_.mapFn('analysis.tense'));
   }
   this.tags = function() {
-    return this.tokens.map(function(t) {
-      return t.pos.tag;
-    })
+    return this.tokens.map(_.mapFn('pos.tag'))
   }
 	// sugar 'grab' methods
 	this.verbs = exports.fn('verb');
@@ -59,9 +51,9 @@ exports.Sentence = function(tokens) {
   this.values = exports.fn('value');
 	
 	// conjugate
-  this.to_past = exports.fn('to_past', 'tokens');
-  this.to_present = exports.fn('to_present', 'tokens');
-  this.to_future = exports.fn('to_future', 'tokens');
+  this.to_past = exports.fn('to_past', 1);
+  this.to_present = exports.fn('to_present', 1);
+  this.to_future = exports.fn('to_future', 1);
 	
   this.insert = function(token, i) {
     if (i && token) { this.tokens.splice(i, 0, token); }
@@ -71,8 +63,8 @@ exports.Sentence = function(tokens) {
     var spots = [];
     options = options || {};
     this.tokens.forEach(function(t) {
-			var optCond = (options.ignore_gerund) ? (t.pos.tag !== 'VBG') : (t.pos);
-      if (optCond && t.pos.parent === 'noun' && t.analysis.is_entity()) {
+			var optionsOK = (options.ignore_gerund) ? (t.pos.tag !== 'VBG') : (t.pos);
+      if (optionsOK && t.pos.parent === 'noun' && t.analysis.is_entity()) {
         spots.push(t);
       }
     });
@@ -102,18 +94,18 @@ exports.Sentence = function(tokens) {
 	// these are cheap ways to negate the meaning
 	// ('none' is ambiguous because it could mean (all or some) )
   this.negate = function() {
-		var o = sentence_rules.negate;
+		var o = rules.negate;
     var t, _txt, txt, arr;
 		// loop through each term.. 
 		for (var i = 0; i < this.tokens.length; i++) {
 			t = this.tokens[i];
 			if (t.pos_reason === 'ambiguous contraction') t.text = t.normalised;
       // turn 'is' into 'isn't', etc - make sure 'is' isnt followed by a 'not', too
-      if (negate_data[t.normalised] && (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
-				this.tokens[i].text = negate_data[t.normalised];
-				this.tokens[i].normalised = negate_data[t.normalised];
+      if (data[t.normalised] && (!this.tokens[i + 1] || this.tokens[i + 1].normalised != 'not')) {
+				this.tokens[i].text = data[t.normalised];
+				this.tokens[i].normalised = data[t.normalised];
 				if (t.capitalised) {
-					this.tokens[i].text = capitalise(this.tokens[i].text);
+					this.tokens[i].text = _.toTitlecase(this.tokens[i].text);
 				}
 				return this;
       }
@@ -132,9 +124,9 @@ exports.Sentence = function(tokens) {
 						arr = (o[id].prefix) ? [o[id].prefix, txt] : [txt, o[id].suffix||''];
 						this.tokens[i].text = arr.join(' ');
 						if (t.capitalised) {
-							this.tokens[i].text = capitalise(this.tokens[i].text);
+							this.tokens[i].text = _.toTitlecase(this.tokens[i].text);
 						}
-						this.tokens[i].normalised = (t.normalised) ? t.normalised : this.tokens[i].text.toLowerCase();
+						this.tokens[i].normalised = (t.normalised) ? t.normalised : _.normalise(this.tokens[i].text);
 						return this;
 					}
 				}
