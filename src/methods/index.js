@@ -3,22 +3,22 @@
  * @module src/methods/index
  */
 // tokenization
-var sentence_parser = require('./tokenization/sentence');
-var tokenize = require('./tokenization/tokenize');
-var ngram = require('./tokenization/ngram');
+var tokenize = require('./tokenize');
+var sentencize = require('./tokenize/sentence');
+var ngramize = require('./tokenize/ngram');
 // normalization
-var normalize = require('./transliteration/unicode_normalisation');
-var syllables = require('./syllables');
+var normalize = require('./transliterate/unicodeNormalize');
+var syllabicate = require('./syllabicate');
 // localization
-var americanize = require('./localization/americanize');
-var britishize = require('./localization/britishize');
+var americanize = require('./localize/americanize');
+var britishize = require('./localize/britishize');
 
 module.exports = {
-  sentence_parser: sentence_parser,
+  sentence_parser: sentencize,
 	tokenize: tokenize,
-	ngram: ngram,
+	ngram: ngramize,
 	normalize: normalize,
-	syllables: syllables,
+	syllables: syllabicate,
 	americanize: americanize,
 	britishize: britishize
 }
