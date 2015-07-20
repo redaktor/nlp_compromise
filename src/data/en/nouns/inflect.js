@@ -234,6 +234,6 @@ var _ = require("../../../_");
 module.exports = (function () {
 
 				exports.zip.irregulars = exports.zip.NN.concat(exports.zip.PRP, exports.zip.PP);
-				exports.zip.uncountables = exports.zip.uc.reduce(_.toObj,{});
+				exports.zip.uncountables = exports.zip.uc.reduce(_.toObj, {});
 				return exports.zip;
 			})();

@@ -9,7 +9,11 @@
  */
 
 
-  exports.zip = { ones: 
+  exports.zip = { plus: [ 'plus', 'and' ],
+  minus: [ 'minus', 'negative' ],
+  factors: [ 'half', 'quarter' ],
+  decimal: [ 'point', 'decimal' ],
+  ones: 
    { zero: 0,
      null: 0,
      nil: 0,

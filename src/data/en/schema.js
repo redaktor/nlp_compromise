@@ -46,14 +46,17 @@
      [ 'DT', 'determiner', 4 ],
      [ 'UH', 'interjection', 4 ],
      [ 'EX', 'existential there', 4 ] ],
-  tenses: 
-   { infinitive: { en: 'infinitive', de: 'Infinitiv', tag: 'VBP' },
-     present: { en: 'present', de: 'Präsenz', tag: 'VBZ' },
-     past: { en: 'past', de: 'Imperfekt', tag: 'VBD' },
-     participle: { en: 'participle', de: 'Partizip', tag: 'VBN' },
-     gerund: { en: 'gerund', de: 'Gerundium', tag: 'VBG' },
+  tense: 
+   { infinitive: { en: 'infinitive', de: 'Infinitiv', tag: 'VBP', base: 1 },
+     present: { en: 'present', de: 'Präsenz', tag: 'VBZ', base: 1 },
+     past: { en: 'past', de: 'Imperfekt', tag: 'VBD', base: 1 },
+     gerund: { en: 'gerund', de: 'Gerundium', tag: 'VBG', base: 1 },
      doer: { en: 'doer', de: 'Ausführer', tag: 'NNA' },
-     future: { en: 'future', de: 'Futur', tag: 'VBF' } } }
+     participle: { en: 'participle', de: 'Partizip', tag: 'VBN' },
+     future: { en: 'future', de: 'Futur', tag: 'VBF' },
+     futurePerfect: { en: 'future perfect', de: 'Futur-Perfekt', tag: 'VB' },
+     perfect: { en: 'perfect', de: 'Perfekt', tag: 'VB' },
+     pluperfect: { en: 'pluperfect', de: 'Plusquamperfekt', tag: 'VB' } } }
 module.exports = (function () {
 				var res = {};
 				exports.zip.tags.forEach(function(a) {
@@ -63,12 +66,17 @@ module.exports = (function () {
 					}
 				});
 				res.getTense = function(tense) {
-					if (!exports.zip.tenses.hasOwnProperty(tense)) {
+					if (!exports.zip.tense.hasOwnProperty(tense)) {
 						return {tag: null};
 					}
-					return exports.zip.tenses[tense];
+					return exports.zip.tense[tense];
 				}
-				res._tenses = exports.zip.tenses;
-				res._tenseOrder = [ 'past', 'present', 'gerund', 'infinitive' ];
+				res._tense = exports.zip.tense;
+				res._tenses = Object.keys(exports.zip.tense);
+				res._baseTense = {};
+				res._tenses.forEach(function(k) {
+					if (res._tense[k].base) { res._baseTense[k] = res._tense[k]; }
+				});
+				res._baseTenses = Object.keys(res._baseTense);
 				return res;
 			})();

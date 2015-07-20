@@ -10,44 +10,49 @@
 
 
   exports.zip = { months: 
-   { january: 0,
-     february: 1,
-     march: 2,
-     april: 3,
-     may: 4,
-     june: 5,
-     july: 6,
-     august: 7,
-     september: 8,
-     october: 9,
-     november: 10,
-     december: 11 },
-  monthAbbrevs: 
-   { jan: 0,
-     feb: 1,
-     mar: 2,
-     apr: 3,
-     jun: 5,
-     jul: 6,
-     aug: 7,
-     sep: 8,
-     sept: 8,
-     oct: 9,
-     nov: 10,
-     dec: 11 },
+   { january: 1,
+     february: 2,
+     march: 3,
+     april: 4,
+     may: 5,
+     june: 6,
+     july: 7,
+     august: 8,
+     september: 9,
+     october: 10,
+     november: 11,
+     december: 12 },
+  monthsAbbrevs: 
+   { jan: 1,
+     feb: 2,
+     mar: 3,
+     apr: 4,
+     jun: 6,
+     jul: 7,
+     aug: 8,
+     sep: 9,
+     sept: 9,
+     oct: 10,
+     nov: 11,
+     dec: 12 },
   days: 
-   { monday: 1,
+   { sunday: 0,
+     monday: 1,
      tuesday: 2,
      wednesday: 3,
      thursday: 4,
      friday: 5,
-     saturday: 6,
-     sunday: 7 } }
+     saturday: 6 },
+  daysAbbrevs: { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 } }
 module.exports = (function () {
 				var res = exports.zip;
-				for (var w in res.monthAbbrevs) { res.months[w] = exports.zip.monthAbbrevs[w] }
-				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
+				['months', 'days'].forEach(function(c, n) {
+					var ca = [c,'Abbrevs'].join('');
+					if (res[ca]) {
+						for (var w in res[ca]) { res[c][w] = exports.zip[ca][w]; }
+					}
+				});
+				res.dayS = '\\b('.concat(Object.keys(res.days).join('|'), ')');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthS + ',?';
 				return res;
 			})();

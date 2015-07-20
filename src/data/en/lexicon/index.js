@@ -1,11 +1,7 @@
 if (!lang) {var lang = 'en';}
 
 var data = require('../');
-var conjugate = require('../../../parents/verb/conjugate');
-var to_doer = require('../../../parents/verb/conjugate/to_doer');
-var to_adverb = require('../../../parents/adjective/conjugate');
-var to_comparative = require('../../../parents/adjective/conjugate/to_comparative');
-var to_superlative = require('../../../parents/adjective/conjugate/to_superlative');
+var parents = require('../../../parents');
 var main = {};
 
   exports.zip = { EX: [ 'there' ],
@@ -343,8 +339,8 @@ var main = {};
 				NNS: data.nouns_inflect.NN.map(function(a){ return a[1]; }),
 				VBD: data.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
 				VBG: data.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
-				RB: Object.keys(data.adverbs_decline).concat(Object.keys(data.adjectives_decline.adj_to_advs).map(function(s) { 
-					return data.adjectives_decline.adj_to_advs[s];
+				RB: Object.keys(data.adverbs_decline).concat(Object.keys(data.adjectives_decline.adverb.to).map(function(s) { 
+					return data.adjectives_decline.adverb.to[s];
 				})),
 			}
 			var lexiZip = {
@@ -357,11 +353,11 @@ var main = {};
 				MD: Object.keys(data.verbs_special.MD),
 				VBP: data.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
 				VBZ: data.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
-				JJR: Object.keys(data.adjectives_decline.to_comparative).map(function(s){ return data.adjectives_decline.to_comparative[s]; }),
-				JJS: Object.keys(data.adjectives_decline.to_superlative).map(function(s){ return data.adjectives_decline.to_superlative[s]; }),
+				JJR: Object.keys(data.adjectives_decline.comparative.to).map(function(s){ return data.adjectives_decline.comparative.to[s]; }),
+				JJS: Object.keys(data.adjectives_decline.superlative.to).map(function(s){ return data.adjectives_decline.superlative.to[s]; }),
 				JJ: data.adjectives_demonym.concat(
-						Object.keys(data.adjectives_decline.adv_donts), Object.keys(data.adjectives_decline.adj_to_advs),
-						Object.keys(data.adjectives_decline.to_comparative), Object.keys(data.adjectives_decline.to_superlative),
+						Object.keys(data.adjectives_decline.adverb.no), Object.keys(data.adjectives_decline.adverb.to),
+						Object.keys(data.adjectives_decline.comparative.to), Object.keys(data.adjectives_decline.superlative.to),
 						Object.keys(data.adverbs_decline).map(function(s) { return data.adverbs_decline[s]; })
 				),
 				CD: nrOnes.concat( 
@@ -396,7 +392,7 @@ var main = {};
 					splits = pv.split(' ');
 					verb = splits.shift();
 					particle = splits.join(' ');
-					c = conjugate(verb);
+					c = parents.verb(verb).conjugate();
 					for (var tense in c) {
 						if (tense != 'doer') {
 							phrasal = c[tense] + ' ' + particle;
@@ -406,9 +402,9 @@ var main = {};
 				}
 				// conjugate all verbs: (~8ms, triples the lexicon size)
 				c = {};
-				data.verbs.forEach(function(v) {
-					c = conjugate(v);
-					for (var tense in data.schema._tenses) {
+				data.verbs.forEach(function(verb) {
+					c = parents.verb(verb).conjugate();
+					for (var tense in data.schema._tense) {
 						if (c[tense] && !main[c[tense]]) { 
 							main[c[tense]] = data.schema.getTense(tense).tag;
 						}
@@ -416,20 +412,18 @@ var main = {};
 				});
 				// decline all adjectives to their adverbs_ (~13ms)
 				// 'to_adverb','to_superlative','to_comparative'
-				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(j) {
-					if (!main.hasOwnProperty(j)) {
-						main[j] = 'JJ';
-						var adv = to_adverb(j);
-						if (adv && adv !== j && !main[adv]) {
-							main[adv] = main[adv] || 'RB';
-						}
-						var c = to_comparative(j);
-						if (c && !c.match(/^more ./) && c !== j && !main[c]) {
-							main[c] = main[c] || 'JJR';
-						}
-						var s = to_superlative(j);
-						if (s && !s.match(/^most ./) && s !== j && !main[s]) {
-							main[s] = main[s] || 'JJS';
+				// to_methods are slightly more performant than .conjugate because we skip to_noun yet ...
+				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(adjective) {
+					if (!main.hasOwnProperty(adjective)) {
+						main[adjective] = 'JJ';
+						var adj = parents.adjective(adjective);
+						var o = { adverb: 'RB', comparative: 'JJR', superlative: 'JJS' };
+						for (var k in o) {
+							var tag = o[k];
+							o[k] = adj[['to_',k].join('')];
+							if (o[k] && o[k] !== adjective && !main[o[k]]) {
+								main[k] = main[k] || 'RB';
+							}
 						}
 					}
 				});

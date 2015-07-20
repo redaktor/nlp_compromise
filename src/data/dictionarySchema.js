@@ -12,38 +12,57 @@ var main = {
 		infinitive: {
 			en: 'infinitive',
 			de: 'Infinitiv',
-			tag: 'VBP'
+			tag: 'VBP',
+			base: 1
 		},
 		present: {
 			en: 'present',
 			de: 'Präsenz',
-			tag: 'VBZ'
+			tag: 'VBZ',
+			base: 1
 		},
 		past: {
 			en: 'past',
 			de: 'Imperfekt',
-			tag: 'VBD'
-		},
-		participle: {
-			en: 'participle',
-			de: 'Partizip',
-			tag: 'VBN'
+			tag: 'VBD',
+			base: 1
 		},
 		gerund: {
 			en: 'gerund',
 			de: 'Gerundium',
-			tag: 'VBG'
+			tag: 'VBG',
+			base: 1
 		},
 		doer: {
 			en: 'doer',
 			de: 'Ausführer',
 			tag: 'NNA'
 		},
+		participle: {
+			en: 'participle',
+			de: 'Partizip',
+			tag: 'VBN'
+		},
 		future: {
 			en: 'future',
 			de: 'Futur',
 			tag: 'VBF'
 		},
+		futurePerfect: {
+			en: 'future perfect',
+			de: 'Futur-Perfekt',
+			tag: 'VB'
+		},
+		perfect: {
+			en: 'perfect',
+			de: 'Perfekt',
+			tag: 'VB'
+		},
+		pluperfect: {
+			en: 'pluperfect',
+			de: 'Plusquamperfekt',
+			tag: 'VB'
+		}
 	},
 	tags: {
 		VB: {

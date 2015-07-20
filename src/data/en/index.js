@@ -1,4 +1,5 @@
 // data index
+var schema = require('./schema');
 var multiples = require('./lexicon/multiples');
 var nouns_inflect = require('./nouns/inflect');
 var nouns = require('./nouns/index');
@@ -17,9 +18,9 @@ var pos = require('./lexicon/pos');
 var negate = require('./lexicon/negate');
 var firstnames = require('./lexicon/firstnames');
 var phrasalVerbs = require('./lexicon/phrasalVerbs');
-var schema = require('./schema');
 
 module.exports = {
+  schema: schema,
   multiples: multiples,
   nouns_inflect: nouns_inflect,
   nouns: nouns,
@@ -37,6 +38,5 @@ module.exports = {
   pos: pos,
   negate: negate,
   firstnames: firstnames,
-  phrasalVerbs: phrasalVerbs,
-  schema: schema
+  phrasalVerbs: phrasalVerbs
 };

@@ -5,11 +5,11 @@ var _ = require("../../../_");
  * change and contribute to dictionary <br>
  *  <br>
  * {{.convertables}} regulars, <br>
- * {{.adj_to_advs}} to adverbs, <br>
- * {{.adv_donts}} having no adverb <br>
- * {{.to_comparative}}  <br>
- * {{.to_superlative}}  <br>
- * {{.to_noun}}  <br>
+ * {{.adverb.to}} to adverbs, <br>
+ * {{.adverb.no}} having no adverb <br>
+ * {{.comparative.to}}  <br>
+ * {{.superlative.to}}  <br>
+ * {{.noun.to}}  <br>
  * types: [adjective, adverb, comparative, superlative, noun]; <br>
  * 0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative. <br>
  * 1 means 'default behavior' <br>
@@ -290,30 +290,31 @@ var _ = require("../../../_");
   'solid',
   'angry' ]
 module.exports = (function () {
-				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
+				var res = { convertables: [], adverb: {to: {}, no:[]}, comparative: {to: {}}, superlative: {to: {}}, noun: {to: {}} };
+				
 				exports.zip.forEach(function(_a) {
 					if (typeof _a === 'string') {
 						res.convertables.push(_a);
 					} else {
 						var a = _a.map(function(w){ return w; });
 						if (a.length > 1) {
-							if (a[1] === 0) { res.adv_donts.push(a[0]); }
-							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = a[1]; }
+							if (a[1] === 0) { res.adverb.no.push(a[0]); }
+							if (typeof a[1] === 'string') { res.adverb.to[a[0]] = a[1]; }
 						}
 						if (a[2] && a[2] === 1) {
 							res.convertables.push(a[0]);
 						} else if (a.length>2) {
-							res.to_comparative[a[0]] = a[2];
+							res.comparative.to[a[0]] = a[2];
 						}
 						if (a.length>3 && a[3]!=1) {
-							res.to_superlative[a[0]] = a[3];
+							res.superlative.to[a[0]] = a[3];
 						}
 						if (a.length>4 && a[4]!=1) {
-							res.to_noun[a[0]] = a[4];
+							res.noun.to[a[0]] = a[4];
 						}
 					}
 				});
 				res.convertables = res.convertables.reduce(_.toObj, {});
-				res.adv_donts = res.adv_donts.reduce(_.toObj, {});
+				res.adverb.no = res.adverb.no.reduce(_.toObj, {});
 				return res;
 			})();
