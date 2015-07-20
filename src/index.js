@@ -35,12 +35,12 @@ function set(v) {
 	}
 	return v;
 }
-exports.nlp = function(text, opts) {
+exports.nlp = function(text, options) {
 	this._text = '';
 	this._options = {};
 	this.set = set;
 	if (text) { this.set(text); }
-	if (opts) { this.set(opts); }
+	if (options) { this.set(options); }
   this.pos = pos;
   this.spot = spot;
   this.adjective = parents.adjective;
