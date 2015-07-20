@@ -974,10 +974,10 @@ exports[t] = function (test) {
       "day": 17,
       "year": 1981
     }],
-    ["June 1st to June 11th 2014", {
+    ["June 1st to June 11th 2016", {
       "month": 5,
       "day": 1,
-      "year": 2014
+      "year": 2016
     }],
     ["between 13 February and 15 February 1945", {
       "month": 1,
@@ -994,7 +994,7 @@ exports[t] = function (test) {
       "day": 1,
       "year": 1987
     }],
-    ["June 22nd 2014", {
+    ["June 22nd 2016", {
       "month": 5,
       "day": 22,
       "year": undefined
@@ -1046,7 +1046,7 @@ exports[t] = function (test) {
       "day": 27,
       "year": undefined
     }],
-    ["2012-2014", {
+    ["2012-2016", {
       "month": undefined,
       "day": undefined,
       "year": 2012
@@ -1078,7 +1078,7 @@ exports[t] = function (test) {
     }],
 
     //edge cases
-    // ["2014-1998",  {"month":undefined,"day":undefined,"year":undefined}],
+    // ["2016-1998",  {"month":undefined,"day":undefined,"year":undefined}],
     ["february 10th", {
       "month": 1,
       "day": 10,
@@ -1095,8 +1095,8 @@ exports[t] = function (test) {
       "month": 0,
       "day": undefined,
       "year": 1921
-    }],
-    // ["",  {"month":undefined,"day":undefined,"year":undefined}],
+    }]
+    //, ["",  {"month":undefined,"day":undefined,"year":undefined}],
   ]
   dates.forEach(function (arr, i) {
     var o = nlp.value(arr[0]).date();
