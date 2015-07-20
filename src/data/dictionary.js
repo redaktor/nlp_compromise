@@ -4467,13 +4467,17 @@ var main = {
 	},
 	
 	//: CD - numbers and dates
-	// these will split to 'NU' and 'DA' if properly formatted
+	// these should split to 'NU' and 'DA' if properly formatted
 	//: NU
 	NU: {
 		title: 'cardinal value, number',
 		example: 'one, two',
 		parent: 'value',
 		tag: 'NU',
+		plus: { en: ['plus','and'] },
+		minus:{ en: ['minus','negative'] },
+		decimal: { en: ['point', 'decimal'] },
+		factors: { en: ['half','quarter'] },
     ones: {
         0: { en: ['zero','null','nil'] },
         1: { en: ['a','one','first'] },
@@ -4542,10 +4546,8 @@ var main = {
 		example: 'june 5th',
 		parent: 'value',
 		tag: 'DA',
-		
-		month: [
+		months: [
 			// note: first element is full name
-			// 0 based		
 			{ en: ['january', 'jan'] },
 			{ en: ['february', 'feb'] },
 			{ en: ['march', 'mar'] },
@@ -4560,17 +4562,26 @@ var main = {
 			{ en: ['november', 'nov'] },
 			{ en: ['december', 'dec'] }
 		],
-		
-		day: [
-			// 1 based	
-			{ en: ['monday'] },
-			{ en: ['tuesday'] },
-			{ en: ['wednesday'] },
-			{ en: ['thursday'] },
-			{ en: ['friday'] },
-			{ en: ['saturday'] },
-			{ en: ['sunday'] }
-		]
+		days: [
+			{ en: ['sunday', 'sun'] },
+			{ en: ['monday', 'mon'] },
+			{ en: ['tuesday', 'tue'] },
+			{ en: ['wednesday', 'wed'] },
+			{ en: ['thursday', 'thu'] },
+			{ en: ['friday', 'fri'] },
+			{ en: ['saturday', 'sat'] }
+		],
+		relative: {
+			positive: {
+				prefix: { en: ['next','upcoming','coming','following'] },
+				suffix: { en: ['after', 'later'] }
+			},
+			negative: {
+				prefix: { en: ['last','previous','closing','past'] },
+				suffix: { en: ['before', 'earlier'] }
+			},
+			deadline: { en: ['within', 'in'] }
+		}
 	}
 };
 

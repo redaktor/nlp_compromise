@@ -34,8 +34,11 @@
 
 
 /* TODO
-// DOC the {{}} stuff to real JSdoc with return types etc. ...
-// schema - maximized, readable module version
+// jsDOC for lexicon (from original)
+// DOC generators (functions to build and zip/unzip a module) ...
+// DOC the {{}} stuff to real JSdoc for methods with return types etc. ...
+// DOC the dictionaries to real JSdoc and use it to document data's methods "... 
+// schema - maximized, readable module version and maybe as JSON Schema (could be reused for validation) ...
 // phrasalVerbs - maximized, readable m. version
 // verbs conjugation for lexicon - the multiple forms like futures (not tagged because were not used yet)
 */
@@ -43,8 +46,8 @@ var fs = require('fs');
 var path = require('path');
 var util = require('util');
 // special util custom inspect fn (functions and regexes in obj)
-var __ = require('./_'); 
-var _ = require('../_');
+var _;
+var __ = require('./_');
 var dict = require('./dictionary');
 var name = require('./dictionaryNames');
 var rule = require('./dictionaryRules');
@@ -60,14 +63,59 @@ function generateLanguage(lang) {
 	try { fs.mkdirSync(path.join(MYPATH, lang)); } catch (e) {};
 	try { fs.mkdirSync(path.join(MYPATH, lang, 'lexicon')); } catch (e) {};
 	
-	
-	// TODO - DOC generators (functions to build and zip/unzip a module) ...
-	
+		
 	// generate the DATA MODULES from dictionaries
+	// This is an array and not an object to support 'same' filenames in different folders
+	// like for 'index' (think of uid as combination of folder+id) ...
 	var generators = [
-	
+		{ // The schema
+			id: 'schema',
+			description: 'The schema for Parts Of Speech tagging',
+			// compress
+			zip: function(lang, isZip) {
+				var o = {parents: [], tags: []};
+				var tags = schema.tags;
+				for (var tag in tags) {
+					var name = tags[tag].hasOwnProperty(lang) ? tags[tag][lang] : tags[tag].en;
+					var pPos = o.parents.indexOf(tags[tag].parent);
+					if (pPos < 0) {
+						o.parents.push(tags[tag].parent);
+						pPos = o.parents.length-1;
+					}
+					var a = [tag, name, pPos];
+					if (tags[tag].hasOwnProperty('tense')) a.push(tags[tag].tense);
+					o.tags.push(a);
+				}
+				o.tense = schema.tenses;
+				return o;
+			},
+			// expand
+			unzip: function() {
+				var res = {};
+				exports.zip.tags.forEach(function(a) {
+					res[a[0]] = { name:a[1], parent:exports.zip.parents[a[2]], tag:a[0] };
+					if (a.length > 3) {
+						res[a[0]].tense = a[3];
+					}
+				});
+				res.getTense = function(tense) {
+					if (!exports.zip.tense.hasOwnProperty(tense)) {
+						return {tag: null};
+					}
+					return exports.zip.tense[tense];
+				}
+				res._tense = exports.zip.tense;
+				res._tenses = Object.keys(exports.zip.tense);
+				res._baseTense = {};
+				res._tenses.forEach(function(k) {
+					if (res._tense[k].base) { res._baseTense[k] = res._tense[k]; }
+				});
+				res._baseTenses = Object.keys(res._baseTense);
+				return res;
+			}
+		},
 		// sort out multiple words
-		{ // 0
+		{ // 1
 			id: 'multiples',
 			folder: 'lexicon',
 			description: 'known "multiples" (words with more than one)\ne. g. "New York"',
@@ -89,7 +137,7 @@ function generateLanguage(lang) {
 		},
 
 		// NOUN
-		{ // 1 irregulars (plural), uncountables
+		{ // 2 irregulars (plural), uncountables
 			id: 'inflect',
 			folder: 'nouns',
 			description: ['singular nouns having irregular plurals\n',
@@ -130,12 +178,12 @@ function generateLanguage(lang) {
 				exports.zip.PP = exports.zip.PP.map(repl);
 				//::
 				exports.zip.irregulars = exports.zip.NN.concat(exports.zip.PRP, exports.zip.PP);
-				exports.zip.uncountables = exports.zip.uc.reduce(_.toObj,{});
+				exports.zip.uncountables = exports.zip.uc.reduce(_.toObj, {});
 				return exports.zip;
 			}
 		},
 
-		{ // 2 other
+		{ // 3 other
 			id: 'index',
 			folder: 'nouns',
 			description: ['singular nouns having irregular plurals\n',
@@ -192,7 +240,7 @@ function generateLanguage(lang) {
 
 
 		// VERB :
-		{ // 3 verbs - CP, MD, negate
+		{ // 4 verbs - CP, MD, negate
 			id: 'special',
 			folder: 'verbs',
 			description: ['special verbs\n',
@@ -243,7 +291,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 4 verbs conjugate - irregulars, noDoers, irregularDoers
+		{ // 5 verbs conjugate - irregulars, noDoers, irregularDoers
 			id: 'conjugate',
 			folder: 'verbs',
 			description: ['{{.irregulars}} irregular conjuagated verbs,\n',
@@ -324,7 +372,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 5
+		{ // 6
 			id: 'index',
 			folder: 'verbs',
 			description: 'some other known verbs for conjugating',
@@ -340,15 +388,15 @@ function generateLanguage(lang) {
 
 		// ADJECTIVE
 		//
-		{ // 6
+		{ // 7
 			id: 'decline',
 			folder: 'adjectives',
 			description: ['{{.convertables}} regulars,\n',
-										'{{.adj_to_advs}} to adverbs,\n',
-										'{{.adv_donts}} having no adverb\n',
-										'{{.to_comparative}} \n',
-										'{{.to_superlative}} \n',
-										'{{.to_noun}} \n',
+										'{{.adverb.to}} to adverbs,\n',
+										'{{.adverb.no}} having no adverb\n',
+										'{{.comparative.to}} \n',
+										'{{.superlative.to}} \n',
+										'{{.noun.to}} \n',
 										'types: [adjective, adverb, comparative, superlative, noun];\n',
 										"0 means 'return null' for adverbs OR 'conjugate without more/most' for comparative and superlative.\n",
 										"1 means 'default behavior'"].join(''),
@@ -416,37 +464,38 @@ function generateLanguage(lang) {
 			},
 			// node.js
 			make: function() {
-				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
+				var res = { convertables: [], adverb: {to: {}, no:[]}, comparative: {to: {}}, superlative: {to: {}}, noun: {to: {}} };
+				
 				exports.zip.forEach(function(_a) {
 					if (typeof _a === 'string') {
 						res.convertables.push(_a);
 					} else {
 						var a = _a.map(function(w){ return w; });
 						if (a.length > 1) {
-							if (a[1] === 0) { res.adv_donts.push(a[0]); }
-							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = a[1]; }
+							if (a[1] === 0) { res.adverb.no.push(a[0]); }
+							if (typeof a[1] === 'string') { res.adverb.to[a[0]] = a[1]; }
 						}
 						if (a[2] && a[2] === 1) {
 							res.convertables.push(a[0]);
 						} else if (a.length>2) {
-							res.to_comparative[a[0]] = a[2];
+							res.comparative.to[a[0]] = a[2];
 						}
 						if (a.length>3 && a[3]!=1) {
-							res.to_superlative[a[0]] = a[3];
+							res.superlative.to[a[0]] = a[3];
 						}
 						if (a.length>4 && a[4]!=1) {
-							res.to_noun[a[0]] = a[4];
+							res.noun.to[a[0]] = a[4];
 						}
 					}
 				});
 				res.convertables = res.convertables.reduce(_.toObj, {});
-				res.adv_donts = res.adv_donts.reduce(_.toObj, {});
+				res.adverb.no = res.adverb.no.reduce(_.toObj, {});
 				return res;
 			},
 			// browser - expand
 			unzip: function() {
 				var repJJ = function(s) { return (typeof s !== 'string') ? s : _.repl(s, ['ight', 'ing', 'ent', 'er', 're', 'al', 'ed', 'ly', 'some']); }
-				var res = { convertables: [], adj_to_advs: {}, adv_donts: [], to_comparative: {}, to_superlative: {}, to_noun: {} };
+				var res = { convertables: [], adverb: {to: {}, no:[]}, comparative: {to: {}}, superlative: {to: {}}, noun: {to: {}} };
 				var expand = function (s, b) { return (s === 0) ? 0 : s.replace('=', b); }
 				exports.zip.forEach(function(_a) {
 					if (typeof _a === 'string') {
@@ -454,29 +503,29 @@ function generateLanguage(lang) {
 					} else {
 						var a = _a.map(function(w){ return repJJ(w); });
 						if (a.length > 1) {
-							if (a[1] === 0) { res.adv_donts.push(a[0]); }
-							if (typeof a[1] === 'string') { res.adj_to_advs[a[0]] = expand(a[1], a[0]); }
+							if (a[1] === 0) { res.adverb.no.push(a[0]); }
+							if (typeof a[1] === 'string') { res.adverb.to[a[0]] = expand(a[1], a[0]); }
 						}
 						if (a[2] && a[2] === 1) {
 							res.convertables.push(a[0])
 						} else if (a.length>2) {
-							res.to_comparative[a[0]] = expand(a[2], a[0])
+							res.comparative.to[a[0]] = expand(a[2], a[0])
 						}
 						if (a.length>3 && a[3]!=1) {
-							res.to_superlative[a[0]] = expand(a[3], a[0])
+							res.superlative.to[a[0]] = expand(a[3], a[0])
 						}
 						if (a.length>4 && a[4]!=1) {
-							res.to_noun[a[0]] = expand(a[4], a[0])
+							res.noun.to[a[0]] = expand(a[4], a[0])
 						}
 					}
 				});
 				res.convertables = res.convertables.reduce(_.toObj, {});
-				res.adv_donts = res.adv_donts.reduce(_.toObj, {});
+				res.adverb.no = res.adverb.no.reduce(_.toObj, {});
 				return res;
 			}
 		},
 
-		{ // 7
+		{ // 8
 			id: 'demonym',
 			folder: 'adjectives',
 			description: 'adjective demonyms, e.g. "australian"',
@@ -499,7 +548,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 8
+		{ // 9
 			id: 'index',
 			folder: 'adjectives',
 			description: 'some other adjectives',
@@ -516,7 +565,7 @@ function generateLanguage(lang) {
 
 
 		// ADVERB
-		{ // 9
+		{ // 10
 			id: 'decline',
 			folder: 'adverbs',
 			description: 'adverbs to adjectives',
@@ -553,14 +602,14 @@ function generateLanguage(lang) {
 
 
 		// OTHER : numbers, dates, honorifics, abbreviations, normalisations, multiples, suffixes
-		{ // 10
+		{ // 11
 			id: 'numbers',
 			folder: 'lexicon',
 			description: 'for number recognition',
 			// build
 			zip: function(lang, isZip) {
 				__.newRes(isZip);
-				var nrs = {};
+				var nrs = {plus: __.val(dict.NU.plus), minus: __.val(dict.NU.minus), factors: __.val(dict.NU.factors), decimal: __.val(dict.NU.decimal)};
 				['ones', 'teens', 'tens', 'multiple'].forEach(function(_var) {
 					var cat = dict.NU[_var];
 					nrs[_var] = {};
@@ -577,19 +626,18 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 11
+		{ // 12
 			id: 'dates',
 			folder: 'lexicon',
 			description: 'for date extraction',
 			// build
 			zip: function(lang, isZip) {
-				var dates = {months: {}, monthAbbrevs: {}, days: {}};
-				['month', 'day'].forEach(function(c, n) {
-					// months are 0 based, days are 1 based
+				var dates = {months: {}, monthsAbbrevs: {}, days: {}, daysAbbrevs: {}};
+				['days', 'months'].forEach(function(c, n) {
 					dict.DA[c].forEach(function(o, i) {
 						var a = (o[lang] instanceof Array) ? o[lang] : [o[lang]];
 						a.forEach(function(w, j) {
-							cat = (c === 'month' && j>0) ? 'monthAbbrevs' : c+'s';
+							cat = (j>0) ? [c,'Abbrevs'].join('') : c;
 							dates[cat][w] = i+n;
 						});
 					});
@@ -597,18 +645,21 @@ function generateLanguage(lang) {
 				return dates;
 			},
 			// expand
-			// TODO - res.monthsS isn't really cross language
 			unzip: function() {
 				var res = exports.zip;
-				for (var w in res.monthAbbrevs) { res.months[w] = exports.zip.monthAbbrevs[w] }
-				res.dayS = '\b('.concat(Object.keys(res.days).join('|'), ')\b');
+				['months', 'days'].forEach(function(c, n) {
+					var ca = [c,'Abbrevs'].join('');
+					if (res[ca]) {
+						for (var w in res[ca]) { res[c][w] = exports.zip[ca][w]; }
+					}
+				});
+				res.dayS = '\\b('.concat(Object.keys(res.days).join('|'), ')');
 				res.monthS = '('.concat(Object.keys(res.months).join('|'), ')');
-				res.monthsS = res.monthS + ',?';
 				return res;
 			}
 		},
 
-		{ // 12
+		{ // 13
 			id: 'honorifics',
 			folder: 'lexicon',
 			description: '',
@@ -619,7 +670,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 13
+		{ // 14
 			id: 'abbreviations',
 			folder: 'lexicon',
 			description: '',
@@ -641,7 +692,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 14
+		{ // 15
 			id: 'pos',
 			folder: 'lexicon',
 			
@@ -687,13 +738,13 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 15
+		{ // 16
 			id: 'negate',
 			folder: 'lexicon',
 			description: 'the complete negate data',
 			// build
 			zip: function(lang, isZip) {
-				return dict.negate.hasOwnProperty(lang) ? dict.negate[lang] : {};
+				return __.val(dict.negate, {});
 			},
 			prefix: "var verbs_special = require('../verbs/special');\n",
 			// convert it to an easier format
@@ -705,7 +756,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 16
+		{ // 17
 			id: 'firstnames',
 			folder: 'lexicon',
 			description: 'first name recognition',
@@ -757,18 +808,17 @@ function generateLanguage(lang) {
 			}
 		},
 		
-		{ // 17
+		{ // 18
 			id: 'phrasalVerbs',
 			folder: 'lexicon',
 			description: ['phrasal verbs',
-										'{{.verbs}} base verbs,\n',
-										'{{.symmetric}} behaviour (references),\n',
-										'{{.asymmetric}} behaviour (references)'].join(''),
-			prefix: "var schema = require('../schema');\n"+
-							"var opposite = require('./negate');\n"+
-							"var verbs = require('../verbs');\n"+
-							"var verbs_conjugate = require('../verbs/conjugate');\n"+
-							"var conjugate = require('../../../parents/verb/conjugate');",
+										'{{.verbs}} base verbs,',
+										'{{.symmetric}} behaviour (references),',
+										'{{.asymmetric}} behaviour (references)'].join('\n'),
+			prefix: ["var schema = require('../schema');",
+							"var opposite = require('./negate');",
+							"var verbs = require('../verbs');",
+							"var conjugated = require('../verbs/conjugate');"].join('\n'),
 			// build
 			zip: function(lang, isZip) {
 				var res = {
@@ -800,7 +850,7 @@ function generateLanguage(lang) {
 			},
 			unzip: function () {
 				var res = {};
-				var allVerbs = verbs_conjugate.irregulars.map(function(o){
+				var allVerbs = conjugated.irregulars.map(function(o){
 					return o.infinitive;	
 				}).concat( verbs, exports.zip.verbs.split(',') );
 				
@@ -830,7 +880,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 18
+		{ // 19
 			id: 'normalisations',
 			folder: 'rules',
 			description: 'approximate visual (not semantic) relationship between unicode and ascii characters',
@@ -856,7 +906,7 @@ function generateLanguage(lang) {
 			}
 		},
 
-		{ // 19
+		{ // 20
 			id: 'wordnet',
 			folder: 'rules',
 			description: 'wordnet generated suffixes',
@@ -875,25 +925,24 @@ function generateLanguage(lang) {
 			}
 		},
 		
-		{ // 20
+		{ // 21
 			id: 'pos',
 			folder: 'rules',
 			description: 'rules for Parts Of Speech tagging',
 			// build
 			zip: function(lang, isZip) {
 				var o = {
-					words: (rule.pos.words.hasOwnProperty(lang)) ? rule.pos.words[lang] : {},
-					strongDeterminers: (rule.pos.strongDeterminers.hasOwnProperty(lang)) ? rule.pos.strongDeterminers[lang] : {},
-					ambiguousContractions: (rule.pos.ambiguousContractions.hasOwnProperty(lang)) ? rule.pos.ambiguousContractions[lang] : {},
-					replace: {},
-					set: (rule.pos.set.hasOwnProperty(lang)) ? rule.pos.set[lang] : {},
-					merge: (rule.pos.merge.hasOwnProperty(lang)) ? rule.pos.merge[lang] : {},
-					special: (rule.pos.special.hasOwnProperty(lang)) ? rule.pos.special[lang] : {},
-					inspect: __.inspectFn
+					replacing: {},
+					words: __.val(rule.pos.words, {}),
+					strongDeterminers: __.val(rule.pos.strongDeterminers, {}),
+					ambiguousContractions: __.val(rule.pos.ambiguousContractions, {}),
+					set: __.val(rule.pos.set, {}),
+					merge: __.val(rule.pos.merge, {}),
+					special: __.val(rule.pos.special, {}),
 				};
-				for (var id in rule.pos.replace) {
-					if (rule.pos.replace[id].hasOwnProperty(lang)) {
-						o.replace[id] = rule.pos.replace[id][lang];
+				for (var id in rule.pos.replacing) {
+					if (rule.pos.replacing[id].hasOwnProperty(lang)) {
+						o.replacing[id] = rule.pos.replacing[id][lang];
 					}
 				}
 				return o;
@@ -902,32 +951,30 @@ function generateLanguage(lang) {
 			unzip: function() {
 				var a = [];
 				for (var k in exports.zip.words) {
-					exports.zip.words[k].forEach(function(r){
-						a.push({
-							reg: r,
-							pos: k
-						});
-					});
+					a = a.concat(exports.zip.words[k].map(function(r){ return [r,k]; }));
 				}
-				exports.zip.words = a;
+				exports.zip.words = _.toObjDeep(a, ['matches', 'tag']);
+				exports.zip.wordsMatch = _.tokenFn(exports.zip, 'words', 1);
+				exports.zip.lexiReplace = _.tokenFn(exports.zip, 'replacing');
+				exports.zip.set = _.tokenFn(exports.zip, 'set');
+				exports.zip.special = _.tokenFn(exports.zip, 'special');
 				return exports.zip;
 			}
 		},
 		
-		{ // 21
+		{ // 22
 			id: 'sentence',
 			folder: 'rules',
 			description: 'rules for sentences\n(currently only .negate)',
 			// build
 			zip: function(lang, isZip) {
 				return {
-					negate: (rule.sentence.negate.hasOwnProperty(lang)) ? rule.sentence.negate[lang] : {},
-					inspect: __.inspectFn					
-				}
+					negate: __.val(rule.sentence.negate, {})
+				};
 			}
 		},
 		
-		{ // 22
+		{ // 23
 			id: 'verb',
 			folder: 'rules',
 			description: 'regex rules and suffixes for verb conjugation\nused in combination with the generic "fallback" method',
@@ -941,17 +988,26 @@ function generateLanguage(lang) {
 							for (var key in o) { 
 								if (typeof o[key] != 'string') { o[key] = 0; } 
 							}
-							return [o.regex, o.infinitive, o.present, o.gerund, o.past, o.doer];
+							return [o.regex, o.infinitive, o.present, o.gerund, o.past, o.doer].map(function(w){ return (typeof w === 'undefined') ? 0 : w; });
 						});
 					}
 				}
 				var o = { 
 					conjugate: (isZip) ? _.repl(JSON.stringify(rs), 0, ['\\$1e', '\\$1s', '\\$1es', '\\$1ed', '\\$1ing', 'ing']) : rs,
+					detect: __.val(rule.verbs.detectFallbacks, {}),
+					unPrefix: __.val(rule.verbs.unPrefix, {}),
+					fallback: __.val(rule.verbs.fallback, {}),
+					fulfill: __.val(rule.verbs.fulfill, {}),
+					doer: __.val(rule.verbs.doer, {}),
+					tenseReplace: {},
 					suffixes: {}
 				};
-				if (!rule.verbs.suffixes.hasOwnProperty(lang)) { 
-					return o;
+				for (var id in rule.verbs.tenseReplace) {
+					if (rule.verbs.tenseReplace[id].hasOwnProperty(lang)) {
+						o.tenseReplace[id] = rule.verbs.tenseReplace[id][lang];
+					}
 				}
+				if (!rule.verbs.suffixes.hasOwnProperty(lang)) { return o; }
 				var s = [ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ];
 				o.suffixes = (isZip) ? _.repl(JSON.stringify(__.val(rule.verbs.suffixes)), 0, s) : __.val(rule.verbs.suffixes);				
 				return o;
@@ -965,6 +1021,11 @@ function generateLanguage(lang) {
 					[ 'ed', 'er', 'le', 'es', 'ns', 'ant', 'nt', 'ise', 'ite', 'ive', 'ize', 'ish', 'ade', 'ate', 'ose', 'eed', 'end', 'est', 'use', '","' ]
 				));
 				//::
+				exports.zip.detect = _.toObjDeep(exports.zip.detect, ['matches', 'returns']);
+				exports.zip.detect = _.tokenFn(exports.zip, 'detect', 1);
+				exports.zip.doer = _.toObjDeep(exports.zip.doer, ['matches', 'replacer']);
+				exports.zip.doerReplace = _.tokenFn(exports.zip, 'doer');
+				exports.zip.tenseReplace = _.tokenFn(exports.zip, 'tenseReplace');
 				exports.zip.suffixes = _.toObjValues(exports.zip.suffixes);
 				for (var cat in exports.zip.conjugate) {
 					exports.zip.conjugate[cat] = exports.zip.conjugate[cat].map(function(a){
@@ -983,60 +1044,295 @@ function generateLanguage(lang) {
 				return exports.zip;
 			}
 		},
-
-		{ // 23
-			id: 'schema',
-			description: 'The schema for Parts Of Speech tagging',
-			// compress
+		
+		{ // 24
+			id: 'noun',
+			folder: 'rules',
+			description: 'regex rules and suffixes for nouns (inflect and indefinite article)',
+			// build
 			zip: function(lang, isZip) {
-				var o = {parents: [], tags: []};
-				var tags = schema.tags;
-				for (var tag in tags) {
-					var name = tags[tag].hasOwnProperty(lang) ? tags[tag][lang] : tags[tag].en;
-					var pPos = o.parents.indexOf(tags[tag].parent);
-					if (pPos < 0) {
-						o.parents.push(tags[tag].parent);
-						pPos = o.parents.length-1;
+				return {
+					which: __.val(rule.nouns.which, {}),
+					gender: {
+						to: __.val(rule.nouns.gender, {}),
+						names: __.val(rule.nouns.genderNames, {}),
+						female: __.val(rule.nouns.genderFallback.female, ''),
+						male: __.val(rule.nouns.genderFallback.male, ''),
+						fallback: __.val(rule.nouns.genderFallback.gender, ''),
+						fallbackPlural: __.val(rule.nouns.genderFallback.plural, ''),
+						fallbackNames: __.val(rule.nouns.genderFallback.names, '')
+					},
+					prepositionPhrase: __.val(rule.nouns.prepositionPhrase, ''),
+					article: {
+						fallback: __.val(rule.nouns.articles.fallback, ''),
+						plural: __.val(rule.nouns.articles.plural, ''),
+						irregular: __.val(rule.nouns.articles.irregulars, {}),
+						regex: __.val(rule.nouns.articles.regexes, {}),
+						fn: __.val(rule.nouns.articles.fn, function(){})
+					},
+					isPlural: {
+						fallback: __.val(rule.nouns.isPluralFallback, function(){})
+					},
+					plural: {
+						pronoun: __.val(rule.nouns.pluralPronoun, ''),
+						to: __.val(rule.nouns.pluralize, []),
+						indicators: __.val(rule.nouns.pluralIndicators, [])
+					},
+					singular: {
+						to: __.val(rule.nouns.singularize, []),
+						indicators: __.val(rule.nouns.singularIndicators, [])	
 					}
-					var a = [tag, name, pPos];
-					if (tags[tag].hasOwnProperty('tense')) a.push(tags[tag].tense);
-					o.tags.push(a);
 				}
-				o.tenses = schema.tenses;
-				return o;
 			},
-			// expand
+			// convert it to functions
 			unzip: function() {
-				var res = {};
-				exports.zip.tags.forEach(function(a) {
-					res[a[0]] = { name:a[1], parent:exports.zip.parents[a[2]], tag:a[0] };
-					if (a.length > 3) {
-						res[a[0]].tense = a[3];
-					}
+				var m = 'matches', r = 'replacer', rt = 'returns';
+				[['plural', 'to', [m, r]], ['plural', 'indicators', [m]], 
+				 ['singular','to', [m, r]], ['singular','indicators', [m]],
+				 ['gender','to', [m, rt]], ['gender','names', [m, rt]], ['which', [m, rt]]].forEach(function(a){
+					var objKeys = a.pop();
+					if (a[1]) { exports.zip[a[0]][a[1]] = _.toObjDeep(exports.zip[a[0]][a[1]], objKeys); }
+					_.setObjKey(a, _.tokenFn(exports.zip, a, 1), exports.zip);
 				});
-				res.getTense = function(tense) {
-					if (!exports.zip.tenses.hasOwnProperty(tense)) {
-						return {tag: null};
+				exports.zip.preposition = {
+					phrase: new RegExp(exports.zip.prepositionPhrase),
+					first: new RegExp('^'+exports.zip.prepositionPhrase)
+				};
+				return exports.zip;
+			}
+		},
+		
+		{ // 25
+			id: 'adjective',
+			folder: 'rules',
+			description: 'regex rules and transforms for adjectives',
+			// build
+			zip: function(lang, isZip) {
+				return {
+					which: __.val(rule.adjectives.which, {}),
+					adverb: {
+						to: __.val(rule.adjectives.adverb.to, {}),
+						no: __.val(rule.adjectives.adverb.no, {}),
+						fallback: __.val(rule.adjectives.adverb.fallback, {})
+					},
+					comparative: {
+						to: __.val(rule.adjectives.comparative.to, {}),
+						no: __.val(rule.adjectives.comparative.no, {}),
+						fn: __.val(rule.adjectives.comparative.fn, {}),
+						regular: __.val(rule.adjectives.comparative.regular, {}),
+						fallback: __.val(rule.adjectives.comparative.fallback, {})
+					},
+					superlative: {
+						to: __.val(rule.adjectives.superlative.to, {}),
+						no: __.val(rule.adjectives.superlative.no, {}),
+						fn: __.val(rule.adjectives.superlative.fn, {}),
+						regular: __.val(rule.adjectives.superlative.regular, {}),
+						fallback: __.val(rule.adjectives.superlative.fallback, {})
+					},
+					noun: {
+						to: __.val(rule.adjectives.noun.to, {}),
+						no: __.val(rule.adjectives.noun.no, {}),
+						fallback: __.val(rule.adjectives.noun.fallback, {})
 					}
-					return exports.zip.tenses[tense];
 				}
-				res._tenses = exports.zip.tenses;
-				res._tenseOrder = [ 'past', 'present', 'gerund', 'infinitive' ];
-				return res;
+			},
+			unzip: function() {
+				var m = 'matches', r = 'replacer', rt = 'returns';
+				[['adverb', 'to', [m, r]], ['adverb', 'no', [m]], 
+				 ['comparative','to',[m, r]], ['comparative','no',[m]], ['comparative','regular',[m]],
+				 ['superlative','to',[m, r]], ['superlative','no',[m]],  ['superlative','regular',[m]], 
+				 ['noun','to',[m, r]], ['noun','no',[m]],
+				 ['which', [m, rt]]].forEach(function(a){
+					var objKeys = a.pop();
+					if (a[1]) { exports.zip[a[0]][a[1]] = _.toObjDeep(exports.zip[a[0]][a[1]], objKeys); }
+					_.setObjKey(a, _.tokenFn(exports.zip, a, 1), exports.zip);
+				});
+				return exports.zip;
+			}
+		},
+		
+		{ // 26
+			id: 'adverb',
+			folder: 'rules',
+			description: 'regex rules and transforms for adverbs',
+			zip: function(lang, isZip) {
+				return {
+					which: __.val(rule.adverbs.which, {}),
+					adjective: {
+						to: __.val(rule.adverbs.adjective.to, {})
+					}
+				}
+			},
+			unzip: function() {
+				var m = 'matches';
+				[['adjective', 'to', [m, 'replacer']], ['which', [m, 'returns']]].forEach(function(a){
+					var objKeys = a.pop();
+					if (a[1]) { exports.zip[a[0]][a[1]] = _.toObjDeep(exports.zip[a[0]][a[1]], objKeys); }
+					_.setObjKey(a, _.tokenFn(exports.zip, a, 1), exports.zip);
+				});
+				return exports.zip;
+			}
+		},
+		/*
+	split: {
+			multiple: {en: ['and', 'or']},
+			eventStart: {en: ['between', 'from']},
+			eventEnd: {en: ['and', 'to']}
+	},
+	day: {
+		suffix: {en: '(?:st|nd|rd|th)?(?:,\\s|\\sof\\s|$|\\s)'}
+	},
+	year:{
+		suffix: { // TODO? - could be arrays - but check if it would be to unflexible for i18n
+			bc: {en: ' before| vor| v.'},
+			ad: {en: ' anno| nach| n.'}
+		}
+	}
+		*/
+		{ // 27
+			id: 'number',
+			folder: 'rules',
+			description: 'regexes and functions for numbr parsing',
+			// build
+			zip: function(lang, isZip) {
+				return {
+					negative: __.val(rule.numbers.negative),
+					factors: __.val(rule.numbers.factors),
+					ordinals:	__.val(rule.numbers.ordinals)
+				}	
+			}
+		},
+		{ // 28
+			id: 'date',
+			folder: 'rules',
+			description: 'regexes and functions for dates parsing',
+			prefix: "var data = require('../lexicon/dates');",
+			// build
+			zip: function(lang, isZip) {
+				var _d = 'day', _m = 'month', _y = 'year';
+				var d = {nr: '(3[0-1]|[12][0-9]|0?[1-9])'}; 
+				d.nrs = [d.nr,__.val(rule.dates.day.suffix)].join('');
+				var m = {nr: '([1-9]|0[1-9]|1[0-2])'};
+				var y = {
+					nr: '(?:([0-9]{1,4})+)', 
+					n:'(?:\\b| )[b]\\s?(?:.?)\\s?[c]\\s?(?:.?)\\s?[e]?\\s?(?:.?)', 
+					p:'(?:\\b| )[a|c]\\s?(?:.?)\\s?[d|e]\\s?(?:.?)'
+				};
+				var rd = {	
+					gregorian: {
+						_1000: __.val(rule.dates.gregorian._1000, {}),
+						_100: __.val(rule.dates.gregorian._100, {}),
+						_10: __.val(rule.dates.gregorian._10, {}),
+						_1: __.val(rule.dates.gregorian._1, {}),
+						_m: __.val(rule.dates.gregorian._m, {}),
+						_d: __.val(rule.dates.gregorian._d, {}),
+						_h: __.val(rule.dates.gregorian._h, {}),
+						_min: __.val(rule.dates.gregorian._min, {})
+					},
+					relative: {
+						tmr: __.val(rule.dates.relative.tmr, {}),
+						yda: __.val(rule.dates.relative.yda, {}),
+						tni: __.val(rule.dates.relative.tni, {}),
+						//links: __.val(rule.dates.relative.links, {}),
+						morn: __.val(rule.dates.relative.morn, {}),
+						noon: __.val(rule.dates.relative.noon, {}),
+						anoon: __.val(rule.dates.relative.anoon, {}),
+						eve: __.val(rule.dates.relative.eve, {}),
+						night: __.val(rule.dates.relative.night, {})
+					},
+					split: {
+						multiple: __.val(rule.dates.split.multiple, {}),
+						eventStart: __.val(rule.dates.split.eventStart, {}),
+						eventEnd: __.val(rule.dates.split.eventEnd, {})
+					},
+					pos: {
+						pre: __.val(dict.DA.relative.positive.prefix,[]).join(' |'),
+						suf: __.val(dict.DA.relative.positive.suffix,[]).join(' |')
+					},
+					neg: {
+						pre: __.val(dict.DA.relative.negative.prefix,[]).join(' |'),
+						suf: __.val(dict.DA.relative.negative.suffix,[]).join(' |')
+					},
+					dl: __.val(dict.DA.relative.deadline,[]).join('|')
+				};
+				var _ymd = {pattern:[_y,_m,_d]}, _dmy = {pattern:[_d,_m,_y]}, _mdy = {pattern:[_m,_d,_y]};
+				var S='(?:', E='?)', st='(?: |^)', st2='(?:\\b|^)', toY=')(?:(?:.*?)', sRel='([0-9]+)?\\s*';
+				var s0 = '(?:\\-)', s1='\\s?(?:\\-|\\/)+\\s?', s2='\\s?(?:\\.|\\/)+\\s?', s3='(?: ?\\- ?)';
+				var eM = rd.split.multiple.join('(?= ) |'), eS = rd.split.eventStart.join('|');
+				var eE = rd.split.eventEnd.filter(function(w){ if (rd.split.multiple.indexOf(w) < 0) return true; }).join('|');
+				var m_s_y = {matches:_.r([m.w,' ',y.nr],0,'i'), parameters: {pattern:[_m,_y]}};
+				var yOnly = {matches:_.r([st,y.nr],0,'i'), parameters: {pattern:[_y]}};
+				//: 									4 HH    5 mm       6 ss        7 msec        8 Z 9 ±    	10 tzHH    11 tzmm
+				var isoTime = '(?:T(\\d{2}):(\\d{2})(?::(\\d{2})(?:\\.(\\d{3}))?)?(?:(Z)|([+\\-])(\\d{2})(?::(\\d{2}))?)?)?';	// TODO time
+				var greg = ['(',_.values(rd.gregorian).join(')|('),')'].join('');
+				var rels = ['(',_.values(rd.relative).join(')|('),')'].join('');
+				var pnPrefix = ['(?:',rd.pos.pre,' )|(',rd.neg.pre,' )'].join('');
+				var pnSuffix = ['(?:',rd.pos.suf,' )|(',rd.neg.suf,' )'].join('');
+				var dl = ['(?:',st,'(?:',rd.dl,')\\s*(?:the\\s*)?(?:',pnPrefix,')',sRel,'(?:',greg,')\\s*(?=(?:\\W|$)))'].join('');
+				var pn = ['(?:',st,pnPrefix,sRel,'(?:',greg,')\\s*)'].join('');
+				var rel = ['(?:',st,rels,')?'].join('');
+				return {
+					range: _.r([st2,S,eS,')(.*)(?:\\s',eM,'\\s)(.*)|',st2,S,eS,')?(.*)(?:(?:\\s',eE,'\\s)|',s3,')(.+)'],0,'i'),
+					multi: _.r([st,S,eM,'(?= ) )|(?: ?\\& ?)|(?: ?, ?)(?=\\d)'],0,'i'),
+					iso: _.r([S,'(\\d{4}|[+\\-]\\d{6})',s0,m.nr,s0,d.nr,E,isoTime]),
+					day: {
+						suffix: __.val(rule.dates.day.suffix, {}),
+						nr: new RegExp(d.nrs, 'i')
+					},
+					month: {
+						nr: new RegExp(m.nr)
+					},
+					year: {
+						nr: new RegExp(y.nr),
+						neg: _.r([y.n,'\\s',y.nr,'|',y.nr,y.n,'|',__.val(rule.dates.year.suffix.bc, {})],0,'i'),
+						pos: _.r([y.p,'\\s',y.nr,'|',y.nr,y.p,'|',__.val(rule.dates.year.suffix.ad, {})], 0,'i')
+					},
+					short: [ // 6/25 etc.
+						{matches: _.r([S,m.nr,s1,d.nr,s1,y.nr,E]), parameters: _mdy},
+						{matches: _.r([S,d.nr,s2,m.nr,s2,y.nr,E]), parameters: _dmy}	
+					],
+					dayFirst: [ // 25th of June etc.
+						{matches: [S,st,S,S,d.nrs,')?)','{m.w}?(?:$| ?)',toY,y.nr,E], parameters:_dmy},				 
+						0, yOnly
+					],
+					monthFirst: [ // June 25th etc.
+						{matches: [S,st,'{m.w}(?:$| ))(?:',d.nrs,toY,y.nr,E], parameters:_mdy},
+						0, yOnly
+					],
+					relative: [
+						{matches: new RegExp(dl, 'i'), parameters: {fn:'gregorian', isRange:1}},
+						{matches: new RegExp(pn, 'i'), parameters: {fn:'gregorian'}},
+						{matches: new RegExp(rel,'i'), parameters: {fn:'dictionary'}}
+					]
+				};
+			},
+			unzip: function() {
+				var _d = 'day', _m = 'month', _y = 'year';
+				var w = {day: Object.keys(data.days).join('|'), month: ['(?:(',Object.keys(data.months).join('|'),'),?)'].join('')};
+				var m_y = {matches:_.r([w.month,' ',exports.zip.year.nr],0,'i'), parameters: {pattern:[_m,_y]}};
+				exports.zip.day.weekday = _.r(['(?:(',w.day,',?))'],0,'i'),
+				exports.zip.month.w = _.r([w.month],0,'i');
+				for (var k in w) {
+					var a = exports.zip[k+'First'][0].matches.map(function(s){ return s.replace('{m.w}',w.month) });
+					exports.zip[k+'First'][0].matches = _.r(a,0,'i');
+					exports.zip[k+'First'][1] = m_y;
+				}
+				exports.zip.short.unshift({matches: exports.zip.iso, parameters: {pattern:[_y,_m,_d]}});
+				return exports.zip;
 			}
 		}
-
+		
 	];
 	
 	// END of generators //
 
 
 	// //////// //
-	// LEXICON // 24
+	// LEXICON // 27
 	// some string constants
 	var C = {
 		// TODO - this is a stub to make sure until anything is browserified we have a 'lang'
-		// would be singleton language ::
+		// SHOULD be singleton language ::
 		l: ["if (!lang) {var lang = '", lang, "';}\n"].join(''), // FIXME - merge local 'dev' fork
 		_: '\n',
 		_var: 'var ',
@@ -1067,11 +1363,7 @@ function generateLanguage(lang) {
 		var data = {};
 		var _lMain = {};
 		var _lZip = {};
-		var conjugate = require('../parents/verb/conjugate');
-		var to_doer = require('../parents/verb/conjugate/to_doer');
-		var to_adverb = require('../parents/adjective/conjugate');
-		var to_comparative = require('../parents/adjective/conjugate/to_comparative');
-		var to_superlative = require('../parents/adjective/conjugate/to_superlative');
+		var parents = require('../parents');
 		
 		// Now let's handle the module names
 		// for data modules index and lexicon
@@ -1081,7 +1373,6 @@ function generateLanguage(lang) {
 				_req: (g.folder) ? path.join(g.folder, g.id) : g.id
 			}; 
 		});
-		
 		
 		// require data modules for use in build
 		function reqModule(o) { data[o._var] = require(['./', path.join(lang, o._req)].join('')); }
@@ -1110,11 +1401,7 @@ function generateLanguage(lang) {
 		var reqs = [
 			C.l, C._,
 			"var data = require('../');", C._,
-			"var conjugate = require('../../../parents/verb/conjugate');", C._,
-			"var to_doer = require('../../../parents/verb/conjugate/to_doer');", C._,
-			"var to_adverb = require('../../../parents/adjective/conjugate');", C._,
-			"var to_comparative = require('../../../parents/adjective/conjugate/to_comparative');", C._,
-			"var to_superlative = require('../../../parents/adjective/conjugate/to_superlative');", C._,
+			"var parents = require('../../../parents');", C._,
 			C.main
 		];
 		
@@ -1130,8 +1417,8 @@ function generateLanguage(lang) {
 				VBN: __VBN,
 				VBD: data.verbs_conjugate.irregulars.map(function(o){ return o.past; }),
 				VBG: data.verbs_conjugate.irregulars.map(function(o){ return o.gerund; }),
-				RB: Object.keys(data.adverbs_decline).concat(Object.keys(data.adjectives_decline.adj_to_advs).map(function(s) { 
-					return data.adjectives_decline.adj_to_advs[s];
+				RB: Object.keys(data.adverbs_decline).concat(Object.keys(data.adjectives_decline.adverb.to).map(function(s) { 
+					return data.adjectives_decline.adverb.to[s];
 				})),
 			}
 			var lexiZip = {
@@ -1144,11 +1431,11 @@ function generateLanguage(lang) {
 				MD: Object.keys(data.verbs_special.MD),
 				VBP: data.verbs_conjugate.irregulars.map(function(o){ return o.infinitive; }),
 				VBZ: data.verbs_conjugate.irregulars.map(function(o){ return o.present; }),
-				JJR: Object.keys(data.adjectives_decline.to_comparative).map(function(s){ return data.adjectives_decline.to_comparative[s]; }),
-				JJS: Object.keys(data.adjectives_decline.to_superlative).map(function(s){ return data.adjectives_decline.to_superlative[s]; }),
+				JJR: Object.keys(data.adjectives_decline.comparative.to).map(function(s){ return data.adjectives_decline.comparative.to[s]; }),
+				JJS: Object.keys(data.adjectives_decline.superlative.to).map(function(s){ return data.adjectives_decline.superlative.to[s]; }),
 				JJ: data.adjectives_demonym.concat(
-						Object.keys(data.adjectives_decline.adv_donts), Object.keys(data.adjectives_decline.adj_to_advs),
-						Object.keys(data.adjectives_decline.to_comparative), Object.keys(data.adjectives_decline.to_superlative),
+						Object.keys(data.adjectives_decline.adverb.no), Object.keys(data.adjectives_decline.adverb.to),
+						Object.keys(data.adjectives_decline.comparative.to), Object.keys(data.adjectives_decline.superlative.to),
 						Object.keys(data.adverbs_decline).map(function(s) { return data.adverbs_decline[s]; })
 				),
 				CD: nrOnes.concat( 
@@ -1185,7 +1472,7 @@ function generateLanguage(lang) {
 					splits = pv.split(' ');
 					verb = splits.shift();
 					particle = splits.join(' ');
-					c = conjugate(verb);
+					c = parents.verb(verb).conjugate();
 					for (var tense in c) {
 						if (tense != 'doer') {
 							phrasal = c[tense] + ' ' + particle;
@@ -1195,9 +1482,9 @@ function generateLanguage(lang) {
 				}
 				// conjugate all verbs: (~8ms, triples the lexicon size)
 				c = {};
-				data.verbs.forEach(function(v) {
-					c = conjugate(v);
-					for (var tense in data.schema._tenses) {
+				data.verbs.forEach(function(verb) {
+					c = parents.verb(verb).conjugate();
+					for (var tense in data.schema._tense) {
 						if (c[tense] && !main[c[tense]]) { 
 							main[c[tense]] = data.schema.getTense(tense).tag;
 						}
@@ -1205,20 +1492,18 @@ function generateLanguage(lang) {
 				});
 				// decline all adjectives to their adverbs_ (~13ms)
 				// 'to_adverb','to_superlative','to_comparative'
-				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(j) {
-					if (!main.hasOwnProperty(j)) {
-						main[j] = 'JJ';
-						var adv = to_adverb(j);
-						if (adv && adv !== j && !main[adv]) {
-							main[adv] = main[adv] || 'RB';
-						}
-						var c = to_comparative(j);
-						if (c && !c.match(/^more ./) && c !== j && !main[c]) {
-							main[c] = main[c] || 'JJR';
-						}
-						var s = to_superlative(j);
-						if (s && !s.match(/^most ./) && s !== j && !main[s]) {
-							main[s] = main[s] || 'JJS';
+				// to_methods are slightly more performant than .conjugate because we skip to_noun yet ...
+				data.adjectives.concat(Object.keys(data.adjectives_decline.convertables)).forEach(function(adjective) {
+					if (!main.hasOwnProperty(adjective)) {
+						main[adjective] = 'JJ';
+						var adj = parents.adjective(adjective);
+						var o = { adverb: 'RB', comparative: 'JJR', superlative: 'JJS' };
+						for (var k in o) {
+							var tag = o[k];
+							o[k] = adj[['to_',k].join('')];
+							if (o[k] && o[k] !== adjective && !main[o[k]]) {
+								main[k] = main[k] || 'RB';
+							}
 						}
 					}
 				});
@@ -1288,6 +1573,9 @@ function generateLanguage(lang) {
 	var _regex = /\b(_)[\[.]["']*[a-zA-Z_]+["'\]]*/g;
 	
 	function build(g, i) {
+		// finish fast
+		if (!g.hasOwnProperty('zip')) { return; }
+		if (i === 1) { _ = require('../_'); }
 		var hasMake = 0;
 		function clean(s) {
 			// TODO - better beautifying HERE // TODO the tab bug
@@ -1295,6 +1583,25 @@ function generateLanguage(lang) {
 				return s.trim()/*.replace(/[ \t]+$/gm, '')*/;
 			}		
 			return s.replace(/^.*\/\/::BROWSER::[\s\S]*?.*[\s\S]*?\/\/::.*?$/gm, '').trim()/*.replace(/[ \t]+$/gm, '\t')*/;
+		}
+		var replO = {};
+		function format(o, wasKey) {
+			var str = '';
+			for (var k in o) {
+				var res = o[k];
+				if (typeof res === 'function' && !(res instanceof RegExp)) {
+					var rKey = ['REPLACE+_+', wasKey||'_', k].join('');
+					replO[rKey] = res;
+					o[k] = rKey;
+				} else if (typeof res === 'object' && !(res instanceof RegExp)) {
+					format(res, k);	
+				}
+			}
+			str = util.inspect(o, { depth: null });
+			for (var rk in replO) {
+				str = str.replace(["'",rk,"'"].join(''), replO[rk].toString(-1));
+			}
+			return str;
 		}
 		function addUnzip(arr) {
 			var mainArr = arr.map(clean,{isZip: 0});
@@ -1333,11 +1640,11 @@ function generateLanguage(lang) {
 		
 		// generate
 		var generatedMain = g.zip(lang);
-		var mainStr = util.inspect(generatedMain, { depth: null });
+		var mainStr = format(generatedMain);
 		gens.main.push(C._exp, mainStr, C._);
 		
 		var generatedZip = g.zip(lang, true);
-		var zipStr = util.inspect(generatedZip, { depth: null });
+		var zipStr = format(generatedZip);
 		gens.zip.push(C._exp, zipStr, C._);
 		
 		hasMake = g.hasOwnProperty('make');
@@ -1406,7 +1713,7 @@ function generateLanguage(lang) {
 
 function setMyPath(site){
 	// automatically set data path from the callsite (see module.exports)
-	// = can be used anywhere, also in grunt ...
+	// = "I can be used anywhere, also in grunt ..."
 	var fnName = site.getFunctionName() || '?';
 	var fName = site.getFileName();
 	var lNr = site.getLineNumber();

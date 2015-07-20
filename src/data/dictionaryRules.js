@@ -38,34 +38,42 @@ strongDeterminers: {
 // {{posCondition}} - the if condition for this rule
 // {{posTag}} - optional, default: null - if any token.pos receives a tag
 // {{tokenIndexSetter}} - optional, default: 0 - e.g. 1 for nextToken or -1 for lastToken
-// {{tokenMergeCount}} - optional, default: 1 - e.g. 2 to merge (this + (i+1) + (i+2)) set <1 for no merging
+// {{tokenMergeCount}} - optional, default: 1 - e.g. 2 to merge (this + (i+1) + (i+2)) [ and set to 0 for no merging ]
 */
 merge: {
 	en: {
 		NN_NN: {
-			_if: function (t,a,i) { return (t.pos.tag === a[i+1].pos.tag && t.punctuated !== true && t.noun_capital == a[i+1].noun_capital ); }
+			// 'joe smith' are both NN, for example
+			_if: function (t,a,i) { return (t.pos.tag === a[i+1].pos.tag && !t.punctuated && t.noun_capital == a[i+1].noun_capital ); }
 		},
 		CD_CD: {
+			// merge dates manually, which often have punctuation
 			_if: function (t,a,i) { return (t.pos.tag === 'CD' && a[i+1].pos.tag ==='CD'); }
 		},
 		CD_w_CD: {
+			// merges like 'hundred and fifty', 'march the 5th'
 			_if: function (t,a,i) { return (t.pos.tag === 'CD' && (a[i+1].normalised === 'and' || a[i+1].normalised === 'the') && a[i+2] && a[i+2].pos.tag === 'CD'); }
 		},
 		NNAB_NN: {
+			// merge abbreviations with nouns manually, eg. 'Joe jr.'
 			_if: function (t,a,i) { return ((t.pos.tag === 'NNAB' && a[i+1].pos.parent ==='noun') || (t.pos.parent==='noun' && a[i+1].pos.tag==='NNAB')); }
 		},
-		VB_VB: {
+		will_VB: {
+			// 'will walk' -> future-tense verb
 			_if: function (t,a,i) { return (t.normalised === 'will' && a[i+1].pos.parent === 'verb'); }
 		},
 		NNP_NN: {
+			// merge NNP and NN, like firstname, lastname
 			tag: 'NNP', set: 1,
 			_if: function (t,a,i) { return ((t.pos.tag === 'NNP' && a[i+1].pos.tag ==='NN') || (t.pos.tag === 'NN' && a[i+1].pos.tag === 'NNP')); }
 		},
 		DT1: {
+			// capitals surrounding a preposition  'United States of America'
 			merge: 2,
 			_if: function (t,a,i) { return (t.pos.tag=='NN' && t.noun_capital && (a[i+1].normalised == 'of' || a[i+1].normalised == 'and') && a[i+2] && a[i+2].noun_capital); }
 		},
 		DT2: {
+			// capitals surrounding two prepositions  'Phantom of the Opera'
 			merge: 3,
 			_if: function (t,a,i) { return (t.noun_capital && a[i+1].normalised == 'of' && a[i+2] && a[i+2].pos.tag == 'DT' && a[i+3] && a[i+3].noun_capital); }
 		}
@@ -98,7 +106,7 @@ ambiguousContractions: {
 // native regexes, set to 0, false or null if not needed in your language
 // {{matches}} finds
 // {{replaces}} replaces by {{replacer}}  // ({{replaces}} is optional, defaults to {{matches}})
-replace: { 
+replacing: { 
 	prefix: {
 		// try to match it without a prefix - eg. outworked -> worked
 		en: {
@@ -359,7 +367,7 @@ words: {
 sentence: {
 	
 	//: negate
-	// rules for pos merging of tokens
+	// the rules for pos merging of tokens
 	negate: {
 		en: {
 			infinitive: {
@@ -396,37 +404,8 @@ sentence: {
 
 // RULES FOR NOUNS
 // --------------------v
-nouns: { // TODO DOC
-// noun.pronoun: decides if it deserves a he, she, they, or it
-	// for plurals (string)
-	pluralPronoun: { en: 'they' },
-	// TODO - build like var refs = ['she', /\b.../]
-	// general rules
-	gender: { // TODO TO {matches: a[0], returns: a[1]}
-		en: [
-			// femaleHonorifics
-			[/\b(mrs|miss|ms|misses|mme|mlle)\.?\b/i, 'she'],
-			// maleHonorifics
-			[/\b(mr|mister|sr|jr)\.?\b/i, 'he']
-		]
-	},
-	// general fallback (string)
-	genderFallback: { en: 'it' },
-	// rules for names
-	genderNamesPredict: { // TODO TO {matches: a[0], returns: a[1]}
-		en: [
-			// preferFemale
-			[/[aeiy]$/i, 'she'],
-			// preferMale
-			[/^[ou]$/i, 'he'],
-			// fallbackFemale
-			[/(nn|ll|tt)/i, 'she']
-		]
-	},
-	// fallback for name (string)
-	genderNamesFallback: { en: 'they' },
-	
-// noun.which: specifically which pos it is
+nouns: {
+	// noun.which: specifically which pos it is
 	which: {
 		en: {
 			possessiveNoun: {
@@ -435,111 +414,221 @@ nouns: { // TODO DOC
 			}
 		}
 	},
+	// noun.pronoun: decides if it deserves a he, she, they, or it
+	// for plurals (string)
+	pluralPronoun: { en: 'they' },
+	// general rules
+	gender: {
+		en: [
+			// femaleHonorifics
+			[/\b(mrs|miss|ms|misses|mme|mlle)\.?\b/i, 'she'],
+			// maleHonorifics
+			[/\b(mr|mister|sr|jr)\.?\b/i, 'he']
+		]
+	},
+	// rules for names (predict ...)
+	genderNames: {
+		en: [
+			// preferFemale if it ends in a 'ee or ah'
+			[/[aeiy]$/i, 'she'],
+			// preferMale if it ends in a 'oh or uh'
+			[/^[ou]$/i, 'he'],
+			// fallbackFemale if it has double-consonants
+			[/(nn|ll|tt)/i, 'she']
+		]
+	},
+	genderFallback: {
+		// male like 'he'
+		male: { en: 'he' },
+		// female like 'she'
+		female: { en: 'she' },
+		// general fallback (last option)
+		gender: { en: 'it' },
+		// fallback for name
+		names: { en: 'they' },
+		// fallback for plural
+		plural: { en: 'they' }
+	},
+	// regex string for preposition phrases' inflect - handle e.g. 'mayors of chicago'
+	prepositionPhrase: {
+			en:	'([a-z]*) (of|in|by|for) [a-z]'
+	},
+	// indefinite articles
+	articles: {
+		fallback: {
+			en: 'a'
+		},
+		// the article for plurals
+		plural: {
+			en: 'the'
+		},
+		// list irregular articles as object key with according words / regexes
+		irregulars: {
+			en: {
+				an: {
+					hour: 1,
+					heir: 1,
+					heirloom: 1,
+					honest: 1,
+					honour: 1,
+					honor: 1,
+					uber: 1 //german u
+				}
+			}
+		},
+		regexes: {
+			en: {
+				a: [
+					/^onc?e/i, //'wu' sound of 'o'
+					/^u[bcfhjkqrstn][aeiou]/i, // 'yu' sound for hard 'u'
+					/^eul/i
+				],
+				an: [
+					/^[aeiou]/
+				]
+			}
+		},
+		// correction function		
+		fn: {
+			// runs in the scope of noun (this.word, this.METHODS)
+			en: function() {
+				// spelled-out acronyms
+				// pronounced letters of acronyms that get a 'an'
+				var an_acronyms = { A:1, E:1, F:1, H:1, I:1, L:1, M:1, N:1, O:1, R:1, S:1, X:1 };
+				if (this.is_acronym(this.word) && an_acronyms.hasOwnProperty(this.word.substr(0, 1)) ) {
+					return 'an';
+				}
+			}
+		}
+	},
 	
-// noun.pluralize and .singularize // TODO TO {matches: a[0], replacer: a[1]}
-	pluralize: [
-		[/(ax|test)is$/i, '$1es'],
-		[/(octop|vir|radi|nucle|fung|cact|stimul)us$/i, '$1i'],
-		[/(octop|vir)i$/i, '$1i'],
-		[/([rl])f$/i, '$1ves'],
-		[/(alias|status)$/i, '$1es'],
-		[/(bu)s$/i, '$1ses'],
-		[/(zer|avocad|hal|tornad|tuxed)o$/i, '$1os'],
-		[/(al|ad|at|er|et|ed|ad)o$/i, '$1oes'],
-		[/([ti])um$/i, '$1a'],
-		[/([ti])a$/i, '$1a'],
-		[/sis$/i, 'ses'],
-		[/(?:([^f])fe|([lr])f)$/i, '$1ves'],
-		[/(hive|stomach|epoch)$/i, '$1s'],
-		[/([^aeiouy]|qu)y$/i, '$1ies'],
-		[/(x|ch|ss|sh|s|z)$/i, '$1es'],
-		[/(matr|vert|ind|cort)(ix|ex)$/i, '$1ices'],
-		[/([m|l])ouse$/i, '$1ice'],
-		[/([m|l])ice$/i, '$1ice'],
-		[/^(ox)$/i, '$1en'],
-		[/^(oxen)$/i, '$1'],
-		[/(quiz)$/i, '$1zes'],
-		[/(antenn|formul|nebul|vertebr|vit)a$/i, '$1ae'],
-		[/(sis)$/i, 'ses'],
-		[/^(?!talis|.*hu)(.*)man$/i, '$1men'],
-		[/(.*)/i, '$1s']
-	],
-	plural_indicators: [
-		/(^v)ies$/i,
-		/ises$/i,
-		/ives$/i,
-		/(antenn|formul|nebul|vertebr|vit)ae$/i,
-		/(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
-		/(buffal|tomat|tornad)oes$/i,
-		/(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
-		/(vert|ind|cort)ices$/i,
-		/(matr|append)ices$/i,
-		/(x|ch|ss|sh|s|z|o)es$/i,
-		/men$/i,
-		/news$/i,
-		/.tia$/i,
-		/(^f)ves$/i,
-		/(lr)ves$/i,
-		/(^aeiouy|qu)ies$/i,
-		/(m|l)ice$/i,
-		/(cris|ax|test)es$/i,
-		/(alias|status)es$/i,
-		/ics$/i
-	],
-	singularize: [
-		[/([^v])ies$/i, '$1y'],
-		[/ises$/i, 'isis'],
-		[/ives$/i, 'ife'],
-		[/(antenn|formul|nebul|vertebr|vit)ae$/i, '$1a'],
-		[/(octop|vir|radi|nucle|fung|cact|stimul)(i)$/i, '$1us'],
-		[/(buffal|tomat|tornad)(oes)$/i, '$1o'],
-		[/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i, '$1sis'],
-		[/(vert|ind|cort)(ices)$/i, '$1ex'],
-		[/(matr|append)(ices)$/i, '$1ix'],
-		[/(x|ch|ss|sh|s|z|o)es$/i, '$1'],
-		[/men$/i, 'man'],
-		[/(n)ews$/i, '$1ews'],
-		[/([ti])a$/i, '$1um'],
-		[/([^f])ves$/i, '$1fe'],
-		[/([lr])ves$/i, '$1f'],
-		[/([^aeiouy]|qu)ies$/i, '$1y'],
-		[/(s)eries$/i, '$1eries'],
-		[/(m)ovies$/i, '$1ovie'],
-		[/([m|l])ice$/i, '$1ouse'],
-		[/(cris|ax|test)es$/i, '$1is'],
-		[/(alias|status)es$/i, '$1'],
-		[/(ss)$/i, '$1'],
-		[/(ics)$/i, "$1"],
-		[/s$/i, '']
-	],
-	singular_indicators: [
-		/(ax|test)is$/i,
-		/(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
-		/(octop|vir)i$/i,
-		/(rl)f$/i,
-		/(alias|status)$/i,
-		/(bu)s$/i,
-		/(al|ad|at|er|et|ed|ad)o$/i,
-		/(ti)um$/i,
-		/(ti)a$/i,
-		/sis$/i,
-		/(?:(^f)fe|(lr)f)$/i,
-		/hive$/i,
-		/(^aeiouy|qu)y$/i,
-		/(x|ch|ss|sh|z)$/i,
-		/(matr|vert|ind|cort)(ix|ex)$/i,
-		/(m|l)ouse$/i,
-		/(m|l)ice$/i,
-		/(antenn|formul|nebul|vertebr|vit)a$/i,
-		/.sis$/i,
-		/^(?!talis|.*hu)(.*)man$/i
-	]
+	isPluralFallback: {
+		en:	function(word) {
+			// 'looks pretty plural' rules - TODO // needs some lovin' :
+			if (word.match(/s$/) && !word.match(/ss$/) && word.length > 3) {
+				return true;
+			}
+			return false;
+		}
+	},
+	// noun.pluralize and .singularize [matches, replaces]
+	pluralize: {
+		en: [
+			[/(ax|test)is$/i, '$1es'],
+			[/(octop|vir|radi|nucle|fung|cact|stimul)us$/i, '$1i'],
+			[/(octop|vir)i$/i, '$1i'],
+			[/([rl])f$/i, '$1ves'],
+			[/(alias|status)$/i, '$1es'],
+			[/(bu)s$/i, '$1ses'],
+			[/(zer|avocad|hal|tornad|tuxed)o$/i, '$1os'],
+			[/(al|ad|at|er|et|ed|ad)o$/i, '$1oes'],
+			[/([ti])um$/i, '$1a'],
+			[/([ti])a$/i, '$1a'],
+			[/sis$/i, 'ses'],
+			[/(?:([^f])fe|([lr])f)$/i, '$1ves'],
+			[/(hive|stomach|epoch)$/i, '$1s'],
+			[/([^aeiouy]|qu)y$/i, '$1ies'],
+			[/(x|ch|ss|sh|s|z)$/i, '$1es'],
+			[/(matr|vert|ind|cort)(ix|ex)$/i, '$1ices'],
+			[/([m|l])ouse$/i, '$1ice'],
+			[/([m|l])ice$/i, '$1ice'],
+			[/^(ox)$/i, '$1en'],
+			[/^(oxen)$/i, '$1'],
+			[/(quiz)$/i, '$1zes'],
+			[/(antenn|formul|nebul|vertebr|vit)a$/i, '$1ae'],
+			[/(sis)$/i, 'ses'],
+			[/^(?!talis|.*hu)(.*)man$/i, '$1men'],
+			[/(.*)/i, '$1s']
+		]
+	},
+	singularize: {
+		en: [
+			[/([^v])ies$/i, '$1y'],
+			[/ises$/i, 'isis'],
+			[/ives$/i, 'ife'],
+			[/(antenn|formul|nebul|vertebr|vit)ae$/i, '$1a'],
+			[/(octop|vir|radi|nucle|fung|cact|stimul)(i)$/i, '$1us'],
+			[/(buffal|tomat|tornad)(oes)$/i, '$1o'],
+			[/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i, '$1sis'],
+			[/(vert|ind|cort)(ices)$/i, '$1ex'],
+			[/(matr|append)(ices)$/i, '$1ix'],
+			[/(x|ch|ss|sh|s|z|o)es$/i, '$1'],
+			[/men$/i, 'man'],
+			[/(n)ews$/i, '$1ews'],
+			[/([ti])a$/i, '$1um'],
+			[/([^f])ves$/i, '$1fe'],
+			[/([lr])ves$/i, '$1f'],
+			[/([^aeiouy]|qu)ies$/i, '$1y'],
+			[/(s)eries$/i, '$1eries'],
+			[/(m)ovies$/i, '$1ovie'],
+			[/([m|l])ice$/i, '$1ouse'],
+			[/(cris|ax|test)es$/i, '$1is'],
+			[/(alias|status)es$/i, '$1'],
+			[/(ss)$/i, '$1'],
+			[/(ics)$/i, "$1"],
+			[/s$/i, '']
+		]
+	},
+	// indicators are similar to plural/singularize rules, but not the same // TODO DOC
+	pluralIndicators: {
+		en: [
+			/(^v)ies$/i,
+			/ises$/i,
+			/ives$/i,
+			/(antenn|formul|nebul|vertebr|vit)ae$/i,
+			/(octop|vir|radi|nucle|fung|cact|stimul)i$/i,
+			/(buffal|tomat|tornad)oes$/i,
+			/(analy|ba|diagno|parenthe|progno|synop|the)ses$/i,
+			/(vert|ind|cort)ices$/i,
+			/(matr|append)ices$/i,
+			/(x|ch|ss|sh|s|z|o)es$/i,
+			/men$/i,
+			/news$/i,
+			/.tia$/i,
+			/(^f)ves$/i,
+			/(lr)ves$/i,
+			/(^aeiouy|qu)ies$/i,
+			/(m|l)ice$/i,
+			/(cris|ax|test)es$/i,
+			/(alias|status)es$/i,
+			/ics$/i
+		]
+	},
+	singularIndicators: {
+		en: [
+			/(ax|test)is$/i,
+			/(octop|vir|radi|nucle|fung|cact|stimul)us$/i,
+			/(octop|vir)i$/i,
+			/(rl)f$/i,
+			/(alias|status)$/i,
+			/(bu)s$/i,
+			/(al|ad|at|er|et|ed|ad)o$/i,
+			/(ti)um$/i,
+			/(ti)a$/i,
+			/sis$/i,
+			/(?:(^f)fe|(lr)f)$/i,
+			/hive$/i,
+			/(^aeiouy|qu)y$/i,
+			/(x|ch|ss|sh|z)$/i,
+			/(matr|vert|ind|cort)(ix|ex)$/i,
+			/(m|l)ouse$/i,
+			/(m|l)ice$/i,
+			/(antenn|formul|nebul|vertebr|vit)a$/i,
+			/.sis$/i,
+			/^(?!talis|.*hu)(.*)man$/i
+		]
+	}
 },
 
 
 // RULES FOR VERBS
 // --------------------v
 verbs: {
+	//: unPrefix
+	// enter a regex to un-prefix the verb, and add it in later
+	unPrefix: {
+		en: /^(over|under|re|anti|full)\-?/i
+	},
 	//: conjugate
 	// regex rules for verb conjugation
 	// used in combination with the generic 'fallback' method
@@ -758,7 +847,7 @@ verbs: {
 				}
 			]
 		}
-		//, end of english
+		//, end of conjugate english
 	},
 	
 	//: verb suffixes
@@ -780,22 +869,370 @@ verbs: {
 				'ffs', 'als', 'urs', 'lds', 'ews', 'ips', 'es', 'ts', 'ns', 's'
 			]
 		}
+		//, end of suffixes english
+	},
+	
+	//: replace
+	// add rules to simplify tenses for conjugation
+	tenseReplace: {
+		pluperfect: {
+			en: {
+				matches: /^had [a-z]/i,
+				replaces: /^had /i,
+				replacer: ''
+			}
+		},
+		perfect: {
+			en: {
+				matches: /^have [a-z]/i,
+				replaces: /^have /i,
+				replacer: ''
+			}		
+		},
+		futurePerfect: {
+			en: {
+				matches: /^will have [a-z]/i,
+				replaces: /^will have /i,
+				replacer: ''
+			}		
+		},
+		future: {
+			en: {
+				replaces: /^will /i,
+				replacer: ''
+			}		
+		}
+	},
+	
+	//: detectFallbacks
+	// fallbacks for detection of special tenses or forms
+	detectFallbacks: {
+		en: [
+			// future fallback
+			[/^will\b/, 'future'],
+			// gerund tag fallback
+			[/([aeiou][^aeiouwyrlm])ing$/, 'gerund'],
+			// negative
+			[/n't$/, 'negative']
+		]
+	},
+	
+	//: fallback
+	// function: fallback to this transformation if it has an unknown prefix ...
+	// get's a blank conjugated verb object, returns this object with plan b
+	fallback: {
+		en: function(w, o) {
+			if (w.length > 4) {
+				o.infinitive = w.replace(/ed$/, '');
+			} else {
+				o.infinitive = w.replace(/d$/, '');
+			}
+			if (w.match(/[^aeiou]$/)) {
+				o.gerund = [w, 'ing'].join('');
+				o.past = [w, 'ed'].join('');
+				if (w.match(/ss$/)) {
+					o.present = [w, 'es'].join(''); //'passes'
+				} else {
+					o.present = [w, 's'].join('');
+				}
+			} else {
+				o.gerund = w.replace(/[aeiou]$/, 'ing');
+				o.past = w.replace(/[aeiou]$/, 'ed');
+				o.present = w.replace(/[aeiou]$/, 'es');
+			}
+			return o;
+		}
 		//, end of english
 	},
 	
+	//: fulfill
+	// function: makes conjugation complete
+	// get's a conjugated verb object, returns fulfilled
+	fulfill: {
+		en: function(o) {
+			return {
+				gerund: [o.infinitive, 'ing'],
+				present: [o.infinitive, 's'],
+				past: [o.infinitive, 'ed'],
+				future: ['will ', o.infinitive],
+				perfect: ['have ', o.past],
+				pluperfect: ['had ', o.past],
+				futurePerfect: ['will have ', o.past]
+			};
+		}
+	},
+	
+	//: doer
+	// transforms for toDoer [matches, replaces]
+	doer: {
+		en: [
+			[/e$/i, 'er'],
+			[/([aeiou])([mlgp])$/i, '$1$2$2er'],
+			[/([rlf])y$/i, '$1ier'],
+			[/^(.?.[aeiou])t$/i, '$1tter']
+		]
+	}
 },
 
 // RULES FOR ADJECTIVES
 // --------------------v
 adjectives: {
-	
+	// adjectives.which: specifically which pos it is
+	which: {
+		en: {
+			comparative: {
+				matches: /..er$/,
+				tag: 'JJR'
+			},
+			superlative: {
+				matches: /..est$/,
+				tag: 'JJS'
+			},
+		}
+	},
+	adverb: {
+		// irregular - to adverb transforms (replaces)
+		to: {
+			en: [
+				[/al$/i, 'ally'],
+				[/ly$/i, 'ly'],
+				[/(.{3})y$/i, '$1ily'],
+				[/que$/i, 'quely'],
+				[/ue$/i, 'uly'],
+				[/ic$/i, 'ically'],
+				[/ble$/i, 'bly'],
+				[/l$/i, 'ly']
+			]
+		},
+		// has no adverb
+		no: {
+			en: [
+				/airs$/,
+				/ll$/,
+				/ee.$/,
+				/ile$/
+			]
+		},
+		// regular: not needed yet
+		// adjective to adverb function
+		fallback: {
+			en: function(word) {
+				return [word,'ly'].join('');	
+			}
+		}
+	},
+	comparative: {
+		// irregular - to comparative transforms (replaces)
+		to: {
+			en: [
+				[/y$/i, 'ier'],
+				[/([aeiou])t$/i, '$1tter'],
+				[/([aeou])de$/i, '$1der'],
+				[/nge$/i, 'nger']
+			]
+		},
+		// has no comparative
+		no: {
+			en: [
+				/ary$/,
+				/ous$/
+			]
+		},
+		// regular comparative, e.g. with '-er' like stronger, define below
+		regular: {
+			en: [
+				/ght$/,
+				/nge$/,
+				/ough$/,
+				/ain$/,
+				/uel$/,
+				/[au]ll$/,
+				/ow$/,
+				/old$/,
+				/oud$/,
+				/e[ae]p$/
+			]
+		},
+		fn: {
+			en: function(word) {
+				return [word,(word.match(/e$/) ? 'r' : 'er')].join('');	
+			}
+		},
+		// the fallback for the adjective to comparative
+		fallback: {
+			en: function(word) {
+				return ['more', word].join(' ');	
+			}
+		}
+	},
+	superlative: {
+		// to superlative transforms (replaces)
+		to: {
+			en: [
+				[/y$/i, 'iest'],
+				[/([aeiou])t$/i, '$1ttest'],
+				[/([aeou])de$/i, '$1dest'],
+				[/nge$/i, 'ngest']
+			]
+		},
+		// has no superlative
+		no: {
+			en: [
+				/ary$/
+			]
+		},
+		// regular superlative e.g. with '-est', strongest, define below
+		regular: {
+			en: [
+				/ght$/,
+				/nge$/,
+				/ough$/,
+				/ain$/,
+				/uel$/,
+				/[au]ll$/,
+				/ow$/,
+				/oud$/,
+				/...p$/
+			]
+		},
+		fn: {
+			en: function(word) {
+				if (word.match(/e$/)) {
+					return [word,'st'].join('');
+				} else {
+					return [word,'est'].join('');
+				}
+			}
+		},
+		// the fallback for the adjective to superlative
+		fallback: {
+			en: function(word) {
+				return ['most', word].join(' ');	
+			}
+		}
+	},
+	noun: {
+		// to noun transforms (replaces)	
+		to: {
+			en: [
+				[/y$/, 'iness'],
+				[/le$/, 'ility'],
+				[/ial$/, 'y'],
+				[/al$/, 'ality'],
+				[/ting$/, 'ting'],
+				[/ring$/, 'ring'],
+				[/bing$/, 'bingness'],
+				[/sing$/, 'se'],
+				[/ing$/, 'ment'],
+				[/ess$/, 'essness'],
+				[/ous$/, 'ousness']
+			]
+		},
+		// has no noun (or is same)
+		no: {
+			en: [
+				/\s$/,
+				/w$/,
+				/s$/
+			]
+		},
+		// adjective to noun function
+		fallback: {
+			en: function(word) {
+				return [word,'ness'].join('');	
+			}
+		}
+	}
 },
 
 // RULES FOR ADVERBS
 // --------------------v
 adverbs: {
-	
+	// adverbs.which: specifically which pos it is
+	which: {
+		en: {
+			superlative: {
+				matches: /..est$/,
+				tag: 'RBS'
+			},
+			comparative: {
+				matches: /..er$/,
+				tag: 'RBR'
+			}
+		}
+	},
+	adjective: {
+		// irregular - to adjective transforms (replaces)
+		to: {
+			en: [
+				[/bly$/i, 'ble'],
+				[/gically$/i, 'gical'],
+				[/([rsdh])ically$/i, '$1ical'],
+				[/ically$/i, 'ic'],
+				[/uly$/i, 'ue'],
+				[/ily$/i, 'y'],
+				[/(.{3})ly$/i, '$1']
+			]
+		}
+	}
 },
+// RULES FOR NUMBERS (others generated by dictionary)
+// -------------------------------------------------v
+numbers: {
+	negative: {en: /^(-|minus|negative)[\s\-]/i}, // TODO anchored
+	factors: {en: 
+		[{
+			reg: /\b(a)?(one-)?(\s)?half([\s\-])?(of\s)?/i,
+			mult: 0.5
+		}, {
+			reg: /\b(a)?(one-)?(\s)?quarter([\s\-])?(of\s)?/i,
+			mult: 0.25
+		}]
+	},
+	ordinals: {en: /(?:\w*)(st|nd|rd|th)(?: |$)/i}
+},
+
+// RULES FOR DATES (others generated by dictionary)
+// -------------------------------------------------v
+dates: {
+	// enter only language dependent words for split (NO '-','&',',' etc.)
+	split: {
+			multiple: {en: ['and', 'or']},
+			eventStart: {en: ['between', 'from']},
+			eventEnd: {en: ['and', 'to']}
+	},
+	day: {
+		suffix: {en: '(?:st|nd|rd|th)?(?:,\\s| of |$|\\s)'}
+	},
+	year:{
+		suffix: { // TODO? - could be arrays - but check if it would be to unflexible for i18n
+			bc: {en: ' before| vor| v.'},
+			ad: {en: ' anno| nach| n.'}
+		}
+	},
+	gregorian: {
+		_1000: { en: 'millennium(?:s?)|millennia' },
+		_100: { en: 'centur(?:y|ies)' },
+		_10: { en: 'decade(?:s?)' },
+		_1: { en: 'year(?:s?)' },
+		_m: { en: 'month(?:s?)' },
+		_d: { en: 'day(?:s?)' },
+		_h: { en: 'h\\.|hr|hrs|hour(?:s?)' },
+		_min: { en: 'm\\.|min(?:ute(?:s?))|mike(?:s?)' }
+	},
+	relative: {
+		tmr: { en: 'tomorrow|tmr' },
+		yda: { en: 'yester|y(?:.?)da' },
+		tni: { en: '(?:(?:to|2)(?:night|nite|nyt|noc))|tngt' },
+		//links: { en: 'in|at' },
+		morn: { en: 'morning' },
+		noon: { en: 'noon' },
+		anoon: { en: 'afternoon|aftn' },
+		eve: { en: 'eve(?:ning?)' },
+		night: { en: 'night|nite|nyt|noc' }
+	}
+},
+
 
 // RULES FOR GENERIC WORDS AND METHODS
 // ----------------------------------v
