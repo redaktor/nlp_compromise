@@ -5,6 +5,15 @@
 // caching per method -> set: function (method, key, val) { cache.nlp[method][key] = val; }
 var _ = require('./_');
 exports.cache = {};
+function toStr(p){ return (typeof p === 'string') ? p : JSON.stringify(p); }
+function c(){
+	if (typeof module !== 'undefined' && module.exports) {
+		return require.cache;
+	} else if (typeof window != 'undefined') {
+		return window.cache;
+	}
+	return exports.cache;
+}
 
 module.exports = (function () {
 		/* TODO
@@ -14,45 +23,40 @@ module.exports = (function () {
 			exports.cache = // TODO AMD cache ...
 		} else 
 		*/
-		if (typeof module !== 'undefined' && module.exports) {
-			exports.cache = require.cache;
-		} else if (typeof window != 'undefined') {
-			exports.cache = window.cache;
-		}
-		exports.cache.nlp = {};
+		c().nlp = {};
 		
     return {
 			empty: function(_method) {
 				if (!_method) {
-					exports.cache.nlp = null;
+					c().nlp = {};
 				} else {
-					exports.cache.nlp[_method] = null;
+					c().nlp[_method] = {};
 				}
 				return true;
 			},
 			get: function(key, params, hashKey) {
 				if (params instanceof Array) {
 					params.push(key);
-					return _.getObjKey(params, false, exports.cache.nlp);
+					return _.getObjKey(params, false, c().nlp);
 				} else {
 					var method = (!params) ? 'main' : params;
-					if (!exports.cache.nlp.hasOwnProperty(method) || !exports.cache.nlp[method].hasOwnProperty((hashKey) ? _.hash(key) : key)) {
+					if (!c().nlp.hasOwnProperty(method) || !c().nlp[method].hasOwnProperty((hashKey) ? _.hash(key) : key)) {
 						return null;
 					}
 				}
-				return exports.cache.nlp[method][(hashKey) ? _.hash(key) : key]; 
+				return c().nlp[method][(hashKey) ? _.hash(key) : key]; 
 			},
 			set: function(key, val, params, hashKey) {
 				if (typeof val === 'undefined') { return null; }
 				if (params instanceof Array) {
 					params.push(key);
-					_.setObjKey(params, val, exports.cache.nlp);
+					_.setObjKey(params, val, c().nlp);
 				} else {
 					var method = (!params) ? 'main' : params;
-					if (!exports.cache.nlp.hasOwnProperty(method)) {
-						exports.cache.nlp[method] = {};
+					if (!c().nlp.hasOwnProperty(method)) {
+						c().nlp[method] = {};
 					}
-					exports.cache.nlp[method][(hashKey) ? _.hash(key) : key] = val;
+					c().nlp[method][(hashKey) ? _.hash(key) : key] = val;
 				}
 				return val;
 			}
