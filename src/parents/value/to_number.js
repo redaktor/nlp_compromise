@@ -18,8 +18,8 @@ var rules = require(dPath+'rules/number');
 var _ = require('../../_');
 var cache = require('../../cache');
 data.plus.push('\\+'); data.minus.push('\\-');
-var numerals = Object.keys(data.ones);
-var dN = numerals.concat(Object.keys(data.teens),Object.keys(data.tens),Object.keys(data.multiple),data.plus,data.minus,data.factors,data.decimal,'\\d+').join('|');
+var _numerals = Object.keys(data.ones);
+var dN = _numerals.concat(Object.keys(data.teens),Object.keys(data.tens),Object.keys(data.multiple),data.plus,data.minus,data.factors,data.decimal,'\\d+').join('|');
 rules.multiple = new RegExp(['\\b',data.plus.join(' |\\b'),' (?=',dN,')'].join(''), 'i');
 rules.multiEnd = new RegExp([' ',data.plus.join('|'),'(?= |$)'].join(''), 'gi');
 rules.numeral = new RegExp(['(',dN,')+(?: |\\b|$)'].join(''), 'gi');
@@ -38,30 +38,30 @@ function set(t, w, multi, total) {
 	if (multi) { this.local_multiplier = multi; }
 	return true;
 }
-
-function hasNumeral(w){	
-	w = this.word||w;
-	if (!_.str(w)) return null;
-	var a = [[]], signs = ['+','-',',','.'], id;
-	var sp = w.split(rules.numeral).filter(_.str);
-	for (id=0; id<sp.length; id++){
-	  if (id === sp.length-1 && !(rules.numeral.test(sp[id]))) { break; }
-		if (/\W/.test(sp[id].slice(-1)) && signs.indexOf(sp[id]) < 0 ) { a.push([]); } else { a[a.length-1].push(sp[id]); } 
-	}
-	return a.map(function(_a){ return _a.join(' '); }).filter(_.str).map(function(num){ 
-		var nrW = num.replace(/ /g,''), nr;
-		var multiEnd = nrW.match(rules.multiEnd);
-		if (multiEnd) {
-			nrW = nrW.replace(multiEnd, '');
-			num = num.replace(multiEnd, '');
-		}
-		if (rules.float.test(nrW)) {
-			nr = parseFloat(nrW);
-			return (nr == nrW) ? nr : num;
-		}
+function wOrNum(num){
+	num = num.replace(rules.multiEnd, ''); 
+	var nrW = num.replace(/ /g,''), nr;
+	if (rules.float.test(nrW)) {
+		nr = parseFloat(nrW);
+	} else {
 		nr = parseInt(nrW, 10);
-		return (nr == nrW) ? nr : num;
-	});
+	}
+	return (nr == nrW) ? nr : num;
+}
+function hasNumeral(w){	
+	w = (this.word||w||' ').trim();
+	if (!_.str(w)) { return null; }	
+	var a = [[]], signs = ['+','-',',','.'], id;
+	var numerals = w.split(rules.numeral).filter(_.str);
+	for (id=0; id<numerals.length; id++){
+	  if (id === numerals.length-1 && !(rules.numeral.test(numerals[id]))) { break; }
+		if (/\W/.test(numerals[id].slice(-1)) && signs.indexOf(numerals[id]) < 0 ) { 
+			a.push([]);
+		} else {
+			a[a.length-1].push(numerals[id]);
+		} 
+	}
+	return a.map(function(_a){ return _a.join(' '); }).filter(_.str).map(wOrNum);
 }
 
 function numeral2number(s, j, a) {
@@ -162,8 +162,9 @@ function numeral2number(s, j, a) {
 	} else {
 		this.total = this.total * this.multiplier;
 	}
-
-	return this.numbers.push({text:s, number:this.total});
+	
+	var isNeg = rules.negative.test(s);
+	return this.numbers.push({text:s, number: (isNeg) ? -(this.total) : this.total});
 }
 function toNumber(w) {
 	if (_.hasL(this.numbers)) { return this.numbers; }
@@ -178,7 +179,7 @@ function toNumber(w) {
 	this.set = set;
 	w = w.trim().toLowerCase(); //.replace(/, ?/g, '').replace(/[$£€]/, '').replace(rules.negative, ''); // ! TODO !!!
 	var numerals = this.numerals || hasNumeral(w);
-	//console.log( '!!', numerals );
+	console.log( '!!', numerals );
 	if (!_.hasL(numerals)) { return []; }
 	for (i=0; i<numerals.length; i++) {
 		this.numeral = (typeof numerals[i] == 'number') ? [numerals[i]] : numerals[i].split(rules.multiple);

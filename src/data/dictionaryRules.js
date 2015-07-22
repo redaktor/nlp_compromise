@@ -1218,7 +1218,8 @@ dates: {
 		_m: { en: 'month(?:s?)' },
 		_d: { en: 'day(?:s?)' },
 		_h: { en: 'h\\.|hr|hrs|hour(?:s?)' },
-		_min: { en: 'm\\.|min(?:ute(?:s?))|mike(?:s?)' }
+		_min: { en: 'm(?:\\.| )|min(?:ute(?:s?))|mike(?:s?)' },
+		_sec: { en: 's(?:\\.| )|sec(?:ond(?:s?))|secs' }
 	},
 	relative: {
 		tmr: { en: 'tomorrow|tmr' },

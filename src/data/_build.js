@@ -1227,7 +1227,8 @@ function generateLanguage(lang) {
 						_m: __.val(rule.dates.gregorian._m, {}),
 						_d: __.val(rule.dates.gregorian._d, {}),
 						_h: __.val(rule.dates.gregorian._h, {}),
-						_min: __.val(rule.dates.gregorian._min, {})
+						_min: __.val(rule.dates.gregorian._min, {}),
+						_sec: __.val(rule.dates.gregorian._sec, {})
 					},
 					relative: {
 						tmr: __.val(rule.dates.relative.tmr, {}),
@@ -1351,7 +1352,7 @@ function generateLanguage(lang) {
 		map2: ');\n',
 		main: 'var main = {};\n',
 		mod0: 'module.exports = ',
-		mod1: 'module.exports = (',
+		mod1: '\nmodule.exports = (',
 		mod2: ')();\n',
 		mod: '\nmodule.exports = exports.zip;\n',
 		doc1: '/**\n',
