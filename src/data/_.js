@@ -1,8 +1,5 @@
 /**
- * special util custom inspect fn (functions and regexes in obj)
- * makes util.inspect logging nested objects with functions and regexes
- * 
- * and build helpers
+ * build helpers
  * not used in the project itself, only used by ./_build
  *
  * @readonly
