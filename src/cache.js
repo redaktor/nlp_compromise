@@ -37,7 +37,7 @@ module.exports = (function () {
 			get: function(key, params, hashKey) {
 				if (params instanceof Array) {
 					params.push(key);
-					return _.getObjKey(params, false, c().nlp);
+					return _.getObjKey(params, c().nlp);
 				} else {
 					var method = (!params) ? 'main' : params;
 					if (!c().nlp.hasOwnProperty(method) || !c().nlp[method].hasOwnProperty((hashKey) ? _.hash(key) : key)) {

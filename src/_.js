@@ -29,6 +29,8 @@ function _getProp(/*Array*/parts, /*Boolean or Object*/create, /*Object*/context
 	} catch(e) { }
 }
 function _mix(dest, source, copyFunc){
+	if (typeof dest != 'object') { dest = {}; }
+	if (typeof source != 'object') { source = {}; }
 	var name, s;
 	for(name in source){
 		s = source[name];
@@ -74,7 +76,7 @@ function normalise (str, exclDot, leaveCase) {
 	// TODO - does it handle all european languages?
 	if (!str) { return ''; }
 	if (!leaveCase) { str = str.toLowerCase(); }
-	str = str.trim().replace(/[,\.!:;\?\(\)]/, '');
+	str = str.trim().replace(/[,.#!$:;^?(){}=`~]/, '');
 	// single curly quotes
 	str = str.replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]+/g, "'");
 	// double curly quotes
@@ -116,16 +118,18 @@ function toObjDeep(arr, keys) {
 		return res;
 	});
 }
-// array.indexOf
-function has(str, a) {
-	if (typeof str === 'string' && a.indexOf(str) > -1) return true;
-	return false;
+// array.indexOf or obj.hasOwnProperty
+function has(k, ao) {
+	return ((ao instanceof Array && ao.indexOf(k) > -1)||ao.hasOwnProperty(k));
 }
 // array.length
 function hasL(a, l) {
 	if (!l) l = 0;
 	return (a && a instanceof Array && a.length > l) ? a.length : 0; 
 }
+// array items
+function first(a) { return (a instanceof Array) ? a[0] : a; }
+function last(a) { return (a instanceof Array) ? a[a.length-1] : a; }
 // string, non empty
 function str(w) {
 	return (typeof w === 'string' && w.trim() != '');
@@ -174,10 +178,10 @@ function hash(str) {
 // input string and options
 function w_options (wOo) {
 	return (typeof wOo === 'string') ? {
-		w: this.word || wOo || '',
+		w: wOo || this.word || this.input || '',
 		options: {}
 	} : {
-		w: this.word || '',
+		w: this.word || this.input || '',
 		options: (obj(wOo)) ? wOo : {}
 	}
 }
@@ -187,17 +191,25 @@ function setPos(token, p, pr) {
 	token.pos_reason = toReadable(pr);
 	return token;
 }
-function setToken(t, i, tokens, id, r) {
+function _index(a, st){
+	a = a.slice(st); if(!hasL(a)) { return -1; }
+	for (i=0; i<a.length; i++){ if(a[i]) { return i; } }
+}
+function setToken(t, i, tokens, id, r, countStart) {
 	if (r._if && r._if(t, tokens[i+1], tokens[i-1], i)) {
 		var token = (r.set) ? tokens[i+(r.set)] : t;
 		setPos(token, schema[r.tag], toReadable(id));
 	} else if (r.matches) {
 		var matches = t.match(r.matches);
 		if (matches) {
+			if (hasL(matches) && typeof countStart === 'number') {
+				matches.i = _index(matches, countStart); 
+				return matches;
+			}
 			if (r.tag) { return schema[r.tag]; }
 			if (r.hasOwnProperty('returns')) { return r.returns; }
 			if (r.hasOwnProperty('replacer')) { return t.replace(r[(r.replaces) ? 'replaces':'matches'], r.replacer); }
-			if (r.parameters) { 
+			if (r.parameters) {
 				for (var k in r.parameters) { matches[k] = r.parameters[k]; }
 				return matches;
 			}
@@ -209,7 +221,7 @@ function setToken(t, i, tokens, id, r) {
 	}
 }
 // set token against data rules, general logic - huge workhouse, saves much typing
-function tokenFn(rules, type, noFallback) {
+function tokenFn(rules, type, noFallback, countStart) {
 	if (type instanceof Array) {
 		var r = _getProp(type, false, rules);
 	} else {
@@ -221,23 +233,23 @@ function tokenFn(rules, type, noFallback) {
 		if (r instanceof Array) {
 			for (id = 0; id < r.length; id++) {
 				var rule = r[id];
-				var set = setToken(t, i, tokens, rule.tag+'Rule_'+id, rule);
+				var set = setToken(t, i, tokens, rule.tag+'Rule_'+id, rule, countStart);
 				if (set) return set;
 			}
 		} else {
 			for (id in r) {
 				var rule = r[id];
-				var set = setToken(t, i, tokens, id, rule);
+				var set = setToken(t, i, tokens, id, rule, countStart);
 				if (set) return set;
 			}
 		}
 		return (noFallback) ? false : t;
 	}
 }
-function getObjKey(parts, create, o) {
+function getObjKey(parts, o, create) {
 	return !parts ? o : _getProp(parts, create, o); // Object	
 }
-function getObject(name, create, o) {
+function getObject(name, o, create) {
 	return !name ? o : _getProp(name.split('.'), create, o); // Object	
 }
 function setObjKey(parts, value, o) {
@@ -294,6 +306,8 @@ exports._ = {
 	toObjDeep: toObjDeep,
 	has: has,
 	hasL: hasL,
+	first: first,
+	last: last,
 	str: str,
 	obj: obj,
 	shallow: shallow,
