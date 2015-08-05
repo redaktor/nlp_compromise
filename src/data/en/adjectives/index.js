@@ -358,7 +358,6 @@
   'scary',
   'scientific',
   'screeching',
-  'second',
   'secure',
   'sedate',
   'seemly',

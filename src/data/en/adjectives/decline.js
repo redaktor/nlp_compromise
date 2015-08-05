@@ -289,6 +289,7 @@ var _ = require("../../../_");
   'tired',
   'solid',
   'angry' ]
+
 module.exports = (function () {
 				var res = { convertables: [], adverb: {to: {}, no:[]}, comparative: {to: {}}, superlative: {to: {}}, noun: {to: {}} };
 				

@@ -18,6 +18,7 @@ var pos = require('./lexicon/pos');
 var negate = require('./lexicon/negate');
 var firstnames = require('./lexicon/firstnames');
 var phrasalVerbs = require('./lexicon/phrasalVerbs');
+var units = require('./units');
 
 module.exports = {
   schema: schema,
@@ -38,5 +39,6 @@ module.exports = {
   pos: pos,
   negate: negate,
   firstnames: firstnames,
-  phrasalVerbs: phrasalVerbs
+  phrasalVerbs: phrasalVerbs,
+  units: units
 };

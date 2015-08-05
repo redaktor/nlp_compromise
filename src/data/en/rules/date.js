@@ -5,6 +5,8 @@ var _ = require("../../../_");
  * change and contribute to dictionaryRules <br>
  *  <br>
  * regexes and functions for dates parsing <br>
+ * a 0 in dayFirst/monthFirst means language independent rules ... <br>
+ * (replaced by module) <br>
  *  <br>
  * @readonly
  * @module data/en/rules/date
@@ -19,7 +21,7 @@ var data = require('../lexicon/dates');
      nr: /(3[0-1]|[12][0-9]|0?[1-9])(?:st|nd|rd|th)?(?:,\s| of |$|\s)/i },
   month: { nr: /([1-9]|0[1-9]|1[0-2])/ },
   year: 
-   { nr: /(?:([0-9]{1,4})+)/,
+   { nr: '(?:([0-9]{1,4})+)',
      neg: /(?:\b| )[b]\s?(?:.?)\s?[c]\s?(?:.?)\s?[e]?\s?(?:.?)\s(?:([0-9]{1,4})+)|(?:([0-9]{1,4})+)(?:\b| )[b]\s?(?:.?)\s?[c]\s?(?:.?)\s?[e]?\s?(?:.?)| before| vor| v./i,
      pos: /(?:\b| )[a|c]\s?(?:.?)\s?[d|e]\s?(?:.?)\s(?:([0-9]{1,4})+)|(?:([0-9]{1,4})+)(?:\b| )[a|c]\s?(?:.?)\s?[d|e]\s?(?:.?)| anno| nach| n./i },
   short: 
@@ -35,7 +37,7 @@ var data = require('../lexicon/dates');
           '(?:',
           '(3[0-1]|[12][0-9]|0?[1-9])(?:st|nd|rd|th)?(?:,\\s| of |$|\\s)',
           ')?)',
-          '{m.w}?(?:$| ?)',
+          '{m.w}?(?:$| )',
           ')(?:(?:.*?)',
           '(?:([0-9]{1,4})+)',
           '?)' ],
@@ -57,9 +59,9 @@ var data = require('../lexicon/dates');
      { matches: /(?: |^)(?:([0-9]{1,4})+)/i,
        parameters: { pattern: [ 'year' ] } } ],
   relative: 
-   [ { matches: /(?:(?: |^)(?:within|in)\s*(?:the\s*)?(?:(?:next |upcoming |coming |following )|(last |previous |closing |past ))([0-9]+)?\s*(?:(millennium(?:s?)|millennia)|(centur(?:y|ies))|(decade(?:s?))|(year(?:s?))|(month(?:s?))|(day(?:s?))|(h\.|hr|hrs|hour(?:s?))|(m\.|min(?:ute(?:s?))|mike(?:s?)))\s*(?=(?:\W|$)))/i,
+   [ { matches: /(?:(?: |^)(?:within|in)\s*(?:the\s*)?(?:(?:(?:next |upcoming |coming |following )|(last |previous |closing |past )))([0-9]+)?\s*(?:(millennium(?:s?)|millennia)|(centur(?:y|ies))|(decades?)|(years?)|(months?)|(days?)|(h\.?|hr|hrs|hours?|stunden?|heurs?)|(m(?:\.| )|min(?:ute(?:[sn]?))|mikes?)|(s(?:\.| )|se[ck]\.?(?:(?:[ou])nde?)?|\u0022|\u2033))\s*(?=(?:\W|$)))/i,
        parameters: { fn: 'gregorian', isRange: 1 } },
-     { matches: /(?:(?: |^)(?:next |upcoming |coming |following )|(last |previous |closing |past )([0-9]+)?\s*(?:(millennium(?:s?)|millennia)|(centur(?:y|ies))|(decade(?:s?))|(year(?:s?))|(month(?:s?))|(day(?:s?))|(h\.|hr|hrs|hour(?:s?))|(m\.|min(?:ute(?:s?))|mike(?:s?)))\s*)/i,
+     { matches: /(?:(?: |^)(?:(?:next |upcoming |coming |following )|(last |previous |closing |past ))([0-9]+)?\s*(?:(millennium(?:s?)|millennia)|(centur(?:y|ies))|(decades?)|(years?)|(months?)|(days?)|(h\.?|hr|hrs|hours?|stunden?|heurs?)|(m(?:\.| )|min(?:ute(?:[sn]?))|mikes?)|(s(?:\.| )|se[ck]\.?(?:(?:[ou])nde?)?|\u0022|\u2033))\s*)/i,
        parameters: { fn: 'gregorian' } },
      { matches: /(?:(?: |^)(tomorrow|tmr)|(yester|y(?:.?)da)|((?:(?:to|2)(?:night|nite|nyt|noc))|tngt)|(morning)|(noon)|(afternoon|aftn)|(eve(?:ning?))|(night|nite|nyt|noc))?/i,
        parameters: { fn: 'dictionary' } } ] }
@@ -67,6 +69,7 @@ module.exports = (function () {
 				var _d = 'day', _m = 'month', _y = 'year';
 				var w = {day: Object.keys(data.days).join('|'), month: ['(?:(',Object.keys(data.months).join('|'),'),?)'].join('')};
 				var m_y = {matches:_.r([w.month,' ',exports.zip.year.nr],0,'i'), parameters: {pattern:[_m,_y]}};
+				exports.zip.year.nr = new RegExp(exports.zip.year.nr);
 				exports.zip.day.weekday = _.r(['(?:(',w.day,',?))'],0,'i'),
 				exports.zip.month.w = _.r([w.month],0,'i');
 				for (var k in w) {
