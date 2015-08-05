@@ -1213,13 +1213,13 @@ dates: {
 	gregorian: {
 		_1000: { en: 'millennium(?:s?)|millennia' },
 		_100: { en: 'centur(?:y|ies)' },
-		_10: { en: 'decade(?:s?)' },
-		_1: { en: 'year(?:s?)' },
-		_m: { en: 'month(?:s?)' },
-		_d: { en: 'day(?:s?)' },
-		_h: { en: 'h\\.|hr|hrs|hour(?:s?)' },
-		_min: { en: 'm(?:\\.| )|min(?:ute(?:s?))|mike(?:s?)' },
-		_sec: { en: 's(?:\\.| )|sec(?:ond(?:s?))|secs' }
+		_10: { en: 'decades?' },
+		_1: { en: 'years?' },
+		_m: { en: 'months?' },
+		_d: { en: 'days?' },
+		_h: { en: 'h\\.?|hr|hrs|hours?|stunden?|heurs?' },
+		_min: { en: 'm(?:\\.| )|min(?:ute(?:[sn]?))|mikes?' },
+		_sec: { en: 's(?:\\.| )|se[ck]\\.?(?:(?:[ou])nde?)?|\\u0022|\\u2033' }
 	},
 	relative: {
 		tmr: { en: 'tomorrow|tmr' },
@@ -1237,6 +1237,392 @@ dates: {
 
 // RULES FOR GENERIC WORDS AND METHODS
 // ----------------------------------v
+//: units
+units: {
+	systems: ['metric', 'us', 'imperial', 'digital', 'natural'],
+	categories: [
+		//0:
+		['time'],
+		['mass'],
+		['thermodynamic temperature'],
+		['length'],
+		['area'],
+		['volume'],
+		['information content'],
+		['amount of substance'],
+		['electric current'],
+		['luminous intensity'],
+		//10:
+		['plane angle'],
+		['solid angle'],
+		['energy','work','heat'],
+		['pressure','stress'], 
+		['power','radiant flux'],
+		['force'],
+		['magnetic flux'],
+		['magnetic field strength','magnetic flux density'],
+		['inductance'],
+		['electric charge','quantity of electricity'],
+		//20:
+		['voltage','electrical potential difference','electromotive force'],
+		['electric capacitance'],
+		['electric conductance'],
+		['electric resistance','impedance','reactance'],
+		['frequency'],
+		['illumination'],
+		['luminous flux'],
+		['radioactivity'],
+		['radioactivity absorbed dose'],
+		['radioactivity equivalent dose'],
+		//30:
+		['catalytic activity'],
+		['speed','velocity'],
+		['acceleration'],
+		['density'],
+		['mass fraction'],
+		['specific volume'],
+		['magnetic field strength'],
+		['electric current density'],
+		['concentration'],
+		['luminance'],
+		//40:
+		['convergence'],
+		['volumetric flow'],
+		['jerk','jolt'],
+		['snap','jounce'],
+		['angular velocity'],
+		['momentum','impulse'],
+		['angular momentum'],
+		['torque','moment of force'],
+		['yank'],
+		['wavenumber','optical power','curvature','spatial frequency'],
+		//50:
+		['area density'],
+		['molar volume'],
+		['action'],
+		['heat capacity','entropy'],
+		['molar heat capacity','molar entropy'],
+		['specific heat capacity','specific entropy'],
+		['molar energy'],
+		['specific energy'],
+		['energy density'],
+		['surface tension','stiffness'],
+		//60:
+		['heat flux density','irradiance'],
+		['thermal conductivity'],
+		['kinematic viscosity','diffusion coefficient'],
+		['dynamic viscosity'],
+		['electric displacement field','polarization vector'],
+		['electric charge density'],
+		['conductivity'],
+		['molar conductivity'],
+		['permittivity'],
+		['permeability'],
+		//70:
+		['electric field strength'],
+		['luminous energy'],
+		['luminous exposure'],
+		['X and gamma exposure'],
+		['absorbed dose rate'],
+		['resistivity']
+	],
+	tags: ['','nautical','historical','dry','fluid','avoirdupois'], // '' = optional ...
+	metric: {
+		prefixes: [
+			// expo of 10, symbol, wordRegex, expo of 2 (computing, optional)
+			// terra for typos in 'latin' languages, it's greek, let's be tolerant? ;)
+			//1.000.000.000.000.000.000.000.000 :
+			[24,'Y','yotta',80],
+			//		1.000.000.000.000.000.000.000 :
+			[21,'Z','zetta',70],
+			//				1.000.000.000.000.000.000 :
+			[18,'E','e(?:ks|x)a',60],
+			//						1.000.000.000.000.000 :
+			[15,'P','peta',50],
+			//								1.000.000.000.000 :
+			[12,'T','te[r]+a',40], 
+			//										1.000.000.000 :
+			[9, 'G','giga',30],
+			//												1.000.000 :
+			[6, 'M','mega',20],
+			//														1.000 :
+			[3, 'k','kilo',10],
+			//															100 :
+			[2, 'h','he[ck]to'],
+			//															 10 :
+			[1, 'da','de[ck]a'],
+			// unit --------------------------- 1
+			// -
+			//															0,1 :
+			[-1, 'd','de[cz][yi]'],
+			//														 0,01 :
+			[-2, 'c','[cz]ent[yi]'],
+			//														0,001 :
+			[-3, 'm','milli'],
+			//												0,000.001 :
+			[-6, 'u','\\u00B5|mikro'],
+			//										0,000.000.001 :
+			[-9, 'n','nano'],
+			//								0,000.000.000.001 :
+			[-12,'p','pi[ck]o'],
+			//						0,000.000.000.000.001 :
+			[-15,'f','femto'],
+			//				0,000.000.000.000.000.001 :
+			[-18,'a','atto'],
+			//		0,000.000.000.000.000.000.001 :
+			[-21,'z','zepto'],
+			//0,000.000.000.000.000.000.000.001 :
+			[-24,'y','yokto']
+		]
+	},
+	units: [
+	// TODO sys 1 --> 2 if ONLY imperial and see comments:
+	// cat, sys, s, w OR [w,r], tag OR 0, siBase OR 0, isPow
+	// auto s order will be done by .length
+		[0,0,'s',['second','se[ck]\\.?(?:(?:[ou])nde?)?|\\u0022|\\u2033']],
+		[0,0,'m',['minute','min\\.?(?:ute(?:[sn]?))?|mikes?'],0,[60,0]],
+		[0,0,'h',['hour','h\\.?|hr|hrs|hours?|stunden?|heurs?'],0,[3600,0]],
+		[1,0,'g',['gram','gramm?e?'],0,3], //siBase: kg (historic reasons)
+		[1,0,'t',['tonne','(?:metris?ch?e? )?tonne[sn]?(?: métrique)?'],0,6],
+		[1,1,'gr','grain'],
+		[1,1,'dwt','pennyweight'],
+		[1,1,'dr','dram'],
+		[1,1,'oz',['ounce','[ou]n[cz]e']],
+		[1,1,'oz t',['troy ounce','troy [ou]n[cz]e']],
+		[1,1,'lb t',['troy pound','troy p[fo]und']],
+		[1,1,'lb',['pound','p[fo]und']], //de: see TODO pound below
+		[1,1,'st','stone'],
+		[1,1,'cwt',['hundredweight','hundredweight|cental|zentner']],
+		[1,1,'TON',['ton','(?:short ?|net ?)?ton[\\W]']], //(2,000 pounds)
+		[1,1,'lTON',['long ton','(?:long ?|gross |weight )ton']], //(2,240 pounds, historic)
+		// !TODO mass: both don't fit in metric conversion range:
+		// carat = 0,2 g
+		// note the german pound is ambiguous with US and its values: "informal" means 0,5 kg but it is 0,453 592 37 !
+		// historically it depends on the region (e.g. bavaria:0,56, hamburg:0,484609) - ignored for now.
+		[2,0,'°? ?K','kelvin'],
+		[2,0,'° ?C','celsius',0,[1,273.15]],
+		[2,1,'° ?F','fahrenheit'], // conflict w. farad F
+		[3,0,'m',['meter','meter|m[eè]tre']],
+		[3,0,'l',['liter','liter|litre'],0,0,3],
+		[3,1,'p',['point','point|punkt']],
+		[3,1,'P\u0338','pica'],
+		[3,1,'in','inch'],
+		[3,1,'ft',['foot','f(?:oo|ee)t|fu(?:ß|ss)']],
+		[3,1,'yd','yard'],
+		[3,1,'mi',['mile','me?ill?e']],
+		//us land, e.g. chain?, acre-foot
+		//us fluid, e.g. fl. ounces, pints, quarts, gallons
+		//us dry ...
+		[3,1,'ftm',['fathom','fathom|faden|klafter|brasse'],1],
+		[3,1,'shot','shackle|shot',1],
+		[3,1,'cb',['cable','c[aâ]ble|kabel'],1],
+		[3,1,'NM',['nautical mile (nmi)','(?:nautical |nautische )me?ile|nmi|mille nautique'],1],
+		[3,1,'nl',['nautical mile (nl)','nautical league|nautische liga|ligue nautique'],1],
+		[3,3,'px','pixel'],
+		[3,3,'pt',['point','point|punkt']],
+		[3,3,'em',['quad (em)','quad|geviert']],
+		[3,3,'rem',['root quad (rem)','root em']],
+		[6,3,'b','bit'],
+		[6,3,'B','byte'],
+		[7,0,'mol','mole'],
+		[8,0,'A',['ampère','ampere|ampère']],
+		[9,0,'cd','candela'],
+		//lx, lux = illuminance = lumen/qm2
+		[10,0,'rad',['radian','radiant?']],
+		[11,0,'sr',['steradian','st[eé]radiant?']],
+		[12,0,'J','joule'],
+		[13,0,'Pa','pascal'],
+		[13,0,'bar','bar'], // bar TODO
+		[14,0,'W','watt'],
+		[15,0,'N','newton'],
+		//dyn|dyne
+		[16,0,'Wb','weber'],
+		[17,0,'T','tesla'],
+		[18,0,'H','henry'],
+		[19,0,'C','coulomb'],
+		[20,0,'V','volt'],
+		[21,0,'F','farad'],
+		[22,0,'S','siemens'],
+		[23,0,'O',['ohm','\\u2126|ohm']],
+		[24,0,'Hz','hertz'],
+		// revolutions per minute
+		[25,0,'lx',['lux','lux|beleuchtungsstärke|éclairement']],
+		[26,0,'lm',['lumen','lumen|lumina|lumière']],
+		[27,0,'Bq','becquerel'],
+		//..
+		[28,0,'Gy','gray'],
+		//rad
+		[29,0,'Sv','sievert'],
+		[30,0,'kat','katal'],
+		[40,0,'dioptry','dioptry'],
+		[45,0,0,['newton second','newton se(?:co|ku)nde?']],
+		[46,0,0,['newton meter second','newton meter|m[eè]tre se(?:co|ku)nde?']],
+		[47,0,0,['newton meter','newton meter|m[eè]tre']],
+		[49,0,0,['reciprocal meter','reciprocal meter|m[eè]tre']],
+		[52,0,0,['joule second','joule se(?:co|ku)nde?']],
+		[63,0,0,['pascal second','pascal se(?:co|ku)nde?']],
+		[71,0,0,['lumen second','lumen se(?:co|ku)nde?']],
+		[72,0,0,['lux second','lux se(?:co|ku)nde?']],
+		[['thermodynamic temperature by amount of substance'],0,0,['kelvin mole','kelvin mole?']],
+		[['thermodynamic temperature by mass'],0,0,['kilogramm? kelvin','kilogramm? kelvin']],
+		[['length by thermodynamic temperature'],0,0,['meter kelvin','(?:meter|m[eè]tre) kelvin']],
+		[['electric conductance by area'],0,0,['siemens square meter','siemens (square ?|quadrat ?)?meter|m[eè]tre']]
+		
+		/* TODO
+			CONSTANTS:: m-1:wavenumber
+			----------+	
+			watt hours
+			currency/währung, loudness/lautheit, bandRate/tonheit, bpm, lat/lng
+			Richter
+			megaparsec [Mpc]
+			Kiloparsec [kpc]
+			Parsec [pc]
+			Lichtjahr [ly]
+			astronomical unit [AU]
+			Liga [lea]
+			Fermi [f]
+			Arpent 
+			Twip
+			ALN
+			Kaliber
+			Ken
+			Reed
+			
+			Planck-Länge
+			http://physics.nist.gov/cuu/Units/outside.html +
+			GtCO2eq, MTU, toe, gilbert, bushel
+			1 board-foot = 1 ft × 1 ft × 1 in = 2.360 dm3
+			1 British thermal unit (Btu) ≈ 1055 J
+			1 calorie (cal) = 4.184 J
+			1 food calorie (kilocalorie, large calorie) (kcal, Cal) = 4.184 kJ
+			1 foot-pound (energy) ≈ 1.356 J
+			1 hand = 10.16 cm // finger // nail
+			1 horsepower ≈ 745.7 W
+			1 R-value (ft2·°F·h/Btu) ≈ 0.1761 RSI (K·m2/W)
+			1 slug = 1 lbf·s2/ft
+			1 U (rack unit) = 1.75 in
+// calculation (special):
+/!	46 	newton metre second						N⋅m⋅s				angular momentum																				m2⋅kg⋅s−1
+/!	54 	joule per kelvin mole					J/(K⋅mol)		molar heat capacity, molelectric displacement field, polarization vectorar entropy 	m2⋅kg⋅s−2⋅K−1⋅mol−1
+/!	55 	joule per kilogram kelvin			J/(K⋅kg)			specific heat capacity, specific entropy								m2⋅s−2⋅K−1
+/!	61 	watt per metre kelvin					W/(m⋅K)			thermal conductivity																		m⋅kg⋅s−3⋅K−1
+/!	67 	siemens square metre per mole	S⋅m2/mol	 		molar conductivity																			kg−1⋅s3⋅mol−1⋅A2
+/!	49 	reciprocal metre							m−1					wavenumber, optical power, curvature, spatial frequency	m−1
+		*/
+	],
+	pows: { 
+		// TODO http://physics.stackexchange.com/questions/11779/whats-the-range-of-dimension-exponents-in-the-si-units-system
+		// regexPrefix, regexSuffix 
+		_2: ['square ','square|quadrat|centiare|centare|(?:s?q[. ]*)', '(?: carr[eé])|(?: squared?)|\\u00B2|2'],
+		_3: ['cubic ','[ck]ubi[ck]|(?:[ck]b[. ]*)', '(?: cubed?)|\\u00B3|3'],
+		_4: ['quartic ','quarti(?:c|que)|biquadratische?|q.', '(?: quarti(?:c|que))|\\u2074|4'],
+		length: [0,3,4,5] //-, length, area, volume
+	},
+	
+	by: {
+		_: "by|\\u22C5|\\u00B7|\\u00D7|\\u2715|\\*",
+		force: {
+			time: 45,
+			length: 47
+		},
+		energy: {
+			time: 52,
+			'thermodynamic temperature': 53
+		},
+		pressure: {
+			time: 63
+		},
+		'luminous flux': {
+			time: 71
+		},
+		illumination: {
+			time: 72
+		},
+		'electric resistance': {
+			length: 75
+		}
+	},
+	per: {
+		_: 'per|pro|a l?|\\/',
+		length: {
+			length: 10,
+			time: 31,
+			time_2: 32,	// TODO
+			time_3: 42,	// TODO
+			time_4: 43	// TODO
+		},
+		area: {
+			area: 11,
+			time: 62
+		},
+		mass: {
+			volume: 33,
+			mass: 34,
+			area: 50
+		},
+		volume: {
+			mass: 35,
+			time: 41,
+			'amount of substance': 51
+		},
+		'plane angle': {
+			time: 44
+		},
+		force: {
+			length: 12,
+			area: 13,
+			time: 48
+		},
+		energy: {
+			time: 14,
+			'thermodynamic temperature by amount of substance': 54,
+			'thermodynamic temperature by mass': 55,
+			'amount of substance': 56,
+			mass: 57,
+			volume: 58
+		},
+		'electric current': {
+			length: 36,
+			area: 37
+		},
+		'amount of substance': {
+			volume: 38
+		},
+		'luminous intensity': {
+			area: 39
+		},
+		power: {
+			area: 60,
+			'length by thermodynamic temperature': 61
+		},
+		'electric charge': {
+			area: 64,
+			volume: 65,
+			mass: 73
+		},
+		'electric conductance': {
+			length: 66
+		},
+		'electric conductance by area': {
+			'amount of substance': 67
+		},
+		'electric capacitance': {
+			length: 68
+		},
+		inductance: {
+			length: 69
+		},
+		voltage: {
+			length: 70
+		},
+		'radioactivity absorbed dose': {
+			time: 74	
+		}
+		/*
+		[0,0,0,['siemens square meter','siemens (square ?|quadrat ?)?meter|m[eè]tre']], //... per mol 67
+		*/
+	}
+},
 
 //: unambigous suffixes
 unambiguousSuffixes: {
