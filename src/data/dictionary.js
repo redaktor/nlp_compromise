@@ -3439,7 +3439,6 @@ var main = {
 			{ en: 'scary' },
 			{ en: 'scientific' },
 			{ en: 'screeching' },
-			{ en: 'second' },
 			{ en: 'secure' },
 			{ en: 'sedate' },
 			{ en: 'seemly' },
@@ -4480,8 +4479,8 @@ var main = {
 		factors: { en: ['half','quarter'] },
     ones: {
         0: { en: ['zero','null','nil'] },
-        1: { en: ['a','one','first'] },
-        2: { en: ['two','second'] },
+        1: { en: ['one','first'] },
+        2: { en: ['two','\\Dsecond'] },
         3: { en: ['three','third'] },
         4: { en: ['four','fourth'] },
         5: { en: ['five','fifth'] },

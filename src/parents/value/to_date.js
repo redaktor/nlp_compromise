@@ -10,12 +10,14 @@
 // NOTE - due to a much more detailed structure - this breaks the tests !!! TODO rewrite TESTS
 
 /* note: Using \\s instead of a literal space to include half width spaced dates ... */
-/* TODO 
-1st observe pattern or setter: 
+/* TODO
+- hebrew, julian etc.
+observe pattern or setter: 
 - whenever year/month/day... changes, DO update .Date, localized
 
+- make years negative if b.c. (check suffixes) --> negCheck
+
 - weekday fallback (rules, but no detection yet for mon.|monday etc., we have the data, so TODO) 
-- make years negative if b.c. (check suffixes)
 - cache sets
 - I think all further date (i18n and format) methods are not scope of this project, 
   so maybe TODO an optional "hook" for moment.js and a moment instead of js Date ...
@@ -28,42 +30,20 @@ var _ = require('../../_');
 var cache = require('../../cache');
 
 var _d = 'day', _m = 'month', _y = 'year', _wd = 'weekDay';
-var _methods = {day:'getUTCDate', month:'getUTCMonth', year:'getUTCFullYear', weekDay:'getUTCDay'};
+var _methods = {day:'UTCDate', month:'UTCMonth', year:'UTCFullYear', weekDay:'UTCDay'};
 var last_dates = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
 if (lang != 'en') { rules.short = rules.short.reverse(); } // TODO
-rules.fn = _.tokenFn(rules, 'short', 1);
-rules.dayFirstFn = _.tokenFn(rules, 'dayFirst', 1);
-rules.monthFirstFn = _.tokenFn(rules, 'monthFirst', 1);
-rules.relativeFn = _.tokenFn(rules, 'relative', 1);
-rules.relativeFns = {
-	gregorian: function (o,i,summand,isNeg) { 
-		// TODO last: set time 0 if set month or day, set day 1 if set year o. above
-		// TODO next: set time 24 if set month or day, set day last_dates if set year o. above
-		// super flexible, would be the same for all languages with gregorian calendar :
-		var n = (1000/Math.pow(10, i));
-		if (n>=1) { o.year = Math.floor((isNeg ? o.year-n : o.year+n)/n)*n; return o; }
-		var a = ['month','day','hour','minute']; // object keys - TODO goes to blank when 'time' TODO is done
-		var k = a[((+n).toFixed(a.length)).split(/(?:\.|1)/g)[1].length];
-		o[k] = isNeg ? o[k]-summand : o[k]+summand;
-		return o;
-	},
-	dictionary: function (o,i) { // sets known dates w. times (tommorrow)
-		var a = [[1],[-1],[-1,22],[0,22],[0,22],[0,6],[0,12],[0,15],[0,18]];
-		if (a[i][0]) { o.day += a[i][0]; }
-		if (a[i][1]) { o.hour = a[i][1]; }
-		return o;
-	}
-}
-function getD(D, t) {
-	return (D && _methods[t]) ? D[_methods[t]]()+((t==='month')?1:0) : false;
+
+function getD(D, t, constant) {
+	var method = ['get',_methods[t]].join('');
+	return (D && method) ? D[method]()+((t==='month')?1:0) : constant||false;
 }
 function setD(o) {
 	// the Date bug "2 digit years always in last century" is fixed in function 'year'
 	// now prevent the Date bug "setting the Date to final value if month or date is null"
 	var d = new Date(Date.UTC(o[_y]||null, o[_m]-1||0, o[_d]||1, 0, 0, 0 /*, hour, minute, second, millisecond*/));
 	// and finally prevent the "year < 1900 // y2k" bug
-	// can anybody confirm the above internally uses setYear instead of setFullYear - if so it is a .js bug
+	// can anybody confirm the above internally uses setYear instead of setFullYear ?
 	d.setUTCFullYear((typeof o[_y] === 'number') ? o[_y] : this.now.getUTCFullYear());
 	return d;
 }
@@ -71,11 +51,34 @@ function lastDay(o) {
 	var i = o[_m]-1; // leap years:
 	return (i === 1 && new Date(o[_y], 1, 29).getMonth() == 1) ? last_dates[i]+1 : last_dates[i];
 }
-function blank(nowD,d,m,y,w){
+function blank(nowD,d,m,y,wd){
 	return {
-		day:getD(nowD,_d),month:getD(nowD,_m),year:getD(nowD,_y),weekDay:getD(nowD,_wd),
-		text: this.text.trim(), Date: nowD||{}, to: false
+		text: this.text.trim(),
+		day:getD(nowD,_d,d), month:getD(nowD,_m,m), year:getD(nowD,_y,y), weekDay:getD(nowD,_wd,wd),
+		Date: nowD||{}, to: false
 	};
+}
+rules.fn = _.tokenFn(rules, 'short', 1);
+rules.dayFirstFn = _.tokenFn(rules, 'dayFirst', 1);
+rules.monthFirstFn = _.tokenFn(rules, 'monthFirst', 1);
+rules.relativeFn = _.tokenFn(rules, 'relative', 1);
+rules.relativeFns = {
+	gregorian: function (o,i,summand,isNeg) {
+		// super flexible, for all languages with gregorian calendar ! :
+		var n = (1000/Math.pow(10, i));
+		if (n>=1) { o.year = Math.floor((isNeg ? o.year-n : o.year+n)/n)*n; return o; }
+		var a = ['month','day','hour','minute']; // TODO goes to blank (object keys) when 'time' TODO is done
+		var k = a[((+n).toFixed(a.length)).split(/(?:\.|1)/g)[1].length];
+		var D = new Date(o.Date);
+		D['set'+_methods[k]](D['get'+_methods[k]]() + (isNeg ? -(summand) : summand));
+		return blank(D);
+	},
+	dictionary: function (o,i) { // sets known dates w. times (tommorrow evening)
+		var a = [[1],[-1],[-1,22],[0,22],[0,22],[0,6],[0,12],[0,15],[0,18]];
+		if (a[i][0]) { o.day += a[i][0]; }
+		if (a[i][1]) { o.hour = a[i][1]; }
+		return o;
+	}
 }
 function hyphenatedDates(str, recover) {
 	var i;
@@ -112,9 +115,11 @@ function knows(matches) {
 		var isNeg = !!(matches[0]); // TODO suffixes
 		var sum = ((matches[1]) ? parseInt(matches[1],10) : 1);
 		var res = rules.relativeFns[matches.fn](_.shallow(_o), index(matches, 1), sum, isNeg);
+		res.text = _o.text;
 		if (matches.isRange || sum > 1) {
 			if (isNeg) { res.to = _o; } else { _o.to = res; res = _o; }
 		}
+		res.relativeTo = this.options.now;
 	} else { // usually *absolute* dates
 		var _o = {text: matches.shift().trim()||matches.input};
 		var res = matches.pattern.reduce(function(o,c,i) {
@@ -123,15 +128,16 @@ function knows(matches) {
 			o[c] = (n) ? n : data.months[matches[i].toLowerCase()];
 			return o;
 		}, _.mixin(_o, blank()));
+		res.relativeTo = false;
 	}
 	
 	this.parts = this.parts.concat(res);
 	return res;
 }
-function negCheck(t) {
+function negCheck(o) {
 	// negative years ...
-	if (t.integer > 0 && rules[_y].negative.hasOwnProperty(t.normalised)) return -(t.integer);
-	return t.integer;
+	if (o.integer > 0 && rules[_y].negative.hasOwnProperty(o.normalised)) return -(o.integer);
+	return o.integer;
 }
 function year(o) {
 		var is = {n: o.text.match(rules[_y].neg), p: o.text.match(rules[_y].pos)}, k;
@@ -143,8 +149,8 @@ function year(o) {
     if (!is.n && !is.p && o[_d] && o[_y]<=((nowY+5)-century) ) { return century+o[_y]; }
     return (is.n) ? -(o[_y]) : o[_y];
 }
-function correct(o, i) {
-	// postprocess
+function postprocess(o, i) {
+	if (!o.text || o.text.length < 3) { return false; }
 	var j;
 	if (!o[_y]) {
 		for (j=i; j<this.results.length; j++){
@@ -166,33 +172,28 @@ function correct(o, i) {
 	// see https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString#Polyfill - TODO ???
 	// o.iso = o.Date.toISOString();
 	o.localized = new Intl.DateTimeFormat(this.options.locale||lang, this.options.localized).format(o.Date);
-	
 	if (o.to) { 
 		delete o.to.to;
 		o.to = JSON.parse(JSON.stringify(o.to));
 		o.to.Date = setD(o.to);
-		if(o.to.Date) { var hasToD = 1; }
+		if(o.to.Date) { 
+			var hasToD = 1;
+			o.localized = new Intl.DateTimeFormat(this.options.locale||lang, this.options.localized).format(o.to.Date);	
+		}
 	}
 	if (o.Date && hasToD) { 
 		// make sure to-date > date
 		var toTooSmall = ((isFinite(o.Date.valueOf()) && isFinite(o.to.Date.valueOf())?(o.Date>o.to.Date)-(o.Date<o.to.Date):NaN) > -1);
 		if (toTooSmall) { return blank(); }
 	}
-	if ((o.to && _.nr(o.to[_m]) && o.to[_m] < o[_m]) || (o.to && _.nr(o.to[_y]) && o.to[_y] < o[_y])) { 
-		return blank(); 
-	}
-	// fullfill weekDay
+	// fullfill weekDay:
 	if (o.day) { o.weekDay = getD(o.Date,_wd); }
 	if (hasToD && o.to.day) { o.to.weekDay = getD(o.to.Date,_wd); }
-	
-	if (_.str(this.input) && this.input.indexOf(o.text) < 0) {
-		console.log( 'NUMERIC', o.text );	
-	}
 	return o;
 }
 function parseDate(w, i, a){
 	w = hyphenatedDates(w, 1);
-	var doA = (this.options.now) ? ['fn', 0, 'relativeFn'] : ['fn', 0];
+	var doA = (this.options.now) ? ['relativeFn', 'fn', 0] : ['fn', 0];		
 	function known() { // recursive rules
 		doA.forEach(function(fn) {
 			if (!fn) {
@@ -210,7 +211,6 @@ function parseDate(w, i, a){
 	known.bind(this)();
 	return this.parts;
 }
-
 function toDate(w, input, options){
 	this.options = _.mixOptions(options, this.options, 'dates');
 	// TODO - how about TIMEs /*, hour, minute, second, millisecond + timezone*/
@@ -222,6 +222,7 @@ function toDate(w, input, options){
 	this.knows = knows;
 	this.input = input;
 	this.text = hyphenatedDates(w);
+	if (!this.options.now) { this.options.now = this.now; }
 	
 	var ranges = this.text.split(rules.range).filter(_.str);
 	var rL = _.hasL(ranges);
@@ -236,12 +237,16 @@ function toDate(w, input, options){
 			}
 			return part.trim();
 		}).filter(_.str);
-		
 		if (rL < 2) {
 			multis.unshift(ranges[0]);
 		} else {
+			if (rL > 2) { multis = multis.concat(ranges.slice(2)); }
 			ranges.map(parseDate, this);	
-			this.results = this.results.concat(range(this.parts));   
+			if (this.parts[0].to||this.parts[1].to) {
+				this.results = this.results.concat(this.parts);
+			} else {
+				this.results = this.results.concat(range(this.parts));
+			}
 		}
 		if (_.hasL(multis)) { 
 			this.parts = [];
@@ -249,17 +254,17 @@ function toDate(w, input, options){
 			this.results = this.results.concat(this.parts);  
 		}    
 	}
-	return this.results.filter(_.obj).map(correct, this);
+	return this.results.map(postprocess, this).filter(_.obj);
 }
 function to_date(w){
 	var wo = _.w_options.bind(this)(w);
 	if (_.hasL(this.dates) && !wo.options.now) { return this.dates; }
-	w = this.numbers.text ? this.numbers.text() : wo.w;
+	w = wo.w;
 	if (!_.str(w)) { return []; }
 	var cached = cache.get(wo.w, ['to_date', this.options||{}]);
 	if (cached) { return cached; }
 	var res = toDate(w, wo.w, wo.options).filter(_.obj);
-	this.dates = this.dates.concat(res);
+	this.dates = (this.dates||[]).concat(res);
 	this.dates.__proto__ = Object.create(Array.prototype);
 	var text = wo.w;
 	this.dates.forEach(function(o){ text = text.replace(o.text, o.localized) });

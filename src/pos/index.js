@@ -19,7 +19,7 @@ var Sentence = require('./sentence');
 var Section = require('./section');
 // all 'CD'
 var vs = Object.keys(dates.months).concat(Object.keys(dates.days));
-for (var k in numbers) { vs = vs.concat(Object.keys(numbers[k])) }
+for (var k in numbers) { if (!(numbers[k] instanceof Array)){ vs = vs.concat(Object.keys(numbers[k]))} }
 var values = vs.reduce(function(h, s) { h[s] = 'CD'; return h; }, {});
 // TODO - pos could use parents/value methods for a better analysis ...
 

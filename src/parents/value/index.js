@@ -6,43 +6,48 @@ if (typeof lang != 'string') lang = 'en';
 var schema = require('../../data/'+lang+'/schema');
 var _ = require('../../_');
 var cache = require('../../cache');
-var to_date = require('./to_date');
-var to_number = require('./to_number');
-var rNr = /(\d+)(?=\D|$)/g;
-
-function which() {
+var toValue = require('./to_value');
+/* //var rNr = /(\d+)(?=\D|$)/g;
+function which(o) {
 	if (this._date) { return schema['DA']; }
 	if (this._number){ return schema['NU']; }
 	return schema['CD'];
 }
-function numeralInDates(o) {
-	var m = o.text.match(rNr), i;
-	if (_.hasL(m)) {
-		for (i=0; i<m.length; i++) {
-			var nr = parseInt(m[i],10);
-			var index = isNaN(nr) ? -1 : this.numerals.indexOf(nr);
-			if (index > -1) { this.numerals.splice(index, 1); }
-		}
+*/
+function _get(filter){
+	// covers more than 80 categories:
+	return function(o){
+		return (typeof o === 'object' && _.has('category',o) && o.category.indexOf(filter) > -1);
 	}
 }
+function get(filter){
+	return (filter === 'date' || filter === 'number') ? this[filter]() : this.values.filter(_get(filter));
+}
+function date(){ return this.dates; }
+function number(w){ 
+	if (!(this.numbers)) {
+		var qs = this.values.filter(_get('quantity'));
+		this.numbers = qs.map(function(o){ return {number:o.quantity, numeral:o.numeral, input:o.input} });
+	}
+	return this.numbers; 
+}
 function value(str, sentence, word_i) {
-  this.word = str || '';
-	this.numerals = to_number.prototype.hasNumeral(this.word);
-	this.numbers = [];
+  this.input = str || '';
+	this.numeric = this.input;
+	this.numbers = false;
 	this.dates = [];
-	this.values = [];
-	this.date();
-	this.dates.forEach(numeralInDates.bind(this));
-	
+	this.values = this.value();
 	this.number();
-	cached = cache.get(this.word, 'valueWhich');
-  this.which = (cached) ? cached : cache.set(this.word, (which.bind(this))(), 'valueWhich');
+	//cached = cache.get(this.input, 'valueWhich');
+  //this.which = (cached) ? cached : cache.set(this.input, (which.bind(this))(), 'valueWhich');
   return this;
 }
+value.prototype.value = toValue;
+value.prototype.date = date;
+value.prototype.number = number;
+value.prototype.get = get;
 value.prototype.has_date = function(){ return _.hasL(this.dates); };
 value.prototype.has_number = function(){ return _.hasL(this.numbers); };
-value.prototype.date = to_date;
-value.prototype.number = to_number;
 
 module.exports = value;
 // console.log(new Value("fifty five").number())

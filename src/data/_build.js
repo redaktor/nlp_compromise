@@ -1,5 +1,6 @@
-// up to date status: includes last commit d4feb704d3e7ae527566cc12dc14af01679e8798
+// up to date status: includes last commit d0d613fd9f048617c1238206aebef52b3bdec32f
 // of https://github.com/spencermountain/nlp_compromise
+// BUT note: structure of value / number / date is now different / more ...
 
 /* This will build the lexica from dictionary !
 
@@ -1192,7 +1193,8 @@ function generateLanguage(lang) {
 		{ // 27
 			id: 'number',
 			folder: 'rules',
-			description: 'regexes and functions for numbr parsing',
+			description: 'regexes and functions for number parsing',
+			prefix: "var d = require('../lexicon/numbers');",
 			// build
 			zip: function(lang, isZip) {
 				return {
@@ -1203,9 +1205,66 @@ function generateLanguage(lang) {
 			}
 		},
 		{ // 28
+			id: 'units',
+			description: 'regexes and functions for number context (e.g. measurement unit) parsing\na fluid language approach',
+			prefix: "var data = require('./lexicon/numbers');",
+			// build
+			zip: function(lang, isZip) {
+				return {
+					systems: rule.units.systems,
+					categories: rule.units.categories,
+					tags: rule.units.tags,
+					prefixes: rule.units.metric.prefixes,
+					units: rule.units.units,
+					pows: rule.units.pows,
+					per: rule.units.per,
+					by: rule.units.by
+				}	
+			},
+			unzip: function() {
+				var _u = {
+					s: exports.zip.units.sort(function(a,bA) { return a[2].length - bA[2].length; }),
+					w: exports.zip.units.sort(function(a,bA) { return _.last(a[3]).length - _.last(bA[3]).length; })
+				};
+				var s = '(?:\\( ?|\\) ?| |$)?', end = '(?:\\b|$)(?: |$)?';
+				function prefix(is) { return exports.zip.prefixes.map(function(a){return a[(is==='s') ? 1 : 2];}) }
+				function unit(is) { return _u[is].map(function(a){return (is==='s') ? a[2] : _.last(a[3]);}) }
+				function pows(i){ 
+					return ['(?:(', Object.keys(exports.zip.pows).filter(function(k){return k.substr(0,1) === '_';}).map(function(k){
+						return exports.zip.pows[k][i];
+					}).join(')|('), '))?'].join('');
+				}
+				var nr = Object.keys(data.multiple).concat(Object.keys(data.tens),Object.keys(data.teens),Object.keys(data.ones));
+				exports.zip.numOnly = new RegExp(['(',nr.join('|'),')',end].join(''), 'gi');
+				nr = ['((?:(?:',nr.concat(data.plus,data.minus,data.factors,data.decimal,'\\d+').join('|'),')(?: ?))+)'].join('');
+				var p = { w:prefix('w'), s:prefix('s') };
+				p.W = [{matches: new RegExp(['(',p.w.join(')|('),')'].join(''), 'i')}];
+				p.S = [{matches: new RegExp(['(',p.s.join(')|('),')'].join(''), '')}];
+				exports.zip.prefix = _.mixin(p, {fn:{w:_.tokenFn(p, 'W', 1, 1), s:_.tokenFn(p, 'S', 1, 1)}});
+				
+				var u = { w:unit('w'), s:unit('s') };
+				u.W = [{matches: new RegExp(['(',u.w.join(')|('),')'].join(''), 'i')}];
+				u.S = [{matches: new RegExp(['(',u.s.join(')|('),')'].join(''), '')}];
+				exports.zip.units = _u;
+				exports.zip.unit = _.mixin(u, {fn:{w:_.tokenFn(u, 'W', 1, 1), s:_.tokenFn(u, 'S', 1, 1)}});
+				p = ['(?:(',p.w.join('|'),')|(?:(',p.s.join('|'),')(?=(?:',u.s.join('|'),')(?:',exports.zip.by._,'|',exports.zip.per._,'|\\b|$))))?'].join('');
+				u = ['(',u.w.join('|'),')?(?: |$)?(',u.s.join('|'),')?'].join('');
+				var unit = [s,pows(1),s,p,u,s,pows(2),s].join('');
+				var a = [
+					nr,
+					unit,'(',exports.zip.by._,')?',unit,
+					'(',exports.zip.per._,')?',s,
+					unit,'(',exports.zip.by._,')?',unit,
+					end
+				];
+				exports.zip.numeral = new RegExp(a.join(''), 'gi');
+				return exports.zip;
+			}
+		},
+		{ // 29
 			id: 'date',
 			folder: 'rules',
-			description: 'regexes and functions for dates parsing',
+			description: 'regexes and functions for dates parsing\na 0 in dayFirst/monthFirst means language independent rules ...\n(replaced by module)',
 			prefix: "var data = require('../lexicon/dates');",
 			// build
 			zip: function(lang, isZip) {
@@ -1267,8 +1326,8 @@ function generateLanguage(lang) {
 				var isoTime = '(?:T(\\d{2}):(\\d{2})(?::(\\d{2})(?:\\.(\\d{3}))?)?(?:(Z)|([+\\-])(\\d{2})(?::(\\d{2}))?)?)?';	// TODO time
 				var greg = ['(',_.values(rd.gregorian).join(')|('),')'].join('');
 				var rels = ['(',_.values(rd.relative).join(')|('),')'].join('');
-				var pnPrefix = ['(?:',rd.pos.pre,' )|(',rd.neg.pre,' )'].join('');
-				var pnSuffix = ['(?:',rd.pos.suf,' )|(',rd.neg.suf,' )'].join('');
+				var pnPrefix = ['(?:(?:',rd.pos.pre,' )|(',rd.neg.pre,' ))'].join('');
+				var pnSuffix = ['(?:(?:',rd.pos.suf,' )|(',rd.neg.suf,' ))'].join('');
 				var dl = ['(?:',st,'(?:',rd.dl,')\\s*(?:the\\s*)?(?:',pnPrefix,')',sRel,'(?:',greg,')\\s*(?=(?:\\W|$)))'].join('');
 				var pn = ['(?:',st,pnPrefix,sRel,'(?:',greg,')\\s*)'].join('');
 				var rel = ['(?:',st,rels,')?'].join('');
@@ -1284,7 +1343,7 @@ function generateLanguage(lang) {
 						nr: new RegExp(m.nr)
 					},
 					year: {
-						nr: new RegExp(y.nr),
+						nr: y.nr,
 						neg: _.r([y.n,'\\s',y.nr,'|',y.nr,y.n,'|',__.val(rule.dates.year.suffix.bc, {})],0,'i'),
 						pos: _.r([y.p,'\\s',y.nr,'|',y.nr,y.p,'|',__.val(rule.dates.year.suffix.ad, {})], 0,'i')
 					},
@@ -1293,7 +1352,7 @@ function generateLanguage(lang) {
 						{matches: _.r([S,d.nr,s2,m.nr,s2,y.nr,E]), parameters: _dmy}	
 					],
 					dayFirst: [ // 25th of June etc.
-						{matches: [S,st,S,S,d.nrs,')?)','{m.w}?(?:$| ?)',toY,y.nr,E], parameters:_dmy},				 
+						{matches: [S,st,S,S,d.nrs,')?)','{m.w}?(?:$| )',toY,y.nr,E], parameters:_dmy},				 
 						0, yOnly
 					],
 					monthFirst: [ // June 25th etc.
@@ -1311,6 +1370,7 @@ function generateLanguage(lang) {
 				var _d = 'day', _m = 'month', _y = 'year';
 				var w = {day: Object.keys(data.days).join('|'), month: ['(?:(',Object.keys(data.months).join('|'),'),?)'].join('')};
 				var m_y = {matches:_.r([w.month,' ',exports.zip.year.nr],0,'i'), parameters: {pattern:[_m,_y]}};
+				exports.zip.year.nr = new RegExp(exports.zip.year.nr);
 				exports.zip.day.weekday = _.r(['(?:(',w.day,',?))'],0,'i'),
 				exports.zip.month.w = _.r([w.month],0,'i');
 				for (var k in w) {
@@ -1779,9 +1839,9 @@ var CLIpos = process.argv.indexOf("-ls");
 // TODO minor - language metrics are absolute, e.g. en: 3200 (words)
 // once we have multiple languages, convert in 'translated' percents:
 // {en: 100, de: 80}
-var units = 'words';
+var wUnit = 'words';
 var pl = {};
-for (var k in plObj) { pl[k] = plObj[k]+' '+units; }
+for (var k in plObj) { pl[k] = plObj[k]+' '+wUnit; }
 if(CLIpos > -1){
 	console.log( pl );
 } else {

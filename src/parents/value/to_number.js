@@ -17,14 +17,6 @@ var data = require(dPath+'lexicon/numbers');
 var rules = require(dPath+'rules/number');
 var _ = require('../../_');
 var cache = require('../../cache');
-data.plus.push('\\+'); data.minus.push('\\-');
-var _numerals = Object.keys(data.ones);
-var dN = _numerals.concat(Object.keys(data.teens),Object.keys(data.tens),Object.keys(data.multiple),data.plus,data.minus,data.factors,data.decimal,'\\d+').join('|');
-rules.multiple = new RegExp(['\\b',data.plus.join(' |\\b'),' (?=',dN,')'].join(''), 'i');
-rules.multiEnd = new RegExp([' ',data.plus.join('|'),'(?= |$)'].join(''), 'gi');
-rules.numeral = new RegExp(['(',dN,')+(?: |\\b|$)'].join(''), 'gi');
-rules.float = /\d+ ?(\.|,) ?\d+/g;
-//console.log(rules.multiEnd)
 function set(t, w, multi, total) {
 	if (t && w && (this.did.ones || this.did.teens)) { return null; }
 	if (t && w && this.did.tens && t != 'ones') { return null; }
@@ -38,34 +30,8 @@ function set(t, w, multi, total) {
 	if (multi) { this.local_multiplier = multi; }
 	return true;
 }
-function wOrNum(num){
-	num = num.replace(rules.multiEnd, ''); 
-	var nrW = num.replace(/ /g,''), nr;
-	if (rules.float.test(nrW)) {
-		nr = parseFloat(nrW);
-	} else {
-		nr = parseInt(nrW, 10);
-	}
-	return (nr == nrW) ? nr : num;
-}
-function hasNumeral(w){	
-	w = (this.word||w||' ').trim();
-	if (!_.str(w)) { return null; }	
-	var a = [[]], signs = ['+','-',',','.'], id;
-	var numerals = w.split(rules.numeral).filter(_.str);
-	for (id=0; id<numerals.length; id++){
-	  if (id === numerals.length-1 && !(rules.numeral.test(numerals[id]))) { break; }
-		if (/\W/.test(numerals[id].slice(-1)) && signs.indexOf(numerals[id]) < 0 ) { 
-			a.push([]);
-		} else {
-			a[a.length-1].push(numerals[id]);
-		} 
-	}
-	return a.map(function(_a){ return _a.join(' '); }).filter(_.str).map(wOrNum);
-}
-
 function numeral2number(s, j, a) {
-	if (typeof s === 'number') { return this.numbers.push({text:s.toString(), number:s}); }
+	if (typeof s === 'number') { return this.numbers.push(s); }
 	s = s.trim();
 	// remember these concerns for possible errors
 	this.did = {ones:0, teens:0, tens:0};
@@ -91,8 +57,7 @@ function numeral2number(s, j, a) {
 	checkWords: for (i = 0; i < words.length; i++) {
 		w = words[i];
 		// phone numbers or iso date or times ... already number but ambiguous, '-' could mean minus;
-		// TODO - splits to values (e.g. phone) or dates !!!
-		if (w.match(/[0-9][\-:][0-9]/)) { continue; }
+		if (w.match(/[0-9][\-:][0-9]/)) { continue; } // TODO - splits to values (e.g. phone) or dates !!!
 		// skip 'a' e.g. a hundred
 		if (w === 'a') { continue; } // TODO decouple, is already 'infinite article'
 		if (data.decimal.indexOf(w) > -1) {
@@ -128,7 +93,7 @@ function numeral2number(s, j, a) {
 				if (this.set(k, w)) { 
 					continue checkWords; 
 				} else { 
-					break checkWords; 
+					break checkWords;
 				}
 			}
 		};
@@ -157,17 +122,15 @@ function numeral2number(s, j, a) {
 	// combine with global multiplier, like 'minus' or 'half'
 	if (prev && prev < this.total) {
 		this.numbers[this.numbers.length-1] = Math.abs(prev)*this.total;
-		// only add this if there was an ' and ' before
-		this.total = (this.numeral[j-1]) ? this.total*this.multiplier : 0;
 	} else {
 		this.total = this.total * this.multiplier;
 	}
-	
 	var isNeg = rules.negative.test(s);
-	return this.numbers.push({text:s, number: (isNeg) ? -(this.total) : this.total});
+	return this.numbers.push((isNeg) ? -(this.total) : this.total);
 }
 function toNumber(w) {
-	if (_.hasL(this.numbers)) { return this.numbers; }
+	if (typeof w === 'number') { return w; }
+	if (!this.numbers) { this.numbers = []; }
 	var wo = _.w_options.bind(this)(w);
 	w = wo.w, options = wo.options;
 	this.options = _.mixOptions(options, this.options, 'numbers');
@@ -177,27 +140,10 @@ function toNumber(w) {
 	var cached = cache.get(input, 'number');
 	if (cached) { return cached; }
 	this.set = set;
-	w = w.trim().toLowerCase(); //.replace(/, ?/g, '').replace(/[$£€]/, '').replace(rules.negative, ''); // ! TODO !!!
-	var numerals = this.numerals || hasNumeral(w);
-	console.log( '!!', numerals );
-	if (!_.hasL(numerals)) { return []; }
-	for (i=0; i<numerals.length; i++) {
-		this.numeral = (typeof numerals[i] == 'number') ? [numerals[i]] : numerals[i].split(rules.multiple);
-		this.numeral.map(numeral2number, this);
-	}
-	var nrText = input;
-	this.numbers.map(function(o){
-		var a = o.text.split(' ');
-		var r = new RegExp(((a.length === 1) ? ['(',a[0],')'] : ['(',a[0],'(.*)',a[a.length-1],')']).join(''),'i');
-		nrText = nrText.replace(r, o.number.toString())		
-	});
-	this.numbers.__proto__ = Object.create(Array.prototype);
-	this.numbers.__proto__._text = nrText;
-	this.numbers.__proto__.text = function(){ return this._text; }
-	return cache.set(input, this.numbers, 'number');
+	w = w.trim().toLowerCase();
+	numeral2number.bind(this)(w);
+	return this.numbers[this.numbers.length-1]||false;
 }
-toNumber.prototype.hasNumeral = hasNumeral;
-
 module.exports = toNumber;
 // console.log(to_number('sixteen hundred'))
 // console.log(to_number('a hundred'))
