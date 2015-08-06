@@ -34,27 +34,43 @@ var _methods = {day:'UTCDate', month:'UTCMonth', year:'UTCFullYear', weekDay:'UT
 var last_dates = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 if (lang != 'en') { rules.short = rules.short.reverse(); } // TODO
 
-function getD(D, t, constant) {
+function get(D, t, doSet) {
 	var method = ['get',_methods[t]].join('');
-	return (D && method) ? D[method]()+((t==='month')?1:0) : constant||false;
+	return (D && method && doSet) ? D[method]()+((t==='month')?1:0) : false;
 }
-function setD(o) {
+function set(o) {
 	// the Date bug "2 digit years always in last century" is fixed in function 'year'
 	// now prevent the Date bug "setting the Date to final value if month or date is null"
-	var d = new Date(Date.UTC(o[_y]||null, o[_m]-1||0, o[_d]||1, 0, 0, 0 /*, hour, minute, second, millisecond*/));
+	var d = new Date(Date.UTC(o[_y]||null, o[_m]-1||0, o[_d]||1, 0, 0, 0, 0 /*, hour, minute, second, millisecond*/));
 	// and finally prevent the "year < 1900 // y2k" bug
 	// can anybody confirm the above internally uses setYear instead of setFullYear ?
 	d.setUTCFullYear((typeof o[_y] === 'number') ? o[_y] : this.now.getUTCFullYear());
 	return d;
 }
+function negCheck(o) {
+	// negative years ... TODO
+	if (o.integer > 0 && rules[_y].negative.hasOwnProperty(o.normalised)) return -(o.integer);
+	return o.integer;
+}
+function year(o) {
+		var is = {n: o.text.match(rules[_y].neg), p: o.text.match(rules[_y].pos)}, k;
+		for (k in is) { if (!_.hasL(is[k]) || is[k][0].indexOf(o[_y].toString()) < 0) { is[k] = false; } }
+		if (o[_y] < 0) { return o[_y]; }
+		// 2 digit years, prefer modern - TODO -> options ? strict = true/false
+    var nowY = this.now.getUTCFullYear();
+    var century = Math.floor(nowY/1000)*1000;
+    if (!is.n && !is.p && o[_d] && o[_y]<=((nowY+5)-century) ) { return century+o[_y]; }
+    return (is.n) ? -(o[_y]) : o[_y];
+}
 function lastDay(o) {
 	var i = o[_m]-1; // leap years:
 	return (i === 1 && new Date(o[_y], 1, 29).getMonth() == 1) ? last_dates[i]+1 : last_dates[i];
 }
-function blank(nowD,d,m,y,wd){
+function blank(nowD,doSet){
+	if (!nowD) { return {text: this.text.trim(), relativeTo:false, day:false, month:false, year:false, weekDay:false}; }
 	return {
-		text: this.text.trim(),
-		day:getD(nowD,_d,d), month:getD(nowD,_m,m), year:getD(nowD,_y,y), weekDay:getD(nowD,_wd,wd),
+		text: this.text.trim(), relativeTo: false,
+		day:get(nowD,_d,doSet), month:get(nowD,_m,doSet), year:get(nowD,_y,doSet), weekDay:get(nowD,_wd,doSet),
 		Date: nowD||{}, to: false
 	};
 }
@@ -66,12 +82,12 @@ rules.relativeFns = {
 	gregorian: function (o,i,summand,isNeg) {
 		// super flexible, for all languages with gregorian calendar ! :
 		var n = (1000/Math.pow(10, i));
-		if (n>=1) { o.year = Math.floor((isNeg ? o.year-n : o.year+n)/n)*n; return o; }
+		if (n>=1 && o.year) { o.year = Math.floor((isNeg ? o.year-n : o.year+n)/n)*n; return o; }
 		var a = ['month','day','hour','minute']; // TODO goes to blank (object keys) when 'time' TODO is done
 		var k = a[((+n).toFixed(a.length)).split(/(?:\.|1)/g)[1].length];
 		var D = new Date(o.Date);
 		D['set'+_methods[k]](D['get'+_methods[k]]() + (isNeg ? -(summand) : summand));
-		return blank(D);
+		return blank(D,1);
 	},
 	dictionary: function (o,i) { // sets known dates w. times (tommorrow evening)
 		var a = [[1],[-1],[-1,22],[0,22],[0,22],[0,6],[0,12],[0,15],[0,18]];
@@ -111,7 +127,7 @@ function index(a, st){
 }
 function knows(matches) {
 	if (matches.fn) { // usually *relative* dates
-		var _o = _.mixin({text: matches.shift().trim()||matches.input}, blank(this.options.now));
+		var _o = _.mixin({text: matches.shift().trim()||matches.input}, blank(this.options.now,1));
 		var isNeg = !!(matches[0]); // TODO suffixes
 		var sum = ((matches[1]) ? parseInt(matches[1],10) : 1);
 		var res = rules.relativeFns[matches.fn](_.shallow(_o), index(matches, 1), sum, isNeg);
@@ -128,54 +144,26 @@ function knows(matches) {
 			o[c] = (n) ? n : data.months[matches[i].toLowerCase()];
 			return o;
 		}, _.mixin(_o, blank()));
-		res.relativeTo = false;
-	}
-	
+	}	
 	this.parts = this.parts.concat(res);
 	return res;
 }
-function negCheck(o) {
-	// negative years ...
-	if (o.integer > 0 && rules[_y].negative.hasOwnProperty(o.normalised)) return -(o.integer);
-	return o.integer;
-}
-function year(o) {
-		var is = {n: o.text.match(rules[_y].neg), p: o.text.match(rules[_y].pos)}, k;
-		for (k in is) { if (!_.hasL(is[k]) || is[k][0].indexOf(o[_y].toString()) < 0) { is[k] = false; } }
-		if (o[_y] < 0) { return o[_y]; }
-		// 2 digit years, prefer modern - TODO -> options ? strict = true/false
-    var nowY = this.now.getUTCFullYear();
-    var century = Math.floor(nowY/1000)*1000;
-    if (!is.n && !is.p && o[_d] && o[_y]<=((nowY+5)-century) ) { return century+o[_y]; }
-    return (is.n) ? -(o[_y]) : o[_y];
-}
 function postprocess(o, i) {
-	if (!o.text || o.text.length < 3) { return false; }
-	var j;
-	if (!o[_y]) {
-		for (j=i; j<this.results.length; j++){
-			if (this.results[j][_y]) { o[_y] = this.results[j][_y]; break; }
-		}
-	}
-	if (!o[_m]) {
-		for (j=0; j<this.results.length; j++){
-			if (this.results[j][_m]) { o[_m] = this.results[j][_m]; break; }
-		}	
-	}
+	if (!o.text || o.text.length < 3) { this.results[i] = false; return false; }
 	// make sure date is in that month...
 	if (o[_d] !== false && (o[_d] > 31 || (o[_m] !== false && o[_d] > lastDay(o)))) {
 		return null;	
 	}
-	if (o[_y] !== false) { o.year = this._year(o); }
-	o.Date = setD(o);
+	o.Date = set(o);
 	// toISOString has crossbrowser issues and automatically 'fills', 
 	// see https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString#Polyfill - TODO ???
 	// o.iso = o.Date.toISOString();
 	o.localized = new Intl.DateTimeFormat(this.options.locale||lang, this.options.localized).format(o.Date);
 	if (o.to) { 
 		delete o.to.to;
+		delete o.to.relativeTo
 		o.to = JSON.parse(JSON.stringify(o.to));
-		o.to.Date = setD(o.to);
+		o.to.Date = set(o.to);
 		if(o.to.Date) { 
 			var hasToD = 1;
 			o.localized = new Intl.DateTimeFormat(this.options.locale||lang, this.options.localized).format(o.to.Date);	
@@ -186,16 +174,14 @@ function postprocess(o, i) {
 		var toTooSmall = ((isFinite(o.Date.valueOf()) && isFinite(o.to.Date.valueOf())?(o.Date>o.to.Date)-(o.Date<o.to.Date):NaN) > -1);
 		if (toTooSmall) { return blank(); }
 	}
-	// fullfill weekDay:
-	if (o.day) { o.weekDay = getD(o.Date,_wd); }
-	if (hasToD && o.to.day) { o.to.weekDay = getD(o.to.Date,_wd); }
+	if (o.Date && o[_d] && o[_m] && o[_y] && !o[_wd]) { o[_wd] = get(o.Date,_wd,1); }
+	if (hasToD && o.to[_d] && o.to[_m] && o.to[_y] && !o.to[_wd]) { o.to[_wd] = get(o.to.Date,_wd,1); }
 	return o;
 }
 function parseDate(w, i, a){
 	w = hyphenatedDates(w, 1);
-	var doA = (this.options.now) ? ['relativeFn', 'fn', 0] : ['fn', 0];		
 	function known() { // recursive rules
-		doA.forEach(function(fn) {
+		['fn', 'relativeFn', 0].forEach(function(fn) {
 			if (!fn) {
 				var mdO = {month:w.search(rules[_m].w), day:w.search(rules[_d].nr)}; 
 				fn = (mdO[_d] > -1 && mdO[_m] > -1 && mdO[_m] < mdO[_d]) ? 'monthFirstFn' : 'dayFirstFn';
@@ -213,10 +199,8 @@ function parseDate(w, i, a){
 }
 function toDate(w, input, options){
 	this.options = _.mixOptions(options, this.options, 'dates');
-	// TODO - how about TIMEs /*, hour, minute, second, millisecond + timezone*/
 	if (!_.str(w)) { return blank(); }
 	this.results = [];
-	// note : to parse relative dates as well you must provide a { now: new Date('blank or anyDate') } in options !
 	this.now = new Date();
 	this._year = year;
 	this.knows = knows;
@@ -273,5 +257,21 @@ function to_date(w){
 	return cache.set(wo.w, this.dates, ['to_date', this.options||{}]);
 }
 module.exports = to_date;
+
+/* // TODO ??? we could fullfill month/year if 'multiple' dates - but that is maybe not bulletproof
+// postprocess -->
+var j;
+if (!o[_y]) {
+	for (j=i; j<this.results.length; j++){
+		if (this.results[j][_y] && !(this.results[j].relativeTo)) { 
+			o[_y] = this.results[j][_y]; break; }
+	}
+}
+if (!o[_m]) {
+	for (j=0; j<this.results.length; j++){
+		if (this.results[j][_m] && !(this.results[j].relativeTo)) { o[_m] = this.results[j][_m]; break; }
+	}	
+}
+*/
 //tests.map(function(a){ return a[0]; }).forEach(to_date);
 // TODO tests

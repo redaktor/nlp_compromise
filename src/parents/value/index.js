@@ -27,7 +27,7 @@ function date(){ return this.dates; }
 function number(w){ 
 	if (!(this.numbers)) {
 		var qs = this.values.filter(_get('quantity'));
-		this.numbers = qs.map(function(o){ return {number:o.quantity, numeral:o.numeral, input:o.input} });
+		this.numbers = qs.map(function(o){ return {text:o.numeral, number:o.quantity} });
 	}
 	return this.numbers; 
 }
